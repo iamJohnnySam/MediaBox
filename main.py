@@ -12,11 +12,6 @@ my_shows = ShowDownloader()
 cctv = CCTVChecker()
 
 
-def run_web_app():
-    if __name__ == '__main__':
-        WebApp.app.run()
-
-
 def run_scheduler():
     exit_condition = True
 
@@ -33,8 +28,8 @@ def run_scheduler():
         time.sleep(1)
 
 
-t_app = threading.Thread(target=run_web_app)
-t_app.start()
-
 t_scheduler = threading.Thread(target=run_scheduler)
 t_scheduler.start()
+
+if __name__ == '__main__':
+    WebApp.app.run(debug=True, host='0.0.0.0')
