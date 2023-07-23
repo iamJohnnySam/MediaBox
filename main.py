@@ -3,6 +3,7 @@ import schedule
 import threading
 
 import WebApp
+import logger
 from ShowDownloader import ShowDownloader
 from CCTVChecker import CCTVChecker
 
@@ -10,6 +11,8 @@ from CCTVChecker import CCTVChecker
 
 my_shows = ShowDownloader()
 cctv = CCTVChecker()
+
+logger.log('info', 'Program Started')
 
 
 def run_scheduler():

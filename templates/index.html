@@ -1,9 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <link rel="stylesheet" href='/static/style.css' />
-    </head>
-    <body>
-        <h1>My website</h1>
-    </body>
-</html>
+{% extends "layout.html" %}
+
+{% block header %}iamJohnnySam Media Box{% endblock %}
+
+{% block body %}
+  <div class="container mt-5">
+    <h2>Log File</h2>
+    <iframe src={{ log_path }} frameborder="0" width="100%" height="400"></iframe>
+  </div>
+{% endblock %}
