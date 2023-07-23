@@ -1,16 +1,40 @@
-# This is a sample Python script.
+import time
+import schedule
+import threading
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+import WebApp
+from ShowDownloader import ShowDownloader
+from CCTVChecker import CCTVChecker
+
+# https://github.com/dbader/schedule
+
+my_shows = ShowDownloader()
+cctv = CCTVChecker()
 
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+def run_web_app():
+    if __name__ == '__main__':
+        WebApp.app.run()
 
 
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
+def run_scheduler():
+    exit_condition = True
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+    schedule.every().day.at("00:30").do(my_shows.run_code)
+    schedule.every().day.at("01:30").do(cctv.run_code)
+    schedule.every().day.at("05:00").do(my_shows.run_code)
+
+    my_shows.run_code()
+    cctv.run_code()
+    cctv.clear_sent()
+
+    while exit_condition:
+        schedule.run_pending()
+        time.sleep(1)
+
+
+t_app = threading.Thread(target=run_web_app)
+t_app.start()
+
+t_scheduler = threading.Thread(target=run_scheduler)
+t_scheduler.start()
