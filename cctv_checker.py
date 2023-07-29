@@ -11,6 +11,7 @@ from os.path import basename
 import numpy as np
 from PIL import Image, ImageOps
 import settings
+import communicator
 
 
 class CCTVChecker:
@@ -69,8 +70,8 @@ class CCTVChecker:
                 os.remove(att_path)
 
             else:
-                settings.bot.sendPhoto(settings.telepot_chat, photo=open(att_path, 'rb'))
-                settings.bot.sendMessage(settings.telepot_chat, "Sus lvl " + str(self.output))
+                communicator.send_image(att_path)
+                communicator.send_now("Sus lvl " + str(self.output))
 
             if sus:
                 self.folderSize = self.folderSize + os.path.getsize(att_path)

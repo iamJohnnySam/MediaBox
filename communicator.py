@@ -11,6 +11,10 @@ def send_now(msg):
     bot.sendMessage(settings.telepot_chat, msg)
 
 
+def send_image(msg):
+    bot.sendPhoto(settings.telepot_chat, photo=open(msg, 'rb'))
+
+
 def handle(msg):
     chat_id = msg['chat']['id']
     command = msg['text']
