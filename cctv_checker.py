@@ -8,10 +8,8 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.utils import formatdate
 from os.path import basename
-
 import numpy as np
 from PIL import Image, ImageOps
-
 import settings
 
 
@@ -28,7 +26,7 @@ class CCTVChecker:
     def log_in(self, mb):
         try:
             self.outlook.login(settings.em, settings.pw)
-        except:
+        except imaplib.IMAP4.error:
             pass
         self.outlook.select(mailbox=mb, readonly=False)
 

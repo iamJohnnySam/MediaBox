@@ -1,11 +1,12 @@
 import time
 import schedule
 import threading
-
-import WebApp
+import web_app
 import logger
-from ShowDownloader import ShowDownloader
-from CCTVChecker import CCTVChecker
+import communicator
+import settings
+from show_downloader import ShowDownloader
+from cctv_checker import CCTVChecker
 
 # https://github.com/dbader/schedule
 
@@ -31,8 +32,10 @@ def run_scheduler():
         time.sleep(1)
 
 
+communicator.start()
+
 t_scheduler = threading.Thread(target=run_scheduler)
 t_scheduler.start()
 
 if __name__ == '__main__':
-    WebApp.app.run(debug=True, host='0.0.0.0')
+    web_app.app.run(debug=False, host='0.0.0.0')

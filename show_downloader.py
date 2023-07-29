@@ -1,48 +1,27 @@
 import feedparser
 import os
-import json
 import time
 import settings
+import communicator
+from editor import JSONEditor
 
 
 class ShowDownloader:
     def __init__(self):
-        with open(settings.show_download_database, 'r') as file:
-            self.data = json.load(file)
-
-    def update_json(self, new_data, series):
-        with open(settings.show_download_database, 'r+') as file:
-            file_data = json.load(file)
-            file_data[series].append(new_data)
-            file.seek(0)
-            json.dump(file_data, file, indent=4)
-        with open(settings.show_download_database, 'r') as file:
-            self.data = json.load(file)
-
-    def update_json2(self, new_data):
-        with open(settings.show_download_database, 'r+') as file:
-            file_data = json.load(file)
-            file_data.update(new_data)
-            file.seek(0)
-            json.dump(file_data, file, indent=4)
-        with open(settings.show_download_database, 'r') as file:
-            self.data = json.load(file)
+        self.shows = JSONEditor(settings.show_download_database)
+        self.data = self.shows.read()
 
     def run_code(self):
         feed = feedparser.parse(settings.feed_link)
-
-        with open(settings.show_download_database, 'r') as file:
-            self.data = json.load(file)
-
+        self.data = self.shows.read()
         show_list = []
 
         for x in feed.entries:
-            if x.tv_show_name in self.data:
-                pass
-            else:
+            if x.tv_show_name not in self.data:
                 new_show = {
                     x.tv_show_name: [{"episode_id": 0, "episode_name": "test", "magnet": "test", "quality": "480"}]}
-                self.update_json2(new_show)
+                self.shows.add_level1(new_show)
+                self.data = self.shows.read()
 
             tmp = x.title[-4:]
 
@@ -75,11 +54,12 @@ class ShowDownloader:
 
         for row in show_list:
             show = {"episode_id": row[0], "episode_name": row[1], "magnet": row[2], "quality": str(row[3])}
-            self.update_json(show, row[4])
+            self.shows.add_level2(show, row[4])
+            self.data = self.shows.read()
 
             os.system("transmission-gtk " + row[2])
 
-            settings.bot.sendMessage(settings.telepot_chat, str(row[1]) + " added at " + str(row[3]))
+            communicator.send_now(str(row[1]) + " added at " + str(row[3]))
             time.sleep(3)
 
-        settings.bot.sendMessage(settings.telepot_chat, "TV Show Check Ran Successfully")
+        communicator.send_now("TV Show Check Ran Successfully")
