@@ -11,6 +11,21 @@ class ShowDownloader:
         self.shows = JSONEditor(settings.show_download_database)
         self.data = self.shows.read()
 
+    def quality_extract(self, topic):
+        tmp = topic[-4:]
+
+        if tmp == "720p":
+            episode_name = topic[:-5].lower()
+            episode_quality = 720
+        elif tmp == "080p":
+            episode_name = topic[:-6].lower()
+            episode_quality = 1080
+        else:
+            episode_name = topic.lower()
+            episode_quality = 480
+
+        return episode_name, episode_quality
+
     def run_code(self):
         feed = feedparser.parse(settings.feed_link)
         self.data = self.shows.read()
@@ -23,17 +38,7 @@ class ShowDownloader:
                 self.shows.add_level1(new_show)
                 self.data = self.shows.read()
 
-            tmp = x.title[-4:]
-
-            if tmp == "720p":
-                episode_name = x.title[:-5].lower()
-                episode_quality = 720
-            elif tmp == "080p":
-                episode_name = x.title[:-6].lower()
-                episode_quality = 1080
-            else:
-                episode_name = x.title.lower()
-                episode_quality = 480
+            episode_name, episode_quality = self.quality_extract(x.title)
 
             if any(player['episode_name'] == episode_name for player in self.data[x.tv_show_name]):
                 pass
@@ -54,7 +59,7 @@ class ShowDownloader:
 
         for row in show_list:
             show = {"episode_id": row[0], "episode_name": row[1], "magnet": row[2], "quality": str(row[3])}
-            self.shows.add_level2(show, row[4])
+            self.shows.add_level2(row[4], show)
             self.data = self.shows.read()
 
             os.system("transmission-gtk " + row[2])
@@ -63,3 +68,4 @@ class ShowDownloader:
             time.sleep(3)
 
         communicator.send_now("TV Show Check Ran Successfully")
+

@@ -1,6 +1,8 @@
 import time
 import schedule
 import threading
+
+import global_var
 import web_app
 import logger
 import communicator
@@ -29,6 +31,9 @@ def run_scheduler():
 
     while exit_condition:
         schedule.run_pending()
+        if global_var.check_shows:
+            my_shows.run_code()
+            global_var.check_shows = False
         time.sleep(1)
 
 

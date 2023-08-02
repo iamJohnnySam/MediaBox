@@ -27,7 +27,7 @@ class CCTVChecker:
     def log_in(self, mb):
         try:
             self.outlook.login(settings.em, settings.pw)
-        except imaplib.IMAP4.error:
+        except:
             pass
         self.outlook.select(mailbox=mb, readonly=False)
 
@@ -62,7 +62,6 @@ class CCTVChecker:
             # IMAGE
             img = self.process_attach_image(att_path)
 
-            sus = False
             self.output = "no neural net"
             sus = True
 

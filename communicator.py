@@ -2,6 +2,7 @@ import datetime
 import logger
 import settings
 import telepot
+import global_var
 from telepot.loop import MessageLoop
 
 bot = telepot.Bot(settings.telepot_id)
@@ -22,9 +23,14 @@ def handle(msg):
     logger.log('info', 'Telepot: ' + str(chat_id) + ' | Got command: ' + command)
 
     if command == '/alive':
-        bot.sendMessage(chat_id, "I'm Alive!")
+        bot.sendMessage(chat_id, str(chat_id) + " - I'm Alive!")
     elif command == '/time':
         bot.sendMessage(chat_id, str(datetime.datetime.now()))
+    elif command == '/checkshows':
+        bot.sendMessage(chat_id, "Starting TV Show Check")
+        global_var.check_shows = True
+    else:
+        bot.sendMessage(chat_id, "Sorry, that command is not known to me...")
 
 
 def start():
