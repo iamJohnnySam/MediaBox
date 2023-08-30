@@ -27,7 +27,6 @@ def run_scheduler():
 
     my_shows.run_code()
     cctv.run_code()
-    cctv.clear_sent()
 
     while exit_condition:
         schedule.run_pending()
