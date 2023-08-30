@@ -38,11 +38,7 @@ class CCTVChecker:
         img = np.expand_dims(img, axis=0)
         return img
 
-    def get_attachment(self, data):
-        msg = email.message_from_bytes(data[0][1])
-        date = msg['Date']
-        date = date.replace(" +0530", "")
-
+    def get_attachment(self, msg, date):
         att_path = "No attachment found."
         for part in msg.walk():
             if part.get_content_maintype() == 'multipart':
@@ -52,12 +48,15 @@ class CCTVChecker:
 
             filename = part.get_filename()
             save_as = date + " " + filename
+            save_as = save_as.replace(",", "")
+            save_as = save_as.replace(":", "-")
+            print(save_as)
             att_path = os.path.join(settings.cctv_download, save_as)
 
-            image = part.get_payload(decode=True)
-            fp = open(att_path, 'wb')
-            fp.write(image)
-            fp.close()
+            if not os.path.isfile(att_path):
+                fp = open(att_path, 'wb')
+                fp.write(part.get_payload(decode=True))
+                fp.close()
 
             # IMAGE
             img = self.process_attach_image(att_path)
@@ -65,22 +64,17 @@ class CCTVChecker:
             self.output = "no neural net"
             sus = True
 
-            if not sus:
-                os.remove(att_path)
-
-            else:
+            if sus:
                 communicator.send_image(att_path)
                 communicator.send_now("Sus lvl " + str(self.output))
 
-            if sus:
-                self.folderSize = self.folderSize + os.path.getsize(att_path)
-                print(filename, self.output, "{:,}".format(self.folderSize))
+            os.remove(att_path)
 
     def scan_mail(self, scan_type, get_attach, delete):
         (result, messages) = self.outlook.search(None, scan_type)
 
         if result == "OK":
-            for message in messages[0].split():
+            for message in messages[0].split(b' '):
                 try:
                     ret, data = self.outlook.fetch(message, '(RFC822)')
                 except:
@@ -89,59 +83,17 @@ class CCTVChecker:
                     exit()
 
                 if get_attach:
-                    self.get_attachment(data)
+                    msg = email.message_from_bytes(data[0][1])
+                    date = msg['Date']
+                    date = date.replace(" +0530", "")
+
+                    self.get_attachment(msg, date)
 
                 if delete:
                     self.outlook.store(message, '+FLAGS', '\\Deleted')
                     self.outlook.expunge()
 
-    def send_email(self, send_to, body):
-        msg = MIMEMultipart()
-        msg['From'] = settings.em
-        msg['To'] = ", ".join(send_to)
-        msg['Date'] = formatdate(localtime=True)
-        msg['Subject'] = "Suspicious Activity"
-
-        msg.attach(MIMEText(body, "html"))
-
-        for f in os.listdir(settings.cctv_download):
-            with open(os.path.join(settings.cctv_download, f), "rb") as fil:
-                part = MIMEApplication(fil.read(), Name=basename(f))
-            part['Content-Disposition'] = 'attachment; filename="%s"' % basename(f)
-            msg.attach(part)
-
-        context = ssl.create_default_context()
-        server = smtplib.SMTP("smtp.office365.com", 587)
-        server.starttls(context=context)
-        server.login(settings.em, settings.pw)
-        server.sendmail(settings.em, send_to, msg.as_string())
-        server.close()
-
     def run_code(self):
         self.log_in('Security')
         self.scan_mail('UnSeen', True, True)
         self.outlook.close()
-
-        if self.folderSize > 0:
-            send_to = [settings.email1, settings.email2]
-            body = """
-                <html><body>
-                    <p>Hi,<br>
-                    We detected some activity on the CCTV in the last 24 hours<br></p>
-                </body> </html>
-            """
-
-            self.send_email(send_to, body)
-
-            for f in os.listdir(settings.cctv_download):
-                os.remove(os.path.join(settings.cctv_download, f))
-            self.folderSize = 0
-
-        print("Done")
-
-    def clear_sent(self):
-        self.log_in('Sent')
-        self.scan_mail('ALL', False, True)
-        self.outlook.close()
-        self.outlook.logout()
-        print("Done")
