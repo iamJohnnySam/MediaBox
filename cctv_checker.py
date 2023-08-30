@@ -15,12 +15,11 @@ class CCTVChecker:
         for f in os.listdir(settings.cctv_download):
             os.remove(os.path.join(settings.cctv_download, f))
 
-    def log_in(self, mb):
+    def log_in(self):
         try:
             self.outlook.login(settings.em, settings.pw)
         except:
             print("Logged In")
-        self.outlook.select(mailbox=mb, readonly=False)
 
     def get_attachment(self, msg, date):
         att_path = "No attachment found."
@@ -46,14 +45,14 @@ class CCTVChecker:
 
             os.remove(att_path)
 
-    def scan_mail(self, scan_type, get_attach, delete):
+    def scan_mail(self, mb, scan_type, get_attach, delete):
+        self.outlook.select(mailbox=mb, readonly=False)
         (result, messages) = self.outlook.search(None, scan_type)
 
         if result == "OK":
             email_count = len(messages[0].split(b' '))
             for i in range(email_count):
                 message = b'1'
-            #for message in messages[0].split(b' '):
                 try:
                     ret, data = self.outlook.fetch(message, '(RFC822)')
                 except:
@@ -77,7 +76,7 @@ class CCTVChecker:
 
     def run_code(self):
         if not self.loggedIn:
-            self.log_in('Security')
+            self.log_in()
             self.loggedIn = True
-        self.scan_mail('UnSeen', True, True)
+        self.scan_mail('Security', 'UnSeen', True, True)
         self.outlook.close()
