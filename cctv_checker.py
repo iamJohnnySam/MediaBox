@@ -1,15 +1,13 @@
 import email
 import imaplib
 import os
-import numpy as np
-from PIL import Image, ImageOps
 import settings
 import communicator
+import logger
 
 
 class CCTVChecker:
     outlook = imaplib.IMAP4_SSL('outlook.office365.com', 993)
-    loggedIn = False
 
     def __int__(self):
         for f in os.listdir(settings.cctv_download):
@@ -22,8 +20,10 @@ class CCTVChecker:
             print("Logged In")
 
     def get_attachment(self, msg, date):
+        att = 0
         att_path = "No attachment found."
-        for part in msg.walk():
+        for part in msg.walk() and att < 2:
+            att = att + 1
             if part.get_content_maintype() == 'multipart':
                 continue
             if part.get('Content-Disposition') is None:
@@ -42,6 +42,7 @@ class CCTVChecker:
 
             communicator.send_image(att_path)
             communicator.send_now(save_as)
+            logger.log('info', save_as)
 
             os.remove(att_path)
 
@@ -69,14 +70,21 @@ class CCTVChecker:
                         self.get_attachment(msg, date)
                     except:
                         print("Message Skipped")
+                        logger.log('error', '1 message skipped')
 
                 if delete:
-                    self.outlook.store(message, '+FLAGS', '\\Deleted')
-                    self.outlook.expunge()
+                    try:
+                        self.outlook.store(message, '+FLAGS', '\\Deleted')
+                        self.outlook.expunge()
+                    except:
+                        print("1 message skipped delete")
+                        logger.log('error', '1 message skipped delete')
 
     def run_code(self):
-        if not self.loggedIn:
-            self.log_in()
-            self.loggedIn = True
-        self.scan_mail('Security', 'UnSeen', True, True)
+        self.log_in()
+        try:
+            self.scan_mail('Security', 'UnSeen', True, True)
+        except:
+            print("Mail box select error")
+            logger.log('error', 'Mail box select error')
         self.outlook.close()
