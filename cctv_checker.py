@@ -8,6 +8,9 @@ import logger
 
 class CCTVChecker:
     outlook = imaplib.IMAP4_SSL('outlook.office365.com', 993)
+    last_t = 0
+    occur_t = 0
+    photos = 3
 
     def __int__(self):
         for f in os.listdir(settings.cctv_download):
@@ -20,9 +23,11 @@ class CCTVChecker:
             print("Logged In")
 
     def get_attachment(self, msg, date):
-        att = 0
+        att: int = 0
         att_path = "No attachment found."
-        for part in msg.walk() and att < 2:
+        for part in msg.walk():
+            if att == self.photos:
+                break
             att = att + 1
             if part.get_content_maintype() == 'multipart':
                 continue
@@ -66,11 +71,31 @@ class CCTVChecker:
                         msg = email.message_from_bytes(data[0][1])
                         date = msg['Date']
                         date = date.replace(" +0530", "")
-
-                        self.get_attachment(msg, date)
                     except:
-                        print("Message Skipped")
+                        print("1 Message Skipped at attachment")
                         logger.log('error', '1 message skipped')
+
+                    t_string = date[-8:]
+                    t = int(t_string[0:2]) * 3600
+                    t = t + int(t_string[3:5]) * 60
+                    t = t + int(t_string[-2:]) * 60
+
+                    if (t - self.last_t) < 3:
+                        self.occur_t = self.occur_t + 1
+                        print(t - self.last_t)
+                    else:
+                        self.occur_t = 0
+
+                    if self.occur_t > 3:
+                        self.photos = 2
+                    elif self.occur_t > 5:
+                        self.photos = 1
+                    elif self.occur_t > 7:
+                        self.photos = 0
+                    else:
+                        self.photos = 3
+
+                    self.get_attachment(msg, date)
 
                 if delete:
                     try:
@@ -82,9 +107,5 @@ class CCTVChecker:
 
     def run_code(self):
         self.log_in()
-        try:
-            self.scan_mail('Security', 'UnSeen', True, True)
-        except:
-            print("Mail box select error")
-            logger.log('error', 'Mail box select error')
+        self.scan_mail('Security', 'UnSeen', True, True)
         self.outlook.close()
