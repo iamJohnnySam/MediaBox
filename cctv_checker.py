@@ -26,9 +26,10 @@ class CCTVChecker:
         att: int = 0
         att_path = "No attachment found."
         for part in msg.walk():
-            if att == self.photos:
-                break
+            if att >= self.photos:
+                continue
             att = att + 1
+            print(att)
             if part.get_content_maintype() == 'multipart':
                 continue
             if part.get('Content-Disposition') is None:
@@ -71,31 +72,35 @@ class CCTVChecker:
                         msg = email.message_from_bytes(data[0][1])
                         date = msg['Date']
                         date = date.replace(" +0530", "")
+
+                        t_string = date[-8:]
+                        t = int(t_string[0:2]) * 3600
+                        t = t + int(t_string[3:5]) * 60
+                        t = t + int(t_string[-2:]) * 60
+
+                        if (t - self.last_t) < 3:
+                            self.occur_t = self.occur_t + 1
+                            print(t - self.last_t)
+                        else:
+                            self.occur_t = 0
+
+                        if self.occur_t > 3:
+                            self.photos = 2
+                            print("High frequency detected = 3")
+                        elif self.occur_t > 5:
+                            self.photos = 1
+                            print("High frequency detected = 5")
+                        elif self.occur_t > 7:
+                            self.photos = 0
+                            print("High frequency detected = 7")
+                        else:
+                            self.photos = 3
+
+                        self.get_attachment(msg, date)
                     except:
-                        print("1 Message Skipped at attachment")
-                        logger.log('error', '1 message skipped')
+                        print("No new messages")
+                        logger.log('error', 'No new messages')
 
-                    t_string = date[-8:]
-                    t = int(t_string[0:2]) * 3600
-                    t = t + int(t_string[3:5]) * 60
-                    t = t + int(t_string[-2:]) * 60
-
-                    if (t - self.last_t) < 3:
-                        self.occur_t = self.occur_t + 1
-                        print(t - self.last_t)
-                    else:
-                        self.occur_t = 0
-
-                    if self.occur_t > 3:
-                        self.photos = 2
-                    elif self.occur_t > 5:
-                        self.photos = 1
-                    elif self.occur_t > 7:
-                        self.photos = 0
-                    else:
-                        self.photos = 3
-
-                    self.get_attachment(msg, date)
 
                 if delete:
                     try:
