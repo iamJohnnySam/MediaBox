@@ -26,14 +26,13 @@ class CCTVChecker:
         att: int = 0
         att_path = "No attachment found."
         for part in msg.walk():
-            if att >= self.photos:
-                continue
-            att = att + 1
-            print(att)
             if part.get_content_maintype() == 'multipart':
                 continue
             if part.get('Content-Disposition') is None:
                 continue
+            if att >= self.photos:
+                continue
+            att = att + 1
 
             save_as = date + " " + part.get_filename()
             save_as = save_as.replace(",", "")
