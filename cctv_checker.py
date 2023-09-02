@@ -17,7 +17,6 @@ class CCTVChecker:
         for f in os.listdir(settings.cctv_download):
             os.remove(os.path.join(settings.cctv_download, f))
 
-
     def log_in(self):
         try:
             self.outlook.login(settings.em, settings.pw)
@@ -62,7 +61,7 @@ class CCTVChecker:
         if result == "OK":
             email_count = len(messages[0].split(b' '))
             for i in range(email_count):
-                message = b'1'
+                message = "1"
                 try:
                     ret, data = self.outlook.fetch(message, '(RFC822)')
                 except:

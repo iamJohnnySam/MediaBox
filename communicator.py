@@ -4,7 +4,6 @@ import settings
 import telepot
 import global_var
 from telepot.loop import MessageLoop
-
 from editor import JSONEditor
 
 bot = telepot.Bot(settings.telepot_id)
@@ -39,10 +38,10 @@ def handle(msg):
         bot.sendMessage(chat_id, str(chat_id) + " - I'm Alive!")
     elif command == '/time':
         bot.sendMessage(chat_id, str(datetime.datetime.now()))
-    elif command == '/checkshows':
+    elif command == '/check-shows':
         bot.sendMessage(chat_id, "Starting TV Show Check")
         global_var.check_shows = True
-    elif command == '/addmetocctv':
+    elif command == '/add-me-to-cctv':
         pass
     else:
         bot.sendMessage(chat_id, "Sorry, that command is not known to me...")
