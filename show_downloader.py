@@ -64,8 +64,7 @@ class ShowDownloader:
 
             os.system("transmission-gtk " + row[2])
 
-            communicator.send_now(str(row[1]) + " added at " + str(row[3]))
+            communicator.send_now(str(row[1]) + " added at " + str(row[3]), "show")
             time.sleep(3)
 
-        communicator.send_now("TV Show Check Ran Successfully")
-
+        communicator.send_now("TV Show Check Ran Successfully", "show")

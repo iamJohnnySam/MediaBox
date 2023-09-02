@@ -5,15 +5,28 @@ import telepot
 import global_var
 from telepot.loop import MessageLoop
 
+from editor import JSONEditor
+
 bot = telepot.Bot(settings.telepot_id)
+telepot_settings = JSONEditor(settings.show_download_database)
+telepot_connections = None
 
 
-def send_now(msg):
+def send_to_master(msg):
     bot.sendMessage(settings.telepot_chat, msg)
 
 
-def send_image(msg):
+def send_image_to_master(msg):
     bot.sendPhoto(settings.telepot_chat, photo=open(msg, 'rb'))
+
+
+def send_now(msg, chat_type, img=False):
+    chats = telepot_connections[chat_type]
+    for chat in chats:
+        if img:
+            bot.sendPhoto(chat, photo=open(msg, 'rb'))
+        else:
+            bot.sendMessage(chat, msg)
 
 
 def handle(msg):
@@ -29,6 +42,8 @@ def handle(msg):
     elif command == '/checkshows':
         bot.sendMessage(chat_id, "Starting TV Show Check")
         global_var.check_shows = True
+    elif command == '/addmetocctv':
+        pass
     else:
         bot.sendMessage(chat_id, "Sorry, that command is not known to me...")
 
@@ -36,3 +51,4 @@ def handle(msg):
 def start():
     MessageLoop(bot, handle).run_as_thread()
     logger.log('info', 'Telepot listening')
+    telepot_connections = telepot_settings.read()

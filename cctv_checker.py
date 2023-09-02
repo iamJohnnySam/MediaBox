@@ -11,10 +11,12 @@ class CCTVChecker:
     last_t = 0
     occur_t = 0
     photos = 3
+    img = None
 
     def __int__(self):
         for f in os.listdir(settings.cctv_download):
             os.remove(os.path.join(settings.cctv_download, f))
+
 
     def log_in(self):
         try:
@@ -24,7 +26,6 @@ class CCTVChecker:
 
     def get_attachment(self, msg, date):
         att: int = 0
-        att_path = "No attachment found."
         for part in msg.walk():
             if part.get_content_maintype() == 'multipart':
                 continue
@@ -45,8 +46,8 @@ class CCTVChecker:
                 fp.write(part.get_payload(decode=True))
                 fp.close()
 
-            communicator.send_image(att_path)
-            communicator.send_now(save_as)
+            communicator.send_now(att_path, "cctv", True)
+            communicator.send_now(save_as, "cctv")
             logger.log('info', save_as)
 
             os.remove(att_path)
@@ -77,11 +78,13 @@ class CCTVChecker:
                         t = t + int(t_string[3:5]) * 60
                         t = t + int(t_string[-2:]) * 60
 
-                        if (t - self.last_t) < 3:
+                        if (t - self.last_t) <= 12:
                             self.occur_t = self.occur_t + 1
                             print(t - self.last_t)
                         else:
                             self.occur_t = 0
+
+                        self.last_t = t
 
                         if self.occur_t > 3:
                             self.photos = 2
@@ -112,4 +115,7 @@ class CCTVChecker:
     def run_code(self):
         self.log_in()
         self.scan_mail('Security', 'UnSeen', True, True)
-        self.outlook.close()
+        try:
+            self.outlook.close()
+        except:
+            print("Close failed")
