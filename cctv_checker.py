@@ -53,8 +53,11 @@ class CCTVChecker:
             os.remove(att_path)
 
     def scan_mail(self, mb, scan_type, get_attach, delete):
-        self.outlook.select(mailbox=mb, readonly=False)
-        (result, messages) = self.outlook.search(None, scan_type)
+        try:
+            self.outlook.select(mailbox=mb, readonly=False)
+            (result, messages) = self.outlook.search(None, scan_type)
+        except:
+            return
 
         if result == "OK":
             email_count = len(messages[0].split(b' '))
@@ -76,11 +79,11 @@ class CCTVChecker:
                         t_string = date[-8:]
                         t = int(t_string[0:2]) * 3600
                         t = t + int(t_string[3:5]) * 60
-                        t = t + int(t_string[-2:]) * 60
+                        t = t + int(t_string[-2:])
 
-                        if (t - self.last_t) <= 12:
+                        if (t - self.last_t) <= 60:
                             self.occur_t = self.occur_t + 1
-                            print(t - self.last_t)
+                            print(t, " | ",  self.last_t, " | ", t - self.last_t, " | ", self.occur_t)
                         else:
                             self.occur_t = 0
 

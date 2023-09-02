@@ -8,8 +8,8 @@ from telepot.loop import MessageLoop
 from editor import JSONEditor
 
 bot = telepot.Bot(settings.telepot_id)
-telepot_settings = JSONEditor(settings.show_download_database)
-telepot_connections = None
+telepot_settings = JSONEditor('telepot_settings.json')
+telepot_connections = telepot_settings.read()
 
 
 def send_to_master(msg):
@@ -50,5 +50,5 @@ def handle(msg):
 
 def start():
     MessageLoop(bot, handle).run_as_thread()
+    print('Telepot listening')
     logger.log('info', 'Telepot listening')
-    telepot_connections = telepot_settings.read()
