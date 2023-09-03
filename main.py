@@ -6,7 +6,7 @@ import global_var
 import web_app
 import logger
 import communicator
-import settings
+
 from show_downloader import ShowDownloader
 from cctv_checker import CCTVChecker
 

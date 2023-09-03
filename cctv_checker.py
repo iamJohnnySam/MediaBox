@@ -20,7 +20,7 @@ class CCTVChecker:
     def log_in(self):
         try:
             self.outlook.login(settings.em, settings.pw)
-        except:
+        except imaplib.IMAP4.error:
             print("Logged In")
 
     def get_attachment(self, msg, date):
@@ -45,15 +45,20 @@ class CCTVChecker:
                 fp.write(part.get_payload(decode=True))
                 fp.close()
 
+            if att == 1:
+                communicator.send_now(date, "cctv")
             communicator.send_now(att_path, "cctv", True)
-            communicator.send_now(save_as, "cctv")
             logger.log('info', save_as)
 
             os.remove(att_path)
 
     def scan_mail(self, mb, scan_type, get_attach, delete):
-        self.outlook.select(mailbox=mb, readonly=False)
-        (result, messages) = self.outlook.search(None, scan_type)
+        try:
+            self.outlook.select(mailbox=mb, readonly=False)
+            (result, messages) = self.outlook.search(None, scan_type)
+        except imaplib.IMAP4.error:
+            print("Mailbox select error")
+            return
 
         if result == "OK":
             email_count = len(messages[0].split(b' '))
@@ -61,7 +66,7 @@ class CCTVChecker:
                 message = "1"
                 try:
                     ret, data = self.outlook.fetch(message, '(RFC822)')
-                except:
+                except imaplib.IMAP4.error:
                     print("No new emails to read.")
                     self.outlook.connection.close()
                     exit()
@@ -69,45 +74,46 @@ class CCTVChecker:
                 if get_attach:
                     try:
                         msg = email.message_from_bytes(data[0][1])
-                        date = msg['Date']
-                        date = date.replace(" +0530", "")
-
-                        t_string = date[-8:]
-                        t = int(t_string[0:2]) * 3600
-                        t = t + int(t_string[3:5]) * 60
-                        t = t + int(t_string[-2:])
-
-                        if (t - self.last_t) <= 60:
-                            self.occur_t = self.occur_t + 1
-                            print(t, " | ",  self.last_t, " | ", t - self.last_t, " | ", self.occur_t)
-                        else:
-                            self.occur_t = 0
-
-                        self.last_t = t
-
-                        if self.occur_t > 3:
-                            self.photos = 2
-                            print("High frequency detected = 3")
-                        elif self.occur_t > 5:
-                            self.photos = 1
-                            print("High frequency detected = 5")
-                        elif self.occur_t > 7:
-                            self.photos = 0
-                            print("High frequency detected = 7")
-                        else:
-                            self.photos = 3
-
-                        self.get_attachment(msg, date)
-                    except:
+                    except AttributeError:
                         print("No new messages")
                         logger.log('error', 'No new messages')
+                        return
 
+                    date = msg['Date']
+                    date = date.replace(" +0530", "")
+
+                    t_string = date[-8:]
+                    t = int(t_string[0:2]) * 3600
+                    t = t + int(t_string[3:5]) * 60
+                    t = t + int(t_string[-2:])
+
+                    if (t - self.last_t) <= 60:
+                        self.occur_t = self.occur_t + 1
+                        print(t, " | ", self.last_t, " | ", t - self.last_t, " | ", self.occur_t)
+                    else:
+                        self.occur_t = 0
+
+                    self.last_t = t
+
+                    if self.occur_t > 3:
+                        self.photos = 2
+                        print("High frequency detected = 3")
+                    elif self.occur_t > 5:
+                        self.photos = 1
+                        print("High frequency detected = 5")
+                    elif self.occur_t > 7:
+                        self.photos = 0
+                        print("High frequency detected = 7")
+                    else:
+                        self.photos = 3
+
+                    self.get_attachment(msg, date)
 
                 if delete:
                     try:
                         self.outlook.store(message, '+FLAGS', '\\Deleted')
                         self.outlook.expunge()
-                    except:
+                    except imaplib.IMAP4.error:
                         print("1 message skipped delete")
                         logger.log('error', '1 message skipped delete')
 

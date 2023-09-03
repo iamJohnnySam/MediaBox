@@ -30,7 +30,10 @@ def send_now(msg, chat_type, img=False):
 
 def handle(msg):
     chat_id = msg['chat']['id']
-    command = msg['text']
+    try:
+        command = msg['text']
+    except KeyError:
+        logger.log('error', 'Telepot Key Error: ' + str(msg))
 
     logger.log('info', 'Telepot: ' + str(chat_id) + ' | Got command: ' + command)
 
