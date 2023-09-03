@@ -68,3 +68,4 @@ class ShowDownloader:
             time.sleep(3)
 
         communicator.send_now("TV Show Check Ran Successfully", "show")
+        print("-------SHOWS-------")

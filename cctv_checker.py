@@ -52,11 +52,8 @@ class CCTVChecker:
             os.remove(att_path)
 
     def scan_mail(self, mb, scan_type, get_attach, delete):
-        try:
-            self.outlook.select(mailbox=mb, readonly=False)
-            (result, messages) = self.outlook.search(None, scan_type)
-        except:
-            return
+        self.outlook.select(mailbox=mb, readonly=False)
+        (result, messages) = self.outlook.search(None, scan_type)
 
         if result == "OK":
             email_count = len(messages[0].split(b' '))
@@ -115,9 +112,10 @@ class CCTVChecker:
                         logger.log('error', '1 message skipped delete')
 
     def run_code(self):
-        self.log_in()
-        self.scan_mail('Security', 'UnSeen', True, True)
         try:
+            self.log_in()
+            self.scan_mail('Security', 'UnSeen', True, True)
             self.outlook.close()
-        except:
-            print("Close failed")
+        except ConnectionError:
+            print("Connection Error")
+        print("-------CCTV-------")
