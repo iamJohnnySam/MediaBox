@@ -16,24 +16,23 @@ class NewsReader:
         self.data = self.news_database.read()
 
         for x in feed.entries:
-            news_id = x.guid
+            news_id = x.id
+            print(news_id)
             news_id = news_id.replace("http://www.adaderana.lk/news.php?nid=", "")
 
             if news_id not in self.data:
+                print(x)
                 new_news = {
                     news_id: [{
                         "Title": x.title,
-                        "Pub Date": x.pubDate,
+                        "Pub Date": x.published,
                         "Link": x.link,
-                        "Desc": x.description
                     }]
                 }
                 self.news_database.add_level1(new_news)
                 self.data = self.news_database.read()
 
                 communicator.send_now("--- NEWS ---", "news")
-                communicator.send_now(x.title, "news")
-                communicator.send_now(x.description, "news")
-                communicator.send_now(x.link, "news")
+                communicator.send_now(x.title + " - " + x.link, "news")
 
         print("------- NEWS -------")
