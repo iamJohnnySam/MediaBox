@@ -17,7 +17,6 @@ class NewsReader:
 
         for x in feed.entries:
             news_id = x.id
-            print(news_id)
             news_id = news_id.replace("http://www.adaderana.lk/news.php?nid=", "")
 
             if news_id not in self.data:
