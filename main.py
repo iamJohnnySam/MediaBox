@@ -6,6 +6,7 @@ import global_var
 import web_app
 import logger
 import communicator
+from news_reader import NewsReader
 
 from show_downloader import ShowDownloader
 from cctv_checker import CCTVChecker
@@ -14,6 +15,7 @@ from cctv_checker import CCTVChecker
 
 my_shows = ShowDownloader()
 cctv = CCTVChecker()
+news_read = NewsReader()
 
 logger.log('info', 'Program Started')
 
@@ -23,16 +25,21 @@ def run_scheduler():
 
     schedule.every().day.at("00:30").do(my_shows.run_code)
     schedule.every(15).minutes.do(cctv.run_code)
+    schedule.every(60).minutes.do(news_read.run_code)
     schedule.every().day.at("05:00").do(my_shows.run_code)
 
     my_shows.run_code()
     cctv.run_code()
+    news_read.run_code()
 
     while exit_condition:
         schedule.run_pending()
         if global_var.check_shows:
             my_shows.run_code()
             global_var.check_shows = False
+        if global_var.check_cctv:
+            cctv.run_code()
+            global_var.check_cctv = False
         time.sleep(1)
 
 

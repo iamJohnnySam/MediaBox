@@ -34,18 +34,23 @@ def handle(msg):
         command = msg['text']
     except KeyError:
         logger.log('error', 'Telepot Key Error: ' + str(msg))
+        return
 
     logger.log('info', 'Telepot: ' + str(chat_id) + ' | Got command: ' + command)
 
     if command == '/alive':
-        bot.sendMessage(chat_id, str(chat_id) + " - I'm Alive!")
+        bot.sendMessage(chat_id, str(chat_id))
+        bot.sendMessage(chat_id, "Hello " + str(msg['chat']['first_name']) + "! I'm Alive and kicking!")
     elif command == '/time':
         bot.sendMessage(chat_id, str(datetime.datetime.now()))
     elif command == '/check-shows':
         bot.sendMessage(chat_id, "Starting TV Show Check")
         global_var.check_shows = True
+    elif command == '/check-cctv':
+        bot.sendMessage(chat_id, "Starting CCTV Check")
+        global_var.check_cctv = True
     elif command == '/add-me-to-cctv':
-        pass
+        bot.sendMessage(chat_id, "Not Implemented")
     else:
         bot.sendMessage(chat_id, "Sorry, that command is not known to me...")
 

@@ -95,15 +95,12 @@ class CCTVChecker:
 
                     self.last_t = t
 
-                    if self.occur_t > 3:
-                        self.photos = 2
-                        print("High frequency detected = 3")
-                    elif self.occur_t > 5:
+                    if self.occur_t > 5:
                         self.photos = 1
                         print("High frequency detected = 5")
-                    elif self.occur_t > 7:
-                        self.photos = 0
-                        print("High frequency detected = 7")
+                    elif self.occur_t > 3:
+                        self.photos = 2
+                        print("High frequency detected = 3")
                     else:
                         self.photos = 3
 
@@ -122,6 +119,6 @@ class CCTVChecker:
             self.log_in()
             self.scan_mail('Security', 'UnSeen', True, True)
             self.outlook.close()
-        except ConnectionError:
+        except (imaplib.IMAP4.abort, imaplib.IMAP4.error):
             print("Connection Error")
         print("-------CCTV-------")

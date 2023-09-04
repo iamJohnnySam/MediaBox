@@ -1,3 +1,5 @@
 /settings.py
 /telepot_settings.json
 /database/downloadedFiles.json
+/database/newsRSS.json
+/log
