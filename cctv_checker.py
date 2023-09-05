@@ -1,6 +1,8 @@
 import email
 import imaplib
 import os
+
+import global_var
 import settings
 import communicator
 import logger
@@ -58,6 +60,7 @@ class CCTVChecker:
             (result, messages) = self.outlook.search(None, scan_type)
         except imaplib.IMAP4.error:
             print("Mailbox select error")
+            global_var.connection_err = global_var.connection_err + 1
             return
 
         if result == "OK":
@@ -95,10 +98,10 @@ class CCTVChecker:
 
                     self.last_t = t
 
-                    if self.occur_t > 5:
+                    if self.occur_t >= 5:
                         self.photos = 1
                         print("High frequency detected = 5")
-                    elif self.occur_t > 3:
+                    elif self.occur_t >= 3:
                         self.photos = 2
                         print("High frequency detected = 3")
                     else:
