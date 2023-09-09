@@ -116,6 +116,8 @@ class CCTVChecker:
                     except imaplib.IMAP4.error:
                         print("1 message skipped delete")
                         logger.log('error', '1 message skipped delete')
+                        global_var.connection_err = global_var.connection_err + 1
+                        return
 
     def run_code(self):
         try:
@@ -124,4 +126,5 @@ class CCTVChecker:
             self.outlook.close()
         except (imaplib.IMAP4.abort, imaplib.IMAP4.error):
             print("Connection Error")
+            global_var.connection_err = global_var.connection_err + 1
         print("-------CCTV-------")

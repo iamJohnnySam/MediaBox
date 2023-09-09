@@ -49,7 +49,7 @@ def run_scheduler():
         time.sleep(1)
 
 
-def run_webapp ():
+def run_webapp():
     if __name__ == '__main__':
         web_app.app.run(debug=False, host='0.0.0.0')
 
@@ -65,9 +65,16 @@ t_webapp.start()
 # Wait for all threads to close
 t_scheduler.join()
 
-print("argv was",sys.argv)
+print("argv was", sys.argv)
 print("sys.executable was", sys.executable)
-print("restart now")
+
+time.sleep(60)
+
+print("restarting now")
+print("-----------------------")
+print("")
+print("")
+print("")
 
 python = sys.executable
 os.execv(sys.executable, ['python'] + sys.argv)

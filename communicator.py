@@ -51,6 +51,23 @@ def handle(msg):
         global_var.check_cctv = True
     elif command == '/add-me-to-cctv':
         bot.sendMessage(chat_id, "Not Implemented")
+    elif command == '/add-me-to-news':
+        bot.sendMessage(chat_id, "Not Implemented")
+    elif command == '/remove-me-from-cctv':
+        bot.sendMessage(chat_id, "Not Implemented")
+    elif command == '/remove-me-from-cctv':
+        bot.sendMessage(chat_id, "Not Implemented")
+
+    elif command == '/help':
+        bot.sendMessage(chat_id, "--- AVAILABLE COMMANDS ---")
+        bot.sendMessage(chat_id, "/alive")
+        bot.sendMessage(chat_id, "/time")
+        bot.sendMessage(chat_id, "/check-shows")
+        bot.sendMessage(chat_id, "/check-cctv")
+        bot.sendMessage(chat_id, "/add-me-to-cctv")
+        bot.sendMessage(chat_id, "/add-me-to-news")
+        bot.sendMessage(chat_id, "/remove-me-from-cctv")
+        bot.sendMessage(chat_id, "/remove-me-from-news")
     else:
         bot.sendMessage(chat_id, "Sorry, that command is not known to me...")
 
