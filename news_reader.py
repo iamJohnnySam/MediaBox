@@ -20,7 +20,6 @@ class NewsReader:
             news_id = news_id.replace("http://www.adaderana.lk/news.php?nid=", "")
 
             if news_id not in self.data:
-                print(x)
                 new_news = {
                     news_id: [{
                         "Title": x.title,
@@ -31,7 +30,7 @@ class NewsReader:
                 self.news_database.add_level1(new_news)
                 self.data = self.news_database.read()
 
-                communicator.send_now("--- NEWS ---", "news")
-                communicator.send_now(x.title + " - " + x.link, "news")
+                communicator.send_now("--- NEWS ---", "news", cctv=False)
+                communicator.send_now(x.title + " - " + x.link, "news", cctv=False)
 
         print("------- NEWS -------")

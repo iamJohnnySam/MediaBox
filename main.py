@@ -43,7 +43,8 @@ def run_scheduler():
             cctv.run_code()
             global_var.check_cctv = False
 
-        if global_var.connection_err >= 4:
+        if (global_var.connection_err >= 4) or global_var.stop_cctv:
+            communicator.send_to_master("Restarting...")
             sys.exit()
 
         time.sleep(1)

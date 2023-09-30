@@ -48,8 +48,8 @@ class CCTVChecker:
                 fp.close()
 
             if att == 1:
-                communicator.send_now(date, "cctv")
-            communicator.send_now(att_path, "cctv", True)
+                communicator.send_now(date, "cctv", cctv=True)
+                communicator.send_now(att_path, "cctv", img=True, cctv=True)
             logger.log('info', save_as)
 
             os.remove(att_path)
@@ -90,7 +90,7 @@ class CCTVChecker:
                     t = t + int(t_string[3:5]) * 60
                     t = t + int(t_string[-2:])
 
-                    if (t - self.last_t) <= 60:
+                    if (t - self.last_t) <= 90:
                         self.occur_t = self.occur_t + 1
                         print(t, " | ", self.last_t, " | ", t - self.last_t, " | ", self.occur_t)
                     else:
@@ -125,6 +125,7 @@ class CCTVChecker:
             self.scan_mail('Security', 'UnSeen', True, True)
             self.outlook.close()
         except (imaplib.IMAP4.abort, imaplib.IMAP4.error):
+            communicator.send_to_master("Connection Error")
             print("Connection Error")
             global_var.connection_err = global_var.connection_err + 1
         print("-------CCTV-------")

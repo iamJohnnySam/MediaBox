@@ -7,6 +7,8 @@ from telepot.loop import MessageLoop
 from editor import JSONEditor
 
 bot = telepot.Bot(settings.telepot_id)
+bot_cctv = telepot.Bot(settings.telepot_id_cctv)
+
 telepot_settings = JSONEditor('telepot_settings.json')
 telepot_connections = telepot_settings.read()
 
@@ -19,13 +21,19 @@ def send_image_to_master(msg):
     bot.sendPhoto(settings.telepot_chat, photo=open(msg, 'rb'))
 
 
-def send_now(msg, chat_type, img=False):
+def send_now(msg, chat_type, img=False, cctv=True):
     chats = telepot_connections[chat_type]
     for chat in chats:
         if img:
-            bot.sendPhoto(chat, photo=open(msg, 'rb'))
+            if cctv:
+                bot_cctv.sendPhoto(chat, photo=open(msg, 'rb'))
+            else:
+                bot.sendPhoto(chat, photo=open(msg, 'rb'))
         else:
-            bot.sendMessage(chat, msg)
+            if cctv:
+                bot_cctv.sendMessage(chat, msg)
+            else:
+                bot.sendMessage(chat, msg)
 
 
 def handle(msg):
@@ -57,6 +65,8 @@ def handle(msg):
         bot.sendMessage(chat_id, "Not Implemented")
     elif command == '/remove-me-from-cctv':
         bot.sendMessage(chat_id, "Not Implemented")
+    elif command == '/start-over':
+        global_var.stop_cctv = True
 
     elif command == '/help':
         bot.sendMessage(chat_id, "--- AVAILABLE COMMANDS ---")
@@ -68,6 +78,7 @@ def handle(msg):
         bot.sendMessage(chat_id, "/add-me-to-news")
         bot.sendMessage(chat_id, "/remove-me-from-cctv")
         bot.sendMessage(chat_id, "/remove-me-from-news")
+        bot.sendMessage(chat_id, "/start-over")
     else:
         bot.sendMessage(chat_id, "Sorry, that command is not known to me...")
 
