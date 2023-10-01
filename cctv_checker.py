@@ -1,7 +1,8 @@
 import email
 import imaplib
 import os
-
+import shutil
+import random
 import global_var
 import settings
 import communicator
@@ -49,7 +50,12 @@ class CCTVChecker:
 
             if att == 1:
                 communicator.send_now(date, "cctv", cctv=True)
-                communicator.send_now(att_path, "cctv", img=True, cctv=True)
+            communicator.send_now(att_path, "cctv", img=True, cctv=True)
+            if random.random() > 0.7:
+                save_path = os.path.join(settings.cctv_save, save_as)
+                fp = open(save_path, 'wb')
+                fp.write(part.get_payload(decode=True))
+                fp.close()
             logger.log('info', save_as)
 
             os.remove(att_path)

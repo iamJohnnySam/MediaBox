@@ -67,5 +67,5 @@ class ShowDownloader:
             communicator.send_now(str(row[1]) + " added at " + str(row[3]), "show", cctv=False)
             time.sleep(3)
 
-        communicator.send_now("TV Show Check Ran Successfully", "show", cctv=False)
+        communicator.send_to_master("TV Show Check Ran Successfully")
         print("-------SHOWS-------")
