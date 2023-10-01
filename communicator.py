@@ -20,9 +20,11 @@ movie_search_id = ""
 movie_search_time = datetime.now()
 movie_search_selected = False
 movie_search_selected_movie = 0
-movie_search_log = ["", "", "", "", ""]
+movie_search_log = ["", "", "", "", "", "", "", "", "", ""]
 movie_search_images = ["Error. Please Search again", "Error. Please Search again", "Error. Please Search again",
-                       "Error. Please Search again", "Error. Please Search again"]
+                       "Error. Please Search again", "Error. Please Search again", "Error. Please Search again",
+                       "Error. Please Search again", "Error. Please Search again", "Error. Please Search again",
+                       "Error. Please Search again"]
 
 
 def send_to_master(msg):
@@ -63,7 +65,7 @@ def handle(msg):
 
     logger.log('info', 'Telepot: ' + str(chat_id) + ' | Got command: ' + command)
 
-    if chat_id not in [6293292035, 6327937295]:
+    if chat_id not in settings.allowed_chats:
         bot.sendMessage(chat_id, "Hello " + str(msg['chat']['first_name']) + "! You're not allowed to be here")
     else:
         if command == '/alive':
@@ -86,7 +88,12 @@ def handle(msg):
         elif command == '/remove_me_from_cctv':
             bot.sendMessage(chat_id, "Not Implemented")
         elif command == '/start_over':
-            global_var.stop_cctv = True
+            if chat_id == 6293292035:
+                global_var.stop_cctv = True
+            else:
+                bot.sendMessage(chat_id, "This will reboot the program. Requesting John...")
+                send_to_master("Start over requested by " + str(msg['chat']['first_name']))
+                send_to_master("/start_over")
         elif command == '/find_movie':
             if movie_search or (datetime.now() - movie_search_time).total_seconds() / 3600 > 0.5:
                 bot.sendMessage(chat_id, "Currently Busy. Please try again shortly")
@@ -102,7 +109,7 @@ def handle(msg):
             if movie_search_id == chat_id:
                 bot.sendMessage(chat_id, "Movie Search Ended")
                 movie_search = False
-        elif command == '/help' or command == 'help' or command == "/start":
+        elif command == '/help' or command.lower() == 'help' or command == "/start":
             bot.sendMessage(chat_id, "--- AVAILABLE COMMANDS ---")
             bot.sendMessage(chat_id, "/alive")
             bot.sendMessage(chat_id, "/time")
@@ -139,7 +146,7 @@ def handle_movie(chat, comm):
         send_to_master(movie_search_log[movie_search_selected_movie])
         os.system("transmission-gtk " + movie_search_log[movie_search_selected_movie])
 
-    elif comm in ["1", "2", "3", "4", "5"]:
+    elif comm in ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]:
         bot.sendMessage(chat, movie_search_images[int(comm) - 1])
         bot.sendMessage(chat, "send /download to download this movie. If not continue search")
         send_to_master(movie_search_images[int(comm) - 1])
@@ -158,13 +165,13 @@ def handle_movie(chat, comm):
             image_string = x.summary_detail.value
             sub1 = 'src="'
             idx1 = image_string.index(sub1)
-            idx2 = image_string.index("/></a>")
-            movie_search_images[i - 1] = image_string[idx1 + len(sub1): idx2 - 1]
+            idx2 = image_string.index('" /></a>')
+            movie_search_images[i - 1] = image_string[idx1 + len(sub1): idx2]
 
             bot.sendMessage(chat, i)
             i = i + 1
             bot.sendMessage(chat, x.title + " - " + x.link)
-            if i == 6:
+            if i == 11:
                 break
 
         bot.sendMessage(chat, "Tell me the number of Movie you want to download")
