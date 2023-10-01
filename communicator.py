@@ -143,13 +143,13 @@ def handle_movie(chat, comm):
         movie_search_selected = False
         bot.sendMessage(chat, "Movie will be added to queue")
         bot.sendMessage(chat, "Movie search has ended. Thank you...")
+        send_to_master(movie_search_images[int(comm) - 1])
         send_to_master(movie_search_log[movie_search_selected_movie])
         os.system("transmission-gtk " + movie_search_log[movie_search_selected_movie])
 
     elif comm in ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]:
         bot.sendMessage(chat, movie_search_images[int(comm) - 1])
         bot.sendMessage(chat, "send /download to download this movie. If not continue search")
-        send_to_master(movie_search_images[int(comm) - 1])
         movie_search_selected = True
         movie_search_selected_movie = int(comm) - 1
     else:

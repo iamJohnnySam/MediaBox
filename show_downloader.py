@@ -12,13 +12,11 @@ class ShowDownloader:
         self.data = self.shows.read()
 
     def quality_extract(self, topic):
-        tmp = topic[-4:]
-
-        if tmp == "720p":
-            episode_name = topic[:-5].lower()
+        if " 720p" in topic:
+            episode_name = topic[0:topic.index(" 720p")].lower()
             episode_quality = 720
-        elif tmp == "080p":
-            episode_name = topic[:-6].lower()
+        elif " 1080p" in topic:
+            episode_name = topic[0:topic.index(" 1080p")].lower()
             episode_quality = 1080
         else:
             episode_name = topic.lower()

@@ -30,7 +30,6 @@ class NewsReader:
                 self.news_database.add_level1(new_news)
                 self.data = self.news_database.read()
 
-                communicator.send_now("--- NEWS ---", "news", cctv=False)
                 communicator.send_now(x.title + " - " + x.link, "news", cctv=False)
 
         print("------- NEWS -------")
