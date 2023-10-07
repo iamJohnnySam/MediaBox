@@ -95,7 +95,7 @@ def handle(msg):
                 send_to_master("Start over requested by " + str(msg['chat']['first_name']))
                 send_to_master("/start_over")
         elif command == '/find_movie':
-            if movie_search or (datetime.now() - movie_search_time).total_seconds() / 3600 > 0.5:
+            if movie_search or (((datetime.now() - movie_search_time).total_seconds() / 3600) > 0.5):
                 bot.sendMessage(chat_id, "Currently Busy. Please try again shortly")
             else:
                 movie_search = True

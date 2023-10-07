@@ -3,13 +3,12 @@ import sys
 import time
 import schedule
 import threading
-
 import global_var
+# import image_classifier
 import web_app
 import logger
 import communicator
 from news_reader import NewsReader
-
 from show_downloader import ShowDownloader
 from cctv_checker import CCTVChecker
 
@@ -18,6 +17,8 @@ from cctv_checker import CCTVChecker
 my_shows = ShowDownloader()
 cctv = CCTVChecker()
 news_read = NewsReader()
+
+#image_classifier.initiate_nn_models()
 
 logger.log('info', 'Program Started')
 

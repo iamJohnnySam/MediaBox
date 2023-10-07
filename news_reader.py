@@ -1,6 +1,4 @@
 import feedparser
-import os
-import time
 import settings
 import communicator
 from editor import JSONEditor

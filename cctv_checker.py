@@ -1,7 +1,6 @@
 import email
 import imaplib
 import os
-import shutil
 import random
 import global_var
 import settings
@@ -98,7 +97,6 @@ class CCTVChecker:
 
                     if (t - self.last_t) <= 90:
                         self.occur_t = self.occur_t + 1
-                        print(t, " | ", self.last_t, " | ", t - self.last_t, " | ", self.occur_t)
                     else:
                         self.occur_t = 0
 
