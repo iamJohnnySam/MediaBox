@@ -4,7 +4,7 @@ import time
 import schedule
 import threading
 import global_var
-# import image_classifier
+import image_classifier
 import web_app
 import logger
 import communicator
@@ -18,7 +18,7 @@ my_shows = ShowDownloader()
 cctv = CCTVChecker()
 news_read = NewsReader()
 
-#image_classifier.initiate_nn_models()
+image_classifier.initiate_nn_models()
 
 logger.log('info', 'Program Started')
 
@@ -38,14 +38,17 @@ def run_scheduler():
     while exit_condition:
         schedule.run_pending()
         if global_var.check_shows:
-            my_shows.run_code()
             global_var.check_shows = False
+            my_shows.run_code()
         if global_var.check_cctv:
-            cctv.run_code()
             global_var.check_cctv = False
+            cctv.run_code()
+        if global_var.check_news:
+            news_read.run_code()
+            global_var.check_news = False
 
         if (global_var.connection_err >= 4) or global_var.stop_cctv:
-            communicator.send_to_master("Restarting...")
+            communicator.send_to_master("Exiting...")
             sys.exit()
 
         time.sleep(1)
@@ -70,13 +73,15 @@ t_scheduler.join()
 print("argv was", sys.argv)
 print("sys.executable was", sys.executable)
 
-time.sleep(60)
+if not global_var.stop_all:
+    time.sleep(60)
 
-print("restarting now")
-print("-----------------------")
-print("")
-print("")
-print("")
+    communicator.send_to_master("Restarting...")
+    print("restarting now")
+    print("-----------------------")
+    print("")
+    print("")
+    print("")
 
-python = sys.executable
-os.execv(sys.executable, ['python'] + sys.argv)
+    python = sys.executable
+    os.execv(sys.executable, ['python'] + sys.argv)

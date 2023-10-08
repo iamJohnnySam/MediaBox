@@ -18,6 +18,7 @@ class NewsReader:
             news_id = news_id.replace("http://www.adaderana.lk/news.php?nid=", "")
 
             if news_id not in self.data:
+                print(news_id)
                 new_news = {
                     news_id: [{
                         "Title": x.title,

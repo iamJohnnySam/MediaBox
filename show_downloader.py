@@ -60,7 +60,7 @@ class ShowDownloader:
             self.shows.add_level2(row[4], show)
             self.data = self.shows.read()
 
-            os.system("transmission-gtk " + row[2])
+            os.system("transmission-remote -a " + row[2])
 
             communicator.send_now(str(row[1]) + " added at " + str(row[3]), "show", cctv=False)
             time.sleep(3)
