@@ -29,17 +29,29 @@ def classify(model, att_path):
     img = np.asarray(img, dtype="float32") / 255
     img = np.expand_dims(img, axis=0)
 
-    if model == "A01":
+    if "A01" in model:
         model1.set_tensor(input_details1[0]['index'], img)
         model1.invoke()
         output_data = model1.get_tensor(output_details1[0]['index'])
         output = output_data[0][0]
-    elif model == "A02":
+
+        if output > 0.1:
+            sus = True
+        else:
+            sus = False
+
+    elif "A02" in model:
         model2.set_tensor(input_details2[0]['index'], img)
         model2.invoke()
         output_data = model2.get_tensor(output_details2[0]['index'])
         output = output_data[0][0]
+
+        if output > 0.25:
+            sus = True
+        else:
+            sus = False
     else:
         output = 0
+        sus = False
 
-    return output
+    return output, sus

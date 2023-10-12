@@ -3,6 +3,7 @@ import imaplib
 import os
 import random
 import global_var
+import image_classifier
 import settings
 import communicator
 import logger
@@ -39,7 +40,6 @@ class CCTVChecker:
             save_as = date + " " + part.get_filename()
             save_as = save_as.replace(",", "")
             save_as = save_as.replace(":", "-")
-            print(save_as)
             att_path = os.path.join(settings.cctv_download, save_as)
 
             if not os.path.isfile(att_path):
@@ -50,6 +50,12 @@ class CCTVChecker:
             if att == 1:
                 communicator.send_now(date, "cctv", cctv=True)
             communicator.send_now(att_path, "cctv", img=True, cctv=True)
+
+            val, sus = image_classifier.classify(part.get_filename(), att_path)
+            if sus:
+                communicator.send_now(str(val), "cctv", cctv=True)
+                print(save_as + "\t SUS: " + str(val))
+
             if random.random() > 0.7:
                 save_path = os.path.join(settings.cctv_save, save_as)
                 fp = open(save_path, 'wb')
