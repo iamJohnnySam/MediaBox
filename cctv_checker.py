@@ -13,7 +13,6 @@ class CCTVChecker:
     outlook = imaplib.IMAP4_SSL('outlook.office365.com', 993)
     last_t = 0
     occur_t = 0
-    photos = 3
     img = None
 
     def __int__(self):
@@ -33,9 +32,6 @@ class CCTVChecker:
                 continue
             if part.get('Content-Disposition') is None:
                 continue
-            if att >= self.photos:
-                continue
-            att = att + 1
 
             save_as = date + " " + part.get_filename()
             save_as = save_as.replace(",", "")
@@ -47,22 +43,35 @@ class CCTVChecker:
                 fp.write(part.get_payload(decode=True))
                 fp.close()
 
-            if att == 1:
-                communicator.send_now(date, "cctv", cctv=True)
-            communicator.send_now(att_path, "cctv", img=True, cctv=True)
-
-            val, sus = image_classifier.classify(part.get_filename(), att_path)
+            file_n = part.get_filename()
+            val, sus = image_classifier.classify(file_n, att_path)
             if sus:
+                if att == 0:
+                    communicator.send_now(date, "cctv", cctv=True)
+                    att = att + 1
+                communicator.send_now(att_path, "cctv", img=True, cctv=True)
                 communicator.send_now(str(val), "cctv", cctv=True)
-                print(save_as + "\t SUS: " + str(val))
+            print(save_as + "\t SUS: " + str(val))
 
             if random.random() > 0.7:
-                save_path = os.path.join(settings.cctv_save, save_as)
+                if "A01" in file_n:
+                    sav = settings.cctv_save + "/A01"
+                elif "A02" in file_n:
+                    sav = settings.cctv_save + "/A02"
+                else:
+                    continue
+
+                if sus:
+                    sav = sav + "/1"
+                else:
+                    sav = sav + "/0"
+
+                save_path = os.path.join(sav, save_as)
                 fp = open(save_path, 'wb')
                 fp.write(part.get_payload(decode=True))
                 fp.close()
-            logger.log('info', save_as)
 
+            logger.log('info', save_as)
             os.remove(att_path)
 
     def scan_mail(self, mb, scan_type, get_attach, delete):
@@ -70,6 +79,7 @@ class CCTVChecker:
             self.outlook.select(mailbox=mb, readonly=False)
             (result, messages) = self.outlook.search(None, scan_type)
         except imaplib.IMAP4.error:
+            communicator.send_to_master("Connection Error - MB Select")
             print("Mailbox select error")
             global_var.connection_err = global_var.connection_err + 1
             return
@@ -96,27 +106,6 @@ class CCTVChecker:
                     date = msg['Date']
                     date = date.replace(" +0530", "")
 
-                    t_string = date[-8:]
-                    t = int(t_string[0:2]) * 3600
-                    t = t + int(t_string[3:5]) * 60
-                    t = t + int(t_string[-2:])
-
-                    if (t - self.last_t) <= 90:
-                        self.occur_t = self.occur_t + 1
-                    else:
-                        self.occur_t = 0
-
-                    self.last_t = t
-
-                    if self.occur_t >= 5:
-                        self.photos = 1
-                        print("High frequency detected = 5")
-                    elif self.occur_t >= 3:
-                        self.photos = 2
-                        print("High frequency detected = 3")
-                    else:
-                        self.photos = 3
-
                     self.get_attachment(msg, date)
 
                 if delete:
@@ -125,6 +114,7 @@ class CCTVChecker:
                         self.outlook.expunge()
                     except imaplib.IMAP4.error:
                         print("1 message skipped delete")
+                        communicator.send_to_master("Connection Error - Delete")
                         logger.log('error', '1 message skipped delete')
                         global_var.connection_err = global_var.connection_err + 1
                         return
@@ -132,10 +122,18 @@ class CCTVChecker:
     def run_code(self):
         try:
             self.log_in()
-            self.scan_mail('Security', 'UnSeen', True, True)
-            self.outlook.close()
         except (imaplib.IMAP4.abort, imaplib.IMAP4.error):
-            communicator.send_to_master("Connection Error")
+            communicator.send_to_master("Connection Error - Login")
             print("Connection Error")
             global_var.connection_err = global_var.connection_err + 1
+
+        self.scan_mail('Security', 'UnSeen', True, True)
+
+        # try:
+        #     self.outlook.close()
+        # except (imaplib.IMAP4.abort, imaplib.IMAP4.error):
+        #     communicator.send_to_master("Connection Error - Close")
+        #     print("Connection Error")
+        #     global_var.connection_err = global_var.connection_err + 1
+
         print("-------CCTV-------")

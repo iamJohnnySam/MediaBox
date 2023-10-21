@@ -25,8 +25,9 @@ def initiate_nn_models():
 
 def classify(model, att_path):
     img = Image.open(att_path)
-    img = ImageOps.grayscale(img)
-    img = np.asarray(img, dtype="float32") / 255
+    # img = ImageOps.grayscale(img)
+    img = np.float32(img)
+    # img = img / 255
     img = np.expand_dims(img, axis=0)
 
     if "A01" in model:
@@ -35,7 +36,7 @@ def classify(model, att_path):
         output_data = model1.get_tensor(output_details1[0]['index'])
         output = output_data[0][0]
 
-        if output > 0.1:
+        if output > settings.A01_threshold:
             sus = True
         else:
             sus = False
@@ -46,7 +47,7 @@ def classify(model, att_path):
         output_data = model2.get_tensor(output_details2[0]['index'])
         output = output_data[0][0]
 
-        if output > 0.25:
+        if output > settings.A02_threshold:
             sus = True
         else:
             sus = False

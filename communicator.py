@@ -114,23 +114,54 @@ def handle(msg):
                 bot.sendMessage(chat_id, "Movie Search Initiated. Time-out in 30 minutes")
                 bot.sendMessage(chat_id, "To exit send /exit")
                 bot.sendMessage(chat_id, "Enter the name of a movie")
+        elif ["/set_A01_threshold", "/set_A02_threshold"] in command:
+            val = command.replace("/set_A01_threshold ", "")
+            val = val.replace("/set_A02_threshold ", "")
+
+            if val.isdigit():
+                try:
+                    threshold_value = int(val)
+                except:
+                    bot.sendMessage(chat_id, "Unrecognized command\n"
+                                             "Command <space> threshold value")
+                    return
+
+                if 1 < threshold_value <= 100:
+                    thresold_value = threshold_value / 100
+                elif threshold_value >= 1:
+                    pass
+                else:
+                    bot.sendMessage(chat_id, "Threshold value too large")
+                    return
+
+                if "A01" in command:
+                    settings.A01_threshold = threshold_value
+                elif "A02" in command:
+                    settings.A02_threshold = threshold_value
+                else:
+                    return
+            else:
+                bot.sendMessage(chat_id, "Unrecognized command\n"
+                                         "Command <space> threshold value")
         elif command == '/exit':
             movie_search = False
             if movie_search and (not movie_search_id == ""):
                 bot.sendMessage(movie_search_id, "Movie Search Ended")
         elif command == '/help' or command.lower() == 'help' or command == "/start":
-            bot.sendMessage(chat_id, "--- AVAILABLE COMMANDS ---")
-            bot.sendMessage(chat_id, "/alive")
-            bot.sendMessage(chat_id, "/time")
-            bot.sendMessage(chat_id, "/check_shows")
-            bot.sendMessage(chat_id, "/check_cctv")
-            bot.sendMessage(chat_id, "/check_news")
-            bot.sendMessage(chat_id, "/add_me_to_cctv")
-            bot.sendMessage(chat_id, "/add_me_to_news")
-            bot.sendMessage(chat_id, "/remove_me_from_cctv")
-            bot.sendMessage(chat_id, "/remove_me_from_news")
-            bot.sendMessage(chat_id, "/start_over")
-            bot.sendMessage(chat_id, "/find_movie")
+            bot.sendMessage(chat_id, "--- AVAILABLE COMMANDS --- \n"
+                                     "/alive \n"
+                                     "/time \n"
+                                     "/check_shows \n"
+                                     "/check_cctv \n"
+                                     "/check_news \n"
+                                     "/add_me_to_cctv \n"
+                                     "/add_me_to_news \n"
+                                     "/remove_me_from_cctv \n"
+                                     "/remove_me_from_news \n"
+                                     "/start_over \n"
+                                     "/find_movie \n"
+                                     "/set_A01_threshold \n"
+                                     "/set_A02_threshold \n")
         elif movie_search and movie_search_id == chat_id:
             handle_movie(chat_id, command)
         else:
