@@ -26,3 +26,14 @@ class JSONEditor:
     def read(self):
         with open(self.file, 'r') as file:
             return json.load(file)
+
+    def delete(self, keep_keys):
+        with open(self.file, 'r+') as file:
+            data = json.load(file)
+
+        for key in data.copy().keys():
+            if key not in keep_keys:
+                del data[key]
+
+        with open(self.file, 'w+') as file:
+            json.dump(data, file, indent=4)

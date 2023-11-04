@@ -6,8 +6,8 @@ import threading
 import global_var
 import web_app
 import logger
-import communicator
-from news_reader import NewsReader
+from communication import communicator
+from news.news_reader import NewsReader
 from show_downloader import ShowDownloader
 from cctv.cctv_checker import CCTVChecker
 

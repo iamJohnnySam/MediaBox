@@ -2,7 +2,7 @@ import feedparser
 import os
 import time
 import settings
-import communicator
+from communication import communicator
 from file_manager.json_editor import JSONEditor
 
 

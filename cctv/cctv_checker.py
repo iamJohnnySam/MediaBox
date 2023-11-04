@@ -3,7 +3,7 @@ import email
 import imaplib
 import os
 import settings
-import communicator
+from communication import communicator
 import logger
 from cctv.image_classifier import ImageClassifier
 
