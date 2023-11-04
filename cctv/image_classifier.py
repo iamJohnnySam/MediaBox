@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 import random
 import tensorflow as tf
 import numpy as np
@@ -9,16 +9,16 @@ import shutil
 
 
 class ImageClassifier:
-    def __init__(self, nn_path, nn_name="A00", save_random=0.75):
+    def __init__(self, nn_path, nn_name="A00", save_random=0.75, threshold=0.6):
         self.output_data = None
         self.model = tf.lite.Interpreter(model_path=nn_path)
         self.model.allocate_tensors()
         self.input_details = self.model.get_input_details()
         self.output_details = self.model.get_output_details()
-        self.threshold = 0.5
+        self.threshold = threshold
         self.nn_name = nn_name
         self.save_random = save_random
-        print("Convolutional Neural Network initiated for channel" + nn_name)
+        print("Convolutional Neural Network initiated for channel " + nn_name)
 
     def classify(self, att_path):
         img = Image.open(att_path)
@@ -37,10 +37,14 @@ class ImageClassifier:
             sus = False
             sav = os.path.join(settings.cctv_save, self.nn_name, "0")
 
+        copy_destination = "None"
         # Randomly save image
         if random.random() > self.save_random:
-            shutil.copyfile(att_path, os.path.join(sav,
-                                                   str(output),
-                                                   datetime.datetime.now().strftime("%Y-%m-%d, %H:%M:%S"),
-                                                   ".jpg"))
-        return output, sus
+            if not os.path.exists(sav):
+                os.makedirs(sav)
+
+            file_name = datetime.now().strftime("%Y-%m-%d, %H-%M-%S") + ".jpg"
+
+            copy_destination = shutil.copyfile(att_path,
+                                               os.path.join(sav, file_name))
+        return output, sus, copy_destination

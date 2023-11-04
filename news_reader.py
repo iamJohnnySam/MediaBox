@@ -1,7 +1,7 @@
 import feedparser
 import settings
 import communicator
-from editor import JSONEditor
+from file_manager.json_editor import JSONEditor
 
 
 class NewsReader:

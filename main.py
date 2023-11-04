@@ -4,21 +4,18 @@ import time
 import schedule
 import threading
 import global_var
-import image_classifier
 import web_app
 import logger
 import communicator
 from news_reader import NewsReader
 from show_downloader import ShowDownloader
-from cctv_checker import CCTVChecker
+from cctv.cctv_checker import CCTVChecker
 
 # https://github.com/dbader/schedule
 
 my_shows = ShowDownloader()
 cctv = CCTVChecker()
 news_read = NewsReader()
-
-image_classifier.initiate_nn_models()
 
 logger.log('info', 'Program Started')
 
@@ -47,7 +44,7 @@ def run_scheduler():
             news_read.run_code()
             global_var.check_news = False
 
-        if (global_var.connection_err >= 4) or global_var.stop_cctv:
+        if (cctv.connection_err >= 4) or global_var.stop_cctv:
             communicator.send_to_master("Exiting...")
             sys.exit()
 

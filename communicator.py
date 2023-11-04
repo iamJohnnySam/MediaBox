@@ -7,7 +7,7 @@ from datetime import datetime
 import telepot
 import global_var
 from telepot.loop import MessageLoop
-from editor import JSONEditor
+from file_manager.json_editor import JSONEditor
 
 bot = telepot.Bot(settings.telepot_id)
 bot_cctv = telepot.Bot(settings.telepot_id_cctv)
@@ -72,27 +72,36 @@ def handle(msg):
         bot.sendMessage(chat_id, "Hello " + str(msg['chat']['first_name']) + "! You're not allowed to be here")
     else:
         if command == '/alive':
-            bot.sendMessage(chat_id, str(chat_id))
-            bot.sendMessage(chat_id, "Hello " + str(msg['chat']['first_name']) + "! I'm Alive and kicking!")
+            bot.sendMessage(chat_id, str(chat_id) + "\n" +
+                            "Hello " + str(msg['chat']['first_name']) + "! I'm Alive and kicking!")
+
         elif command == '/time':
             bot.sendMessage(chat_id, str(datetime.datetime.now()))
+
         elif command == '/check_shows':
             bot.sendMessage(chat_id, "Starting TV Show Check")
+
             global_var.check_shows = True
         elif command == '/check_news':
             bot.sendMessage(chat_id, "Starting News Check")
             global_var.check_news = True
+
         elif command == '/check_cctv':
             bot.sendMessage(chat_id, "Starting CCTV Check")
             global_var.check_cctv = True
+
         elif command == '/add_me_to_cctv':
             bot.sendMessage(chat_id, "Not Implemented")
+
         elif command == '/add_me_to_news':
             bot.sendMessage(chat_id, "Not Implemented")
+
         elif command == '/remove_me_from_cctv':
             bot.sendMessage(chat_id, "Not Implemented")
+
         elif command == '/remove_me_from_cctv':
             bot.sendMessage(chat_id, "Not Implemented")
+
         elif command == '/start_over':
             if chat_id == 6293292035:
                 global_var.stop_cctv = True
@@ -100,9 +109,11 @@ def handle(msg):
                 bot.sendMessage(chat_id, "This will reboot the program. Requesting John...")
                 send_to_master("Start over requested by " + str(msg['chat']['first_name']))
                 send_to_master("/start_over")
+
         elif command == '/exit_all' and chat_id == 6293292035:
             global_var.stop_all = True
             global_var.stop_cctv = True
+
         elif command == '/find_movie':
             if movie_search:
                 bot.sendMessage(chat_id, "Currently Busy. Please try again shortly")
@@ -111,21 +122,20 @@ def handle(msg):
                 movie_search_id = chat_id
                 movie_search_time = datetime.now()
                 movie_search_selected = False
-                bot.sendMessage(chat_id, "Movie Search Initiated. Time-out in 30 minutes")
-                bot.sendMessage(chat_id, "To exit send /exit")
-                bot.sendMessage(chat_id, "Enter the name of a movie")
-        elif ["/set_A01_threshold", "/set_A02_threshold"] in command:
+                bot.sendMessage(chat_id, "Movie Search Initiated. Time-out in 30 minutes \n" +
+                                         "To exit send /exit \n" +
+                                         "Enter the name of a movie")
+
+        elif ("/set_A01_threshold" in command) or ("/set_A02_threshold" in command):
             val = command.replace("/set_A01_threshold ", "")
             val = val.replace("/set_A02_threshold ", "")
-
             if val.isdigit():
                 try:
                     threshold_value = int(val)
                 except:
-                    bot.sendMessage(chat_id, "Unrecognized command\n"
-                                             "Command <space> threshold value")
+                    bot.sendMessage(chat_id, "Unrecognized command format\n"
+                                             "Command <space> value")
                     return
-
                 if 1 < threshold_value <= 100:
                     thresold_value = threshold_value / 100
                 elif threshold_value >= 1:
@@ -133,37 +143,46 @@ def handle(msg):
                 else:
                     bot.sendMessage(chat_id, "Threshold value too large")
                     return
-
                 if "A01" in command:
-                    settings.A01_threshold = threshold_value
+                    settings.cctv_A01_threshold = threshold_value
                 elif "A02" in command:
-                    settings.A02_threshold = threshold_value
+                    settings.cctv_A02_threshold = threshold_value
                 else:
                     return
             else:
                 bot.sendMessage(chat_id, "Unrecognized command\n"
                                          "Command <space> threshold value")
+
         elif command == '/exit':
             movie_search = False
             if movie_search and (not movie_search_id == ""):
                 bot.sendMessage(movie_search_id, "Movie Search Ended")
+
         elif command == '/help' or command.lower() == 'help' or command == "/start":
-            bot.sendMessage(chat_id, "--- AVAILABLE COMMANDS --- \n"
-                                     "/alive \n"
-                                     "/time \n"
-                                     "/check_shows \n"
-                                     "/check_cctv \n"
-                                     "/check_news \n"
-                                     "/add_me_to_cctv \n"
-                                     "/add_me_to_news \n"
-                                     "/remove_me_from_cctv \n"
-                                     "/remove_me_from_news \n"
-                                     "/start_over \n"
-                                     "/find_movie \n"
-                                     "/set_A01_threshold \n"
-                                     "/set_A02_threshold \n")
+            bot.sendMessage(chat_id, "--- AVAILABLE COMMANDS --- \n" +
+                            "/alive \n" +
+                            "/time \n" +
+                            "/check_shows \n" +
+                            "/check_cctv \n" +
+                            "/check_news \n" +
+                            "/add_me_to_cctv \n" +
+                            "/add_me_to_news \n" +
+                            "/remove_me_from_cctv \n" +
+                            "/remove_me_from_news \n" +
+                            "/start_over \n" +
+                            "/find_movie \n" +
+                            "/set_A01_threshold \n" +
+                            "/set_A02_threshold \n")
+
+        elif "/" in command:
+            bot.sendMessage(chat_id, "Sorry, that command is not known to me...")
+
+        # END Commands
+        # START Conversations
+
         elif movie_search and movie_search_id == chat_id:
             handle_movie(chat_id, command)
+
         else:
             bot.sendMessage(chat_id, "Sorry, that command is not known to me...")
 
@@ -182,18 +201,19 @@ def handle_movie(chat, comm):
 
     if comm.lower() == "/download" and movie_search_selected:
         movie_search_selected = False
-        bot.sendMessage(chat, "Movie will be added to queue")
-        bot.sendMessage(chat, "Movie search has ended. Thank you...")
-        send_to_master(movie_search_images[movie_search_selected_movie])
-        send_to_master(movie_search_log[movie_search_selected_movie])
+        bot.sendMessage(chat, "Movie will be added to queue \n" +
+                              "Movie search has ended. Thank you...")
+        send_to_master(movie_search_images[movie_search_selected_movie] + "\n" +
+                       movie_search_log[movie_search_selected_movie])
         os.system("transmission-remote -a " + movie_search_log[movie_search_selected_movie])
 
     elif comm in ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17" "18",
                   "19", "20"]:
-        bot.sendMessage(chat, movie_search_images[int(comm) - 1])
-        bot.sendMessage(chat, "send /download to download this movie. If not continue search")
+        bot.sendMessage(chat, movie_search_images[int(comm) - 1] +
+                        "\n send /download to download this movie. If not continue search")
         movie_search_selected = True
         movie_search_selected_movie = int(comm) - 1
+
     else:
         c = comm.lower().replace(" ", "%20")
         search_string = "https://yts.mx/rss/" + c + "/720p/all/0/en"
@@ -210,9 +230,8 @@ def handle_movie(chat, comm):
             idx2 = image_string.index('" /></a>')
             movie_search_images[i - 1] = image_string[idx1 + len(sub1): idx2]
 
-            bot.sendMessage(chat, i)
+            bot.sendMessage(chat, str(i) + "\n" + x.title + " - " + x.link)
             i = i + 1
-            bot.sendMessage(chat, x.title + " - " + x.link)
             if i == 21:
                 break
 

@@ -3,7 +3,7 @@ import os
 import time
 import settings
 import communicator
-from editor import JSONEditor
+from file_manager.json_editor import JSONEditor
 
 
 class ShowDownloader:
@@ -21,7 +21,6 @@ class ShowDownloader:
         else:
             episode_name = topic.lower()
             episode_quality = 480
-
         return episode_name, episode_quality
 
     def run_code(self):
