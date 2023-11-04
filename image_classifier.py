@@ -1,58 +1,46 @@
+import datetime
+import random
 import tensorflow as tf
 import numpy as np
 import settings
-from PIL import Image, ImageOps
+from PIL import Image
+import os
+import shutil
 
 
-def initiate_nn_models():
-    global model1
-    global model2
-    global input_details1
-    global input_details2
-    global output_details1
-    global output_details2
+class ImageClassifier:
+    def __init__(self, nn_path, nn_name="A00", save_random=0.75):
+        self.output_data = None
+        self.model = tf.lite.Interpreter(model_path=nn_path)
+        self.model.allocate_tensors()
+        self.input_details = self.model.get_input_details()
+        self.output_details = self.model.get_output_details()
+        self.threshold = 0.5
+        self.nn_name = nn_name
+        self.save_random = save_random
+        print("Convolutional Neural Network initiated for channel" + nn_name)
 
-    model1 = tf.lite.Interpreter(model_path=settings.cctv_model1)
-    model1.allocate_tensors()
-    input_details1 = model1.get_input_details()
-    output_details1 = model1.get_output_details()
+    def classify(self, att_path):
+        img = Image.open(att_path)
+        img = np.float32(img)
+        img = np.expand_dims(img, axis=0)
 
-    model2 = tf.lite.Interpreter(model_path=settings.cctv_model1)
-    model2.allocate_tensors()
-    input_details2 = model2.get_input_details()
-    output_details2 = model2.get_output_details()
+        self.model.set_tensor(self.input_details[0]['index'], img)
+        self.model.invoke()
+        self.output_data = self.model.get_tensor(self.output_details[0]['index'])
+        output = self.output_data[0][0]
 
-
-def classify(model, att_path):
-    img = Image.open(att_path)
-    # img = ImageOps.grayscale(img)
-    img = np.float32(img)
-    # img = img / 255
-    img = np.expand_dims(img, axis=0)
-
-    if "A01" in model:
-        model1.set_tensor(input_details1[0]['index'], img)
-        model1.invoke()
-        output_data = model1.get_tensor(output_details1[0]['index'])
-        output = output_data[0][0]
-
-        if output > settings.A01_threshold:
+        if output > self.threshold:
             sus = True
+            sav = os.path.join(settings.cctv_save, self.nn_name, "1")
         else:
             sus = False
+            sav = os.path.join(settings.cctv_save, self.nn_name, "0")
 
-    elif "A02" in model:
-        model2.set_tensor(input_details2[0]['index'], img)
-        model2.invoke()
-        output_data = model2.get_tensor(output_details2[0]['index'])
-        output = output_data[0][0]
-
-        if output > settings.A02_threshold:
-            sus = True
-        else:
-            sus = False
-    else:
-        output = 0
-        sus = False
-
-    return output, sus
+        # Randomly save image
+        if random.random() > self.save_random:
+            shutil.copyfile(att_path, os.path.join(sav,
+                                                   str(output),
+                                                   datetime.datetime.now().strftime("%Y-%m-%d, %H:%M:%S"),
+                                                   ".jpg"))
+        return output, sus
