@@ -8,7 +8,7 @@ import web_app
 import logger
 from communication import communicator
 from news.news_reader import NewsReader
-from show_downloader import ShowDownloader
+from show.show_downloader import ShowDownloader
 from cctv.cctv_checker import CCTVChecker
 
 # https://github.com/dbader/schedule
