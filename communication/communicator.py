@@ -5,6 +5,7 @@ import telepot
 import global_var
 from telepot.loop import MessageLoop
 
+from communication.communicate_finance import CommunicateFinance
 from communication.communicate_movie import CommunicateMovie
 from file_manager.json_editor import JSONEditor
 
@@ -16,8 +17,8 @@ telepot_connections = telepot_settings.read()
 
 # Activity Dictionaries
 activity = {}
-activity_movie = {}
-activities = {'/find_movie': activity_movie}
+activities = {'/find_movie': {},
+              '/expense': {}}
 
 
 def send_to_master(msg):
@@ -30,6 +31,7 @@ def send_image_to_master(msg):
 
 def send_message(chat_id, msg):
     bot.sendMessage(chat_id, msg)
+
 
 def send_now(msg, chat_type, img=False, cctv=True):
     chats = telepot_connections[chat_type]
@@ -65,6 +67,8 @@ def activate_mode(chat_id, mode):
 
     if mode == "/find_movie":
         activities[mode][chat_id] = CommunicateMovie(chat_id)
+    elif mode == "/expense":
+        activities[mode][chat_id] = CommunicateFinance(chat_id)
 
 
 def handle(msg):
@@ -136,22 +140,25 @@ def handle(msg):
             activate_mode(chat_id, command)
 
         elif command == '/help' or command.lower() == 'help' or command == "/start":
-            bot.sendMessage(chat_id, "--- AVAILABLE COMMANDS --- \n" +
-                            "/alive \n" +
-                            "/time \n" +
-                            "/current_activity \n" +
+            bot.sendMessage(chat_id,
+                            "--- AVAILABLE COMMANDS ---\n" +
+                            "/alive\n" +
+                            "/time\n" +
+                            "/current_activity\n" +
                             "\n" +
-                            "/check_shows \n" +
-                            "/find_movie \n" +
+                            "/check_shows\n" +
+                            "/find_movie\n" +
                             "\n" +
-                            "/check_cctv \n" +
-                            "/add_me_to_cctv \n" +
-                            "/remove_me_from_cctv \n" +
+                            "/check_cctv\n" +
+                            "/add_me_to_cctv\n" +
+                            "/remove_me_from_cctv\n" +
                             "\n" +
-                            "/check_news \n" +
-                            "/remove_me_from_news \n" +
+                            "/check_news\n" +
+                            "/remove_me_from_news\n" +
                             "\n" +
-                            "/start_over \n"
+                            "/expense\n" +
+                            "\n" +
+                            "/start_over\n"
                             "/exit_all"
                             )
 
