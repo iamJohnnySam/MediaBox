@@ -2,7 +2,7 @@ import feedparser
 import settings
 from communication import communicator
 from datetime import datetime
-from file_manager.json_editor import JSONEditor
+from database_manager.json_editor import JSONEditor
 
 
 class NewsReader:

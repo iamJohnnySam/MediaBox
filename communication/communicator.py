@@ -7,7 +7,7 @@ from telepot.loop import MessageLoop
 
 from communication.communicate_finance import CommunicateFinance
 from communication.communicate_movie import CommunicateMovie
-from file_manager.json_editor import JSONEditor
+from database_manager.json_editor import JSONEditor
 
 bot = telepot.Bot(settings.telepot_id)
 bot_cctv = telepot.Bot(settings.telepot_id_cctv)

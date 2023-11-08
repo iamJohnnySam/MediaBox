@@ -3,7 +3,7 @@ import os
 import time
 import settings
 from communication import communicator
-from file_manager.json_editor import JSONEditor
+from database_manager.json_editor import JSONEditor
 
 
 class ShowDownloader:
