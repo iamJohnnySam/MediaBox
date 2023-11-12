@@ -4,7 +4,7 @@ import time
 import schedule
 import threading
 import global_var
-import web_app
+from web import web_app
 import logger
 from communication import communicator
 from news.news_reader import NewsReader

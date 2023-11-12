@@ -9,6 +9,6 @@ def index():
     return render_template('index.html', log_path='../log/log-' + logger.today_date + '.log')
 
 
-@app.route('/Movies/')
+@app.route('/movies/')
 def movies():
     return render_template('movies.html')
