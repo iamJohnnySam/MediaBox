@@ -12,11 +12,16 @@ from database_manager.json_editor import JSONEditor
 
 
 class Communicator:
-    def __init__ (self):
-        pass
+    def __init__(self, telepot_account):
+        telepot_accounts = JSONEditor('telepot_accounts').read()
+        self.bot = telepot.Bot(telepot_accounts[telepot_account]["account"])
+        self.master = telepot_accounts[telepot_account]["master"]
 
-
-
+    def send_to_master(self, msg, image=False):
+        if image:
+            self.bot.sendPhoto(self.master, photo=open(msg, 'rb'))
+        else:
+            self.bot.sendMessage(self.master, msg)
 
 
 bot = telepot.Bot(settings.telepot_id)
@@ -33,10 +38,6 @@ activities = {'/find_movie': {},
 
 def send_to_master(msg):
     bot.sendMessage(settings.master_chat, msg)
-
-
-def send_image_to_master(msg):
-    bot.sendPhoto(settings.master_chat, photo=open(msg, 'rb'))
 
 
 def send_message(chat_id, msg):
