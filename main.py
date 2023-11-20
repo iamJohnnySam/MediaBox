@@ -44,7 +44,7 @@ def run_scheduler():
             news_read.run_code()
             global_var.check_news = False
 
-        if (cctv.connection_err >= 4) or global_var.stop_cctv:
+        if global_var.stop_cctv:
             communicator.send_to_master("Exiting...")
             sys.exit()
 

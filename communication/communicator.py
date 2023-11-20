@@ -7,12 +7,22 @@ from telepot.loop import MessageLoop
 
 from communication.communicate_finance import CommunicateFinance
 from communication.communicate_movie import CommunicateMovie
+
 from database_manager.json_editor import JSONEditor
+
+
+class Communicator:
+    def __init__ (self):
+        pass
+
+
+
+
 
 bot = telepot.Bot(settings.telepot_id)
 bot_cctv = telepot.Bot(settings.telepot_id_cctv)
 
-telepot_settings = JSONEditor('telepot_settings.json')
+telepot_settings = JSONEditor('telepot_comms.json')
 telepot_connections = telepot_settings.read()
 
 # Activity Dictionaries
