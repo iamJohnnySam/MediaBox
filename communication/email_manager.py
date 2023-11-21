@@ -23,7 +23,7 @@ class EmailManager:
         try:
             self.myEmail.login(self.email, self.password)
         except imaplib.IMAP4.error:
-            print("Logged In")
+            pass
 
     def select_mailbox(self):
         try:
@@ -101,7 +101,6 @@ class EmailManager:
                         self.attachments[part.get_filename()] = part.get_payload(decode=True)
             else:
                 return False, None, None, None
-
 
         file_n = list(self.attachments.keys())[0]
         attachment = self.attachments[file_n]
