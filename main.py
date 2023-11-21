@@ -6,6 +6,7 @@ import threading
 import global_var
 from web import web_app
 import logger
+import platform
 from communication import communicator
 from news.news_reader import NewsReader
 from show.show_downloader import ShowDownloader
@@ -13,9 +14,19 @@ from cctv.cctv_checker import CCTVChecker
 
 # https://github.com/dbader/schedule
 
-my_shows = ShowDownloader()
-cctv = CCTVChecker()
-news_read = NewsReader()
+# CHECK RUNNING SYSTEM
+run_all = False
+print("Currently running code on: ", platform.machine())
+if platform.machine() == 'armv7l':
+    run_all = True
+else:
+    print("Running on other platform (not Raspberry Pi)")
+
+# CREATE OBJECTS
+if run_all:
+    my_shows = ShowDownloader()
+    cctv = CCTVChecker()
+    news_read = NewsReader()
 
 logger.log('info', 'Program Started')
 
