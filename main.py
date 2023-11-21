@@ -69,14 +69,21 @@ def run_webapp():
 
 communicator.start()
 
-t_scheduler = threading.Thread(target=run_scheduler)
-t_scheduler.start()
+if run_all:
+    t_scheduler = threading.Thread(target=run_scheduler)
+    t_scheduler.start()
 
-t_webapp = threading.Thread(target=run_webapp, daemon=True)
-t_webapp.start()
+    t_webapp = threading.Thread(target=run_webapp, daemon=True)
+    t_webapp.start()
 
-# Wait for all threads to close
-t_scheduler.join()
+    t_scheduler.join()
+
+else:
+    t_webapp = threading.Thread(target=run_webapp)
+    t_webapp.start()
+
+    t_webapp.join()
+
 
 print("argv was", sys.argv)
 print("sys.executable was", sys.executable)
