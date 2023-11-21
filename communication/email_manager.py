@@ -52,7 +52,7 @@ class EmailManager:
             self.result = "Not OK"
 
     def email_close(self):
-        self.myEmail.connection.close()
+        self.myEmail.close()
 
     def get_next_message(self, message="1"):
         self.current_message = message
