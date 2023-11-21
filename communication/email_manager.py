@@ -7,11 +7,11 @@ from communication import communicator
 class EmailManager:
     result = "Not OK"
     attachments = {}
+    current_date = None
+    current_message = "1"
 
     def __init__(self, email_address, password, mb):
         self.msg = None
-        self.current_date = None
-        self.current_message = "1"
         self.unread_emails = 0
         self.connection_err = 0
         self.email = email_address
