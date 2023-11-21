@@ -102,6 +102,7 @@ class EmailManager:
             else:
                 return False, None, None, None
 
+
         file_n = list(self.attachments.keys())[0]
         attachment = self.attachments[file_n]
         del self.attachments[file_n]
