@@ -61,14 +61,15 @@ class EmailManager:
             self.connect()
 
         if self.result == "OK":
+            ret, data = self.myEmail.fetch(message, '(RFC822)')
+
             try:
-                ret, data = self.myEmail.fetch(message, '(RFC822)')
-            except imaplib.IMAP4.error:
+                self.msg = email.message_from_bytes(data[0][1])
+            except AttributeError:
                 print("No new emails to read.")
                 self.email_close()
                 return False
 
-            self.msg = email.message_from_bytes(data[0][1])
             self.current_date = self.msg['Date']
             self.current_date = self.current_date.replace(" +0530", "")
             return True
