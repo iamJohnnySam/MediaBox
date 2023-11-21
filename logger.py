@@ -1,5 +1,10 @@
 import logging
+import os
 from datetime import date
+
+
+if not os.path.exists('log/'):
+    os.makedirs('log/')
 
 today_date = str(date.today())
 logging.basicConfig(filename='log/log-'+today_date+'.log', level=logging.DEBUG)

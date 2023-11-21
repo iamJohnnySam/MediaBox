@@ -22,6 +22,8 @@ class CCTVChecker:
         for f in os.listdir(settings.cctv_download):
             os.remove(os.path.join(settings.cctv_download, f))
 
+        self.create_object()
+
     def create_object(self):
         self.outlook = EmailManager(settings.em, settings.pw, 'Security')
         print("Created CCTV Object")

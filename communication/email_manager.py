@@ -6,9 +6,9 @@ from communication import communicator
 
 class EmailManager:
     result = "Not OK"
+    attachments = []
 
     def __init__(self, email_address, password, mb):
-        self.attachments = None
         self.msg = None
         self.current_date = None
         self.current_message = "1"
@@ -22,10 +22,8 @@ class EmailManager:
     def log_in(self):
         try:
             self.myEmail.login(self.email, self.password)
-            return True
         except imaplib.IMAP4.error:
             print("Logged In")
-            return False
 
     def select_mailbox(self):
         try:
@@ -46,11 +44,11 @@ class EmailManager:
             return False
 
     def connect(self):
-        a = self.log_in()
+        self.log_in()
         b = self.select_mailbox()
         c = self.check_email()
 
-        if not (a and b and c):
+        if not (b and c):
             self.result = "Not OK"
 
     def email_close(self):
@@ -86,6 +84,8 @@ class EmailManager:
             self.connection_err = self.connection_err + 1
 
     def get_next_attachment(self):
+        self.connect()
+
         if len(self.attachments) == 0:
             if self.unread_emails > 0:
                 self.delete_email()
