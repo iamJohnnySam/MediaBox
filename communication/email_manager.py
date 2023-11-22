@@ -6,12 +6,12 @@ from communication import communicator
 
 class EmailManager:
     result = "Not OK"
+    attachments = {}
+    current_date = None
+    current_message = "1"
 
     def __init__(self, email_address, password, mb):
-        self.attachments = None
         self.msg = None
-        self.current_date = None
-        self.current_message = "1"
         self.unread_emails = 0
         self.connection_err = 0
         self.email = email_address
@@ -22,10 +22,8 @@ class EmailManager:
     def log_in(self):
         try:
             self.myEmail.login(self.email, self.password)
-            return True
         except imaplib.IMAP4.error:
-            print("Logged In")
-            return False
+            pass
 
     def select_mailbox(self):
         try:
@@ -46,15 +44,15 @@ class EmailManager:
             return False
 
     def connect(self):
-        a = self.log_in()
+        self.log_in()
         b = self.select_mailbox()
         c = self.check_email()
 
-        if not (a and b and c):
+        if not (b and c):
             self.result = "Not OK"
 
     def email_close(self):
-        self.myEmail.connection.close()
+        self.myEmail.close()
 
     def get_next_message(self, message="1"):
         self.current_message = message
@@ -63,14 +61,15 @@ class EmailManager:
             self.connect()
 
         if self.result == "OK":
+            ret, data = self.myEmail.fetch(message, '(RFC822)')
+
             try:
-                ret, data = self.myEmail.fetch(message, '(RFC822)')
-            except imaplib.IMAP4.error:
+                self.msg = email.message_from_bytes(data[0][1])
+            except AttributeError:
                 print("No new emails to read.")
                 self.email_close()
                 return False
 
-            self.msg = email.message_from_bytes(data[0][1])
             self.current_date = self.msg['Date']
             self.current_date = self.current_date.replace(" +0530", "")
             return True
@@ -86,24 +85,26 @@ class EmailManager:
             self.connection_err = self.connection_err + 1
 
     def get_next_attachment(self):
-        if len(self.attachments) == 0:
+        self.connect()
+
+        if len(self.attachments.keys()) == 0:
             if self.unread_emails > 0:
                 self.delete_email()
                 worked = self.get_next_message()
                 if not worked:
                     return False, None, None, None
                 self.unread_emails = self.unread_emails - 1
-                self.attachments = self.msg.walk()
-                x = 0
-                for part in self.attachments:
+                attachments = self.msg.walk()
+                for part in attachments:
                     if part.get_content_maintype() == 'multipart' or part.get('Content-Disposition') is None:
-                        self.attachments.pop(x)
-                    x = x+1
+                        continue
+                    else:
+                        self.attachments[part.get_filename()] = part.get_payload(decode=True)
             else:
                 return False, None, None, None
 
-        file_n = self.attachments[0].get_filename()
-        attachment = self.attachments[0].get_payload(decode=True)
-        attachment.pop(0)
+        file_n = list(self.attachments.keys())[0]
+        attachment = self.attachments[file_n]
+        del self.attachments[file_n]
 
         return True, attachment, self.current_date, file_n

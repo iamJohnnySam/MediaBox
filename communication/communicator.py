@@ -38,7 +38,7 @@ activities = {'/find_movie': {},
 
 
 def send_to_master(msg):
-    bot.sendMessage(settings.master_chat, msg)
+    bot.sendMessage(telepot_accounts["main"]["master"], msg)
 
 
 def send_message(chat_id, msg):

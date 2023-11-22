@@ -36,7 +36,8 @@ def run_scheduler():
     exit_condition = True
 
     schedule.every().day.at("00:30").do(my_shows.run_code)
-    schedule.every(15).minutes.do(cctv.run_code)
+    schedule.every().day.at("00:30").do(cctv.run_code)
+    # schedule.every(15).minutes.do(cctv.run_code)
     schedule.every(60).minutes.do(news_read.run_code)
     schedule.every().day.at("05:00").do(my_shows.run_code)
 
