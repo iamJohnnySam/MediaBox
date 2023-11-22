@@ -13,7 +13,7 @@ from database_manager.json_editor import JSONEditor
 
 class Communicator:
     def __init__(self, telepot_account):
-        telepot_accounts = JSONEditor('telepot_accounts').read()
+        telepot_accounts = JSONEditor('communication/telepot_accounts.json').read()
         self.bot = telepot.Bot(telepot_accounts[telepot_account]["account"])
         self.master = telepot_accounts[telepot_account]["master"]
 
@@ -24,10 +24,11 @@ class Communicator:
             self.bot.sendMessage(self.master, msg)
 
 
-bot = telepot.Bot(settings.telepot_id)
-bot_cctv = telepot.Bot(settings.telepot_id_cctv)
+telepot_accounts = JSONEditor('communication/telepot_accounts.json').read()
+bot = telepot.Bot(telepot_accounts["main"]["account"])
+bot_cctv = telepot.Bot(telepot_accounts["cctv"]["account"])
 
-telepot_settings = JSONEditor('telepot_comms.json')
+telepot_settings = JSONEditor('communication/telepot_comms.json')
 telepot_connections = telepot_settings.read()
 
 # Activity Dictionaries

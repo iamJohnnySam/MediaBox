@@ -3,10 +3,11 @@ import sys
 import time
 import schedule
 import threading
+import platform
+
 import global_var
 from web import web_app
 import logger
-import platform
 from communication import communicator
 from news.news_reader import NewsReader
 from show.show_downloader import ShowDownloader
@@ -15,11 +16,11 @@ from cctv.cctv_checker import CCTVChecker
 # https://github.com/dbader/schedule
 
 # CHECK RUNNING SYSTEM
-run_all = False
 print("Currently running code on: ", platform.machine())
 if platform.machine() == 'armv7l':
     run_all = True
 else:
+    run_all = False
     print("Running on other platform (not Raspberry Pi)")
 
 # CREATE OBJECTS
@@ -67,9 +68,9 @@ def run_webapp():
         web_app.app.run(debug=False, host='0.0.0.0')
 
 
-communicator.start()
-
 if run_all:
+    communicator.start()
+
     t_scheduler = threading.Thread(target=run_scheduler)
     t_scheduler.start()
 
