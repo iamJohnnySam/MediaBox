@@ -3,6 +3,8 @@ import sys
 import time
 import schedule
 import threading
+import platform
+
 import global_var
 from web import web_app
 import logger
@@ -13,9 +15,19 @@ from cctv.cctv_checker import CCTVChecker
 
 # https://github.com/dbader/schedule
 
-my_shows = ShowDownloader()
-cctv = CCTVChecker()
-news_read = NewsReader()
+# CHECK RUNNING SYSTEM
+print("Currently running code on: ", platform.machine())
+if platform.machine() == 'armv7l':
+    run_all = True
+else:
+    run_all = False
+    print("Running on other platform (not Raspberry Pi)")
+
+# CREATE OBJECTS
+if run_all:
+    my_shows = ShowDownloader()
+    cctv = CCTVChecker()
+    news_read = NewsReader()
 
 logger.log('info', 'Program Started')
 
@@ -57,16 +69,23 @@ def run_webapp():
         web_app.app.run(debug=False, host='0.0.0.0')
 
 
-communicator.start()
+if run_all:
+    communicator.start()
 
-t_scheduler = threading.Thread(target=run_scheduler)
-t_scheduler.start()
+    t_scheduler = threading.Thread(target=run_scheduler)
+    t_scheduler.start()
 
-t_webapp = threading.Thread(target=run_webapp, daemon=True)
-t_webapp.start()
+    t_webapp = threading.Thread(target=run_webapp, daemon=True)
+    t_webapp.start()
 
-# Wait for all threads to close
-t_scheduler.join()
+    t_scheduler.join()
+
+else:
+    t_webapp = threading.Thread(target=run_webapp)
+    t_webapp.start()
+
+    t_webapp.join()
+
 
 print("argv was", sys.argv)
 print("sys.executable was", sys.executable)

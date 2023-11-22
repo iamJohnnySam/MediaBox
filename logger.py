@@ -2,7 +2,6 @@ import logging
 import os
 from datetime import date
 
-
 if not os.path.exists('log/'):
     os.makedirs('log/')
 
