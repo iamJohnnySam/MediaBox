@@ -74,7 +74,7 @@ class Communicator:
             return
 
         logger.log('info', 'Telepot: ' + str(self.chat_id) + ' | Got command: ' + command)
-        print("MSG > " + self.telepot_account + "\t" + self.chat_id + "\t" + command)
+        print("MSG > " + str(self.telepot_account) + "\t" + str(self.chat_id) + "\t" + str(command))
 
         if str(self.chat_id) not in JSONEditor('communication/telepot_allowed_chats.json').read().keys():
             self.bot.sendMessage(self.chat_id,
