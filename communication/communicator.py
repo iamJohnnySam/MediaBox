@@ -96,7 +96,7 @@ class Communicator:
             elif command == '/help' or command.lower() == 'help' or command == "/start":
                 message = "--- AVAILABLE COMMANDS ---"
                 for commands in command_dictionary.keys():
-                    message = message + "\n" + commands + "\t" + command_dictionary[commands]["definition"]
+                    message = message + "\n" + commands + " - " + command_dictionary[commands]["definition"]
                 self.send_now(message,
                               image=False,
                               chat=self.chat_id)

@@ -41,10 +41,10 @@
   },
   "/start_over": {
     "function": "start_over",
-    "definition": "Reboot"
+    "definition": "Reboot Bot"
   },
   "/exit_all": {
     "function": "exit_all",
-    "definition": "Shut Down"
+    "definition": "Shut Down Bot"
   }
 }

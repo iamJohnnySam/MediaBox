@@ -4,7 +4,6 @@ import time
 import schedule
 import threading
 import platform
-
 import global_var
 from web import web_app
 import logger
@@ -21,7 +20,6 @@ if platform.machine() == 'armv7l':
     run_all = True
 else:
     run_all = False
-    print("Running on other platform (not Raspberry Pi)")
 
 # CREATE OBJECTS
 if run_all:
@@ -36,7 +34,7 @@ def run_scheduler():
     exit_condition = True
 
     schedule.every().day.at("00:30").do(my_shows.run_code)
-    schedule.every().day.at("00:30").do(cctv.run_code)
+    schedule.every().day.at("01:00").do(cctv.run_code)
     # schedule.every(15).minutes.do(cctv.run_code)
     schedule.every(60).minutes.do(news_read.run_code)
     schedule.every().day.at("05:00").do(my_shows.run_code)
