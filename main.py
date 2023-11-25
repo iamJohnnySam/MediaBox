@@ -58,7 +58,7 @@ def run_scheduler():
             global_var.check_news = False
 
         if global_var.stop_cctv:
-            communicator.send_to_master("Exiting...")
+            communicator.send_to_master("main", "Exiting...")
             sys.exit()
 
         time.sleep(1)
@@ -70,8 +70,6 @@ def run_webapp():
 
 
 if run_all:
-    communicator.start()
-
     t_scheduler = threading.Thread(target=run_scheduler)
     t_scheduler.start()
 
@@ -93,7 +91,7 @@ print("sys.executable was", sys.executable)
 if not global_var.stop_all:
     time.sleep(60)
 
-    communicator.send_to_master("Restarting...")
+    communicator.send_to_master("main", "Restarting...")
     print("restarting now")
     print("-----------------------")
     print("")
