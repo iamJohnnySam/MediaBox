@@ -7,6 +7,9 @@ from database_manager.json_editor import JSONEditor
 
 
 class ShowDownloader:
+    telepot_chat_group = "shows"
+    telepot_account = "main"
+
     def __init__(self):
         self.shows = JSONEditor(settings.show_download_database)
         self.data = self.shows.read()
@@ -61,8 +64,10 @@ class ShowDownloader:
 
             os.system("transmission-remote -a " + row[2])
 
-            communicator.send_now(str(row[1]) + " added at " + str(row[3]), "show", cctv=False)
+            communicator.send_to_group(self.telepot_account,
+                                       str(row[1]) + " added at " + str(row[3]),
+                                       group=self.telepot_chat_group)
             time.sleep(3)
 
-        communicator.send_to_master("TV Show Check Ran Successfully")
+        communicator.send_to_master(self.telepot_account, "TV Show Check Ran Successfully")
         print("-------SHOWS-------")

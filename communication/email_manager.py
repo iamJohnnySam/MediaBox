@@ -80,7 +80,7 @@ class EmailManager:
             self.myEmail.expunge()
         except imaplib.IMAP4.error:
             print("1 message skipped delete")
-            communicator.send_to_master("Connection Error - Delete")
+            communicator.send_to_master("cctv", "Connection Error - Delete")
             logger.log('error', '1 message skipped delete')
             self.connection_err = self.connection_err + 1
 

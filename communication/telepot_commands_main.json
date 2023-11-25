@@ -1,0 +1,50 @@
+{
+  "/alive": {
+    "function": "alive",
+    "definition": "Check bot"
+  },
+  "/time": {
+    "function": "time",
+    "definition": "Check bot time"
+  },
+  "/check_shows": {
+    "function": "check_shows",
+    "definition": "Check new TV shows"
+  },
+  "/check_news": {
+    "function": "check_news",
+    "definition": "Get latest News"
+  },
+  "/check_cctv": {
+    "function": "check_cctv",
+    "definition": "Check latest cctv"
+  },
+  "/add_me_to_cctv": {
+    "function": "add_me_to_cctv",
+    "definition": "Add to CCTV group"
+  },
+  "/add_me_to_news": {
+    "function": "add_me_to_news",
+    "definition": "Add to news group"
+  },
+  "/remove_me_from_cctv": {
+    "function": "remove_me_from_cctv",
+    "definition": "Remove from CCTV group"
+  },
+  "/remove_me_from_news": {
+    "function": "remove_me_from_cctv",
+    "definition": "Remove from news group"
+  },
+  "/current_activity": {
+    "function": "current_activity",
+    "definition": "Check activity"
+  },
+  "/start_over": {
+    "function": "start_over",
+    "definition": "Reboot"
+  },
+  "/exit_all": {
+    "function": "exit_all",
+    "definition": "Shut Down"
+  }
+}

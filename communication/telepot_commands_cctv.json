@@ -1,0 +1,26 @@
+{
+  "/alive": {
+    "function": "alive",
+    "definition": "Check bot"
+  },
+  "/time": {
+    "function": "time",
+    "definition": "Check bot time"
+  },
+  "/check_cctv": {
+    "function": "check_cctv",
+    "definition": "Check latest cctv"
+  },
+  "/add_me_to_cctv": {
+    "function": "add_me_to_cctv",
+    "definition": "Add to CCTV group"
+  },
+  "/remove_me_from_cctv": {
+    "function": "remove_me_from_cctv",
+    "definition": "Remove from CCTV group"
+  },
+  "/current_activity": {
+    "function": "current_activity",
+    "definition": "Check activity"
+  }
+}

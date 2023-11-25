@@ -6,6 +6,9 @@ from database_manager.json_editor import JSONEditor
 
 
 class NewsReader:
+    telepot_account = "main"
+    telepot_chat_group = "news"
+
     def __init__(self):
         self.id_inhibitor = "http://www.adaderana.lk/news.php?nid="
         self.news_database = JSONEditor(settings.news_database)
@@ -34,7 +37,9 @@ class NewsReader:
                 }
                 self.news_database.add_level1(new_news)
 
-                communicator.send_now(x.title + " - " + x.link, "news", cctv=False)
+                communicator.send_to_group(self.telepot_account,
+                                           x.title + " - " + x.link,
+                                           self.telepot_chat_group)
 
         if (datetime.now() - self.last_clean).days >= 1:
             print("Starting News Clean-up")

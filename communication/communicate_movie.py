@@ -11,21 +11,22 @@ class CommunicateMovie:
     movie_log = []
     movie_images = []
 
-    def __init__(self, chat_id):
+    def __init__(self, telepot_account, chat_id):
+        self.telepot_account = telepot_account
         self.chat_id = chat_id
-        communicator.send_message(self.chat_id, "Enter the name of a movie")
+        communicator.send_message(self.telepot_account, self.chat_id, "Enter the name of a movie")
 
     def handle(self, comm):
         if comm.lower() == "/download" and self.movie_selected:
             self.movie_selected = False
-            communicator.send_message(self.chat_id, "Movie will be added to queue \n" +
+            communicator.send_message(self.telepot_account, self.chat_id, "Movie will be added to queue \n" +
                                       "Send /exit or type another movie")
-            communicator.send_to_master(self.movie_images[self.selected_movie] + "\n" +
+            communicator.send_to_master(self.telepot_account, self.movie_images[self.selected_movie] + "\n" +
                                         self.movie_log[self.selected_movie])
             os.system("transmission-remote -a " + self.movie_log[self.selected_movie])
 
         elif comm.isdigit() and (int(comm) <= len(self.movie_log)):
-            communicator.send_message(self.chat_id, self.movie_images[int(comm) - 1] +
+            communicator.send_message(self.telepot_account, self.chat_id, self.movie_images[int(comm) - 1] +
                                       "\n send /download to download this movie. If not continue search")
             self.movie_selected = True
             self.selected_movie = int(comm) - 1
@@ -35,7 +36,7 @@ class CommunicateMovie:
             c = comm.lower().replace(" ", "%20")
             c = c.lower().replace("/", "")
             search_string = "https://yts.mx/rss/" + c + "/720p/all/0/en"
-            communicator.send_to_master("Searching " + search_string)
+            communicator.send_to_master(self.telepot_account, "Searching " + search_string)
             movie_feed = feedparser.parse(search_string)
 
             self.movie_log = []
@@ -50,7 +51,9 @@ class CommunicateMovie:
                 idx2 = image_string.index('" /></a>')
                 self.movie_images.append(image_string[idx1 + len(sub1): idx2])
 
-                communicator.send_message(self.chat_id, str(i) + "\n" + x.title + " - " + x.link)
+                communicator.send_message(self.telepot_account, self.chat_id,
+                                          str(i) + "\n" + x.title + " - " + x.link)
                 i = i + 1
 
-            communicator.send_message(self.chat_id, "Tell me the number of Movie you want to download")
+            communicator.send_message(self.telepot_account, self.chat_id,
+                                      "Tell me the number of Movie you want to download")

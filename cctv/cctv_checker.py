@@ -10,6 +10,8 @@ from communication.email_manager import EmailManager
 class CCTVChecker:
     last_detect_A02 = None
     last_detect_A01 = None
+    telepot_account = "cctv"
+    telepot_chat_group = "cctv"
 
     def __init__(self):
         self.outlook = None
@@ -64,10 +66,10 @@ class CCTVChecker:
 
             if sus:
                 if sus_attachment_count == 0:
-                    communicator.send_now(date, "cctv", cctv=True)
+                    communicator.send_to_group(self.telepot_account, date, self.telepot_chat_group)
                     sus_attachment_count = sus_attachment_count + 1
-                communicator.send_now(att_path, "cctv", img=True, cctv=True)
-                communicator.send_now(str(val), "cctv", cctv=True)
+                communicator.send_to_group(self.telepot_account, att_path, self.telepot_chat_group, image=True)
+                communicator.send_to_group(self.telepot_account, str(val), self.telepot_chat_group)
             print(save_as + "\t SUS: " + str("%.2f" % val) + "\t Copy to: " + location)
             logger.log('info', save_as + "\t SUS: " + str(val) + "\t Copy to: " + location)
 
