@@ -3,14 +3,19 @@ from datetime import datetime
 import telepot
 import global_var
 from telepot.loop import MessageLoop
+import openai
 
+import settings
 from communication.communicate_finance import CommunicateFinance
 from communication.communicate_movie import CommunicateMovie
 
 from database_manager.json_editor import JSONEditor
 
+openai.my_api_key = settings.chat
+
 
 class Communicator:
+    ai_messages = {}
     activity = {}
     activities = {'/find_movie': {},
                   '/expense': {}}
@@ -106,9 +111,7 @@ class Communicator:
                               image=False,
                               chat=self.chat_id)
             else:
-                self.send_now("Sorry, I don't understand. Send /help to find out what you can do here",
-                              image=False,
-                              chat=self.chat_id)
+                self.talk_to_ai(command)
 
     def alive(self):
         self.send_now(str(self.chat_id) + "\n" + "Hello " + self.chat_name + "! I'm Alive and kicking!",
@@ -181,11 +184,29 @@ class Communicator:
         if self.chat_id == self.master:
             global_var.stop_all = True
             global_var.stop_cctv = True
+            self.send_now("Completing ongoing tasks. Please wait.")
         else:
             self.send_now("This will shut down the program. Requesting Master User...",
                           image=False,
                           chat=self.chat_id)
             self.send_now("Start over requested by " + self.chat_name + "\n/exit_all")
+
+    def talk_to_ai(self, command):
+        if self.chat_id not in self.ai_messages.keys():
+            self.ai_messages[self.chat_id] = [{"role": "system", "content":
+                                               "You are a intelligent assistant."}]
+
+        self.ai_messages[self.chat_id].append(
+            {"role": "user", "content": command},
+        )
+        chat = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo", messages=self.ai_messages[self.chat_id]
+        )
+        reply = chat.choices[0].message.content
+        self.ai_messages[self.chat_id].append(
+            {"role": "assistant", "content": reply}
+        )
+        self.send_now(reply, image=False, chat=self.chat_id)
 
 
 telepot_channels = {}

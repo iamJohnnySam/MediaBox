@@ -70,9 +70,13 @@ class CCTVChecker:
                     sus_attachment_count = sus_attachment_count + 1
                 communicator.send_to_group(self.telepot_account, att_path, self.telepot_chat_group, image=True)
                 communicator.send_to_group(self.telepot_account, str(val), self.telepot_chat_group)
-            print(save_as + "\t SUS: " + str("%.2f" % val) + "\t Copy to: " + location)
+            print(str(datetime.datetime.now()),
+                  "CCTV >",
+                  save_as + "\t SUS: " + str("%.2f" % val) + "\t Copy to: " + location)
             logger.log('info', save_as + "\t SUS: " + str(val) + "\t Copy to: " + location)
 
             os.remove(att_path)
 
-        print("-------CCTV-------")
+        print(str(datetime.datetime.now()),
+              "STATUS >,"
+              "-------CCTV-------")

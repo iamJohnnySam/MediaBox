@@ -28,6 +28,7 @@ if run_all:
     news_read = NewsReader()
 
 logger.log('info', 'Program Started')
+global_var.ready_to_run = True
 
 
 def run_scheduler():
