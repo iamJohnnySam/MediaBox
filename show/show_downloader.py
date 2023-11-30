@@ -7,7 +7,7 @@ from database_manager.json_editor import JSONEditor
 
 
 class ShowDownloader:
-    telepot_chat_group = "shows"
+    telepot_chat_group = "show"
     telepot_account = "main"
 
     def __init__(self):
