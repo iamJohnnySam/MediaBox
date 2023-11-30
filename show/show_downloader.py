@@ -62,7 +62,8 @@ class ShowDownloader:
             self.shows.add_level2(row[4], show)
             self.data = self.shows.read()
 
-            os.system("transmission-remote -a " + row[2])
+            x = os.system("transmission-remote -a " + row[2])
+            print(x)
 
             communicator.send_to_group(self.telepot_account,
                                        str(row[1]) + " added at " + str(row[3]),
