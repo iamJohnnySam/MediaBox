@@ -1,6 +1,7 @@
 from datetime import datetime
 import random
-import tensorflow as tf
+# import tensorflow as tf
+import tflite_runtime.interpreter as tflite
 import numpy as np
 import settings
 from PIL import Image
@@ -11,7 +12,8 @@ import shutil
 class ImageClassifier:
     def __init__(self, nn_path, nn_name="A00", save_random=0.75, threshold=0.6):
         self.output_data = None
-        self.model = tf.lite.Interpreter(model_path=nn_path)
+        # self.model = tf.lite.Interpreter(model_path=nn_path)
+        self.model = tflite.Interpreter(model_path=nn_path)
         self.model.allocate_tensors()
         self.input_details = self.model.get_input_details()
         self.output_details = self.model.get_output_details()

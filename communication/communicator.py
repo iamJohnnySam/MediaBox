@@ -102,6 +102,10 @@ class Communicator:
                 message = "--- AVAILABLE COMMANDS ---"
                 for commands in command_dictionary.keys():
                     message = message + "\n" + commands + " - " + command_dictionary[commands]["definition"]
+                message = message + "\n\n ACTIVITIES"
+                for commands in self.activities.keys():
+                    message = message + "\n" + commands
+
                 self.send_now(message,
                               image=False,
                               chat=self.chat_id)
