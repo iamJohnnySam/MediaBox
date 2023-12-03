@@ -12,7 +12,7 @@ class TalkToAI:
 
         self.chat_id = chat
         self.messages = [{"role": "system",
-                          "content": "You are a intelligent assistant."}]
+                          "content": "You are an intelligent assistant."}]
 
         logger.log("OpenAI Object Created for " + str(chat))
 
