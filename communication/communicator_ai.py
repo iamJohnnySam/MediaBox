@@ -14,7 +14,7 @@ class TalkToAI:
         self.messages = [{"role": "system",
                           "content": "You are a intelligent assistant."}]
 
-        logger.log("OpenAI Object Created for " + chat)
+        logger.log("OpenAI Object Created for " + str(chat))
 
     def send_to_ai(self, message):
         self.messages.append({"role": "user", "content": message})
