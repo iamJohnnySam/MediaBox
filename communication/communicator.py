@@ -115,7 +115,10 @@ class Communicator:
                               image=False,
                               chat=self.chat_id)
             else:
-                self.talk_to_ai(self.chat_id, command)
+                # self.talk_to_ai(self.chat_id, command)
+                self.send_now("Sorry, Talk to AI is disabled. Please try a different command",
+                              image=False,
+                              chat=self.chat_id)
 
     def alive(self):
         self.send_now(str(self.chat_id) + "\n" + "Hello " + self.chat_name + "! I'm Alive and kicking!",
@@ -200,8 +203,6 @@ class Communicator:
             self.ai_messages[str(chat_id)] = TalkToAI(self.chat_id)
 
         self.ai_messages[str(chat_id)].send_to_ai(command)
-
-
 
 telepot_channels = {}
 for account in JSONEditor('communication/telepot_accounts.json').read().keys():
