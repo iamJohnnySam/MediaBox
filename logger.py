@@ -28,6 +28,6 @@ def log(message, source="MBOX", message_type="info"):
         source = "{:<4}".format(source)
 
     print(message_type + ",",
-          str(datetime.now()) + ",",
+          datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ",",
           source + ", >,",
           message)
