@@ -50,14 +50,14 @@ class Communicator:
     def activate_mode(self, chat_id, mode):
         if (chat_id in self.activity.keys()) or (mode == '/exit'):
             self.bot.sendMessage(chat_id, "Ending Session - " + self.activity[chat_id])
-            logger.log(chat_id + " - Ending Session - " + self.activity[chat_id], source="TG")
+            logger.log(str(chat_id) + " - Ending Session - " + str(self.activity[chat_id]), source="TG")
             del self.activity[chat_id]
 
         if mode == '/exit':
             return
 
         self.bot.sendMessage(chat_id, "Starting Session - " + mode + "\nTo exit send /exit")
-        logger.log(chat_id + " - Starting Session - " + self.activity[chat_id], source="TG")
+        logger.log(str(chat_id) + " - Starting Session - " + str(self.activity[chat_id]), source="TG")
         self.activity[chat_id] = mode
 
         if chat_id in self.activities[mode].keys():
@@ -87,7 +87,7 @@ class Communicator:
             command_dictionary = JSONEditor('communication/telepot_commands_' + self.telepot_account + '.json').read()
             if command in command_dictionary.keys():
                 function = command_dictionary[command]["function"]
-                logger.log(self.chat_id + ' - Calling Function: ' + function, source="TG")
+                logger.log(str(self.chat_id) + ' - Calling Function: ' + function, source="TG")
                 func = getattr(self, function)
                 func()
 
@@ -210,7 +210,7 @@ class Communicator:
             {"role": "assistant", "content": reply}
         )
         self.send_now(reply, image=False, chat=self.chat_id)
-        logger.log(reply, source="AI")
+        logger.log(str(reply), source="AI")
 
 
 telepot_channels = {}
@@ -220,7 +220,7 @@ for account in JSONEditor('communication/telepot_accounts.json').read().keys():
 
 def send_message(telepot_account, chat_id, msg, image=False):
     telepot_channels[telepot_account].send_now(msg, image, chat_id)
-    logger.log(chat_id + " - " + msg, source="TG-R")
+    logger.log(str(chat_id) + " - " + str(msg), source="TG-R")
 
 
 def send_to_master(telepot_account, msg, image=False):
