@@ -220,6 +220,7 @@ for account in JSONEditor('communication/telepot_accounts.json').read().keys():
 
 def send_message(telepot_account, chat_id, msg, image=False):
     telepot_channels[telepot_account].send_now(msg, image, chat_id)
+    logger.log(chat_id + " - " + msg, source="TG-R")
 
 
 def send_to_master(telepot_account, msg, image=False):
