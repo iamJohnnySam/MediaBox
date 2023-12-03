@@ -56,7 +56,7 @@ def run_webapp():
 
 
 # CHECK RUNNING SYSTEM
-logger.log("Currently running code on: ", platform.machine())
+logger.log("Currently running code on: " + platform.machine())
 
 if platform.machine() == 'armv7l':
     logger.log("Code Running in Full Mode")

@@ -48,5 +48,5 @@ class ImageClassifier:
 
             copy_destination = shutil.copyfile(att_path,
                                                os.path.join(sav, file_name))
-            logger.log("Image Saved - ", source="CCTV")
+            logger.log("Image Saved - " + copy_destination, source="CCTV")
         return output, sus, copy_destination

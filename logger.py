@@ -23,7 +23,7 @@ def log(message, source="MBOX", message_type="info"):
         logging.debug(message)
 
     if len(source) > 4:
-        source = source[:4]
+        pass
     else:
         source = "{:<4}".format(source)
 
