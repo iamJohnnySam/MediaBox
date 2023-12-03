@@ -14,22 +14,6 @@ from cctv.cctv_checker import CCTVChecker
 
 # https://github.com/dbader/schedule
 
-# CHECK RUNNING SYSTEM
-print("Currently running code on: ", platform.machine())
-if platform.machine() == 'armv7l':
-    run_all = True
-else:
-    run_all = False
-
-# CREATE OBJECTS
-if run_all:
-    my_shows = ShowDownloader()
-    cctv = CCTVChecker()
-    news_read = NewsReader()
-
-logger.log('info', 'Program Started')
-global_var.ready_to_run = True
-
 
 def run_scheduler():
     exit_condition = True
@@ -49,15 +33,18 @@ def run_scheduler():
         if global_var.check_shows:
             global_var.check_shows = False
             my_shows.run_code()
+
         if global_var.check_cctv:
             global_var.check_cctv = False
             cctv.run_code()
+
         if global_var.check_news:
-            news_read.run_code()
             global_var.check_news = False
+            news_read.run_code()
 
         if global_var.stop_cctv:
-            communicator.send_to_master("main", "Exiting...")
+            communicator.send_to_master("main", "Exiting in 1 minute")
+            logger.log("Exiting Code in T-minus 1 minute")
             sys.exit()
 
         time.sleep(1)
@@ -68,7 +55,18 @@ def run_webapp():
         web_app.app.run(debug=False, host='0.0.0.0')
 
 
-if run_all:
+# CHECK RUNNING SYSTEM
+logger.log("Currently running code on: ", platform.machine())
+
+if platform.machine() == 'armv7l':
+    logger.log("Code Running in Full Mode")
+    my_shows = ShowDownloader()
+    cctv = CCTVChecker()
+    news_read = NewsReader()
+
+    global_var.ready_to_run = True
+    logger.log('Program Started')
+
     t_scheduler = threading.Thread(target=run_scheduler)
     t_scheduler.start()
 
@@ -78,24 +76,28 @@ if run_all:
     t_scheduler.join()
 
 else:
+    logger.log("Code Running in Partial Mode")
+
     t_webapp = threading.Thread(target=run_webapp)
     t_webapp.start()
 
     t_webapp.join()
 
-
-print("argv was", sys.argv)
-print("sys.executable was", sys.executable)
-
 if not global_var.stop_all:
     time.sleep(60)
 
+    logger.log("argv was", sys.argv)
+    logger.log("sys.executable was", sys.executable)
+
     communicator.send_to_master("main", "Restarting...")
-    print("restarting now")
-    print("-----------------------")
+    logger.log("Restarting now...")
     print("")
     print("")
     print("")
 
     python = sys.executable
     os.execv(sys.executable, ['python'] + sys.argv)
+
+else:
+    communicator.send_to_master("main", "Exiting...")
+    logger.log("EXIT")

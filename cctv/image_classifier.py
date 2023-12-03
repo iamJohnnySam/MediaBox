@@ -1,8 +1,8 @@
 from datetime import datetime
 import random
-# import tensorflow as tf
 import tflite_runtime.interpreter as tflite
 import numpy as np
+import logger
 import settings
 from PIL import Image
 import os
@@ -20,7 +20,7 @@ class ImageClassifier:
         self.threshold = threshold
         self.nn_name = nn_name
         self.save_random = save_random
-        print("Convolutional Neural Network initiated for channel " + nn_name)
+        logger.log("Convolutional Neural Network initiated for channel " + nn_name)
 
     def classify(self, att_path):
         img = Image.open(att_path)
@@ -40,7 +40,6 @@ class ImageClassifier:
             sav = os.path.join(settings.cctv_save, self.nn_name, "0")
 
         copy_destination = "None"
-        # Randomly save image
         if random.random() > self.save_random:
             if not os.path.exists(sav):
                 os.makedirs(sav)
@@ -49,4 +48,5 @@ class ImageClassifier:
 
             copy_destination = shutil.copyfile(att_path,
                                                os.path.join(sav, file_name))
+            logger.log("Image Saved - ", source="CCTV")
         return output, sus, copy_destination

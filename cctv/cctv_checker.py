@@ -28,7 +28,7 @@ class CCTVChecker:
 
     def create_object(self):
         self.outlook = EmailManager(settings.em, settings.pw, 'Security')
-        print("Created CCTV Object")
+        logger.log("Created CCTV Object", "CCTV")
 
     def run_code(self):
         if self.outlook.connection_err > 4:
@@ -70,13 +70,8 @@ class CCTVChecker:
                     sus_attachment_count = sus_attachment_count + 1
                 communicator.send_to_group(self.telepot_account, att_path, self.telepot_chat_group, image=True)
                 communicator.send_to_group(self.telepot_account, str(val), self.telepot_chat_group)
-            print(str(datetime.datetime.now()),
-                  "CCTV >",
-                  save_as + "\t SUS: " + str("%.2f" % val) + "\t Copy to: " + location)
-            logger.log('info', save_as + "\t SUS: " + str(val) + "\t Copy to: " + location)
 
+            logger.log(save_as + "\t SUS: " + str("%.2f" % val), source="CCTV")
             os.remove(att_path)
 
-        print(str(datetime.datetime.now()),
-              "STATUS >,"
-              "-------CCTV-------")
+        logger.log("-------CCTV-------")

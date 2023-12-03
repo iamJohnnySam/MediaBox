@@ -18,6 +18,7 @@ class EmailManager:
         self.password = password
         self.mb = mb
         self.myEmail = imaplib.IMAP4_SSL('outlook.office365.com', 993)
+        logger.log("Email Manager Object Created - " + email_address)
 
     def log_in(self):
         try:
@@ -30,7 +31,7 @@ class EmailManager:
             self.myEmail.select(mailbox=self.mb, readonly=False)
             return True
         except imaplib.IMAP4.error:
-            print("Mailbox select error")
+            logger.log("Mailbox select error", source="EM", message_type="error")
             self.connection_err = self.connection_err + 1
             return False
 
@@ -40,7 +41,7 @@ class EmailManager:
             self.unread_emails = len(self.messages[0].split(b' '))
             return True, self.unread_emails
         except imaplib.IMAP4.error:
-            print("Mailbox search error")
+            logger.log("Mailbox search error", source="EM", message_type="error")
             return False
 
     def connect(self):
@@ -50,6 +51,7 @@ class EmailManager:
 
         if not (b and c):
             self.result = "Not OK"
+            logger.log("Email Error", source="EM", message_type="error")
 
     def email_close(self):
         self.myEmail.close()
@@ -66,7 +68,7 @@ class EmailManager:
             try:
                 self.msg = email.message_from_bytes(data[0][1])
             except AttributeError:
-                print("No new emails to read.")
+                logger.log("No new emails to read.", source="EM")
                 self.email_close()
                 return False
 
@@ -79,9 +81,8 @@ class EmailManager:
             self.myEmail.store(self.current_message, '+FLAGS', '\\Deleted')
             self.myEmail.expunge()
         except imaplib.IMAP4.error:
-            print("1 message skipped delete")
+            logger.log("1 message skipped delete", source="EM", message_type="warn")
             communicator.send_to_master("cctv", "Connection Error - Delete")
-            logger.log('error', '1 message skipped delete')
             self.connection_err = self.connection_err + 1
 
     def get_next_attachment(self):

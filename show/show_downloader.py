@@ -1,9 +1,23 @@
 import feedparser
 import os
 import time
+import logger
 import settings
 from communication import communicator
 from database_manager.json_editor import JSONEditor
+
+
+def quality_extract(topic):
+    if " 720p" in topic:
+        episode_name = topic[0:topic.index(" 720p")].lower()
+        episode_quality = 720
+    elif " 1080p" in topic:
+        episode_name = topic[0:topic.index(" 1080p")].lower()
+        episode_quality = 1080
+    else:
+        episode_name = topic.lower()
+        episode_quality = 480
+    return episode_name, episode_quality
 
 
 class ShowDownloader:
@@ -13,18 +27,7 @@ class ShowDownloader:
     def __init__(self):
         self.shows = JSONEditor(settings.show_download_database)
         self.data = self.shows.read()
-
-    def quality_extract(self, topic):
-        if " 720p" in topic:
-            episode_name = topic[0:topic.index(" 720p")].lower()
-            episode_quality = 720
-        elif " 1080p" in topic:
-            episode_name = topic[0:topic.index(" 1080p")].lower()
-            episode_quality = 1080
-        else:
-            episode_name = topic.lower()
-            episode_quality = 480
-        return episode_name, episode_quality
+        logger.log("Show Downloader Object Created")
 
     def run_code(self):
         feed = feedparser.parse(settings.feed_link)
@@ -38,7 +41,7 @@ class ShowDownloader:
                 self.shows.add_level1(new_show)
                 self.data = self.shows.read()
 
-            episode_name, episode_quality = self.quality_extract(x.title)
+            episode_name, episode_quality = quality_extract(x.title)
 
             if any(player['episode_name'] == episode_name for player in self.data[x.tv_show_name]):
                 pass
@@ -63,12 +66,14 @@ class ShowDownloader:
             self.data = self.shows.read()
 
             x = os.system("transmission-remote -a " + row[2])
-            print(x)
+            logger.log(x, source="TOR")
 
+            message = str(row[1]) + " added at " + str(row[3])
             communicator.send_to_group(self.telepot_account,
-                                       str(row[1]) + " added at " + str(row[3]),
+                                       message,
                                        group=self.telepot_chat_group)
+            logger.log(message, source="SHOW")
             time.sleep(3)
 
-        communicator.send_to_master(self.telepot_account, "TV Show Check Ran Successfully")
-        print("-------SHOWS-------")
+        communicator.send_to_master(self.telepot_account, "TV Show Check Completed")
+        logger.log("-------SHOWS-------")

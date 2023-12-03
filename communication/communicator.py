@@ -4,11 +4,9 @@ import telepot
 import global_var
 from telepot.loop import MessageLoop
 import openai
-
 import settings
 from communication.communicate_finance import CommunicateFinance
 from communication.communicate_movie import CommunicateMovie
-
 from database_manager.json_editor import JSONEditor
 
 openai.my_api_key = settings.chat
@@ -31,8 +29,7 @@ class Communicator:
         self.telepot_chat_id = JSONEditor('communication/telepot_groups.json')
 
         MessageLoop(self.bot, self.handle).run_as_thread()
-        print('Telepot ', telepot_account, ' listening')
-        logger.log('info', 'Telepot ' + telepot_account + 'listening')
+        logger.log('Telepot ' + telepot_account + ' listening', source="TG")
 
     def send_to_group(self, group, msg, image=False):
         chats = self.telepot_chat_id.read()[group]
@@ -53,12 +50,14 @@ class Communicator:
     def activate_mode(self, chat_id, mode):
         if (chat_id in self.activity.keys()) or (mode == '/exit'):
             self.bot.sendMessage(chat_id, "Ending Session - " + self.activity[chat_id])
+            logger.log(chat_id + " - Ending Session - " + self.activity[chat_id], source="TG")
             del self.activity[chat_id]
 
         if mode == '/exit':
             return
 
         self.bot.sendMessage(chat_id, "Starting Session - " + mode + "\nTo exit send /exit")
+        logger.log(chat_id + " - Starting Session - " + self.activity[chat_id], source="TG")
         self.activity[chat_id] = mode
 
         if chat_id in self.activities[mode].keys():
@@ -75,11 +74,10 @@ class Communicator:
         try:
             command = msg['text']
         except KeyError:
-            logger.log('error', 'Telepot Key Error: ' + str(msg))
+            logger.log('Telepot Key Error: ' + str(msg), source="TG", message_type="error")
             return
 
-        logger.log('info', 'Telepot: ' + str(self.chat_id) + ' | Got command: ' + command)
-        print("MSG > " + str(self.telepot_account) + "\t" + str(self.chat_id) + "\t" + str(command))
+        logger.log(str(self.telepot_account) + "\t" + str(self.chat_id) + " - " + str(command), source="MSG")
 
         if str(self.chat_id) not in JSONEditor('communication/telepot_allowed_chats.json').read().keys():
             self.bot.sendMessage(self.chat_id,
@@ -89,6 +87,7 @@ class Communicator:
             command_dictionary = JSONEditor('communication/telepot_commands_' + self.telepot_account + '.json').read()
             if command in command_dictionary.keys():
                 function = command_dictionary[command]["function"]
+                logger.log(self.chat_id + ' - Calling Function: ' + function, source="TG")
                 func = getattr(self, function)
                 func()
 
@@ -211,6 +210,7 @@ class Communicator:
             {"role": "assistant", "content": reply}
         )
         self.send_now(reply, image=False, chat=self.chat_id)
+        logger.log(reply, source="AI")
 
 
 telepot_channels = {}
