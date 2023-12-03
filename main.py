@@ -14,6 +14,9 @@ from cctv.cctv_checker import CCTVChecker
 
 # https://github.com/dbader/schedule
 
+print("")
+print("")
+print("")
 
 def run_scheduler():
     exit_condition = True

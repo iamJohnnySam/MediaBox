@@ -50,14 +50,14 @@ class Communicator:
     def activate_mode(self, chat_id, mode):
         if (chat_id in self.activity.keys()) or (mode == '/exit'):
             self.bot.sendMessage(chat_id, "Ending Session - " + self.activity[chat_id])
-            logger.log(str(chat_id) + " - Ending Session - " + str(self.activity[chat_id]), source="TG")
+            logger.log(str(chat_id) + " - Ending Session - " + self.activity[chat_id], source="TG")
             del self.activity[chat_id]
 
         if mode == '/exit':
             return
 
         self.bot.sendMessage(chat_id, "Starting Session - " + mode + "\nTo exit send /exit")
-        logger.log(str(chat_id) + " - Starting Session - " + str(self.activity[chat_id]), source="TG")
+        logger.log(str(chat_id) + " - Starting Session - " + self.activity[chat_id], source="TG")
         self.activity[chat_id] = mode
 
         if chat_id in self.activities[mode].keys():
@@ -92,7 +92,7 @@ class Communicator:
                 func()
 
             elif (command in self.activities.keys()) or command == '/exit':
-                self.activate_mode(self.chat_id, command)
+                self.activate_mode(str(self.chat_id), command)
 
             elif self.chat_id in self.activity:
                 self.activities[self.activity[self.chat_id]][self.chat_id].handle(command)
