@@ -14,12 +14,13 @@ openai.my_api_key = settings.chat
 
 
 class Communicator:
-    ai_messages = {}
-    activity = {}
-    activities = {'/find_movie': {},
-                  '/expense': {}}
 
     def __init__(self, telepot_account):
+        self.telepot_groups = {}
+        self.ai_messages = {}
+        self.activity = {}
+        self.activities = {'/find_movie': {},
+                           '/expense': {}}
         self.chat_name = None
         self.chat_id = None
         self.telepot_account = telepot_account
@@ -33,7 +34,10 @@ class Communicator:
         logger.log('Telepot ' + telepot_account + ' listening', source="TG")
 
     def send_to_group(self, group, msg, image=False):
-        chats = self.telepot_chat_id.read()[group]
+        if self.telepot_groups == {}:
+            self.telepot_groups = self.telepot_chat_id.read()
+
+        chats = self.telepot_groups[group]
         for chat in chats:
             if image:
                 self.bot.sendPhoto(chat, photo=open(msg, 'rb'))
