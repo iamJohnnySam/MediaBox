@@ -1,8 +1,8 @@
 import feedparser
 import os
 import time
+import global_var
 import logger
-import settings
 from communication import communicator
 from database_manager.json_editor import JSONEditor
 
@@ -25,12 +25,12 @@ class ShowDownloader:
     telepot_account = "main"
 
     def __init__(self):
-        self.shows = JSONEditor(settings.show_download_database)
+        self.shows = JSONEditor(global_var.show_download_database)
         self.data = self.shows.read()
         logger.log("Show Downloader Object Created")
 
     def run_code(self):
-        feed = feedparser.parse(settings.feed_link)
+        feed = feedparser.parse(global_var.feed_link)
         self.data = self.shows.read()
         show_list = []
 

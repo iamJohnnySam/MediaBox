@@ -1,5 +1,6 @@
 import datetime
 import os
+import global_var
 import settings
 from communication import communicator
 import logger
@@ -15,14 +16,14 @@ class CCTVChecker:
 
     def __init__(self):
         self.outlook = None
-        self.cctv_classifier1 = ImageClassifier(settings.cctv_model1, "A01", 0.75)
-        self.cctv_classifier2 = ImageClassifier(settings.cctv_model2, "A02", 0.75)
+        self.cctv_classifier1 = ImageClassifier(global_var.cctv_model1, "A01", 0.75)
+        self.cctv_classifier2 = ImageClassifier(global_var.cctv_model2, "A02", 0.75)
 
-        if not os.path.exists(settings.cctv_download):
-            os.makedirs(settings.cctv_download)
+        if not os.path.exists(global_var.cctv_download):
+            os.makedirs(global_var.cctv_download)
 
-        for f in os.listdir(settings.cctv_download):
-            os.remove(os.path.join(settings.cctv_download, f))
+        for f in os.listdir(global_var.cctv_download):
+            os.remove(os.path.join(global_var.cctv_download, f))
 
         self.create_object()
 
@@ -46,7 +47,7 @@ class CCTVChecker:
 
             save_as = date + " " + file_n
             save_as = save_as.replace(",", "").replace(":", "-")
-            att_path = os.path.join(settings.cctv_download, save_as)
+            att_path = os.path.join(global_var.cctv_download, save_as)
 
             if not os.path.isfile(att_path):
                 fp = open(att_path, 'wb')

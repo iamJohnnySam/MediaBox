@@ -76,7 +76,7 @@ class EmailManager:
             self.current_date = self.current_date.replace(" +0530", "")
             return True
 
-    def delete_email(self):
+    def delete_current_email(self):
         try:
             self.myEmail.store(self.current_message, '+FLAGS', '\\Deleted')
             self.myEmail.expunge()
@@ -85,12 +85,15 @@ class EmailManager:
             communicator.send_to_master("cctv", "Connection Error - Delete")
             self.connection_err = self.connection_err + 1
 
+    def delete_all_emails(self):
+        pass
+
     def get_next_attachment(self):
         self.connect()
 
         if len(self.attachments.keys()) == 0:
             if self.unread_emails > 0:
-                self.delete_email()
+                self.delete_current_email()
                 worked = self.get_next_message()
                 if not worked:
                     return False, None, None, None

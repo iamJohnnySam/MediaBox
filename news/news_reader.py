@@ -1,7 +1,6 @@
 import feedparser
-
+import global_var
 import logger
-import settings
 from communication import communicator
 from datetime import datetime
 from database_manager.json_editor import JSONEditor
@@ -13,13 +12,13 @@ class NewsReader:
 
     def __init__(self):
         self.id_inhibitor = "http://www.adaderana.lk/news.php?nid="
-        self.news_database = JSONEditor(settings.news_database)
+        self.news_database = JSONEditor(global_var.news_database)
         self.data = self.news_database.read()
         self.last_clean = datetime(2022, 11, 2, 14, 40, 00, 000000)
         logger.log("News Watcher Object Created")
 
     def run_code(self):
-        feed = feedparser.parse(settings.news_link)
+        feed = feedparser.parse(global_var.news_link)
         self.data = self.news_database.read()
 
         available_news = []
