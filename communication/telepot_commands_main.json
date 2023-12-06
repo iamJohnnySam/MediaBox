@@ -46,5 +46,9 @@
   "/exit_all": {
     "function": "exit_all",
     "definition": "Shut Down Bot"
+  },
+  "/reboot_pi": {
+    "function": "reboot_pi",
+    "definition": "Reboot Server"
   }
 }

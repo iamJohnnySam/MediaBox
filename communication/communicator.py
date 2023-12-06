@@ -202,6 +202,18 @@ class Communicator:
                           chat=self.chat_id)
             self.send_now("Start over requested by " + self.chat_name + "\n/exit_all")
 
+    def reboot_pi(self):
+        if self.chat_id == self.master:
+            global_var.stop_all = True
+            global_var.stop_cctv = True
+            global_var.reboot_pi = True
+            self.send_now("Completing ongoing tasks. Please wait.")
+        else:
+            self.send_now("This will reboot the server. Requesting Master User...",
+                          image=False,
+                          chat=self.chat_id)
+            self.send_now("Start over requested by " + self.chat_name + "\n/reboot_pi")
+
     def talk_to_ai(self, chat_id, command):
         if str(self.chat_id) not in self.ai_messages.keys():
             self.ai_messages[str(chat_id)] = TalkToAI(self.chat_id)

@@ -104,3 +104,6 @@ if not global_var.stop_all:
 else:
     communicator.send_to_master("main", "Exiting...")
     logger.log("EXIT")
+
+    if global_var.reboot_pi:
+        os.system("sudo reboot")

@@ -4,6 +4,7 @@ check_news = False
 stop_cctv = False
 stop_all = False
 ready_to_run = False
+reboot_pi = False
 
 media_path = "/mnt/MediaBox"
 
