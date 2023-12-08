@@ -26,9 +26,9 @@ class EmailManager:
         except imaplib.IMAP4.error:
             pass
 
-    def select_mailbox(self):
+    def select_mailbox(self, mailbox):
         try:
-            self.myEmail.select(mailbox=self.mb, readonly=False)
+            self.myEmail.select(mailbox=mailbox, readonly=False)
             return True
         except imaplib.IMAP4.error:
             logger.log("Mailbox select error", source="EM", message_type="error")
@@ -46,7 +46,7 @@ class EmailManager:
 
     def connect(self):
         self.log_in()
-        b = self.select_mailbox()
+        b = self.select_mailbox(self.mb)
         c = self.check_email()
 
         if not (b and c):
@@ -86,7 +86,19 @@ class EmailManager:
             self.connection_err = self.connection_err + 1
 
     def delete_all_emails(self):
-        pass
+        message = "1"
+
+        self.connect()
+
+        exit_condition = True
+        while exit_condition:
+            try:
+                self.myEmail.store(message, '+FLAGS', '\\Deleted')
+                self.myEmail.expunge()
+            except AttributeError:
+                logger.log("No new emails to delete.", source="EM")
+                self.email_close()
+                return
 
     def get_next_attachment(self):
         self.connect()

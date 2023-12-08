@@ -5,6 +5,8 @@ import schedule
 import threading
 import platform
 import global_var
+import settings
+from communication.email_manager import EmailManager
 from web import web_app
 import logger
 from communication import communicator
@@ -18,6 +20,7 @@ print("")
 print("")
 print("")
 
+
 def run_scheduler():
     exit_condition = True
 
@@ -26,10 +29,12 @@ def run_scheduler():
     # schedule.every(15).minutes.do(cctv.run_code)
     schedule.every(60).minutes.do(news_read.run_code)
     schedule.every().day.at("05:00").do(my_shows.run_code)
+    schedule.every().day.at("03:00").do(sent_folder_delete.delete_all_emails)
 
     my_shows.run_code()
     cctv.run_code()
     news_read.run_code()
+    sent_folder_delete.delete_all_emails()
 
     while exit_condition:
         schedule.run_pending()
@@ -46,8 +51,8 @@ def run_scheduler():
             news_read.run_code()
 
         if global_var.stop_cctv:
-            communicator.send_to_master("main", "Exiting in 1 minute")
-            logger.log("Exiting Code in T-minus 1 minute")
+            communicator.send_to_master("main", "Exiting")
+            logger.log("Exiting Code")
             sys.exit()
 
         time.sleep(1)
@@ -66,6 +71,7 @@ if platform.machine() == 'armv7l':
     my_shows = ShowDownloader()
     cctv = CCTVChecker()
     news_read = NewsReader()
+    sent_folder_delete = EmailManager(settings.em, settings.pw, 'Sent')
 
     global_var.ready_to_run = True
     logger.log('Program Started')
