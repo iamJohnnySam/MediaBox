@@ -80,7 +80,6 @@ class EmailManager:
         try:
             self.myEmail.store(self.current_message, '+FLAGS', '\\Deleted')
             self.myEmail.expunge()
-            logger.log("Deleted Email", source="EM")
         except imaplib.IMAP4.error:
             logger.log("1 message skipped delete", source="EM", message_type="warn")
             communicator.send_to_master("cctv", "Connection Error - Delete")
@@ -96,6 +95,8 @@ class EmailManager:
             try:
                 self.myEmail.store(message, '+FLAGS', '\\Deleted')
                 self.myEmail.expunge()
+                logger.log("Deleted Email", source="EM")
+
             except AttributeError:
                 logger.log("No new emails to delete.", source="EM")
                 self.email_close()
