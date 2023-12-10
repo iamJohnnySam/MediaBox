@@ -96,10 +96,12 @@ class EmailManager:
         count = 0
         while exit_condition:
             try:
+                ret, data = self.myEmail.fetch(message, '(RFC822)')
+                self.msg = email.message_from_bytes(data[0][1])
                 self.myEmail.store(message, '+FLAGS', '\\Deleted')
                 self.myEmail.expunge()
                 count = count + 1
-                logger.log("Deleted Email", source="EM")
+                logger.log("Deleted Email - " + self.msg['Date'], source="EM")
             except AttributeError:
                 exit_condition = False
                 logger.log("No new emails to delete.", source="EM")
