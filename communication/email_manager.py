@@ -100,7 +100,6 @@ class EmailManager:
                 exit_condition = False
                 logger.log("No new emails to delete.", source="EM")
                 self.email_close()
-                logger.log("Deleted " + count + "emails from " + self.mb, source="EM")
                 logger.log("Deleted " + str(count) + "emails from " + self.mb, source="EM")
                 return
             try:
