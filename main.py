@@ -5,8 +5,6 @@ import schedule
 import threading
 import platform
 import global_var
-import settings
-from communication.email_manager import EmailManager
 from web import web_app
 import logger
 from communication import communicator
@@ -51,7 +49,6 @@ def run_scheduler():
             news_read.run_code()
 
         if global_var.stop_cctv:
-            communicator.send_to_master("main", "Exiting")
             logger.log("Exiting Code")
             sys.exit()
 
@@ -97,7 +94,6 @@ if not global_var.stop_all:
     logger.log("argv was" + sys.argv)
     logger.log("sys.executable was" + sys.executable)
 
-    communicator.send_to_master("main", "Restarting...")
     logger.log("Restarting now...")
     print("")
     print("")

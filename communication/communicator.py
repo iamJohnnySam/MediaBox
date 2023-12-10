@@ -1,3 +1,4 @@
+import os
 import threading
 
 import logger
@@ -183,6 +184,12 @@ class Communicator:
             self.send_now("No current activity",
                           image=False,
                           chat=self.chat_id)
+
+    def list_torrents(self):
+        x = os.system("transmission-remote -f")
+        self.send_now(str(x),
+                      image=False,
+                      chat=self.chat_id)
 
     def start_over(self):
         if self.chat_id == self.master:
