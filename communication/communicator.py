@@ -186,7 +186,7 @@ class Communicator:
                           chat=self.chat_id)
 
     def list_torrents(self):
-        x = os.system("transmission-remote -f")
+        x = os.system("transmission-remote -l")
         self.send_now(str(x),
                       image=False,
                       chat=self.chat_id)
