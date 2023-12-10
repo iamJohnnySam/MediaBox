@@ -12,6 +12,7 @@ from communication.communicate_finance import CommunicateFinance
 from communication.communicate_movie import CommunicateMovie
 from communication.communicator_ai import TalkToAI
 from database_manager.json_editor import JSONEditor
+from show import transmission
 
 openai.my_api_key = settings.chat
 
@@ -186,7 +187,7 @@ class Communicator:
                           chat=self.chat_id)
 
     def list_torrents(self):
-        x = os.system("transmission-remote -l")
+        x = transmission.list_torrents()
         self.send_now(str(x),
                       image=False,
                       chat=self.chat_id)
