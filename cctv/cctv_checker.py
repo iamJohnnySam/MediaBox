@@ -76,3 +76,6 @@ class CCTVChecker:
             os.remove(att_path)
 
         logger.log("-------CCTV-------")
+
+    def clean_up(self):
+        self.outlook.delete_all_emails("Sent")

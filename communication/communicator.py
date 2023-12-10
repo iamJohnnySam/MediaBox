@@ -1,3 +1,5 @@
+import threading
+
 import logger
 from datetime import datetime
 import telepot
@@ -220,19 +222,28 @@ class Communicator:
 
         self.ai_messages[str(chat_id)].send_to_ai(command)
 
+
+telepot_lock = threading.Lock()
+
 telepot_channels = {}
 for account in JSONEditor('communication/telepot_accounts.json').read().keys():
     telepot_channels[account] = Communicator(account)
 
 
 def send_message(telepot_account, chat_id, msg, image=False):
+    telepot_lock.acquire()
     telepot_channels[telepot_account].send_now(msg, image, chat_id)
     logger.log(str(chat_id) + " - " + str(msg), source="TG-R")
+    telepot_lock.release()
 
 
 def send_to_master(telepot_account, msg, image=False):
+    telepot_lock.acquire()
     telepot_channels[telepot_account].send_now(msg, image)
+    telepot_lock.release()
 
 
 def send_to_group(telepot_account, msg, group, image=False):
+    telepot_lock.acquire()
     telepot_channels[telepot_account].send_to_group(group, msg, image)
+    telepot_lock.release()

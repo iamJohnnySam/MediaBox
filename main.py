@@ -29,12 +29,12 @@ def run_scheduler():
     # schedule.every(15).minutes.do(cctv.run_code)
     schedule.every(60).minutes.do(news_read.run_code)
     schedule.every().day.at("05:00").do(my_shows.run_code)
-    schedule.every().day.at("03:00").do(sent_folder_delete.delete_all_emails)
+    schedule.every().day.at("03:00").do(cctv.clean_up)
 
     my_shows.run_code()
     cctv.run_code()
     news_read.run_code()
-    sent_folder_delete.delete_all_emails()
+    cctv.clean_up()
 
     while exit_condition:
         schedule.run_pending()
@@ -71,7 +71,6 @@ if platform.machine() == 'armv7l':
     my_shows = ShowDownloader()
     cctv = CCTVChecker()
     news_read = NewsReader()
-    sent_folder_delete = EmailManager(settings.em, settings.pw, 'Sent')
 
     global_var.ready_to_run = True
     logger.log('Program Started')
@@ -95,8 +94,8 @@ else:
 if not global_var.stop_all:
     time.sleep(60)
 
-    logger.log("argv was", sys.argv)
-    logger.log("sys.executable was", sys.executable)
+    logger.log("argv was" + sys.argv)
+    logger.log("sys.executable was" + sys.executable)
 
     communicator.send_to_master("main", "Restarting...")
     logger.log("Restarting now...")
