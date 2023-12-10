@@ -38,7 +38,7 @@
   "/list_torrents": {
     "function": "list_torrents",
     "definition": "List Torrents"
-  },,
+  },
   "/current_activity": {
     "function": "current_activity",
     "definition": "Check activity"
