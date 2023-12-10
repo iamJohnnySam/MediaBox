@@ -1,7 +1,6 @@
 import email
 import imaplib
 import logger
-from communication import communicator
 
 
 class EmailManager:
@@ -84,7 +83,6 @@ class EmailManager:
             self.myEmail.expunge()
         except imaplib.IMAP4.error:
             logger.log("1 message skipped delete", source="EM", message_type="warn")
-            communicator.send_to_master("cctv", "Connection Error - Delete")
             self.connection_err = self.connection_err + 1
 
     def delete_all_emails(self, mailbox="Sent"):
@@ -95,20 +93,23 @@ class EmailManager:
         exit_condition = True
         count = 0
         while exit_condition:
+            ret, data = self.myEmail.fetch(message, '(RFC822)')
             try:
-                ret, data = self.myEmail.fetch(message, '(RFC822)')
                 self.msg = email.message_from_bytes(data[0][1])
-                self.myEmail.store(message, '+FLAGS', '\\Deleted')
-                self.myEmail.expunge()
-                count = count + 1
-                logger.log("Deleted Email - " + self.msg['Date'], source="EM")
             except AttributeError:
                 exit_condition = False
                 logger.log("No new emails to delete.", source="EM")
                 self.email_close()
                 logger.log("Deleted " + count + "emails from " + self.mb, source="EM")
-                communicator.send_to_master("main", "Deleted " + count + "emails from " + self.mb)
+                logger.log("Deleted " + str(count) + "emails from " + self.mb, source="EM")
                 return
+            try:
+                self.myEmail.store(message, '+FLAGS', '\\Deleted')
+                self.myEmail.expunge()
+                count = count + 1
+                logger.log("Deleted Email - " + self.msg['Date'], source="EM")
+            except AttributeError:
+                logger.log("Failed to delete - " + self.msg['Date'], source="EM")
 
     def get_next_attachment(self):
         self.connect()
