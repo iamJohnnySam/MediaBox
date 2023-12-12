@@ -42,7 +42,7 @@ class CCTVChecker:
         while running:
             running, attachment, date, file_n = self.outlook.get_next_attachment()
 
-            if not running:
+            if not running or global_var.stop_cctv:
                 break
 
             save_as = date + " " + file_n
