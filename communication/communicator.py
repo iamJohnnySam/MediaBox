@@ -42,6 +42,9 @@ class Communicator:
             self.telepot_groups = self.telepot_chat_id.read()
 
         chats = self.telepot_groups[group]
+
+        logger.log(str(chats) + " - Group Message: " + msg, "TG")
+
         for chat in chats:
             if image:
                 self.bot.sendPhoto(chat, photo=open(msg, 'rb'))
@@ -51,6 +54,9 @@ class Communicator:
     def send_now(self, msg, image=False, chat=None):
         if chat is None:
             chat = self.master
+
+        logger.log(chat + " - Message: " + msg, "TG")
+
         if image:
             self.bot.sendPhoto(chat, photo=open(msg, 'rb'))
         else:
