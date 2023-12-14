@@ -1,5 +1,7 @@
 import email
 import imaplib
+
+import global_var
 import logger
 
 
@@ -93,7 +95,7 @@ class EmailManager:
 
         exit_condition = True
         count = 0
-        while exit_condition:
+        while exit_condition and (not global_var.stop_all):
             ret, data = self.myEmail.fetch(message, '(RFC822)')
             try:
                 self.msg = email.message_from_bytes(data[0][1])
