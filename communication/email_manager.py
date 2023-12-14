@@ -53,6 +53,7 @@ class EmailManager:
         if not (b and c):
             self.result = "Not OK"
             logger.log("Email Error", source="EM", message_type="error")
+            self.mail_connect_error = True
 
     def email_close(self):
         self.myEmail.close()

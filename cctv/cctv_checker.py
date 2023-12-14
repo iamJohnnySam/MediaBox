@@ -1,4 +1,5 @@
 import datetime
+import time
 import os
 import global_var
 import settings
@@ -32,8 +33,10 @@ class CCTVChecker:
         logger.log("Created CCTV Object", "CCTV")
 
     def run_code(self):
-        if self.outlook.connection_err > 4:
+        if self.outlook.connection_err > 0:
             del self.outlook
+            logger.log("Deleted CCTV Object", "CCTV")
+            time.sleep(10)
             self.create_object()
 
         running = True
@@ -42,8 +45,7 @@ class CCTVChecker:
         while running:
             running, attachment, date, file_n = self.outlook.get_next_attachment()
 
-            if not running or global_var.stop_cctv:
-                running = False
+            if (not running) or global_var.stop_cctv:
                 break
 
             save_as = date + " " + file_n

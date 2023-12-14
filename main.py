@@ -1,13 +1,14 @@
-import maintenance.start_up
 import os
 import sys
 import time
 import schedule
 import threading
 import platform
-import global_var
-from web import web_app
+
 import logger
+import global_var
+from maintenance import start_up
+from web import web_app
 from communication import communicator
 from news.news_reader import NewsReader
 from show.show_downloader import ShowDownloader
@@ -85,16 +86,17 @@ else:
 
     t_webapp.join()
 
+# ------ REBOOT CONDITION -----------
 if not global_var.stop_all:
+    communicator.send_to_master("main", "Crashed.")
     time.sleep(60)
 
-    logger.log("argv was" + sys.argv)
-    logger.log("sys.executable was" + sys.executable)
+    logger.log("argv was" + str(sys.argv))
+    logger.log("sys.executable was" + str(sys.executable))
 
     logger.log("Restarting now...")
-    print("")
-    print("")
-    print("")
+    start_up.keep_gap()
+    start_up.print_logo()
 
     python = sys.executable
     os.execv(sys.executable, ['python'] + sys.argv)
