@@ -55,7 +55,7 @@ class Communicator:
         if chat is None:
             chat = self.master
 
-        logger.log(chat + " - Message: " + msg, "TG")
+        logger.log(str(chat) + " - Message: " + msg, "TG")
 
         if image:
             self.bot.sendPhoto(chat, photo=open(msg, 'rb'))

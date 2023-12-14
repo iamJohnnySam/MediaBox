@@ -5,10 +5,10 @@ import schedule
 import threading
 import platform
 
-import logger
 import global_var
 from maintenance import start_up
 from web import web_app
+import logger
 from communication import communicator
 from news.news_reader import NewsReader
 from show.show_downloader import ShowDownloader
