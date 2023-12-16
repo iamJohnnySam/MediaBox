@@ -29,6 +29,8 @@ class JSONEditor:
             return json.load(file)
 
     def delete(self, keep_keys):
+        logger.log("-------DATABASE CLEANUP STARTED-------")
+
         with open(self.file, 'r+') as file:
             data = json.load(file)
 
@@ -39,3 +41,5 @@ class JSONEditor:
 
         with open(self.file, 'w+') as file:
             json.dump(data, file, indent=4)
+
+        logger.log("-------DATABASE CLEANUP ENDED-------")

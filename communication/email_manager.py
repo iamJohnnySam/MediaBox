@@ -105,6 +105,7 @@ class EmailManager:
                 logger.log("No new emails to delete.", source="EM")
                 self.email_close()
                 logger.log("Deleted " + str(count) + " emails from " + self.mb, source="EM")
+                logger.log("-------ENDED EMAIL CLEAN-UP SCRIPT-------")
                 return
             try:
                 self.myEmail.store(message, '+FLAGS', '\\Deleted')
@@ -113,8 +114,6 @@ class EmailManager:
                 logger.log("Deleted Email - " + self.msg['Date'], source="EM")
             except AttributeError:
                 logger.log("Failed to delete - " + self.msg['Date'], source="EM")
-
-        logger.log("-------ENDED EMAIL CLEAN-UP SCRIPT-------")
 
     def get_next_attachment(self):
         self.connect()
