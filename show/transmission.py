@@ -50,7 +50,7 @@ def list_all():
     number = 0
     for torrent in client.active_torrents.keys():
         torrent_path = str(client.active_torrents[torrent].torrent_file).split("/")
-        completion = str(client.active_torrents[torrent].torrent_file*100)
+        completion = str(client.active_torrents[torrent].percent_complete*100) + "%"
         return_string = return_string + "\n" + str(number) + ": " + str(torrent_path[-1] + " - " + completion)
         number = number + 1
 
