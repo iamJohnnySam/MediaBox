@@ -5,6 +5,7 @@ import global_var
 import logger
 from communication import communicator
 from database_manager.json_editor import JSONEditor
+from show import transmission
 
 
 def quality_extract(topic):
@@ -63,18 +64,23 @@ class ShowDownloader:
 
         for row in show_list:
             show = {"episode_id": row[0], "episode_name": row[1], "magnet": row[2], "quality": str(row[3])}
-            self.shows.add_level2(row[4], show)
-            self.data = self.shows.read()
+            success, torrent_id = transmission.download(row[2])
+            # torrent_id = os.system("transmission-remote -a " + row[2])
 
-            x = os.system("transmission-remote -a " + row[2])
-            logger.log(x, source="TOR")
+            if success:
+                self.shows.add_level2(row[4], show)
+                self.data = self.shows.read()
+                logger.log(torrent_id, source="TOR")
 
-            message = str(row[1]) + " added at " + str(row[3])
-            communicator.send_to_group(self.telepot_account,
-                                       message,
-                                       group=self.telepot_chat_group)
-            logger.log(message, source="SHOW")
-            time.sleep(3)
+                message = str(row[1]) + " added at " + str(row[3]) + " torrent id = " + str(torrent_id)
+                communicator.send_to_group(self.telepot_account,
+                                           message,
+                                           group=self.telepot_chat_group)
+                logger.log(message, source="SHOW")
+                time.sleep(3)
+
+            else:
+                logger.log("Torrent Add Failed: " + str(row[2]), source="TOR", message_type="error")
 
         communicator.send_to_master(self.telepot_account, "TV Show Check Completed")
         logger.log("-------ENDED TV SHOW CHECK SCRIPT-------")

@@ -15,7 +15,7 @@ class Transmission:
         torrent = self.client.add_torrent(path, paused=paused)
         torrent_id = torrent.hashString
         success = self.add_torrent_to_list(torrent_id, torrent)
-        return success
+        return success, torrent_id
 
     def add_torrent_to_list(self, torrent_id, torrent):
         if torrent_id not in self.active_torrents.keys():
@@ -29,5 +29,5 @@ client = Transmission()
 
 
 def download(link, paused=False):
-    success = client.add_torrent(link, paused)
-    return success
+    success, torrent_id = client.add_torrent(link, paused)
+    return success, torrent_id

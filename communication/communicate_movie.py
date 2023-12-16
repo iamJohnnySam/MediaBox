@@ -1,6 +1,7 @@
 import os
 import feedparser
 from communication import communicator
+from show import transmission
 
 
 class CommunicateMovie:
@@ -16,14 +17,20 @@ class CommunicateMovie:
         self.chat_id = chat_id
         communicator.send_message(self.telepot_account, self.chat_id, "Enter the name of a movie")
 
+    def add_to_download(self, torrent):
+        # os.system("transmission-remote -a " + self.movie_log[self.selected_movie])
+        success, torrent_id = transmission.download(torrent)
+        if success:
+            communicator.send_message(self.telepot_account, self.chat_id, "Movie will be added to queue \n" +
+                                      "Send /exit or type another movie")
+
+        communicator.send_to_master(self.telepot_account, self.movie_images[self.selected_movie] + "\n" +
+                                    self.movie_log[self.selected_movie])
+
     def handle(self, comm):
         if comm.lower() == "/download" and self.movie_selected:
             self.movie_selected = False
-            communicator.send_message(self.telepot_account, self.chat_id, "Movie will be added to queue \n" +
-                                      "Send /exit or type another movie")
-            communicator.send_to_master(self.telepot_account, self.movie_images[self.selected_movie] + "\n" +
-                                        self.movie_log[self.selected_movie])
-            os.system("transmission-remote -a " + self.movie_log[self.selected_movie])
+            self.add_to_download(self.movie_log[self.selected_movie])
 
         elif comm.isdigit() and (int(comm) <= len(self.movie_log)):
             communicator.send_message(self.telepot_account, self.chat_id, self.movie_images[int(comm) - 1] +
