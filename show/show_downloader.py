@@ -30,6 +30,7 @@ class ShowDownloader:
         logger.log("Show Downloader Object Created")
 
     def run_code(self):
+        logger.log("-------STARTED TV SHOW CHECK SCRIPT-------")
         feed = feedparser.parse(global_var.feed_link)
         self.data = self.shows.read()
         show_list = []
@@ -76,4 +77,4 @@ class ShowDownloader:
             time.sleep(3)
 
         communicator.send_to_master(self.telepot_account, "TV Show Check Completed")
-        logger.log("-------SHOWS-------")
+        logger.log("-------ENDED TV SHOW CHECK SCRIPT-------")

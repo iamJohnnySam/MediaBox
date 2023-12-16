@@ -1,6 +1,5 @@
 import os
 import threading
-
 import logger
 from datetime import datetime
 import telepot
@@ -146,19 +145,19 @@ class Communicator:
 
     def check_shows(self):
         global_var.check_shows = True
-        self.send_now("Starting TV Show Check",
+        self.send_now("Request Initiated - TV Show Check",
                       image=False,
                       chat=self.chat_id)
 
     def check_news(self):
         global_var.check_news = True
-        self.send_now("Starting News Check",
+        self.send_now("Request Initiated - News Check",
                       image=False,
                       chat=self.chat_id)
 
     def check_cctv(self):
         global_var.check_cctv = True
-        self.send_now("Starting CCTV Check",
+        self.send_now("Request Initiated - CCTV Check",
                       image=False,
                       chat=self.chat_id)
 

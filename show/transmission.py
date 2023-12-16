@@ -5,7 +5,6 @@ from transmission_rpc import Client
 class Transmission:
     def __init__(self):
         self.client = Client()
-
         self.active_torrents = {}
 
     def list_torrents(self):
@@ -14,8 +13,21 @@ class Transmission:
 
     def add_torrent(self, path, paused=False):
         torrent = self.client.add_torrent(path, paused=paused)
-
-        self.add_torrent_to_list(torrent_id, torrent)
+        torrent_id = torrent.hashString
+        success = self.add_torrent_to_list(torrent_id, torrent)
+        return success
 
     def add_torrent_to_list(self, torrent_id, torrent):
-        pass
+        if torrent_id not in self.active_torrents.keys():
+            self.active_torrents[torrent_id] = torrent
+            return True
+        else:
+            return False
+
+
+client = Transmission()
+
+
+def download(link, paused=False):
+    success = client.add_torrent(link, paused)
+    return success

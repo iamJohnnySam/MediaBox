@@ -33,6 +33,8 @@ class CCTVChecker:
         logger.log("Created CCTV Object", "CCTV")
 
     def run_code(self):
+        logger.log("-------STARTED CCTV MAIN SCRIPT-------")
+
         if self.outlook.connection_err > 0:
             del self.outlook
             logger.log("Deleted CCTV Object", "CCTV")
@@ -78,7 +80,7 @@ class CCTVChecker:
             logger.log(save_as + "\t SUS: " + str("%.2f" % val), source="CCTV")
             os.remove(att_path)
 
-        logger.log("-------CCTV-------")
+        logger.log("-------ENDED CCTV MAIN SCRIPT-------")
 
     def clean_up(self):
         self.outlook.delete_all_emails("Sent")

@@ -18,6 +18,7 @@ class NewsReader:
         logger.log("News Watcher Object Created")
 
     def run_code(self):
+        logger.log("-------STARTED NEWS READER SCRIPT-------")
         feed = feedparser.parse(global_var.news_link)
         self.data = self.news_database.read()
 
@@ -49,4 +50,4 @@ class NewsReader:
             logger.log("Cleaned News Database")
             self.last_clean = datetime.now()
 
-        logger.log("------- NEWS -------")
+        logger.log("-------ENDED NEWS READER SCRIPT-------")

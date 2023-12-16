@@ -89,6 +89,7 @@ class EmailManager:
             self.connection_err = self.connection_err + 1
 
     def delete_all_emails(self, mailbox="Sent"):
+        logger.log("-------STARTED EMAIL CLEAN-UP SCRIPT-------")
         message = "1"
 
         self.connect(mailbox)
@@ -112,6 +113,8 @@ class EmailManager:
                 logger.log("Deleted Email - " + self.msg['Date'], source="EM")
             except AttributeError:
                 logger.log("Failed to delete - " + self.msg['Date'], source="EM")
+
+        logger.log("-------ENDED EMAIL CLEAN-UP SCRIPT-------")
 
     def get_next_attachment(self):
         self.connect()
