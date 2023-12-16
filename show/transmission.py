@@ -43,12 +43,14 @@ def download(link, paused=False):
 def list_all():
     client.list_torrents()
     if len(client.active_torrents.keys()) == 0:
-        return_string = "- ACTIVE TORRENTS- "
-    else:
         return_string = "No Active Torrents"
+    else:
+        return_string = "- ACTIVE TORRENTS- "
 
+    number = 0
     for torrent in client.active_torrents.keys():
         torrent_path = str(client.active_torrents[torrent].torrent_file).split("/")
-        return_string = return_string + "\n" + str(torrent_path[-1])
+        return_string = return_string + "\n" + str(number) + ": " + str(torrent_path[-1])
+        number = number + 1
 
     return return_string
