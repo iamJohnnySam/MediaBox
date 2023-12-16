@@ -192,8 +192,8 @@ class Communicator:
                           chat=self.chat_id)
 
     def list_torrents(self):
-        x = transmission.list_torrents()
-        self.send_now(str(x),
+        torrent_list = transmission.list_all()
+        self.send_now(str(torrent_list),
                       image=False,
                       chat=self.chat_id)
 
