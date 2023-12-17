@@ -10,6 +10,7 @@ class JSONEditor:
         self.file = location
 
         if not os.path.exists(location):
+            os.makedirs(os.path.dirname(location), exist_ok=True)
             with open(location, "w") as f:
                 json.dump({}, f)
 
