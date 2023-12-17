@@ -30,9 +30,16 @@ class SQLConnector:
         try:
             self.my_cursor.execute(sql, val)
             self.my_db.commit()
-            return True
+            return True, self.my_cursor.lastrowid
+
         except:
-            return False
+            return False, 0
 
 
-financer = SQLConnector(settings.database_user, settings.database_password, 'transactions')
+finance_db = SQLConnector(settings.database_user, settings.database_password, 'transactions')
+
+
+def insert(table, columns, values, model="finance"):
+    if model == "finance":
+        pass
+    pass

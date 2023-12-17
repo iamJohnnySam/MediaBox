@@ -6,6 +6,8 @@ import global_var
 import telepot
 from telepot.loop import MessageLoop
 from telepot.namedtuple import InlineKeyboardMarkup, InlineKeyboardButton
+
+from database_manager import sql_connector
 from database_manager.json_editor import JSONEditor
 from show import transmission
 
@@ -167,7 +169,7 @@ class Communicator:
             value = str(query_data).split(",")[2]
 
         if command == "cancel":
-            self.remove_in_line_buttons(callback_id)
+            self.update_in_line_buttons(callback_id)
             self.bot.answerCallbackQuery(query_id, text='Canceled')
         elif command == "echo":
             self.send_now(value, chat=from_id)
@@ -175,7 +177,7 @@ class Communicator:
         elif command == "download":
             success, torrent_id = transmission.download(value)
             if success:
-                self.remove_in_line_buttons(callback_id)
+                self.update_in_line_buttons(callback_id)
                 self.send_now("Movie will be added to queue", chat=from_id)
             self.bot.answerCallbackQuery(query_id, text='Downloaded')
         elif command == "finance":
@@ -183,12 +185,12 @@ class Communicator:
         else:
             self.bot.answerCallbackQuery(query_id, text='Unhandled')
 
-    def remove_in_line_buttons(self, button_id):
+    def update_in_line_buttons(self, button_id, keyboard=None):
         comm = button_id.split("_")[0] + "_" + button_id.split("_")[1] + "_"
         message = JSONEditor('database/telepot/' + comm + 'telepot_button_link.json').read()[button_id]
         logger.log("Buttons to remove from message id " + str(message['message_id']), "TG")
         message_id = telepot.message_identifier(message)
-        self.bot.editMessageReplyMarkup(message_id, reply_markup=None)
+        self.bot.editMessageReplyMarkup(message_id, reply_markup=keyboard)
 
     def alive(self):
         self.send_now(str(self.chat_id) + "\n" + "Hello " + self.chat_name + "! I'm Alive and kicking!",
@@ -229,7 +231,7 @@ class Communicator:
 
         if movie == "":
             self.send_now("Please type the name of the movie after the command. You can press and hold this "
-                          "command and type the movie \n /find_movie", chat=self.chat_id)
+                          "command and type the movie \n /find_movie", chat=self.chat_id, reply_to=self.message_id)
             return
 
         movie = movie.lower().replace(" ", "%20")
@@ -260,6 +262,32 @@ class Communicator:
             message = self.send_now(x.title, chat=self.chat_id, keyboard=keyboard)
 
             self.link_msg_to_buttons(message, [key1_id, key2_id, key3_id, key4_id])
+
+    def finance(self):
+        value = self.message.replace(self.message.split(" ")[0], "").strip()
+
+        if value == "":
+            self.send_now("Please type the amount after the command. You can press and hold this "
+                          "command and type the amount\n /finance", chat=self.chat_id, reply_to=self.message_id)
+            return
+
+        sql_id = sql_connector.insert('transactions', "amount", str(value), 'finance')
+        identifier = "transactions_" + str(sql_id) + "_"
+
+        key1_id, key1_button = self.keyboard_button("Income", "finance", identifier+"income")
+        key2_id, key2_button = self.keyboard_button("Expense", "finance", identifier+"expense")
+        key3_id, key3_button = self.keyboard_button("Invest", "finance", identifier+"invest")
+        key4_id, key4_button = self.keyboard_button("Delete", "finance", identifier+"delete")
+
+        keyboard_markup = [[key1_button, key2_button, key3_button],
+                           [key4_button]]
+
+        keyboard = InlineKeyboardMarkup(inline_keyboard=keyboard_markup)
+
+        message = self.send_now("Let's fill some missing info", chat=self.chat_id, keyboard=keyboard,
+                                reply_to=self.message_id)
+
+        self.link_msg_to_buttons(message, [key1_id, key2_id, key3_id, key4_id])
 
     def request_tv_show(self):
         show = self.message.replace(self.message.split(" ")[0], "").strip()
