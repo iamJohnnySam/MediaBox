@@ -69,7 +69,7 @@ class Communicator:
         else:
             message = self.bot.sendMessage(chat, msg, reply_to_message_id=reply_to)
 
-        logger.log(str(chat) + " - " + message['message_id'] + " - Message: " + msg, "TG")
+        logger.log(str(chat) + " - " + str(message['message_id']) + " - Message: " + msg, "TG")
 
         return message['message_id']
 
@@ -186,7 +186,7 @@ class Communicator:
     def remove_in_line_buttons(self, button_id):
         comm = button_id.split("_")[0] + "_" + button_id.split("_")[1] + "_"
         message_id = JSONEditor('database/telepot/' + comm + 'telepot_button_link.json').read()[button_id]
-        logger.log("Buttons to remove from message id " + message_id, "TG")
+        logger.log("Buttons to remove from message id " + str(message_id), "TG")
         self.bot.editMessageReplyMarkup(message_id, reply_markup=None)
 
     def alive(self):
