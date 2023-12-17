@@ -187,7 +187,6 @@ class Communicator:
 
         callback_id = str(query_data).split(",")[0]
         command = str(query_data).split(",")[1]
-        value = str(query_data).split(",")[2]
 
         if command == "X":
             telepot_callbacks = self.telepot_callback_database.read()
@@ -195,6 +194,8 @@ class Communicator:
             logger.log("Callback Query: " + query_data, "TG")
             command = str(query_data).split(",")[0]
             value = str(query_data).split(",")[1]
+        else:
+            value = str(query_data).split(",")[2]
 
         if command == "cancel":
             self.bot.answerCallbackQuery(query_id, text='Canceled')
