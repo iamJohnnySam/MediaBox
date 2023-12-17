@@ -112,6 +112,7 @@ class Communicator:
             telepot_callbacks = self.telepot_callback_database.read()
             telepot_callbacks[data_id] = str(callback_command) + "," + str(value)
             data = data_id + ",X"
+            self.telepot_callback_database.add_level1(telepot_callbacks)
 
         return InlineKeyboardButton(text=str(text), callback_data=data)
 
