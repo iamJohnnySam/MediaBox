@@ -1,4 +1,6 @@
 import json
+import os
+
 import logger
 
 
@@ -6,6 +8,10 @@ class JSONEditor:
 
     def __init__(self, location):
         self.file = location
+
+        if not os.path.exists(location):
+            with open(location, "w") as f:
+                json.dump({}, f)
 
     def add_level1(self, data):
         logger.log("Added Level 1 data: " + str(data) + " at " + self.file, source="JSON")
