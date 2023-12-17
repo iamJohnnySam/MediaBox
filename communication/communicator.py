@@ -24,6 +24,8 @@ openai.my_api_key = settings.chat
 class Communicator:
 
     def __init__(self, telepot_account):
+        self.telepot_account = telepot_account
+
         self.allowed_chats = None
         self.telepot_groups = {}
         self.ai_messages = {}
@@ -33,17 +35,17 @@ class Communicator:
         self.chat_name = None
         self.chat_id = None
         self.message = None
-        self.callback_id_prefix = str(datetime.now()) + "_"
+        self.callback_id_prefix = telepot_account + "_" + datetime.now().strftime("%y%m%d%H%M") + "_"
         self.current_callback_id = 0
 
-        self.telepot_account = telepot_account
+
         telepot_accounts = JSONEditor('communication/telepot_accounts.json').read()
         self.bot = telepot.Bot(telepot_accounts[telepot_account]["account"])
         self.master = telepot_accounts[telepot_account]["master"]
 
         self.telepot_chat_id = JSONEditor('communication/telepot_groups.json')
-
         self.command_dictionary = JSONEditor('communication/telepot_commands_' + self.telepot_account + '.json').read()
+        self.telepot_callback_database = JSONEditor('communication/telepot_callback_database.json')
 
         MessageLoop(self.bot, {'chat': self.handle,
                                'callback_query': self.handle_callback}).run_as_thread()
@@ -103,8 +105,14 @@ class Communicator:
     #         self.activities[mode][chat_id] = CommunicateFinance(self.telepot_account, chat_id)
 
     def keyboard_button(self, text, callback_command, value="None"):
-        data = self.callback_id_prefix + str(self.current_callback_id)
-        data = data + "," + str(callback_command) + "," + str(value)
+        data_id = self.callback_id_prefix + str(self.current_callback_id) + "_" + text
+        data = data_id + "," + str(callback_command) + "," + str(value)
+
+        if len(data) >= 60:
+            telepot_callbacks = self.telepot_callback_database.read()
+            telepot_callbacks[data_id] = str(callback_command) + "," + str(value)
+            data = data_id + ",X"
+
         return InlineKeyboardButton(text=str(text), callback_data=data)
 
     def check_allowed_sender(self, chat_id, msg):
@@ -180,6 +188,12 @@ class Communicator:
         callback_id = str(query_data).split(",")[0]
         command = str(query_data).split(",")[1]
         value = str(query_data).split(",")[2]
+
+        if command == "X":
+            telepot_callbacks = self.telepot_callback_database.read()
+            query_data = telepot_callbacks[callback_id].split(",")
+            command = str(query_data).split(",")[0]
+            value = str(query_data).split(",")[1]
 
         if command == "cancel":
             self.bot.answerCallbackQuery(query_id, text='Canceled')
