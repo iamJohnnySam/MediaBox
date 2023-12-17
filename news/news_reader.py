@@ -42,12 +42,10 @@ class NewsReader:
                 communicator.send_to_group(self.telepot_account,
                                            x.title + " - " + x.link,
                                            self.telepot_chat_group)
-                logger.log(news_id + ": " + x.title, source="NEWS")
+                logger.log(news_id, source="NEWS")
 
         if (datetime.now() - self.last_clean).days >= 1:
-            logger.log("Starting News Clean-up")
             self.news_database.delete(available_news)
-            logger.log("Cleaned News Database")
             self.last_clean = datetime.now()
 
         logger.log("-------ENDED NEWS READER SCRIPT-------")

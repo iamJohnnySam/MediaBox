@@ -51,6 +51,10 @@ class Communicator:
                 self.bot.sendMessage(chat, msg)
 
     def send_now(self, msg, image=False, chat=None):
+        if msg == "":
+            logger.log("NO MESSAGE", source="TG", message_type="error")
+            return
+
         if chat is None:
             chat = self.master
 

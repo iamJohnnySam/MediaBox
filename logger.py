@@ -27,7 +27,9 @@ def log(message, source="MBOX", message_type="info"):
     else:
         source = "{:<4}".format(source)
 
-    print(message_type + ",",
-          datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ",",
-          source + ", >,",
-          message)
+    for segment in message.split("\n"):
+        print(message_type + ",",
+              datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ",",
+              source + ", >,",
+              segment)
+
