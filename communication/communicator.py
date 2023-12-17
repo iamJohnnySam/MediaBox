@@ -1,18 +1,18 @@
+import os
 import threading
 import feedparser
 import logger
+from bardapi import Bard
 from datetime import datetime
 import global_var
 import telepot
 from telepot.loop import MessageLoop
 from telepot.namedtuple import InlineKeyboardMarkup, InlineKeyboardButton
-import openai
 import settings
-from communication.communicator_ai import TalkToAI
 from database_manager.json_editor import JSONEditor
 from show import transmission
 
-openai.my_api_key = settings.chat
+os.environ['_BARD_API_KEY'] = settings.bard
 
 
 class Communicator:
@@ -135,8 +135,7 @@ class Communicator:
                               image=False,
                               chat=self.chat_id)
             else:
-                # self.talk_to_ai(self.chat_id, command)
-                self.send_now("Sorry, Talk to AI is disabled. Please try a different command",
+                self.send_now(Bard().get_answer(msg)['content'],
                               image=False,
                               chat=self.chat_id)
 
@@ -298,12 +297,6 @@ class Communicator:
                           image=False,
                           chat=self.chat_id)
             self.send_now("Start over requested by " + self.chat_name + "\n/reboot_pi")
-
-    def talk_to_ai(self, chat_id, command):
-        if str(self.chat_id) not in self.ai_messages.keys():
-            self.ai_messages[str(chat_id)] = TalkToAI(self.chat_id)
-
-        self.ai_messages[str(chat_id)].send_to_ai(command)
 
 
 telepot_lock = threading.Lock()
