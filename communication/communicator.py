@@ -23,6 +23,7 @@ class Communicator:
         self.chat_name = None
         self.chat_id = None
         self.message = None
+        self.message_id = None
         self.callback_id_prefix = telepot_account + "_" + datetime.now().strftime("%y%m%d%H%M") + "_"
         self.current_callback_id = 0
 
@@ -51,7 +52,7 @@ class Communicator:
             else:
                 self.bot.sendMessage(chat, msg)
 
-    def send_now(self, msg, image=False, chat=None, keyboard=None):
+    def send_now(self, msg, image=False, chat=None, keyboard=None, reply_to=None):
         if msg == "":
             logger.log("NO MESSAGE", source="TG", message_type="error")
             return
@@ -62,12 +63,12 @@ class Communicator:
         logger.log(str(chat) + " - Message: " + msg, "TG")
 
         if image:
-            self.bot.sendPhoto(chat, photo=open(msg, 'rb'))
+            self.bot.sendPhoto(chat, photo=open(msg, 'rb'), reply_to_message_id=reply_to)
         elif keyboard is not None:
             self.current_callback_id = self.current_callback_id + 1
-            self.bot.sendMessage(chat, msg, reply_markup=keyboard)
+            self.bot.sendMessage(chat, msg, reply_markup=keyboard, reply_to_message_id=reply_to)
         else:
-            self.bot.sendMessage(chat, msg)
+            self.bot.sendMessage(chat, msg, reply_to_message_id=reply_to)
 
     def keyboard_button(self, text, callback_command, value="None"):
         data_id = self.callback_id_prefix + str(self.current_callback_id) + "_" + text
@@ -99,6 +100,7 @@ class Communicator:
         # Get Command details
         self.chat_id = msg['chat']['id']
         self.chat_name = str(msg['chat']['first_name'])
+        self.message_id = msg['message_id']
         try:
             self.message = str(msg['text'])
             command = self.message.split(" ")[0]
@@ -165,13 +167,16 @@ class Communicator:
             if success:
                 self.send_now("Movie will be added to queue", chat=from_id)
             self.bot.answerCallbackQuery(query_id, text='Downloaded')
+        elif command == "finance":
+            pass
         else:
             self.bot.answerCallbackQuery(query_id, text='Unhandled')
 
     def alive(self):
         self.send_now(str(self.chat_id) + "\n" + "Hello " + self.chat_name + "! I'm Alive and kicking!",
                       image=False,
-                      chat=self.chat_id)
+                      chat=self.chat_id,
+                      reply_to=self.message_id)
 
     def time(self):
         self.send_now(str(datetime.now()),

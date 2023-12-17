@@ -1,5 +1,7 @@
 import mysql.connector
 
+import settings
+
 
 class SQLConnector:
     def __init__(self, user, password, database):
@@ -10,8 +12,14 @@ class SQLConnector:
             database=database
         )
         self.database = database
-
         self.my_cursor = self.my_db.cursor()
+
+    def check_table_exists(self, table):
+        self.my_cursor.execute("SHOW TABLES")
+        if table not in self.my_cursor:
+            return False
+        else:
+            return True
 
     def insert(self, table, columns, val):
         placeholder = "%s"
@@ -25,3 +33,6 @@ class SQLConnector:
             return True
         except:
             return False
+
+
+financer = SQLConnector(settings.database_user, settings.database_password, 'transactions')
