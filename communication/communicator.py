@@ -19,6 +19,7 @@ openai.my_api_key = settings.chat
 class Communicator:
 
     def __init__(self, telepot_account):
+        self.allowed_chats = None
         self.telepot_groups = {}
         self.ai_messages = {}
         self.activity = {}
@@ -32,6 +33,8 @@ class Communicator:
         self.master = telepot_accounts[telepot_account]["master"]
 
         self.telepot_chat_id = JSONEditor('communication/telepot_groups.json')
+
+        self.command_dictionary = JSONEditor('communication/telepot_commands_' + self.telepot_account + '.json').read()
 
         MessageLoop(self.bot, self.handle).run_as_thread()
         logger.log('Telepot ' + telepot_account + ' listening', source="TG")
@@ -86,7 +89,22 @@ class Communicator:
         elif mode == "/expense":
             self.activities[mode][chat_id] = CommunicateFinance(self.telepot_account, chat_id)
 
+    def check_allowed_sender(self, chat_id, msg):
+        # Load allowed list of chats first time
+        if self.allowed_chats is None:
+            self.allowed_chats = JSONEditor('communication/telepot_allowed_chats.json').read().keys()
+
+        if str(chat_id) in self.allowed_chats:
+            return True
+        else:
+            self.bot.sendMessage(self.chat_id,
+                                 "Hello " + str(msg['chat']['first_name']) + "! You're not allowed to be here")
+            self.send_now("Unauthorised Chat access: " + str(msg['chat']['first_name']))
+            logger.log("Unauthorised Chat access: " + str(msg['chat']['first_name']), source="TG", message_type="warn")
+            return False
+
     def handle(self, msg):
+        # Get Command details
         self.chat_id = msg['chat']['id']
         self.chat_name = str(msg['chat']['first_name'])
         try:
@@ -97,14 +115,11 @@ class Communicator:
 
         logger.log(str(self.telepot_account) + "\t" + str(self.chat_id) + " - " + str(command), source="MSG")
 
-        if str(self.chat_id) not in JSONEditor('communication/telepot_allowed_chats.json').read().keys():
-            self.bot.sendMessage(self.chat_id,
-                                 "Hello " + str(msg['chat']['first_name']) + "! You're not allowed to be here")
-            self.send_now("Unauthorised Chat access: " + str(msg['chat']['first_name']))
-        else:
-            command_dictionary = JSONEditor('communication/telepot_commands_' + self.telepot_account + '.json').read()
-            if command in command_dictionary.keys():
-                function = command_dictionary[command]["function"]
+        # Check if sender is in allowed list
+        if self.check_allowed_sender(self.chat_id, msg):
+
+            if command in self.command_dictionary.keys():
+                function = self.command_dictionary[command]["function"]
                 logger.log(str(self.chat_id) + ' - Calling Function: ' + function, source="TG")
                 func = getattr(self, function)
                 func()
@@ -117,8 +132,8 @@ class Communicator:
 
             elif command == '/help' or command.lower() == 'help' or command == "/start":
                 message = "--- AVAILABLE COMMANDS ---"
-                for commands in command_dictionary.keys():
-                    message = message + "\n" + commands + " - " + command_dictionary[commands]["definition"]
+                for commands in self.command_dictionary.keys():
+                    message = message + "\n" + commands + " - " + self.command_dictionary[commands]["definition"]
                 message = message + "\n\n ACTIVITIES"
                 for commands in self.activities.keys():
                     message = message + "\n" + commands
