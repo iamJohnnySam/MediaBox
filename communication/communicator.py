@@ -148,8 +148,9 @@ class Communicator:
         command = str(query_data).split(",")[1]
 
         if command == "X":
+            comm = callback_id.split("_")[0] + "_" + callback_id.split("_")[1] + "_"
             telepot_callbacks = JSONEditor('database/telepot/'
-                                           + self.callback_id_prefix + 'telepot_callback_database.json').read()
+                                           + comm + 'telepot_callback_database.json').read()
             query_data = telepot_callbacks[callback_id]
             logger.log("Callback Query: " + query_data, "TG")
             command = str(query_data).split(",")[0]
