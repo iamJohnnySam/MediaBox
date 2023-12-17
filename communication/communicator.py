@@ -103,7 +103,7 @@ class Communicator:
     #     elif mode == "/expense":
     #         self.activities[mode][chat_id] = CommunicateFinance(self.telepot_account, chat_id)
 
-    def keyboard_button(self, text, callback_command, value = "None"):
+    def keyboard_button(self, text, callback_command, value="None"):
         data = self.callback_id_prefix + str(self.current_callback_id)
         data = data + "," + str(callback_command) + "," + str(value)
         return InlineKeyboardButton(text=str(text), callback_data=data)
@@ -221,8 +221,13 @@ class Communicator:
                       image=False,
                       chat=self.chat_id)
 
-    def find_movie(self):
-        movie = self.message.replace(self.message.split(" ")[0], "").trim()
+    def find_movie(self, movie=None):
+        if movie is None:
+            movie = self.message.replace(self.message.split(" ")[0], "").strip()
+
+        if movie == "":
+            self.send_now("Please type the name of the movie after the command", chat=self.chat_id)
+
         movie = movie.lower().replace(" ", "%20")
         movie = movie.lower().replace("/", "")
         search_string = "https://yts.mx/rss/" + movie + "/720p/all/0/en"
