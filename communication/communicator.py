@@ -1,14 +1,11 @@
-import os
 import threading
 import feedparser
 import logger
-from bardapi import Bard
 from datetime import datetime
 import global_var
 import telepot
 from telepot.loop import MessageLoop
 from telepot.namedtuple import InlineKeyboardMarkup, InlineKeyboardButton
-import settings
 from database_manager.json_editor import JSONEditor
 from show import transmission
 
@@ -162,6 +159,7 @@ class Communicator:
             self.bot.answerCallbackQuery(query_id, text='Canceled')
         elif command == "echo":
             self.send_now(value, chat=from_id)
+            self.bot.answerCallbackQuery(query_id, text='Sent')
         elif command == "download":
             success, torrent_id = transmission.download(value)
             if success:
@@ -223,8 +221,7 @@ class Communicator:
             image = image_string[idx1 + len(sub1): idx2]
 
             keyboard_markup = [[self.keyboard_button("See Image", "echo", image),
-                                self.keyboard_button("Visit Page", "echo", x.link),
-                                self.keyboard_button("Not This", "cancel")],
+                                self.keyboard_button("Visit Page", "echo", x.link)],
                                [self.keyboard_button("Download", "download", x.links[1].href)]]
 
             keyboard = InlineKeyboardMarkup(inline_keyboard=keyboard_markup)
