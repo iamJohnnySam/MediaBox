@@ -183,7 +183,7 @@ class Communicator:
 
     def handle_callback(self, msg):
         query_id, from_id, query_data = telepot.glance(msg, flavor='callback_query')
-        logger.log('Callback Query: ' + " " + query_id + " " + from_id + " " + query_data)
+        logger.log('Callback Query: ' + " " + str(query_id) + " " + str(from_id) + " " + str(query_data))
 
         callback_id = str(query_data).split(",")[0]
         command = str(query_data).split(",")[1]
