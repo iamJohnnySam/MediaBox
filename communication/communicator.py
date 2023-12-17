@@ -75,12 +75,11 @@ class Communicator:
 
         if image:
             self.bot.sendPhoto(chat, photo=open(msg, 'rb'))
+        elif keyboard is not None:
+            self.current_callback_id = self.current_callback_id + 1
+            self.bot.sendMessage(chat, msg, reply_markup=keyboard)
         else:
             self.bot.sendMessage(chat, msg)
-
-        if keyboard is not None:
-            self.current_callback_id = self.current_callback_id + 1
-            self.bot.sendMessage(chat, 'Use inline keyboard', reply_markup=keyboard)
 
     # def activate_mode(self, chat_id, mode):
     #     if (chat_id in self.activity.keys()) or (mode == '/exit'):
@@ -106,7 +105,7 @@ class Communicator:
     def keyboard_button(self, text, callback_command, value="None"):
         data = self.callback_id_prefix + str(self.current_callback_id)
         data = data + "," + str(callback_command) + "," + str(value)
-        return [InlineKeyboardButton(text=str(text), callback_data=data)]
+        return InlineKeyboardButton(text=str(text), callback_data=data)
 
     def check_allowed_sender(self, chat_id, msg):
         # Load allowed list of chats first time
@@ -244,13 +243,12 @@ class Communicator:
             idx2 = image_string.index('" /></a>')
             image = image_string[idx1 + len(sub1): idx2]
 
-            keyboard = InlineKeyboardMarkup(inline_keyboard=[
-                                                             self.keyboard_button("See Image", "echo", image),
-                                                             self.keyboard_button("Visit Page", "echo", x.link),
-                                                             self.keyboard_button("Download", "download", x.links[1].href),
-                                                             self.keyboard_button("Not This", "cancel")
-                ]
-            )
+            keyboard_markup = [[self.keyboard_button("See Image", "echo", image),
+                                self.keyboard_button("Visit Page", "echo", x.link),
+                                self.keyboard_button("Not This", "cancel")],
+                               [self.keyboard_button("Download", "download", x.links[1].href)]]
+
+            keyboard = InlineKeyboardMarkup(inline_keyboard=keyboard_markup)
 
             self.send_now(x.title, chat=self.chat_id, keyboard=keyboard)
 
