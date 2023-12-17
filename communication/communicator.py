@@ -106,7 +106,7 @@ class Communicator:
     def keyboard_button(self, text, callback_command, value="None"):
         data = self.callback_id_prefix + str(self.current_callback_id)
         data = data + "," + str(callback_command) + "," + str(value)
-        return InlineKeyboardButton(text=str(text), callback_data=data)
+        return [InlineKeyboardButton(text=str(text), callback_data=data)]
 
     def check_allowed_sender(self, chat_id, msg):
         # Load allowed list of chats first time
@@ -244,10 +244,13 @@ class Communicator:
             idx2 = image_string.index('" /></a>')
             image = image_string[idx1 + len(sub1): idx2]
 
-            keyboard = InlineKeyboardMarkup(self.keyboard_button("See Image", "echo", image),
-                                            self.keyboard_button("Visit Page", "echo", x.link),
-                                            self.keyboard_button("Download", "download", x.links[1].href),
-                                            self.keyboard_button("Not This", "cancel"))
+            keyboard = InlineKeyboardMarkup(inline_keyboard=[
+                                                             self.keyboard_button("See Image", "echo", image),
+                                                             self.keyboard_button("Visit Page", "echo", x.link),
+                                                             self.keyboard_button("Download", "download", x.links[1].href),
+                                                             self.keyboard_button("Not This", "cancel")
+                ]
+            )
 
             self.send_now(x.title, chat=self.chat_id, keyboard=keyboard)
 
