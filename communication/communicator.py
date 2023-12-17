@@ -9,6 +9,7 @@ from telepot.namedtuple import InlineKeyboardMarkup, InlineKeyboardButton
 from database_manager.json_editor import JSONEditor
 from show import transmission
 
+
 # os.environ['_BARD_API_KEY'] = settings.bard
 
 
@@ -63,12 +64,14 @@ class Communicator:
         logger.log(str(chat) + " - Message: " + msg, "TG")
 
         if image:
-            self.bot.sendPhoto(chat, photo=open(msg, 'rb'), reply_to_message_id=reply_to)
+            message = self.bot.sendPhoto(chat, photo=open(msg, 'rb'), reply_to_message_id=reply_to)
         elif keyboard is not None:
             self.current_callback_id = self.current_callback_id + 1
-            self.bot.sendMessage(chat, msg, reply_markup=keyboard, reply_to_message_id=reply_to)
+            message = self.bot.sendMessage(chat, msg, reply_markup=keyboard, reply_to_message_id=reply_to)
         else:
-            self.bot.sendMessage(chat, msg, reply_to_message_id=reply_to)
+            message = self.bot.sendMessage(chat, msg, reply_to_message_id=reply_to)
+
+        return message.message_id
 
     def keyboard_button(self, text, callback_command, value="None"):
         data_id = self.callback_id_prefix + str(self.current_callback_id) + "_" + text
@@ -80,7 +83,13 @@ class Communicator:
                        self.callback_id_prefix + 'telepot_callback_database.json').add_level1(telepot_callbacks)
             data = data_id + ",X"
 
-        return InlineKeyboardButton(text=str(text), callback_data=data)
+        return data_id, InlineKeyboardButton(text=str(text), callback_data=data)
+
+    def link_msg_to_buttons(self, message_id, buttons):
+        for button in buttons:
+            button_dict = {button: message_id}
+            JSONEditor('database/telepot/' +
+                       self.callback_id_prefix + 'telepot_button_link.json').add_level1(button_dict)
 
     def check_allowed_sender(self, chat_id, msg):
         # Load allowed list of chats first time
@@ -158,11 +167,13 @@ class Communicator:
             value = str(query_data).split(",")[2]
 
         if command == "cancel":
+            self.remove_in_line_buttons(callback_id)
             self.bot.answerCallbackQuery(query_id, text='Canceled')
         elif command == "echo":
             self.send_now(value, chat=from_id)
             self.bot.answerCallbackQuery(query_id, text='Sent')
         elif command == "download":
+            self.remove_in_line_buttons(callback_id)
             success, torrent_id = transmission.download(value)
             if success:
                 self.send_now("Movie will be added to queue", chat=from_id)
@@ -171,6 +182,11 @@ class Communicator:
             pass
         else:
             self.bot.answerCallbackQuery(query_id, text='Unhandled')
+
+    def remove_in_line_buttons(self, button_id):
+        comm = button_id.split("_")[0] + "_" + button_id.split("_")[1] + "_"
+        message_id = JSONEditor('database/telepot/' + comm + 'telepot_button_link.json').read()[button_id]
+        self.bot.editMessageReplyMarkup(message_id, reply_markup=None)
 
     def alive(self):
         self.send_now(str(self.chat_id) + "\n" + "Hello " + self.chat_name + "! I'm Alive and kicking!",
@@ -181,25 +197,29 @@ class Communicator:
     def time(self):
         self.send_now(str(datetime.now()),
                       image=False,
-                      chat=self.chat_id)
+                      chat=self.chat_id,
+                      reply_to=self.message_id)
 
     def check_shows(self):
         global_var.check_shows = True
         self.send_now("Request Initiated - TV Show Check",
                       image=False,
-                      chat=self.chat_id)
+                      chat=self.chat_id,
+                      reply_to=self.message_id)
 
     def check_news(self):
         global_var.check_news = True
         self.send_now("Request Initiated - News Check",
                       image=False,
-                      chat=self.chat_id)
+                      chat=self.chat_id,
+                      reply_to=self.message_id)
 
     def check_cctv(self):
         global_var.check_cctv = True
         self.send_now("Request Initiated - CCTV Check",
                       image=False,
-                      chat=self.chat_id)
+                      chat=self.chat_id,
+                      reply_to=self.message_id)
 
     def find_movie(self, movie=None):
         if movie is None:
@@ -225,13 +245,19 @@ class Communicator:
             idx2 = image_string.index('" /></a>')
             image = image_string[idx1 + len(sub1): idx2]
 
-            keyboard_markup = [[self.keyboard_button("See Image", "echo", image),
-                                self.keyboard_button("Visit Page", "echo", x.link)],
-                               [self.keyboard_button("Download", "download", x.links[1].href)]]
+            key1_id, key1_button = self.keyboard_button("See Image", "echo", image)
+            key2_id, key2_button = self.keyboard_button("Visit Page", "echo", x.link)
+            key3_id, key3_button = self.keyboard_button("See Image", "cancel", "")
+            key4_id, key4_button = self.keyboard_button("Download", "download", x.links[1].href)
+
+            keyboard_markup = [[key1_button, key2_button, key3_button],
+                               [key4_button]]
 
             keyboard = InlineKeyboardMarkup(inline_keyboard=keyboard_markup)
 
-            self.send_now(x.title, chat=self.chat_id, keyboard=keyboard)
+            message_id = self.send_now(x.title, chat=self.chat_id, keyboard=keyboard)
+
+            self.link_msg_to_buttons(message_id, [key1_id, key2_id, key3_id, key4_id])
 
     def request_tv_show(self):
         show = self.message.replace(self.message.split(" ")[0], "").strip()
@@ -243,33 +269,38 @@ class Communicator:
         request = {show: self.chat_name}
         JSONEditor('database/requested_shows.json').add_level1(request)
         logger.log("TV Show Requested - " + show)
-        self.send_now("TV Show Requested - " + show, chat=self.chat_id)
+        self.send_now("TV Show Requested - " + show, chat=self.chat_id, reply_to=self.message_id)
 
     def add_me_to_cctv(self):
         self.send_now("Function Not yet implemented",
                       image=False,
-                      chat=self.chat_id)
+                      chat=self.chat_id,
+                      reply_to=self.message_id)
 
     def add_me_to_news(self):
         self.send_now("Function Not yet implemented",
                       image=False,
-                      chat=self.chat_id)
+                      chat=self.chat_id,
+                      reply_to=self.message_id)
 
     def remove_me_from_cctv(self):
         self.send_now("Function Not yet implemented",
                       image=False,
-                      chat=self.chat_id)
+                      chat=self.chat_id,
+                      reply_to=self.message_id)
 
     def remove_me_from_news(self):
         self.send_now("Function Not yet implemented",
                       image=False,
-                      chat=self.chat_id)
+                      chat=self.chat_id,
+                      reply_to=self.message_id)
 
     def list_torrents(self):
         torrent_list = transmission.list_all()
         self.send_now(str(torrent_list),
                       image=False,
-                      chat=self.chat_id)
+                      chat=self.chat_id,
+                      reply_to=self.message_id)
 
     def start_over(self):
         if self.chat_id == self.master:
@@ -277,7 +308,8 @@ class Communicator:
         else:
             self.send_now("This will reboot the program. Requesting Master User...",
                           image=False,
-                          chat=self.chat_id)
+                          chat=self.chat_id,
+                          reply_to=self.message_id)
             self.send_now("Start over requested by " + self.chat_name + "\n/start_over")
 
     def exit_all(self):
@@ -288,7 +320,8 @@ class Communicator:
         else:
             self.send_now("This will shut down the program. Requesting Master User...",
                           image=False,
-                          chat=self.chat_id)
+                          chat=self.chat_id,
+                          reply_to=self.message_id)
             self.send_now("Start over requested by " + self.chat_name + "\n/exit_all")
 
     def reboot_pi(self):
@@ -300,7 +333,8 @@ class Communicator:
         else:
             self.send_now("This will reboot the server. Requesting Master User...",
                           image=False,
-                          chat=self.chat_id)
+                          chat=self.chat_id,
+                          reply_to=self.message_id)
             self.send_now("Start over requested by " + self.chat_name + "\n/reboot_pi")
 
 
@@ -313,15 +347,17 @@ for account in JSONEditor('communication/telepot_accounts.json').read().keys():
 
 def send_message(telepot_account, chat_id, msg, image=False):
     telepot_lock.acquire()
-    telepot_channels[telepot_account].send_now(msg, image, chat_id)
+    msg_id = telepot_channels[telepot_account].send_now(msg, image, chat_id)
     logger.log(str(chat_id) + " - " + str(msg), source="TG-R")
     telepot_lock.release()
+    return msg_id
 
 
 def send_to_master(telepot_account, msg, image=False):
     telepot_lock.acquire()
-    telepot_channels[telepot_account].send_now(msg, image)
+    msg_id = telepot_channels[telepot_account].send_now(msg, image)
     telepot_lock.release()
+    return msg_id
 
 
 def send_to_group(telepot_account, msg, group, image=False):
