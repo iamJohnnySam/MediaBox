@@ -71,7 +71,7 @@ class Communicator:
 
         logger.log(str(chat) + " - " + str(message['message_id']) + " - Message: " + msg, "TG")
 
-        return message['message_id']
+        return message
 
     def keyboard_button(self, text, callback_command, value="None"):
         data_id = self.callback_id_prefix + str(self.current_callback_id) + "_" + text
@@ -85,9 +85,9 @@ class Communicator:
 
         return data_id, InlineKeyboardButton(text=str(text), callback_data=data)
 
-    def link_msg_to_buttons(self, message_id, buttons):
+    def link_msg_to_buttons(self, message, buttons):
         for button in buttons:
-            button_dict = {button: message_id}
+            button_dict = {button: message}
             JSONEditor('database/telepot/' +
                        self.callback_id_prefix + 'telepot_button_link.json').add_level1(button_dict)
 
@@ -185,8 +185,9 @@ class Communicator:
 
     def remove_in_line_buttons(self, button_id):
         comm = button_id.split("_")[0] + "_" + button_id.split("_")[1] + "_"
-        message_id = JSONEditor('database/telepot/' + comm + 'telepot_button_link.json').read()[button_id]
-        logger.log("Buttons to remove from message id " + str(message_id), "TG")
+        message = JSONEditor('database/telepot/' + comm + 'telepot_button_link.json').read()[button_id]
+        logger.log("Buttons to remove from message id " + str(message['message_id']), "TG")
+        message_id = telepot.message_identifier(message)
         self.bot.editMessageReplyMarkup(message_id, reply_markup=None)
 
     def alive(self):
@@ -256,9 +257,9 @@ class Communicator:
 
             keyboard = InlineKeyboardMarkup(inline_keyboard=keyboard_markup)
 
-            message_id = self.send_now(x.title, chat=self.chat_id, keyboard=keyboard)
+            message = self.send_now(x.title, chat=self.chat_id, keyboard=keyboard)
 
-            self.link_msg_to_buttons(message_id, [key1_id, key2_id, key3_id, key4_id])
+            self.link_msg_to_buttons(message, [key1_id, key2_id, key3_id, key4_id])
 
     def request_tv_show(self):
         show = self.message.replace(self.message.split(" ")[0], "").strip()
