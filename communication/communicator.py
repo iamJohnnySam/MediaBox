@@ -71,6 +71,8 @@ class Communicator:
         else:
             message = self.bot.sendMessage(chat, msg, reply_to_message_id=reply_to)
 
+        print(str(message))
+
         return message.message_id
 
     def keyboard_button(self, text, callback_command, value="None"):
