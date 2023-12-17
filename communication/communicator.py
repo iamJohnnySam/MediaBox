@@ -12,7 +12,7 @@ import settings
 from database_manager.json_editor import JSONEditor
 from show import transmission
 
-os.environ['_BARD_API_KEY'] = settings.bard
+# os.environ['_BARD_API_KEY'] = settings.bard
 
 
 class Communicator:
@@ -135,7 +135,8 @@ class Communicator:
                               image=False,
                               chat=self.chat_id)
             else:
-                self.send_now(Bard().get_answer(msg)['content'],
+                # self.send_now(Bard().get_answer(msg)['content'],
+                self.send_now("Chatbot Disabled. Type /help to find more information",
                               image=False,
                               chat=self.chat_id)
 
@@ -164,6 +165,7 @@ class Communicator:
             success, torrent_id = transmission.download(value)
             if success:
                 self.send_now("Movie will be added to queue", chat=from_id)
+            self.bot.answerCallbackQuery(query_id, text='Downloaded')
         else:
             self.bot.answerCallbackQuery(query_id, text='Unhandled')
 
