@@ -61,8 +61,6 @@ class Communicator:
         if chat is None:
             chat = self.master
 
-        logger.log(str(chat) + " - Message: " + msg, "TG")
-
         if image:
             message = self.bot.sendPhoto(chat, photo=open(msg, 'rb'), reply_to_message_id=reply_to)
         elif keyboard is not None:
@@ -70,6 +68,8 @@ class Communicator:
             message = self.bot.sendMessage(chat, msg, reply_markup=keyboard, reply_to_message_id=reply_to)
         else:
             message = self.bot.sendMessage(chat, msg, reply_to_message_id=reply_to)
+
+        logger.log(str(chat) + " - " + message['message_id'] + " - Message: " + msg, "TG")
 
         return message['message_id']
 
@@ -173,9 +173,9 @@ class Communicator:
             self.send_now(value, chat=from_id)
             self.bot.answerCallbackQuery(query_id, text='Sent')
         elif command == "download":
-            self.remove_in_line_buttons(callback_id)
             success, torrent_id = transmission.download(value)
             if success:
+                self.remove_in_line_buttons(callback_id)
                 self.send_now("Movie will be added to queue", chat=from_id)
             self.bot.answerCallbackQuery(query_id, text='Downloaded')
         elif command == "finance":
@@ -186,6 +186,7 @@ class Communicator:
     def remove_in_line_buttons(self, button_id):
         comm = button_id.split("_")[0] + "_" + button_id.split("_")[1] + "_"
         message_id = JSONEditor('database/telepot/' + comm + 'telepot_button_link.json').read()[button_id]
+        logger.log("Buttons to remove from message id " + message_id, "TG")
         self.bot.editMessageReplyMarkup(message_id, reply_markup=None)
 
     def alive(self):
@@ -247,7 +248,7 @@ class Communicator:
 
             key1_id, key1_button = self.keyboard_button("See Image", "echo", image)
             key2_id, key2_button = self.keyboard_button("Visit Page", "echo", x.link)
-            key3_id, key3_button = self.keyboard_button("See Image", "cancel", "")
+            key3_id, key3_button = self.keyboard_button("Cancel", "cancel", "")
             key4_id, key4_button = self.keyboard_button("Download", "download", x.links[1].href)
 
             keyboard_markup = [[key1_button, key2_button, key3_button],
