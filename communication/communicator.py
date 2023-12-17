@@ -78,8 +78,8 @@ class Communicator:
 
         if len(data) >= 60:
             telepot_callbacks = {data_id: str(callback_command) + "," + str(value)}
-            JSONEditor('database/' + self.callback_id_prefix + 'telepot_callback_database.json')\
-                .add_level1(telepot_callbacks)
+            JSONEditor('database/telepot/' +
+                       self.callback_id_prefix + 'telepot_callback_database.json').add_level1(telepot_callbacks)
             data = data_id + ",X"
 
         return InlineKeyboardButton(text=str(text), callback_data=data)
@@ -148,8 +148,8 @@ class Communicator:
         command = str(query_data).split(",")[1]
 
         if command == "X":
-            telepot_callbacks = JSONEditor('database/' + self.callback_id_prefix + 'telepot_callback_database.json')\
-                .read()
+            telepot_callbacks = JSONEditor('database/telepot/'
+                                           + self.callback_id_prefix + 'telepot_callback_database.json').read()
             query_data = telepot_callbacks[callback_id]
             logger.log("Callback Query: " + query_data, "TG")
             command = str(query_data).split(",")[0]
