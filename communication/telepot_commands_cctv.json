@@ -18,9 +18,5 @@
   "/remove_me_from_cctv": {
     "function": "remove_me_from_cctv",
     "definition": "Remove from CCTV group"
-  },
-  "/current_activity": {
-    "function": "current_activity",
-    "definition": "Check activity"
   }
 }

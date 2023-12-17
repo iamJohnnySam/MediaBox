@@ -1,19 +1,13 @@
-import os
 import threading
-
 import feedparser
-
 import logger
 from datetime import datetime
 import global_var
 import telepot
 from telepot.loop import MessageLoop
 from telepot.namedtuple import InlineKeyboardMarkup, InlineKeyboardButton
-from telepot.namedtuple import InlineQueryResultArticle, InputTextMessageContent
 import openai
 import settings
-from communication.communicate_finance import CommunicateFinance
-from communication.communicate_movie import CommunicateMovie
 from communication.communicator_ai import TalkToAI
 from database_manager.json_editor import JSONEditor
 from show import transmission
@@ -29,15 +23,11 @@ class Communicator:
         self.allowed_chats = None
         self.telepot_groups = {}
         self.ai_messages = {}
-        self.activity = {}
-        self.activities = {'/find_movie': {},
-                           '/expense': {}}
         self.chat_name = None
         self.chat_id = None
         self.message = None
         self.callback_id_prefix = telepot_account + "_" + datetime.now().strftime("%y%m%d%H%M") + "_"
         self.current_callback_id = 0
-
 
         telepot_accounts = JSONEditor('communication/telepot_accounts.json').read()
         self.bot = telepot.Bot(telepot_accounts[telepot_account]["account"])
@@ -45,7 +35,6 @@ class Communicator:
 
         self.telepot_chat_id = JSONEditor('communication/telepot_groups.json')
         self.command_dictionary = JSONEditor('communication/telepot_commands_' + self.telepot_account + '.json').read()
-        self.telepot_callback_database = JSONEditor('communication/telepot_callback_database.json')
 
         MessageLoop(self.bot, {'chat': self.handle,
                                'callback_query': self.handle_callback}).run_as_thread()
@@ -83,36 +72,15 @@ class Communicator:
         else:
             self.bot.sendMessage(chat, msg)
 
-    # def activate_mode(self, chat_id, mode):
-    #     if (chat_id in self.activity.keys()) or (mode == '/exit'):
-    #         self.bot.sendMessage(chat_id, "Ending Session - " + self.activity[chat_id])
-    #         logger.log(str(chat_id) + " - Ending Session - " + self.activity[chat_id], source="TG")
-    #         del self.activity[chat_id]
-    #
-    #     if mode == '/exit':
-    #         return
-    #
-    #     self.bot.sendMessage(chat_id, "Starting Session - " + mode + "\nTo exit send /exit")
-    #     self.activity[chat_id] = mode
-    #     logger.log(str(chat_id) + " - Starting Session - " + self.activity[chat_id], source="TG")
-    #
-    #     if chat_id in self.activities[mode].keys():
-    #         del self.activities[mode][chat_id]
-    #
-    #     if mode == "/find_movie":
-    #         self.activities[mode][chat_id] = CommunicateMovie(self.telepot_account, chat_id)
-    #     elif mode == "/expense":
-    #         self.activities[mode][chat_id] = CommunicateFinance(self.telepot_account, chat_id)
-
     def keyboard_button(self, text, callback_command, value="None"):
         data_id = self.callback_id_prefix + str(self.current_callback_id) + "_" + text
         data = data_id + "," + str(callback_command) + "," + str(value)
 
         if len(data) >= 60:
-            telepot_callbacks = self.telepot_callback_database.read()
-            telepot_callbacks[data_id] = str(callback_command) + "," + str(value)
+            telepot_callbacks = {data_id: str(callback_command) + "," + str(value)}
+            JSONEditor('database/' + self.callback_id_prefix + 'telepot_callback_database.json')\
+                .add_level1(telepot_callbacks)
             data = data_id + ",X"
-            self.telepot_callback_database.add_level1(telepot_callbacks)
 
         return InlineKeyboardButton(text=str(text), callback_data=data)
 
@@ -153,20 +121,10 @@ class Communicator:
                 func = getattr(self, function)
                 func()
 
-            # If command is not in list or if /exit
-            # elif (command in self.activities.keys()) or command == '/exit':
-            #     self.activate_mode(self.chat_id, command)
-
-            elif self.chat_id in self.activity:
-                self.activities[self.activity[self.chat_id]][self.chat_id].handle(command)
-
             elif command == '/help' or command.lower() == 'help' or command == "/start":
                 message = "--- AVAILABLE COMMANDS ---"
                 for commands in self.command_dictionary.keys():
                     message = message + "\n" + commands + " - " + self.command_dictionary[commands]["definition"]
-                message = message + "\n\n ACTIVITIES"
-                for commands in self.activities.keys():
-                    message = message + "\n" + commands
 
                 self.send_now(message,
                               image=False,
@@ -190,7 +148,8 @@ class Communicator:
         command = str(query_data).split(",")[1]
 
         if command == "X":
-            telepot_callbacks = self.telepot_callback_database.read()
+            telepot_callbacks = JSONEditor('database/' + self.callback_id_prefix + 'telepot_callback_database.json')\
+                .read()
             query_data = telepot_callbacks[callback_id]
             logger.log("Callback Query: " + query_data, "TG")
             command = str(query_data).split(",")[0]
@@ -288,16 +247,6 @@ class Communicator:
         self.send_now("Function Not yet implemented",
                       image=False,
                       chat=self.chat_id)
-
-    def current_activity(self):
-        if self.chat_id in self.activity.keys():
-            self.send_now("Current activity is " + self.activity[self.chat_id],
-                          image=False,
-                          chat=self.chat_id)
-        else:
-            self.send_now("No current activity",
-                          image=False,
-                          chat=self.chat_id)
 
     def list_torrents(self):
         torrent_list = transmission.list_all()
