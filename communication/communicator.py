@@ -227,6 +227,7 @@ class Communicator:
 
         if movie == "":
             self.send_now("Please type the name of the movie after the command", chat=self.chat_id)
+            return
 
         movie = movie.lower().replace(" ", "%20")
         movie = movie.lower().replace("/", "")
