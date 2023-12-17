@@ -21,7 +21,11 @@
   },
   "/find_movie": {
     "function": "find_movie",
-    "definition": "Type Name of Movie after command"
+    "definition": "Type name of Movie after command"
+  },
+  "/request_tv_show": {
+    "function": "request_tv_show",
+    "definition": "Type name of TV Show after command"
   },
   "/add_me_to_cctv": {
     "function": "add_me_to_cctv",

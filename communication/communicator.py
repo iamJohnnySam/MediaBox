@@ -201,7 +201,8 @@ class Communicator:
             movie = self.message.replace(self.message.split(" ")[0], "").strip()
 
         if movie == "":
-            self.send_now("Please type the name of the movie after the command", chat=self.chat_id)
+            self.send_now("Please type the name of the movie after the command. You can press and hold this "
+                          "command and type the movie \n /find_movie", chat=self.chat_id)
             return
 
         movie = movie.lower().replace(" ", "%20")
@@ -227,6 +228,18 @@ class Communicator:
             keyboard = InlineKeyboardMarkup(inline_keyboard=keyboard_markup)
 
             self.send_now(x.title, chat=self.chat_id, keyboard=keyboard)
+
+    def request_tv_show(self):
+        show = self.message.replace(self.message.split(" ")[0], "").strip()
+        if show == "":
+            self.send_now("Please type the name of the tv show after the command. You can press and hold this "
+                          "command and type the movie \n /request_tv_show", chat=self.chat_id)
+            return
+
+        request = {show: self.chat_name}
+        JSONEditor('database/requested_shows.json').add_level1(request)
+        logger.log("TV Show Requested - " + show)
+        self.send_now("TV Show Requested - " + show, chat=self.chat_id)
 
     def add_me_to_cctv(self):
         self.send_now("Function Not yet implemented",
