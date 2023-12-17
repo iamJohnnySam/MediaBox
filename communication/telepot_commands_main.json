@@ -19,6 +19,10 @@
     "function": "check_cctv",
     "definition": "Check latest cctv"
   },
+  "/find_movie": {
+    "function": "find_movie",
+    "definition": "Type Name of Movie after command"
+  },
   "/add_me_to_cctv": {
     "function": "add_me_to_cctv",
     "definition": "Add to CCTV group"
@@ -38,10 +42,6 @@
   "/list_torrents": {
     "function": "list_torrents",
     "definition": "List Torrents"
-  },
-  "/current_activity": {
-    "function": "current_activity",
-    "definition": "Check activity"
   },
   "/start_over": {
     "function": "start_over",
