@@ -41,7 +41,7 @@ class Communicator:
                                'callback_query': self.handle_callback}).run_as_thread()
         logger.log('Telepot ' + telepot_account + ' listening', source="TG")
 
-    def send_to_group(self, group, msg, image=False):
+    def send_to_group(self, group, msg, image=False, caption=""):
         if self.telepot_groups == {}:
             self.telepot_groups = self.telepot_chat_id.read()
 
@@ -51,11 +51,11 @@ class Communicator:
 
         for chat in chats:
             if image:
-                self.bot.sendPhoto(chat, photo=open(msg, 'rb'))
+                self.bot.sendPhoto(chat, photo=open(msg, 'rb'), caption=caption)
             else:
                 self.bot.sendMessage(chat, msg)
 
-    def send_now(self, msg, image=False, chat=None, keyboard=None, reply_to=None):
+    def send_now(self, msg, image=False, chat=None, keyboard=None, reply_to=None, caption=""):
         if msg == "":
             logger.log("NO MESSAGE", source="TG", message_type="error")
             return
@@ -64,7 +64,7 @@ class Communicator:
             chat = self.master
 
         if image:
-            message = self.bot.sendPhoto(chat, photo=open(msg, 'rb'), reply_to_message_id=reply_to)
+            message = self.bot.sendPhoto(chat, photo=open(msg, 'rb'), reply_to_message_id=reply_to, caption=caption)
         elif keyboard is not None:
             self.current_callback_id = self.current_callback_id + 1
             message = self.bot.sendMessage(chat, msg, reply_markup=keyboard, reply_to_message_id=reply_to)
@@ -377,20 +377,20 @@ for account in JSONEditor('communication/telepot_accounts.json').read().keys():
 
 def send_message(telepot_account, chat_id, msg, image=False):
     telepot_lock.acquire()
-    msg_id = telepot_channels[telepot_account].send_now(msg, image, chat_id)
+    msg_id = telepot_channels[telepot_account].send_now(msg, image, chat_id, caption=caption)
     logger.log(str(chat_id) + " - " + str(msg), source="TG-R")
     telepot_lock.release()
     return msg_id
 
 
-def send_to_master(telepot_account, msg, image=False):
+def send_to_master(telepot_account, msg, image=False, caption=""):
     telepot_lock.acquire()
-    msg_id = telepot_channels[telepot_account].send_now(msg, image)
+    msg_id = telepot_channels[telepot_account].send_now(msg, image, caption=caption)
     telepot_lock.release()
     return msg_id
 
 
-def send_to_group(telepot_account, msg, group, image=False):
+def send_to_group(telepot_account, msg, group, image=False, caption=""):
     telepot_lock.acquire()
-    telepot_channels[telepot_account].send_to_group(group, msg, image)
+    telepot_channels[telepot_account].send_to_group(group, msg, image, caption=caption)
     telepot_lock.release()

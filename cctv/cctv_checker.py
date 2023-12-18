@@ -74,8 +74,8 @@ class CCTVChecker:
                 if sus_attachment_count == 0:
                     communicator.send_to_group(self.telepot_account, date, self.telepot_chat_group)
                     sus_attachment_count = sus_attachment_count + 1
-                communicator.send_to_group(self.telepot_account, att_path, self.telepot_chat_group, image=True)
-                communicator.send_to_group(self.telepot_account, str(val), self.telepot_chat_group)
+                communicator.send_to_group(self.telepot_account, att_path, self.telepot_chat_group,
+                                           image=True, caption=str(val))
 
             logger.log(save_as + "\t SUS: " + str("%.2f" % val), source="CCTV")
             os.remove(att_path)
