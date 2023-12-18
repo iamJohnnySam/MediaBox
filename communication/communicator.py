@@ -375,7 +375,7 @@ for account in JSONEditor('communication/telepot_accounts.json').read().keys():
     telepot_channels[account] = Communicator(account)
 
 
-def send_message(telepot_account, chat_id, msg, image=False):
+def send_message(telepot_account, chat_id, msg, image=False, caption=""):
     telepot_lock.acquire()
     msg_id = telepot_channels[telepot_account].send_now(msg, image, chat_id, caption=caption)
     logger.log(str(chat_id) + " - " + str(msg), source="TG-R")
