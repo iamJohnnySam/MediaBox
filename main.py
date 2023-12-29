@@ -14,37 +14,71 @@ from news.news_reader import NewsReader
 from show.show_downloader import ShowDownloader
 from cctv.cctv_checker import CCTVChecker
 
-
 # https://github.com/dbader/schedule
+running_threads = {}
+schedule_on_hold = {}
+
+
+def run_threader(func):
+    function = func.__qualname__
+    if function in running_threads.keys():
+        logger.log("Busy. Cannot Start thread for " + function)
+        return False
+
+    running_threads[function] = threading.Thread(target=func)
+    running_threads[function].start()
+
+    logger.log("Started Thread " + function)
+    return True
+
+
+def scheduler(name):
+    if name == "show":
+        success = run_threader(my_shows.run_code)
+    elif name == "cctv":
+        success = run_threader(cctv.run_code)
+    elif name == "cctv_clean":
+        success = run_threader(cctv.clean_up)
+    elif name == "news":
+        success = run_threader(news_read.run_code)
+    else:
+        logger.log("Schedule Call Error", message_type="err")
+        return
+
+    if success:
+        schedule.cancel_job(schedule_on_hold[name])
+        del schedule_on_hold[name]
+    elif name not in schedule_on_hold.keys():
+        schedule_on_hold[name] = schedule.every(15).minutes.do(scheduler, name=name)
+    else:
+        return
+
 
 def run_scheduler():
     exit_condition = True
 
-    schedule.every().day.at("00:30").do(my_shows.run_code)
-    schedule.every().day.at("01:00").do(cctv.run_code)
-    # schedule.every(15).minutes.do(cctv.run_code)
-    schedule.every(60).minutes.do(news_read.run_code)
-    schedule.every().day.at("05:00").do(my_shows.run_code)
-    schedule.every().day.at("03:00").do(cctv.clean_up)
+    schedule.every().day.at("00:30").do(scheduler, name='show')
+    schedule.every().day.at("01:00").do(scheduler, name='cctv')
+    # schedule.every(15).minutes.do(scheduler, name='cctv')
+    schedule.every(60).minutes.do(scheduler, name='news')
+    schedule.every().day.at("05:00").do(scheduler, name='show')
+    schedule.every().day.at("03:00").do(scheduler, name='cctv_clean')
 
-    my_shows.run_code()
-    cctv.run_code()
-    news_read.run_code()
-    cctv.clean_up()
+    schedule.run_all(delay_seconds=10)
 
     while exit_condition:
         schedule.run_pending()
         if global_var.check_shows:
             global_var.check_shows = False
-            my_shows.run_code()
+            scheduler("show")
 
         if global_var.check_cctv:
             global_var.check_cctv = False
-            cctv.run_code()
+            scheduler("cctv")
 
         if global_var.check_news:
             global_var.check_news = False
-            news_read.run_code()
+            scheduler("news")
 
         if global_var.stop_cctv:
             logger.log("Exiting Code")
@@ -76,7 +110,11 @@ if platform.machine() == 'armv7l':
     t_webapp = threading.Thread(target=run_webapp, daemon=True)
     t_webapp.start()
 
-    t_scheduler.join()
+    # t_scheduler.join()
+    while t_scheduler.isAlive():
+        for thread in running_threads.keys():
+            if not running_threads[thread].isAlive():
+                del running_threads[thread]
 
 else:
     logger.log("Code Running in Partial Mode")
