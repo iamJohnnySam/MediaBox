@@ -45,7 +45,7 @@ def scheduler(name):
         logger.log("Schedule Call Error", message_type="err")
         return
 
-    if success:
+    if success and name in schedule_on_hold.keys():
         schedule.cancel_job(schedule_on_hold[name])
         del schedule_on_hold[name]
     elif name not in schedule_on_hold.keys():
