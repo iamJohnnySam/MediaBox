@@ -97,7 +97,13 @@ class EmailManager:
         exit_condition = True
         count = 0
         while exit_condition and (not global_var.stop_all):
-            ret, data = self.myEmail.fetch(message, '(RFC822)')
+            try:
+                ret, data = self.myEmail.fetch(message, '(RFC822)')
+            except (imaplib.IMAP4.error, imaplib.IMAP4.abort) as error:
+                exit_condition = False
+                self.connection_err = self.connection_err + 1
+                logger.log("Error Occurred: " + error, source="EM")
+                return
             try:
                 self.msg = email.message_from_bytes(data[0][1])
             except AttributeError:
