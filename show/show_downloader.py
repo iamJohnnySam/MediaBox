@@ -39,7 +39,7 @@ class ShowDownloader:
         for x in feed.entries:
             if x.tv_show_name not in self.data:
                 new_show = {
-                    x.tv_show_name: [{"episode_id": 0, "episode_name": "test", "magnet": "test", "quality": "480"}]}
+                    x.tv_show_name: [{}]}
                 self.shows.add_level1(new_show)
                 self.data = self.shows.read()
 

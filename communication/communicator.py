@@ -24,6 +24,7 @@ class Communicator:
         self.telepot_groups = {}
         self.ai_messages = {}
         self.chat_name = None
+        self.chat_type = None
         self.chat_id = None
         self.message = None
         self.message_id = None
@@ -110,8 +111,18 @@ class Communicator:
     def handle(self, msg):
         # Get Command details
         self.chat_id = msg['chat']['id']
+        self.chat_type = msg['chat']['type']
         self.chat_name = str(msg['chat']['first_name'])
         self.message_id = msg['message_id']
+
+        if 'text' in msg.keys():
+            self.handle_text(msg)
+        elif 'photo' in msg.keys():
+            self.handle_photo(msg)
+        else:
+            logger.log("Unknown Chat type", source="TG", message_type="error")
+
+    def handle_text(self, msg):
         try:
             self.message = str(msg['text'])
             command = self.message.split(" ")[0]
@@ -149,6 +160,9 @@ class Communicator:
                 self.send_now("Chatbot Disabled. Type /help to find more information",
                               image=False,
                               chat=self.chat_id)
+
+    def handle_photo(self, msg):
+        pass
 
     def handle_callback(self, msg):
         query_id, from_id, query_data = telepot.glance(msg, flavor='callback_query')
