@@ -116,6 +116,7 @@ if platform.machine() == 'armv7l':
         for thread in list(running_threads.keys()):
             if not running_threads[thread].is_alive():
                 del running_threads[thread]
+                logger.log("Thread Ended: " + thread)
         time.sleep(1)
 
 else:
