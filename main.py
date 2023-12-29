@@ -19,67 +19,50 @@ running_threads = {}
 schedule_on_hold = {}
 
 
-def run_threader(func):
-    function = func.__qualname__.split(".")[0]
+def schedule_handler(func):
+    name = func.__qualname__
+    function = name.split(".")[0]
     if function in running_threads.keys():
         logger.log("Busy. Cannot Start thread for " + function)
-        return False
+        if name not in schedule_on_hold.keys():
+            schedule_on_hold[name] = schedule.every(1).minutes.do(schedule_handler, func=func)
 
     running_threads[function] = threading.Thread(target=func)
     running_threads[function].start()
 
-    logger.log("Started Thread " + function)
-    return True
-
-
-def scheduler(name):
-    if name == "show":
-        success = run_threader(my_shows.run_code)
-    elif name == "cctv":
-        success = run_threader(cctv.run_code)
-    elif name == "cctv_clean":
-        success = run_threader(cctv.clean_up)
-    elif name == "news":
-        success = run_threader(news_read.run_code)
-    else:
-        logger.log("Schedule Call Error", message_type="err")
-        return
-
-    if success and name in schedule_on_hold.keys():
+    logger.log("Thread Started: " + function)
+    if name in list(schedule_on_hold.keys()):
         schedule.cancel_job(schedule_on_hold[name])
         del schedule_on_hold[name]
-    elif name not in schedule_on_hold.keys():
-        schedule_on_hold[name] = schedule.every(15).minutes.do(scheduler, name=name)
-    else:
-        return
 
 
 def run_scheduler():
     exit_condition = True
 
-    schedule.every().day.at("00:30").do(scheduler, name='show')
-    schedule.every().day.at("01:00").do(scheduler, name='cctv')
-    schedule.every(60).minutes.do(scheduler, name='news')
-    schedule.every().day.at("03:00").do(scheduler, name='cctv_clean')
+    schedule.every().day.at("00:30").do(schedule_handler, func=my_shows.run_code)
+    schedule.every().day.at("01:00").do(schedule_handler, func=cctv.run_code)
+    schedule.every(60).minutes.do(schedule_handler, func=news_read.run_code)
+    schedule.every().day.at("03:00").do(schedule_handler, func=cctv.clean_up)
 
     schedule.run_all(delay_seconds=10)
-    # schedule.every(15).minutes.do(scheduler, name='cctv')
-    schedule.every().day.at("05:00").do(scheduler, name='show')
-    schedule.every().day.at("07:00").do(scheduler, name='cctv')
+
+    # schedule.every(15).minutes.do(schedule_handler, func=cctv.run_code)
+    schedule.every().day.at("05:00").do(schedule_handler, func=my_shows.run_code)
+    schedule.every().day.at("07:00").do(schedule_handler, func=cctv.run_code)
 
     while exit_condition:
         schedule.run_pending()
         if global_var.check_shows:
             global_var.check_shows = False
-            scheduler("show")
+            schedule_handler(my_shows.run_code)
 
         if global_var.check_cctv:
             global_var.check_cctv = False
-            scheduler("cctv")
+            schedule_handler(cctv.run_code)
 
         if global_var.check_news:
             global_var.check_news = False
-            scheduler("news")
+            schedule_handler(news_read.run_code)
 
         if global_var.stop_cctv:
             logger.log("Exiting Code")
