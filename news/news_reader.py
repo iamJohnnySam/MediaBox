@@ -7,7 +7,7 @@ from database_manager.json_editor import JSONEditor
 
 
 class NewsReader:
-    telepot_account = "main"
+    telepot_account = "news"
     telepot_chat_group = "news"
 
     def __init__(self):
