@@ -47,6 +47,10 @@
     "function": "list_torrents",
     "definition": "List Torrents"
   },
+  "/finance": {
+    "function": "finance",
+    "definition": "Add Transactions"
+  },
   "/start_over": {
     "function": "start_over",
     "definition": "Reboot Bot"
