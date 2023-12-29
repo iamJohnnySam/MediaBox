@@ -111,9 +111,9 @@ if platform.machine() == 'armv7l':
     t_webapp.start()
 
     # t_scheduler.join()
-    while t_scheduler.isAlive():
+    while t_scheduler.is_alive():
         for thread in running_threads.keys():
-            if not running_threads[thread].isAlive():
+            if not running_threads[thread].is_alive():
                 del running_threads[thread]
 
 else:
