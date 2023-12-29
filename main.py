@@ -20,7 +20,7 @@ schedule_on_hold = {}
 
 
 def run_threader(func):
-    function = func.__qualname__
+    function = func.__qualname__.split(".")[0]
     if function in running_threads.keys():
         logger.log("Busy. Cannot Start thread for " + function)
         return False
@@ -115,6 +115,7 @@ if platform.machine() == 'armv7l':
         for thread in running_threads.keys():
             if not running_threads[thread].is_alive():
                 del running_threads[thread]
+        time.sleep(1)
 
 else:
     logger.log("Code Running in Partial Mode")
