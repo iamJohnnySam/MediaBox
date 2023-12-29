@@ -59,12 +59,13 @@ def run_scheduler():
 
     schedule.every().day.at("00:30").do(scheduler, name='show')
     schedule.every().day.at("01:00").do(scheduler, name='cctv')
-    # schedule.every(15).minutes.do(scheduler, name='cctv')
     schedule.every(60).minutes.do(scheduler, name='news')
-    schedule.every().day.at("05:00").do(scheduler, name='show')
     schedule.every().day.at("03:00").do(scheduler, name='cctv_clean')
 
     schedule.run_all(delay_seconds=10)
+    # schedule.every(15).minutes.do(scheduler, name='cctv')
+    schedule.every().day.at("05:00").do(scheduler, name='show')
+    schedule.every().day.at("07:00").do(scheduler, name='cctv')
 
     while exit_condition:
         schedule.run_pending()
@@ -112,7 +113,7 @@ if platform.machine() == 'armv7l':
 
     # t_scheduler.join()
     while t_scheduler.is_alive():
-        for thread in running_threads.keys():
+        for thread in list(running_threads.keys()):
             if not running_threads[thread].is_alive():
                 del running_threads[thread]
         time.sleep(1)
