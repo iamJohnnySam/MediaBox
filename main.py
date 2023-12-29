@@ -100,7 +100,7 @@ if platform.machine() == 'armv7l':
             if not running_threads[thread].is_alive():
                 del running_threads[thread]
                 logger.log("Thread Ended: " + thread)
-        time.sleep(1)
+        time.sleep(10)
 
 else:
     logger.log("Code Running in Partial Mode")
