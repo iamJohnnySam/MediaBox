@@ -9,7 +9,9 @@ today_date = str(date.today())
 logging.basicConfig(filename='log/log-' + today_date + '.log', level=logging.DEBUG)
 
 
-def log(message, source="MBOX", message_type="info"):
+def log(msg, source="MBOX", message_type="info"):
+    message = str(msg)
+
     if today_date != str(date.today()):
         logging.basicConfig(filename='log/log-' + today_date + '.log', level=logging.DEBUG)
 
