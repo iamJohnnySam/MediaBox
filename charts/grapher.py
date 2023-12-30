@@ -35,7 +35,7 @@ def grapher_category_dictionary(graph_dict, x_column, cat_column, data_column, x
 
     for cat in data.keys():
         plt.bar(list(data[cat].keys()), list(data[cat].values()), color=colors[color_val], label=cat, bottom=prev_bar)
-        prev_bar = cat
+        prev_bar = list(data[cat].values())
 
         color_val = color_val + 1
         if color_val == len(colors):
