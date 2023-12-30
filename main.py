@@ -27,6 +27,8 @@ def schedule_handler(func):
         if name not in schedule_on_hold.keys():
             schedule_on_hold[name] = schedule.every(1).minutes.do(schedule_handler, func=func)
 
+        return
+
     running_threads[function] = threading.Thread(target=func)
     running_threads[function].start()
 
