@@ -3,7 +3,7 @@ import feedparser
 import telepot
 
 import logger
-from datetime import datetime
+from datetime import datetime, timedelta
 import global_var
 
 from communication.communicator_base import CommunicatorBase
@@ -181,6 +181,21 @@ class Communicator(CommunicatorBase):
         else:
             self.cb_feed(None, None, None, identifier + str(value))
 
+    def baby_diaper(self, msg, chat_id, message_id, value):
+        identifier = datetime.now().strftime('%Y-%m-%d %H:%M:%S') + " "
+
+        self.send_message_with_keyboard(msg="Need some diaper info",
+                                        chat_id=chat_id,
+                                        button_text=["Pee", "Poo", "Poo & Pee", "Cancel"],
+                                        button_cb=["diaper", "diaper", "diaper", "cancel"],
+                                        button_val=[identifier + "pee",
+                                                    identifier + "poo",
+                                                    identifier + "pp",
+                                                    ""],
+                                        arrangement=[3, 1],
+                                        reply_to=message_id
+                                        )
+
     def start_over(self, msg, chat_id, message_id, value):
         if chat_id == self.master:
             global_var.stop_cctv = True
@@ -258,17 +273,38 @@ class Communicator(CommunicatorBase):
                                                         value + " expressed",
                                                         value + " formula",
                                                         ""],
-                                            arrangement=[2, 1],
+                                            arrangement=[3, 1],
                                             )
 
         if len(data) == 4:
-            self.send_to_group("baby", "Baby was fed " + data[2] + "ml on " + data[0] +
+            self.send_to_group("baby",
+                               "resources/baby_milk.png",
+                               True,
+                               "Baby was fed " + data[2] + "ml on " + data[0] +
                                " at " + data[1] + " with " + data[3] + " milk")
             write_data = {str(data[0]) + " " + str(data[1]): {"date": data[0],
                                                               "time": data[1],
                                                               "ml": data[2],
                                                               "source": data[3]}}
             JSONEditor(global_var.baby_feed_database).add_level1(write_data)
+
+    def cb_diaper(self, callback_id, query_id, from_id, value):
+        self.update_in_line_buttons(callback_id)
+        try:
+            self.bot.answerCallbackQuery(query_id, text='Got it')
+        except telepot.exception.TelegramError:
+            pass
+
+        data = value.split(" ")
+        self.send_to_group("baby",
+                           "resources/baby_diaper.png",
+                           True,
+                           data[2] + "Diaper recorded on " + data[0] + " at " + data[1])
+
+        write_data = {str(data[0]) + " " + str(data[1]): {"date": data[0],
+                                                          "time": data[1],
+                                                          "what": data[2]}}
+        JSONEditor(global_var.baby_diaper_database).add_level1(write_data)
 
 
 telepot_lock = threading.Lock()
