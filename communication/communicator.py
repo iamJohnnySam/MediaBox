@@ -299,7 +299,7 @@ class Communicator(CommunicatorBase):
         self.send_to_group("baby",
                            "resources/baby_diaper.png",
                            True,
-                           data[2] + "Diaper recorded on " + data[0] + " at " + data[1])
+                           data[2] + " diaper recorded on " + data[0] + " at " + data[1])
 
         write_data = {str(data[0]) + " " + str(data[1]): {"date": data[0],
                                                           "time": data[1],
