@@ -249,8 +249,8 @@ class Communicator(CommunicatorBase):
 
         data = value.split(" ")
 
-        if len(data) == 2:
-            self.send_message_with_keyboard(msg="How did you feed " + data[1] + "ml on " + data[0],
+        if len(data) == 3:
+            self.send_message_with_keyboard(msg="How did you feed " + data[2] + "ml at " + data[1],
                                             chat_id=from_id,
                                             button_text=["Breast", "Formula", "Cancel"],
                                             button_cb=["feed", "feed", "cancel"],
@@ -260,8 +260,9 @@ class Communicator(CommunicatorBase):
                                             arrangement=[2, 1],
                                             )
 
-        if len(data) == 3:
-            self.send_now(msg="Got it. Baby was fed " + data[1] + "ml on " + data[0] + " with " + value[2] + " milk")
+        if len(data) == 4:
+            self.send_now(msg="Got it. Baby was fed " + data[2] + "ml on " + data[0] +
+                              " at " + data[1] + " with " + value[3] + " milk")
             write_data = {str(data[0]): {"when": data[0],
                                          "ml": data[1],
                                          "source": data[2]}}
