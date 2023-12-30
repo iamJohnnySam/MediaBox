@@ -211,7 +211,7 @@ class Communicator(CommunicatorBase):
                       reply_to=message_id)
 
     def baby_diaper_history(self, msg, chat_id, message_id, value):
-        pic = grapher_category_dictionary(graph_dict=JSONEditor(global_var.baby_feed_database).read(),
+        pic = grapher_category_dictionary(graph_dict=JSONEditor(global_var.baby_diaper_database).read(),
                                           x_column="date",
                                           cat_column="what",
                                           data_column="count",
