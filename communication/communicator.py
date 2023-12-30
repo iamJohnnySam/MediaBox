@@ -261,8 +261,9 @@ class Communicator(CommunicatorBase):
                                             )
 
         if len(data) == 4:
-            self.send_now(msg="Got it. Baby was fed " + data[2] + "ml on " + data[0] +
-                              " at " + data[1] + " with " + value[3] + " milk")
+            self.send_to_group("baby", "Got it. Baby was fed " + data[2] + "ml on " + data[0] +
+                               " at " + data[1] + " with " + value[3] + " milk")
+            self.send_now()
             write_data = {str(data[0]): {"when": data[0],
                                          "ml": data[1],
                                          "source": data[2]}}
