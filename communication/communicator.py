@@ -1,5 +1,7 @@
 import threading
 import feedparser
+import telepot
+
 import logger
 from datetime import datetime
 import global_var
@@ -237,7 +239,10 @@ class Communicator(CommunicatorBase):
     def cb_feed(self, callback_id, query_id, from_id, value):
         if callback_id is not None:
             self.update_in_line_buttons(callback_id)
-            self.bot.answerCallbackQuery(query_id, text='Got it')
+            try:
+                self.bot.answerCallbackQuery(query_id, text='Got it')
+            except telepot.exception.TelegramError:
+                pass
 
         # FORMAT
         # ID <SPACE> ml <SPACE> source
