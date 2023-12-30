@@ -24,7 +24,8 @@ class CommunicatorBase:
         self.master = telepot_accounts[telepot_account]["master"]
 
         self.telepot_chat_id = JSONEditor('communication/telepot_groups.json')
-        self.command_dictionary = JSONEditor('communication/telepot_commands_' + self.telepot_account + '.json').read()
+        self.command_dictionary = JSONEditor('communication/commands/telepot_commands_' +
+                                             self.telepot_account + '.json').read()
 
         MessageLoop(self.bot, {'chat': self.handle,
                                'callback_query': self.handle_callback}).run_as_thread()

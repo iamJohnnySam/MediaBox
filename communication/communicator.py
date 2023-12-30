@@ -5,6 +5,7 @@ import telepot
 import logger
 from datetime import datetime, timedelta
 import global_var
+from charts.grapher import grapher_category_dictionary
 
 from communication.communicator_base import CommunicatorBase
 from database_manager import sql_connector
@@ -196,6 +197,32 @@ class Communicator(CommunicatorBase):
                                         reply_to=message_id
                                         )
 
+    def feed_history(self, msg, chat_id, message_id, value):
+        pic = grapher_category_dictionary(graph_dict=JSONEditor(global_var.baby_feed_database).read(),
+                                          x_column="date",
+                                          cat_column="source",
+                                          data_column="ml",
+                                          x_name="Date",
+                                          y_name="Amount (ml)",
+                                          chart_title="Feed History - " + datetime.now().strftime('%Y-%m-%d %H:%M'))
+        self.send_now(pic,
+                      image=True,
+                      chat=chat_id,
+                      reply_to=message_id)
+
+    def diaper_history(self, msg, chat_id, message_id, value):
+        pic = grapher_category_dictionary(graph_dict=JSONEditor(global_var.baby_feed_database).read(),
+                                          x_column="date",
+                                          cat_column="what",
+                                          data_column="count",
+                                          x_name="Date",
+                                          y_name="Diapers",
+                                          chart_title="Diaper History - " + datetime.now().strftime('%Y-%m-%d %H:%M'))
+        self.send_now(pic,
+                      image=True,
+                      chat=chat_id,
+                      reply_to=message_id)
+
     def start_over(self, msg, chat_id, message_id, value):
         if chat_id == self.master:
             global_var.stop_cctv = True
@@ -303,7 +330,8 @@ class Communicator(CommunicatorBase):
 
         write_data = {str(data[0]) + " " + str(data[1]): {"date": data[0],
                                                           "time": data[1],
-                                                          "what": data[2]}}
+                                                          "what": data[2],
+                                                          "count": 1}}
         JSONEditor(global_var.baby_diaper_database).add_level1(write_data)
 
 

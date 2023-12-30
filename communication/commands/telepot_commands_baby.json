@@ -13,6 +13,14 @@
   },
   "/diaper": {
     "function": "baby_diaper",
-    "definition": "Add Change Information"
+    "definition": "Add Diaper Information"
+  },
+  "/feed_history": {
+    "function": "baby_diaper_history",
+    "definition": "Graph it"
+  },
+  "/diaper_history": {
+    "function": "baby_diaper_history",
+    "definition": "Graph it"
   }
 }
