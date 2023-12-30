@@ -261,12 +261,12 @@ class Communicator(CommunicatorBase):
                                             )
 
         if len(data) == 4:
-            self.send_to_group("baby", "Got it. Baby was fed " + data[2] + "ml on " + data[0] +
-                               " at " + data[1] + " with " + value[3] + " milk")
-            self.send_now()
-            write_data = {str(data[0]): {"when": data[0],
-                                         "ml": data[1],
-                                         "source": data[2]}}
+            self.send_to_group("baby", "Baby was fed " + data[2] + "ml on " + data[0] +
+                               " at " + data[1] + " with " + data[3] + " milk")
+            write_data = {str(data[0]) + " " + str(data[1]): {"date": data[0],
+                                                              "time": data[1],
+                                                              "ml": data[2],
+                                                              "source": data[3]}}
             JSONEditor(global_var.baby_feed_database).add_level1(write_data)
 
 
