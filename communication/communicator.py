@@ -252,9 +252,10 @@ class Communicator(CommunicatorBase):
         if len(data) == 3:
             self.send_message_with_keyboard(msg="How did you feed " + data[2] + "ml at " + data[1],
                                             chat_id=from_id,
-                                            button_text=["Breast", "Formula", "Cancel"],
-                                            button_cb=["feed", "feed", "cancel"],
+                                            button_text=["Breast", "Express", "Formula", "Cancel"],
+                                            button_cb=["feed", "feed", "feed", "cancel"],
                                             button_val=[value + " breast",
+                                                        value + " expressed",
                                                         value + " formula",
                                                         ""],
                                             arrangement=[2, 1],

@@ -203,7 +203,7 @@ class CommunicatorBase:
         buttons = []
 
         for i in range(len(button_text)):
-            key_id, key_button = self.keyboard_button(button_text[i], button_cb[i], button_val[0])
+            key_id, key_button = self.keyboard_button(button_text[i], button_cb[i], button_val[i])
             buttons.append(key_button)
             button_ids.append(key_id)
 
