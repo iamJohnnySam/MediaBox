@@ -179,7 +179,7 @@ class Communicator(CommunicatorBase):
                                             )
 
         else:
-            self.cb_feed(None, None, None, identifier + str(value))
+            self.cb_feed(None, None, chat_id, identifier + str(value))
 
     def baby_diaper(self, msg, chat_id, message_id, value):
         identifier = datetime.now().strftime('%Y-%m-%d %H:%M:%S') + " "
