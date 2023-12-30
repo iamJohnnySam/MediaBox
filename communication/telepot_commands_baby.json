@@ -1,0 +1,18 @@
+{
+  "/alive": {
+    "function": "alive",
+    "definition": "Check bot"
+  },
+  "/time": {
+    "function": "time",
+    "definition": "Check bot time"
+  },
+  "/feed": {
+    "function": "baby_feed",
+    "definition": "Add Feeding Information"
+  },
+  "/diaper": {
+    "function": "baby_diaper",
+    "definition": "Add Change Information"
+  }
+}
