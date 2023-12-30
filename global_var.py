@@ -21,3 +21,6 @@ cctv_model1_google = 'https://drive.google.com/file/d/1-1i0UqlOT46jTQZP980FOhBcd
 cctv_model2_google = 'https://drive.google.com/file/d/1qkNWVF28CRyTo96fLCgB2BvELqPFTdcO/view?usp=sharing'
 cctv_model1 = "cctv/nn_models/modelA01.tflite"
 cctv_model2 = "cctv/nn_models/modelA02.tflite"
+
+baby_feed_database = 'database/baby_feed.json'
+baby_diaper_database = 'database/baby_diaper.json'

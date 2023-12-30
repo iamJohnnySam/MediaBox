@@ -4,8 +4,6 @@ import logger
 from datetime import datetime
 import global_var
 
-from telepot.namedtuple import InlineKeyboardMarkup
-
 from communication.communicator_base import CommunicatorBase
 from database_manager import sql_connector
 from database_manager.json_editor import JSONEditor
@@ -19,6 +17,7 @@ class Communicator(CommunicatorBase):
 
     def __init__(self, telepot_account):
         super().__init__(telepot_account)
+        self.source = "TG-C"
 
     def alive(self, msg, chat_id, message_id, value):
         self.send_now(str(chat_id) + "\n" + "Hello " + str(msg['chat']['first_name']) + "! I'm Alive and kicking!",
@@ -76,17 +75,14 @@ class Communicator(CommunicatorBase):
             idx2 = image_string.index('" /></a>')
             image = image_string[idx1 + len(sub1): idx2]
 
-            key1_id, key1_button = self.keyboard_button("See Image", "echo", image)
-            key2_id, key2_button = self.keyboard_button("Visit Page", "echo", x.link)
-            key3_id, key3_button = self.keyboard_button("Cancel", "cancel", "")
-            key4_id, key4_button = self.keyboard_button("Download", "download", x.links[1].href)
-
-            keyboard = InlineKeyboardMarkup(inline_keyboard=[[key1_button, key2_button, key3_button],
-                                                             [key4_button]])
-
-            message = self.send_now(x.title, chat=chat_id, keyboard=keyboard)
-
-            self.link_msg_to_buttons(message, [key1_id, key2_id, key3_id, key4_id])
+            self.send_message_with_keyboard(msg=x.title,
+                                            chat_id=chat_id,
+                                            button_text=["See Image", "Visit Page", "Cancel", "Download"],
+                                            button_cb=["echo", "echo", "cancel", "download"],
+                                            button_val=[image, x.link, "", x.links[1].href],
+                                            arrangement=[3, 1],
+                                            reply_to=None
+                                            )
 
     def finance(self, msg, chat_id, message_id, value):
         if value == "":
@@ -97,20 +93,17 @@ class Communicator(CommunicatorBase):
         sql_id = sql_connector.insert('transactions', "amount", str(value), 'finance')
         identifier = "transactions_" + str(sql_id) + "_"
 
-        key1_id, key1_button = self.keyboard_button("Income", "finance", identifier + "income")
-        key2_id, key2_button = self.keyboard_button("Expense", "finance", identifier + "expense")
-        key3_id, key3_button = self.keyboard_button("Invest", "finance", identifier + "invest")
-        key4_id, key4_button = self.keyboard_button("Delete", "finance", identifier + "delete")
-
-        keyboard_markup = [[key1_button, key2_button, key3_button],
-                           [key4_button]]
-
-        keyboard = InlineKeyboardMarkup(inline_keyboard=keyboard_markup)
-
-        message = self.send_now("Let's fill some missing info", chat=chat_id, keyboard=keyboard,
-                                reply_to=message_id)
-
-        self.link_msg_to_buttons(message, [key1_id, key2_id, key3_id, key4_id])
+        self.send_message_with_keyboard(msg="Let's fill some missing info",
+                                        chat_id=chat_id,
+                                        button_text=["Income", "Expense", "Invest", "Delete"],
+                                        button_cb=["finance", "finance", "finance", "finance"],
+                                        button_val=[identifier + "income",
+                                                    identifier + "expense",
+                                                    identifier + "invest",
+                                                    identifier + "delete"],
+                                        arrangement=[3, 1],
+                                        reply_to=message_id
+                                        )
 
     def request_tv_show(self, msg, chat_id, message_id, value):
         show = value
@@ -156,23 +149,35 @@ class Communicator(CommunicatorBase):
                       reply_to=message_id)
 
     def baby_feed(self, msg, chat_id, message_id, value):
-        identifier = "baby_" + datetime.now().strftime('%Y-%m-%d %H:%M:%S') + "_"
+        identifier = datetime.now().strftime('%Y-%m-%d %H:%M:%S') + " "
 
-        if value == "":
-            self.send_now("Please type the amount after the command. You can press and hold this "
-                          "command and type the amount\n /finance", chat=chat_id, reply_to=message_id)
+        value_check_fail = False
+
+        if value != "":
+            if "ml" in value:
+                value = str(value).replace("ml", "").strip()
+            try:
+                int(value)
+            except ValueError:
+                logger.log("Rejected entered feed value", source=self.source)
+                value_check_fail = True
+
+        if value == "" or value_check_fail:
+            self.send_message_with_keyboard(msg="Need some feeding info",
+                                            chat_id=chat_id,
+                                            button_text=["30ml", "60ml", "90ml", "120ml", "Cancel"],
+                                            button_cb=["feed", "feed", "feed", "feed", "cancel"],
+                                            button_val=[identifier + "30",
+                                                        identifier + "60",
+                                                        identifier + "90",
+                                                        identifier + "120",
+                                                        ""],
+                                            arrangement=[4, 1],
+                                            reply_to=message_id
+                                            )
+
         else:
-            key1_id, key1_button = self.keyboard_button("Breast", "baby_feed", identifier + value + "_breast")
-            key2_id, key2_button = self.keyboard_button("Formula", "baby_feed", identifier + value + "_bottle")
-            key3_id, key3_button = self.keyboard_button("Cancel", "cancel", "")
-
-            keyboard_markup = [[key1_button, key2_button], [key3_button]]
-            keyboard = InlineKeyboardMarkup(inline_keyboard=keyboard_markup)
-
-            message = self.send_now("Let's fill some missing info", chat=chat_id, keyboard=keyboard,
-                                    reply_to=message_id)
-
-            self.link_msg_to_buttons(message, [key1_id, key2_id, key3_id])
+            self.cb_feed(None, None, None, identifier + str(value))
 
     def start_over(self, msg, chat_id, message_id, value):
         if chat_id == self.master:
@@ -228,6 +233,34 @@ class Communicator(CommunicatorBase):
 
     def cb_finance(self, callback_id, query_id, from_id, value):
         pass
+
+    def cb_feed(self, callback_id, query_id, from_id, value):
+        if callback_id is not None:
+            self.update_in_line_buttons(callback_id)
+            self.bot.answerCallbackQuery(query_id, text='Got it')
+
+        # FORMAT
+        # ID <SPACE> ml <SPACE> source
+
+        data = value.split(" ")
+
+        if len(data) == 2:
+            self.send_message_with_keyboard(msg="How did you feed " + data[1] + "ml on " + data[0],
+                                            chat_id=from_id,
+                                            button_text=["Breast", "Formula", "Cancel"],
+                                            button_cb=["feed", "feed", "cancel"],
+                                            button_val=[value + " breast",
+                                                        value + " formula",
+                                                        ""],
+                                            arrangement=[2, 1],
+                                            )
+
+        if len(data) == 3:
+            self.send_now(msg="Got it. Baby was fed " + data[1] + "ml on " + data[0] + " with " + value[2] + " milk")
+            write_data = {str(data[0]): {"when": data[0],
+                                         "ml": data[1],
+                                         "source": data[2]}}
+            JSONEditor(global_var.baby_feed_database).add_level1(write_data)
 
 
 telepot_lock = threading.Lock()

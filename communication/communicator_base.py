@@ -2,7 +2,7 @@ from datetime import datetime
 
 import telepot
 from telepot.loop import MessageLoop
-from telepot.namedtuple import InlineKeyboardButton
+from telepot.namedtuple import InlineKeyboardButton, InlineKeyboardMarkup
 
 import logger
 from database_manager.json_editor import JSONEditor
@@ -65,8 +65,12 @@ class CommunicatorBase:
         return message
 
     def keyboard_button(self, text, callback_command, value="None"):
+        # FORMAT
+        # Full   = Account _ %y%m%d%H%M _ CB-ID _ buttonText , DATA
+        # DATA   = functionCall, Value
+
         data_id = self.callback_id_prefix + str(self.current_callback_id) + "_" + text
-        data = data_id + "," + str(callback_command) + "," + str(value)
+        data = data_id + "," + str(callback_command).lower() + "," + str(value)
 
         if len(data) >= 60:
             telepot_callbacks = {data_id: str(callback_command) + "," + str(value)}
@@ -188,3 +192,39 @@ class CommunicatorBase:
         logger.log("Buttons to remove from message id " + str(message['message_id']), self.source)
         message_id = telepot.message_identifier(message)
         self.bot.editMessageReplyMarkup(message_id, reply_markup=keyboard)
+
+    def send_message_with_keyboard(self, msg, chat_id, button_text, button_cb, button_val,
+                                   arrangement, reply_to=None):
+        if len(button_text) == 0 or len(button_text) != len(button_cb) or len(button_text) != len(button_val):
+            logger.log("Keyboard Generation error: " + str(msg), source=self.source, message_type="error")
+            return
+
+        button_ids = []
+        buttons = []
+
+        for i in range(len(button_text)):
+            key_id, key_button = self.keyboard_button(button_text[0], button_cb[0], button_val[0])
+            buttons.append(key_button)
+            button_ids.append(key_id)
+
+        keyboard_markup = []
+        c = 0
+
+        for i in range(len(arrangement)):
+            keyboard_row = []
+            for j in range(arrangement[i]):
+                keyboard_row.append(buttons[c])
+                c = c+1
+            keyboard_markup.append(keyboard_row)
+
+        keyboard = InlineKeyboardMarkup(inline_keyboard=keyboard_markup)
+
+        message = self.send_now(msg, chat=chat_id, keyboard=keyboard,
+                                reply_to=reply_to)
+
+        self.link_msg_to_buttons(message, button_ids)
+
+
+
+
+
