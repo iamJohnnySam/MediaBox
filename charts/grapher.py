@@ -41,7 +41,7 @@ def grapher_category_dictionary(graph_dict, x_column, cat_column, data_column, x
         if color_val == len(colors):
             color_val = 0
 
-    # plt.plot(list(total_data.keys()), list(total_data.values()), color=colors[color_val], label="Total")
+    plt.plot(list(total_data.keys()), list(total_data.values()), color=colors[color_val], label="Total")
 
     plt.title(chart_title)
     plt.xlabel(x_name)
