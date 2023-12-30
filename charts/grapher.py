@@ -12,7 +12,7 @@ def grapher_category_dictionary(graph_dict, x_column, cat_column, data_column, x
         title = graph_dict[val][x_column]
         category = graph_dict[val][cat_column]
 
-        if title in data.keys() and category in data[title].keys():
+        if category in data.keys() and title in data[category].keys():
             data[category][title] = data[category][title] + float(graph_dict[val][data_column])
         else:
             data[category][title] = float(graph_dict[val][data_column])
