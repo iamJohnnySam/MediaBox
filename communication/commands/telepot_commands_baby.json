@@ -16,7 +16,7 @@
     "definition": "Add Diaper Information"
   },
   "/feed_history": {
-    "function": "baby_diaper_history",
+    "function": "baby_feed_history",
     "definition": "Graph it"
   },
   "/diaper_history": {
