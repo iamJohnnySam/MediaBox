@@ -176,8 +176,8 @@ class CommunicatorBase:
 
         try:
             logger.log("Calling function: cb_" + command)
-            eval("self.cb_" + command + "(callback_id, query_id, from_id, value)",
-                 {'__builtins__': None})
+            func = getattr(self, "cb_" + command)
+            func(callback_id, query_id, from_id, value)
         except (ValueError, SyntaxError) as error:
             self.bot.answerCallbackQuery(query_id, text='Unhandled')
             logger.log("Unhandled Callback: " + error, source=self.source, message_type="error")
