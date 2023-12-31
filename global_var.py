@@ -10,6 +10,7 @@ media_path = "/mnt/MediaBox"
 
 feed_link = "https://showrss.info/user/275495.rss?magnets=true&namespaces=true&name=clean&quality=null&re=null"
 show_download_database = 'database/downloadedFiles.json'
+requested_show_database = 'database/requested_shows.json'
 
 news_link = "https://www.adaderana.lk/rss.php"
 news_database = 'database/newsRSS.json'
@@ -24,3 +25,4 @@ cctv_model2 = "cctv/nn_models/modelA02.tflite"
 
 baby_feed_database = 'database/baby_feed.json'
 baby_diaper_database = 'database/baby_diaper.json'
+baby_weight_database = 'database/baby_weight.json'

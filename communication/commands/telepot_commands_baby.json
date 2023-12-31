@@ -15,6 +15,10 @@
     "function": "baby_diaper",
     "definition": "Add Diaper Information"
   },
+  "/weight": {
+    "function": "baby_weight",
+    "definition": "Add Weight"
+  },
   "/feed_history": {
     "function": "baby_feed_history",
     "definition": "Graph it"

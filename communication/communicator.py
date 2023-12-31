@@ -116,9 +116,20 @@ class Communicator(CommunicatorBase):
             return
 
         request = {show: str(msg['chat']['first_name'])}
-        JSONEditor('database/requested_shows.json').add_level1(request)
-        logger.log("TV Show Requested - " + show)
+        JSONEditor(global_var.requested_show_database).add_level1(request)
+        logger.log("TV Show Requested - " + show, source=self.source)
         self.send_now("TV Show Requested - " + show, chat=chat_id, reply_to=message_id)
+
+    def baby_weight(self, msg, chat_id, message_id, value):
+        if value == "":
+            self.send_now("Please type the weight after the command. You can press and hold this "
+                          "command and type the weight \n /baby_weight", chat=chat_id)
+            return
+
+        val = {datetime.now().strftime('%Y/%m/$d'): value}
+        JSONEditor(global_var.baby_weight_database).add_level1(val)
+        logger.log("Baby Weight Added - " + value, source=self.source)
+        self.send_now("Baby Weight Added - " + value, chat=chat_id, reply_to=message_id)
 
     def add_me_to_cctv(self, msg, chat_id, message_id, value):
         self.send_now("Function Not yet implemented",
