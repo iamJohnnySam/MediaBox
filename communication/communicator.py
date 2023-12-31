@@ -464,15 +464,15 @@ class Communicator(CommunicatorBase):
                            data[2] + " diaper recorded on " + data[0] + " at " + data[1] +
                            ". \n Use /diaper to submit a new entry.")
 
-        if data[2] == "Poo & Pee":
+        if data[2] == "pp":
             write_data = {str(data[0]) + " " + str(data[1]): {"date": data[0],
                                                               "time": data[1],
-                                                              "what": "Poo",
+                                                              "what": "poo",
                                                               "count": 1}}
             JSONEditor(global_var.baby_diaper_database).add_level1(write_data)
             write_data = {str(data[0]) + " " + str(data[1]): {"date": data[0],
                                                               "time": data[1],
-                                                              "what": "Pee",
+                                                              "what": "pee",
                                                               "count": 1}}
             JSONEditor(global_var.baby_diaper_database).add_level1(write_data)
         else:
