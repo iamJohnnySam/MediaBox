@@ -4,6 +4,7 @@ import telepot
 from telepot.loop import MessageLoop
 from telepot.namedtuple import InlineKeyboardButton, InlineKeyboardMarkup
 
+import global_var
 import logger
 from database_manager.json_editor import JSONEditor
 
@@ -19,12 +20,12 @@ class CommunicatorBase:
         self.telepot_groups = {}
         self.telepot_account = telepot_account
 
-        telepot_accounts = JSONEditor('communication/telepot_accounts.json').read()
+        telepot_accounts = JSONEditor(global_var.telepot_accounts).read()
         self.bot = telepot.Bot(telepot_accounts[telepot_account]["account"])
         self.master = telepot_accounts[telepot_account]["master"]
 
-        self.telepot_chat_id = JSONEditor('communication/telepot_groups.json')
-        self.command_dictionary = JSONEditor('communication/commands/telepot_commands_' +
+        self.telepot_chat_id = JSONEditor(global_var.telepot_groups)
+        self.command_dictionary = JSONEditor(global_var.telepot_commands + 'telepot_commands_' +
                                              self.telepot_account + '.json').read()
 
         MessageLoop(self.bot, {'chat': self.handle,
@@ -75,7 +76,7 @@ class CommunicatorBase:
 
         if len(data) >= 60:
             telepot_callbacks = {data_id: str(callback_command) + "," + str(value)}
-            JSONEditor('database/telepot/' +
+            JSONEditor(global_var.telepot_callback_database +
                        self.callback_id_prefix + 'telepot_callback_database.json').add_level1(telepot_callbacks)
             data = data_id + ",X"
 
@@ -84,7 +85,7 @@ class CommunicatorBase:
     def link_msg_to_buttons(self, message, buttons):
         for button in buttons:
             button_dict = {button: message}
-            JSONEditor('database/telepot/' +
+            JSONEditor(global_var.telepot_callback_database +
                        self.callback_id_prefix + 'telepot_button_link.json').add_level1(button_dict)
 
     def check_allowed_sender(self, chat_id, msg):
@@ -92,7 +93,7 @@ class CommunicatorBase:
         sender_name = str(msg['chat']['first_name'])
 
         if self.allowed_chats is None or self.allowed_chats == {}:
-            self.allowed_chats = JSONEditor('communication/telepot_allowed_chats.json').read().keys()
+            self.allowed_chats = JSONEditor(global_var.telepot_allowed_chats).read().keys()
 
         if str(chat_id) in self.allowed_chats:
             return True
@@ -167,7 +168,7 @@ class CommunicatorBase:
 
         if command == "X":
             comm = callback_id.split("_")[0] + "_" + callback_id.split("_")[1] + "_"
-            telepot_callbacks = JSONEditor('database/telepot/'
+            telepot_callbacks = JSONEditor(global_var.telepot_callback_database
                                            + comm + 'telepot_callback_database.json').read()
 
             query_data = telepot_callbacks[callback_id]
@@ -189,7 +190,8 @@ class CommunicatorBase:
 
     def update_in_line_buttons(self, button_id, keyboard=None):
         comm = button_id.split("_")[0] + "_" + button_id.split("_")[1] + "_"
-        message = JSONEditor('database/telepot/' + comm + 'telepot_button_link.json').read()[button_id]
+        message = JSONEditor(global_var.telepot_callback_database
+                             + comm + 'telepot_button_link.json').read()[button_id]
         logger.log("Buttons to remove from message id " + str(message['message_id']), self.source)
         message_id = telepot.message_identifier(message)
         self.bot.editMessageReplyMarkup(message_id, reply_markup=keyboard)

@@ -429,16 +429,26 @@ class Communicator(CommunicatorBase):
                                             )
 
         if len(data) == 4:
+            day_total = 0.0
+            database = JSONEditor(global_var.baby_feed_database).read()
+            for key in database.keys():
+                if database[key]["date"] == data[0]:
+                    day_total = day_total + float(database[key]["ml"])
+            day_total = day_total + float(data[2])
+
             self.send_to_group("baby",
                                "resources/baby_milk.png",
                                True,
                                "Baby was fed " + data[2] + "ml on " + data[0] +
-                               " at " + data[1] + " with " + data[3] + " milk. \n Use /feed to submit a new entry.")
+                               " at " + data[1] + " with " + data[3] +
+                               " milk. \n For today your baby has had " + "{:10.1f}".format(day_total) +
+                               "ml of milk\n Use /feed to submit a new entry or\n " +
+                               "Use /feed_history to see the history.")
             write_data = {str(data[0]) + " " + str(data[1]): {"date": data[0],
                                                               "time": data[1],
                                                               "ml": data[2],
                                                               "source": data[3]}}
-            JSONEditor(global_var.baby_feed_database).add_level1(write_data)
+            database.add_level1(write_data)
 
     def cb_diaper(self, callback_id, query_id, from_id, value):
         self.update_in_line_buttons(callback_id)

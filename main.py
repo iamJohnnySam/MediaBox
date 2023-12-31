@@ -112,6 +112,8 @@ else:
 
     t_webapp.join()
 
+global_var.backup.run_code()
+
 # ------ REBOOT CONDITION -----------
 if not global_var.stop_all:
     communicator.send_to_master("main", "Crashed.")
