@@ -112,7 +112,7 @@ class Communicator(CommunicatorBase):
         show = value
         if show == "":
             self.send_now("Please type the name of the tv show after the command. You can press and hold this "
-                          "command and type the movie \n /request_tv_show", chat=chat_id)
+                          "command and type the movie \n /request_tv_show", chat=chat_id, reply_to=message_id)
             return
 
         request = {show: str(msg['chat']['first_name'])}
@@ -123,7 +123,7 @@ class Communicator(CommunicatorBase):
     def baby_weight(self, msg, chat_id, message_id, value):
         if value == "":
             self.send_now("Please type the weight in kg after the command. You can press and hold this "
-                          "command and type the weight \n /baby_weight", chat=chat_id)
+                          "command and type the weight \n /baby_weight", chat=chat_id, reply_to=message_id)
             return
 
         val = {datetime.now().strftime('%Y/%m/$d'): value}
