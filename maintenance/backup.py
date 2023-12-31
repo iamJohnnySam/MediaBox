@@ -8,7 +8,10 @@ import logger
 
 class BackUp:
     def __init__(self, loc):
-        self.backup_location = os.path.join(loc, datetime.now().strftime("%H:%M:%S"))
+        self.backup_location = os.path.join(loc, datetime.now().strftime("%Y%m%d%H%M%S"))
+        if not os.path.exists(self.backup_location):
+            os.makedirs(self.backup_location)
+
         self.copy_folders = []
         self.copy_files = []
         self.move_folders = []
