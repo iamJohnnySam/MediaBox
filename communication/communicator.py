@@ -141,10 +141,15 @@ class Communicator(CommunicatorBase):
             self.send_now("Entry for today is already existing", chat=chat_id, reply_to=message_id)
             logger.log("Date already existing - " + value, source=self.source)
         else:
+            last_weight = float(list(database.read().values())[-1])
+            last_date = list(database.read())[-1]
+
             database.add_level1(val)
-            logger.log("Baby Weight Added - " + value, source=self.source)
-            self.send_now("Baby Weight Added - " + value, chat=chat_id, reply_to=message_id)
-            self.baby_weight_trend(msg, chat_id, message_id, value)
+            send_string = "Baby Weight Added - " + value + "kg. \nThat's a weight gain of " + \
+                          str(weight - last_weight) + "kg since " + str(last_date)
+
+            logger.log(send_string, source=self.source)
+            self.baby_weight_trend(msg, chat_id, message_id, value, caption=send_string)
 
     def add_me_to_cctv(self, msg, chat_id, message_id, value):
         self.send_now("Function Not yet implemented",
@@ -329,7 +334,10 @@ class Communicator(CommunicatorBase):
                       chat=chat_id,
                       reply_to=message_id)
 
-    def baby_weight_trend(self, msg, chat_id, message_id, value):
+    def baby_weight_trend(self, msg, chat_id, message_id, value, caption=None):
+        if caption is None:
+            caption = "Baby Weight trend. Add new weight using /weight command"
+
         pic = grapher_simple_trend(graph_dict=JSONEditor(global_var.baby_weight_database).read(),
                                    x_name="Date",
                                    y_name="Weight (kg)",
@@ -337,6 +345,7 @@ class Communicator(CommunicatorBase):
         self.send_now(pic,
                       image=True,
                       chat=chat_id,
+                      caption=caption,
                       reply_to=message_id)
 
     def start_over(self, msg, chat_id, message_id, value):
