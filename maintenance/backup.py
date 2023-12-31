@@ -23,6 +23,7 @@ class BackUp:
             destination = os.path.join(self.backup_location, file)
             if not os.path.exists(os.path.dirname(destination)):
                 os.makedirs(os.path.dirname(destination))
+                logger.log(f"Directories created for {os.path.dirname(destination)}")
 
             shutil.copy(file, destination)
             logger.log(f"Copied {file} -> {destination}")
@@ -31,6 +32,7 @@ class BackUp:
             destination = os.path.join(self.backup_location, file)
             if not os.path.exists(os.path.dirname(destination)):
                 os.makedirs(os.path.dirname(destination))
+                logger.log(f"Directories created for {os.path.dirname(destination)}")
 
             shutil.move(file, destination)
             logger.log(f"Moved {file} -> {destination}")
