@@ -39,7 +39,10 @@ class BackUp:
                 os.makedirs(os.path.dirname(destination))
                 logger.log(f"Directories created for {os.path.dirname(destination)}")
 
-            shutil.move(file, destination)
+            try:
+                shutil.move(file, destination)
+            except FileNotFoundError:
+                pass
             logger.log(f"Moved {file} -> {destination}")
 
         for folder in self.copy_folders:
