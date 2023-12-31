@@ -448,7 +448,7 @@ class Communicator(CommunicatorBase):
                                                               "time": data[1],
                                                               "ml": data[2],
                                                               "source": data[3]}}
-            database.add_level1(write_data)
+            JSONEditor(global_var.baby_feed_database).add_level1(write_data)
 
     def cb_diaper(self, callback_id, query_id, from_id, value):
         self.update_in_line_buttons(callback_id)
