@@ -31,7 +31,6 @@
     "function": "baby_diaper_trend_date",
     "definition": "See the diaper trend by date"
   },
-  ,
   "/feed_trend_source": {
     "function": "baby_feed_trend_cat",
     "definition": "See the feeding trend"
