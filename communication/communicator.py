@@ -229,7 +229,7 @@ class Communicator(CommunicatorBase):
                             cat_column="source",
                             data_column="ml",
                             x_name="Time of Day (round to nearest hour)",
-                            y_name="Amount (ml)",
+                            y_name="Source",
                             chart_title="Feed Trend - " + datetime.now().strftime('%Y-%m-%d %H:%M'),
                             size=True)
         self.send_now(pic,
@@ -243,7 +243,7 @@ class Communicator(CommunicatorBase):
                             cat_column="what",
                             data_column="count",
                             x_name="Time of Day (round to nearest hour)",
-                            y_name="Diapers",
+                            y_name="Type",
                             chart_title="Diaper Trend - " + datetime.now().strftime('%Y-%m-%d %H:%M'),
                             size=True)
         self.send_now(pic,

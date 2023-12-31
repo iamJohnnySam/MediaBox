@@ -3,15 +3,19 @@ from datetime import datetime, timedelta
 from matplotlib import pyplot as plt
 
 
+def convert_to_time(val):
+    format_string = "%H:%M:%S"
+    x = datetime.strptime(val, format_string)
+    x = x.replace(second=0, microsecond=0, minute=0, hour=x.hour) + timedelta(hours=x.minute // 30)
+    return x
+
 def extractor(graph_dict, x_column, cat_column, data_column, convert_time=False):
     data = {}
     total_data = {}
 
     for val in graph_dict.keys():
         if convert_time:
-            format_string = "%H:%M:%S"
-            x = datetime.strptime(graph_dict[val][x_column], format_string)
-            x = x.replace(second=0, microsecond=0, minute=0, hour=x.hour)+timedelta(hours=x.minute//30)
+            x = convert_to_time(graph_dict[val][x_column])
         else:
             x = graph_dict[val][x_column]
 
@@ -80,7 +84,8 @@ def grapher_trend(graph_dict, t_column, cat_column, data_column, x_name, y_name,
         size_data = []
 
         for key in graph_dict.keys():
-            t_data.append(graph_dict[key][t_column])
+
+            t_data.append(convert_to_time(graph_dict[key][t_column]))
             y_data.append(graph_dict[key][cat_column])
             size_data.append(float(graph_dict[key][data_column]))
 
