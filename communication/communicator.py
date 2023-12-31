@@ -5,7 +5,7 @@ import telepot
 import logger
 from datetime import datetime, timedelta
 import global_var
-from charts.grapher import grapher_category_dictionary, grapher_trend
+from charts.grapher import grapher_category_dictionary, grapher_trend, grapher_simple_trend
 
 from communication.communicator_base import CommunicatorBase
 from database_manager import sql_connector
@@ -126,10 +126,24 @@ class Communicator(CommunicatorBase):
                           "command and type the weight \n /baby_weight", chat=chat_id, reply_to=message_id)
             return
 
-        val = {datetime.now().strftime('%Y/%m/%d'): value}
-        JSONEditor(global_var.baby_weight_database).add_level1(val)
-        logger.log("Baby Weight Added - " + value, source=self.source)
-        self.send_now("Baby Weight Added - " + value, chat=chat_id, reply_to=message_id)
+        try:
+            weight = float(value)
+        except ValueError:
+            self.send_now("Please type the weight in kg. Please enter the number only",
+                          chat=chat_id, reply_to=message_id)
+            return
+
+        key = datetime.now().strftime('%Y/%m/%d')
+        val = {key: weight}
+
+        database = JSONEditor(global_var.baby_weight_database)
+        if key in database.read().keys():
+            self.send_now("Entry for today is already existing", chat=chat_id, reply_to=message_id)
+            logger.log("Date already existing - " + value, source=self.source)
+        else:
+            database.add_level1(val)
+            logger.log("Baby Weight Added - " + value, source=self.source)
+            self.send_now("Baby Weight Added - " + value, chat=chat_id, reply_to=message_id)
 
     def add_me_to_cctv(self, msg, chat_id, message_id, value):
         self.send_now("Function Not yet implemented",
@@ -302,13 +316,10 @@ class Communicator(CommunicatorBase):
                       reply_to=message_id)
 
     def baby_diaper_trend_cat(self, msg, chat_id, message_id, value):
-        pic = grapher_trend(graph_dict=JSONEditor(global_var.baby_diaper_database).read(),
-                            t_column="time",
-                            cat_column="what",
-                            data_column="count",
-                            x_name="Time of Day (round to nearest hour)",
-                            y_name="Diapers",
-                            chart_title="Diaper Trend - " + datetime.now().strftime('%Y-%m-%d %H:%M'))
+        pic = grapher_simple_trend(graph_dict=JSONEditor(global_var.baby_weight_database).read(),
+                                   x_name="Date",
+                                   y_name="Weight (kg)",
+                                   chart_title="Baby Weight Trend - " + datetime.now().strftime('%Y-%m-%d %H:%M'))
         self.send_now(pic,
                       image=True,
                       chat=chat_id,

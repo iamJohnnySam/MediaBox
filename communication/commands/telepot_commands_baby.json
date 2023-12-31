@@ -50,5 +50,9 @@
   "/diaper_trend_excrement": {
     "function": "baby_diaper_trend_cat",
     "definition": "See the diaper trend"
+  },
+  "/weight_trend": {
+    "function": "baby_weight_trend",
+    "definition": "How weight has changed"
   }
 }

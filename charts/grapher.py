@@ -9,6 +9,13 @@ def convert_to_time(val):
     x = x.replace(second=0, microsecond=0, minute=0, hour=x.hour) + timedelta(hours=x.minute // 30)
     return x
 
+
+def convert_to_date(val):
+    format_string = "%Y:%m:%d"
+    x = datetime.strptime(val, format_string)
+    return x
+
+
 def extractor(graph_dict, x_column, cat_column, data_column, convert_time=False):
     data = {}
     total_data = {}
@@ -84,7 +91,6 @@ def grapher_trend(graph_dict, t_column, cat_column, data_column, x_name, y_name,
         size_data = []
 
         for key in graph_dict.keys():
-
             t_data.append(convert_to_time(graph_dict[key][t_column]))
             y_data.append(graph_dict[key][cat_column])
             size_data.append(float(graph_dict[key][data_column]))
@@ -106,6 +112,31 @@ def grapher_trend(graph_dict, t_column, cat_column, data_column, x_name, y_name,
             color_val = color_val + 1
             if color_val == len(colors):
                 color_val = 0
+
+    plt.title(chart_title)
+    plt.xlabel(x_name)
+    plt.ylabel(y_name)
+    plt.legend(loc="upper right")
+
+    fig_path = "charts/" + chart_title + '.png'
+    plt.savefig(fig_path)
+
+    return fig_path
+
+
+def grapher_simple_trend(graph_dict, x_name, y_name, chart_title):
+    fig1 = plt.figure()
+    fig1.set_figwidth(10)
+    fig1.set_figheight(5)
+
+    x_data = []
+    y_data = []
+
+    for key in graph_dict.keys():
+        x_data.append(convert_to_date(key))
+        y_data.append(float(graph_dict[key]))
+
+    plt.plot(x_data, y_data)
 
     plt.title(chart_title)
     plt.xlabel(x_name)
