@@ -77,13 +77,13 @@ def grapher_trend(graph_dict, t_column, cat_column, data_column, x_name, y_name,
     fig1.set_figheight(5)
 
     for cat in data.keys():
-        plt.plot(list(data[cat].keys()), list(data[cat].values()), color=colors[color_val], label=cat)
+        plt.scatter(list(data[cat].keys()), list(data[cat].values()), color=colors[color_val], label=cat)
 
         color_val = color_val + 1
         if color_val == len(colors):
             color_val = 0
 
-    plt.plot(list(total_data.keys()), list(total_data.values()), color=colors[color_val], label="Total")
+    plt.scatter(list(total_data.keys()), list(total_data.values()), color=colors[color_val], label="Total")
 
     plt.title(chart_title)
     plt.xlabel(x_name)
