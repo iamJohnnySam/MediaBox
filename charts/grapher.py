@@ -82,7 +82,7 @@ def grapher_trend(graph_dict, t_column, cat_column, data_column, x_name, y_name,
         for key in graph_dict.keys():
             t_data.append(graph_dict[key][t_column])
             y_data.append(graph_dict[key][cat_column])
-            size_data.append(graph_dict[key][data_column])
+            size_data.append(float(graph_dict[key][data_column]))
 
         plt.scatter(t_data, y_data,
                     c=size_data,
