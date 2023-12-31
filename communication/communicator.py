@@ -3,7 +3,7 @@ import feedparser
 import telepot
 
 import logger
-from datetime import datetime, timedelta
+from datetime import datetime
 import global_var
 from charts.grapher import grapher_category_dictionary, grapher_trend, grapher_simple_trend
 
@@ -433,7 +433,7 @@ class Communicator(CommunicatorBase):
                                "resources/baby_milk.png",
                                True,
                                "Baby was fed " + data[2] + "ml on " + data[0] +
-                               " at " + data[1] + " with " + data[3] + " milk")
+                               " at " + data[1] + " with " + data[3] + " milk. \n Use /feed to submit a new entry.")
             write_data = {str(data[0]) + " " + str(data[1]): {"date": data[0],
                                                               "time": data[1],
                                                               "ml": data[2],
@@ -451,13 +451,26 @@ class Communicator(CommunicatorBase):
         self.send_to_group("baby",
                            "resources/baby_diaper.png",
                            True,
-                           data[2] + " diaper recorded on " + data[0] + " at " + data[1])
+                           data[2] + " diaper recorded on " + data[0] + " at " + data[1] +
+                           ". \n Use /diaper to submit a new entry.")
 
-        write_data = {str(data[0]) + " " + str(data[1]): {"date": data[0],
-                                                          "time": data[1],
-                                                          "what": data[2],
-                                                          "count": 1}}
-        JSONEditor(global_var.baby_diaper_database).add_level1(write_data)
+        if data[2] == "Poo & Pee":
+            write_data = {str(data[0]) + " " + str(data[1]): {"date": data[0],
+                                                              "time": data[1],
+                                                              "what": "Poo",
+                                                              "count": 1}}
+            JSONEditor(global_var.baby_diaper_database).add_level1(write_data)
+            write_data = {str(data[0]) + " " + str(data[1]): {"date": data[0],
+                                                              "time": data[1],
+                                                              "what": "Pee",
+                                                              "count": 1}}
+            JSONEditor(global_var.baby_diaper_database).add_level1(write_data)
+        else:
+            write_data = {str(data[0]) + " " + str(data[1]): {"date": data[0],
+                                                              "time": data[1],
+                                                              "what": data[2],
+                                                              "count": 1}}
+            JSONEditor(global_var.baby_diaper_database).add_level1(write_data)
 
 
 telepot_lock = threading.Lock()

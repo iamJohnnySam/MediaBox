@@ -20,6 +20,11 @@ def extractor(graph_dict, x_column, cat_column, data_column, convert_time=False)
     data = {}
     total_data = {}
 
+    x_column_values = []
+    for val in graph_dict.keys():
+        if graph_dict[val][x_column] not in x_column_values:
+            x_column_values.append(graph_dict[val][x_column])
+
     for val in graph_dict.keys():
         if convert_time:
             x = convert_to_time(graph_dict[val][x_column])
@@ -30,11 +35,10 @@ def extractor(graph_dict, x_column, cat_column, data_column, convert_time=False)
 
         if category not in data.keys():
             data[category] = {}
+            for x_column_value in x_column_values:
+                data[category][x_column_value] = 0
 
-        if x in data[category].keys():
-            data[category][x] = data[category][x] + float(graph_dict[val][data_column])
-        else:
-            data[category][x] = float(graph_dict[val][data_column])
+        data[category][x] = data[category][x] + float(graph_dict[val][data_column])
 
         if x in total_data.keys():
             total_data[x] = total_data[x] + float(graph_dict[val][data_column])
