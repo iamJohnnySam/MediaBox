@@ -126,7 +126,7 @@ class Communicator(CommunicatorBase):
                           "command and type the weight \n /baby_weight", chat=chat_id, reply_to=message_id)
             return
 
-        val = {datetime.now().strftime('%Y/%m/$d'): value}
+        val = {datetime.now().strftime('%Y/%m/%d'): value}
         JSONEditor(global_var.baby_weight_database).add_level1(val)
         logger.log("Baby Weight Added - " + value, source=self.source)
         self.send_now("Baby Weight Added - " + value, chat=chat_id, reply_to=message_id)
