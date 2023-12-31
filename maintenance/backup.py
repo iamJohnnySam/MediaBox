@@ -47,8 +47,6 @@ class BackUp:
 
         for folder in self.copy_folders:
             destination = os.path.join(self.backup_location, folder)
-            if not os.path.exists(os.path.dirname(destination)):
-                os.makedirs(os.path.dirname(destination))
 
             shutil.copytree(folder, destination)
             logger.log(f"Copied {folder} -> {destination}")
