@@ -316,6 +316,19 @@ class Communicator(CommunicatorBase):
                       reply_to=message_id)
 
     def baby_diaper_trend_cat(self, msg, chat_id, message_id, value):
+        pic = grapher_trend(graph_dict=JSONEditor(global_var.baby_feed_database).read(),
+                            t_column="time",
+                            cat_column="what",
+                            data_column="count",
+                            x_name="Time of Day (round to nearest hour)",
+                            y_name="Number of Diapers",
+                            chart_title="Diaper Trend - " + datetime.now().strftime('%Y-%m-%d %H:%M'))
+        self.send_now(pic,
+                      image=True,
+                      chat=chat_id,
+                      reply_to=message_id)
+
+    def baby_weight_trend(self, msg, chat_id, message_id, value):
         pic = grapher_simple_trend(graph_dict=JSONEditor(global_var.baby_weight_database).read(),
                                    x_name="Date",
                                    y_name="Weight (kg)",
