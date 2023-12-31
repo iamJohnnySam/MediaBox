@@ -9,7 +9,8 @@ def extractor(graph_dict, x_column, cat_column, data_column, convert_time=False)
 
     for val in graph_dict.keys():
         if convert_time:
-            x = datetime.fromtimestamp(graph_dict[val][x_column])
+            format_string = "%H:%M:%S"
+            x = datetime.strptime(graph_dict[val][x_column], format_string)
             x = x.replace(second=0, microsecond=0, minute=0, hour=x.hour)+timedelta(hours=x.minute//30)
         else:
             x = graph_dict[val][x_column]
