@@ -1,5 +1,4 @@
-from datetime import datetime
-import datetime
+from datetime import datetime, timedelta
 
 from matplotlib import pyplot as plt
 
@@ -11,7 +10,7 @@ def extractor(graph_dict, x_column, cat_column, data_column, convert_time=False)
     for val in graph_dict.keys():
         if convert_time:
             x = datetime.fromtimestamp(graph_dict[val][x_column])
-            x = x.replace(second=0, microsecond=0, minute=0, hour=x.hour)+datetime.timedelta(hours=x.minute//30)
+            x = x.replace(second=0, microsecond=0, minute=0, hour=x.hour)+timedelta(hours=x.minute//30)
         else:
             x = graph_dict[val][x_column]
 
