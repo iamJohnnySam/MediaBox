@@ -23,12 +23,21 @@
     "function": "baby_diaper_history",
     "definition": "Graph it"
   },
-  "/feed_trend": {
-    "function": "baby_feed_trend",
+  "/feed_trend_date": {
+    "function": "baby_feed_trend_date",
+    "definition": "See the feeding trend by date"
+  },
+  "/diaper_trend_date": {
+    "function": "baby_diaper_trend_date",
+    "definition": "See the diaper trend by date"
+  },
+  ,
+  "/feed_trend_source": {
+    "function": "baby_feed_trend_cat",
     "definition": "See the feeding trend"
   },
-  "/diaper_trend": {
-    "function": "baby_diaper_trend",
-    "definition": "See the feeding trend"
+  "/diaper_trend_excrement": {
+    "function": "baby_diaper_trend_cat",
+    "definition": "See the diaper trend"
   }
 }
