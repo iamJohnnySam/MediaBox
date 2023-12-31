@@ -11,7 +11,7 @@ def convert_to_time(val):
 
 
 def convert_to_date(val):
-    format_string = "%Y:%m:%d"
+    format_string = "%Y/%m/%d"
     x = datetime.strptime(val, format_string)
     return x
 
