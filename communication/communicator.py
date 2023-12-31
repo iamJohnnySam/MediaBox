@@ -144,6 +144,7 @@ class Communicator(CommunicatorBase):
             database.add_level1(val)
             logger.log("Baby Weight Added - " + value, source=self.source)
             self.send_now("Baby Weight Added - " + value, chat=chat_id, reply_to=message_id)
+            self.baby_weight_trend(msg, chat_id, message_id, value)
 
     def add_me_to_cctv(self, msg, chat_id, message_id, value):
         self.send_now("Function Not yet implemented",
