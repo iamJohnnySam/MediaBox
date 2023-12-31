@@ -23,6 +23,14 @@
     "function": "baby_diaper_history",
     "definition": "Graph it"
   },
+  "/feed_trend": {
+    "function": "baby_feed_trend",
+    "definition": "See the feeding trend by date"
+  },
+  "/diaper_trend": {
+    "function": "baby_diaper_trend",
+    "definition": "See the diaper trend by date"
+  },
   "/feed_trend_date": {
     "function": "baby_feed_trend_date",
     "definition": "See the feeding trend by date"

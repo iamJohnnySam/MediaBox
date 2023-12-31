@@ -66,24 +66,41 @@ def grapher_category_dictionary(graph_dict, x_column, cat_column, data_column, x
     return fig_path
 
 
-def grapher_trend(graph_dict, t_column, cat_column, data_column, x_name, y_name, chart_title):
+def grapher_trend(graph_dict, t_column, cat_column, data_column, x_name, y_name, chart_title, size=False):
     colors = ['b', 'g', 'r', 'c', 'm', 'y']
     color_val = 0
-
-    data, total_data = extractor(graph_dict, t_column, cat_column, data_column, convert_time=True)
 
     fig1 = plt.figure()
     fig1.set_figwidth(10)
     fig1.set_figheight(5)
 
-    for cat in data.keys():
-        plt.scatter(list(data[cat].keys()), list(data[cat].values()), color=colors[color_val], label=cat)
+    if size:
+        t_data = []
+        y_data = []
+        size_data = []
 
-        color_val = color_val + 1
-        if color_val == len(colors):
-            color_val = 0
+        for key in graph_dict.keys():
+            t_data.append(graph_dict[key][t_column])
+            y_data.append(graph_dict[key][cat_column])
+            size_data.append(graph_dict[key][data_column])
 
-    plt.scatter(list(total_data.keys()), list(total_data.values()), color=colors[color_val], label="Total")
+        plt.scatter(t_data, y_data,
+                    c=size_data,
+                    s=size_data,
+                    alpha=0.5,
+                    cmap="jet")
+
+    else:
+        data, total_data = extractor(graph_dict, t_column, cat_column, data_column, convert_time=True)
+        for cat in data.keys():
+            plt.scatter(list(data[cat].keys()), list(data[cat].values()),
+                        color=colors[color_val],
+                        alpha=0.5,
+                        label=cat)
+
+            color_val = color_val + 1
+            if color_val == len(colors):
+                color_val = 0
 
     plt.title(chart_title)
     plt.xlabel(x_name)

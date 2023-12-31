@@ -223,6 +223,34 @@ class Communicator(CommunicatorBase):
                       chat=chat_id,
                       reply_to=message_id)
 
+    def baby_feed_trend(self, msg, chat_id, message_id, value):
+        pic = grapher_trend(graph_dict=JSONEditor(global_var.baby_feed_database).read(),
+                            t_column="time",
+                            cat_column="source",
+                            data_column="ml",
+                            x_name="Time of Day (round to nearest hour)",
+                            y_name="Amount (ml)",
+                            chart_title="Feed Trend - " + datetime.now().strftime('%Y-%m-%d %H:%M'),
+                            size=True)
+        self.send_now(pic,
+                      image=True,
+                      chat=chat_id,
+                      reply_to=message_id)
+
+    def baby_diaper_trend(self, msg, chat_id, message_id, value):
+        pic = grapher_trend(graph_dict=JSONEditor(global_var.baby_diaper_database).read(),
+                            t_column="time",
+                            cat_column="what",
+                            data_column="count",
+                            x_name="Time of Day (round to nearest hour)",
+                            y_name="Diapers",
+                            chart_title="Diaper Trend - " + datetime.now().strftime('%Y-%m-%d %H:%M'),
+                            size=True)
+        self.send_now(pic,
+                      image=True,
+                      chat=chat_id,
+                      reply_to=message_id)
+
     def baby_feed_trend_date(self, msg, chat_id, message_id, value):
         pic = grapher_trend(graph_dict=JSONEditor(global_var.baby_feed_database).read(),
                             t_column="time",
