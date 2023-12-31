@@ -122,7 +122,7 @@ class Communicator(CommunicatorBase):
 
     def baby_weight(self, msg, chat_id, message_id, value):
         if value == "":
-            self.send_now("Please type the weight after the command. You can press and hold this "
+            self.send_now("Please type the weight in kg after the command. You can press and hold this "
                           "command and type the weight \n /baby_weight", chat=chat_id)
             return
 
