@@ -146,7 +146,7 @@ class Communicator(CommunicatorBase):
 
             database.add_level1(val)
             send_string = "Baby Weight Added - " + value + "kg. \nThat's a weight gain of " + \
-                          str(weight - last_weight) + "kg since " + str(last_date)
+                          "{:10.2f}".format(weight - last_weight) + "kg since " + str(last_date) + "."
 
             logger.log(send_string, source=self.source)
             self.baby_weight_trend(msg, chat_id, message_id, value, caption=send_string)
