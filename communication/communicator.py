@@ -106,7 +106,9 @@ class Communicator(CommunicatorBase):
 
         columns = 'transaction_by, amount'
         val = (chat_id, amount)
-        success, sql_id = self.finance_sql.insert('transaction_lkr', columns, val, get_id=True)
+        success, sql_id = self.finance_sql.insert('transaction_lkr', columns, val,
+                                                  get_id=True,
+                                                  id_column='transaction_id')
         identifier = str(sql_id) + ";"
 
         self.send_message_with_keyboard(msg=f'Is LKR {value} an income or expense?',
