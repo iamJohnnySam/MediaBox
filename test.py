@@ -17,4 +17,5 @@ for row in data:
     val.append((row[2], row[0], row[1]))
 
 connector.insert(table='categories',
-                 columns="`category_id`, `category`, `in_out`, `type`")
+                 columns="`category_id`, `category`, `in_out`, `type`",
+                 val=val)
