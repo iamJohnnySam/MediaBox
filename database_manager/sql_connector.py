@@ -25,7 +25,7 @@ class SQLConnector:
 
     def insert(self, table, columns, val):
         placeholder = "%s"
-        for i in columns.count(","):
+        for i in range(columns.count(",")):
             placeholder = placeholder + ", %s"
 
         sql = "INSERT INTO " + table + " (" + columns + ") VALUES (" + placeholder + ")"
