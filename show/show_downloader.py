@@ -3,8 +3,10 @@ import os
 import time
 import global_var
 import logger
+import settings
 from communication import communicator
 from database_manager.json_editor import JSONEditor
+from database_manager.sql_connector import SQLConnector
 from show import transmission
 
 
@@ -26,28 +28,22 @@ class ShowDownloader:
     telepot_account = "main"
 
     def __init__(self):
-        self.shows = JSONEditor(global_var.show_download_database)
-        self.data = self.shows.read()
+        self.database = SQLConnector(settings.database_user, settings.database_password, 'entertainment')
         logger.log("Show Downloader Object Created")
 
     def run_code(self):
         logger.log("-------STARTED TV SHOW CHECK SCRIPT-------")
         feed = feedparser.parse(global_var.feed_link)
-        self.data = self.shows.read()
         show_list = []
 
         for x in feed.entries:
-            if x.tv_show_name not in self.data:
-                new_show = {
-                    x.tv_show_name: [{"episode_id": 0, "episode_name": "test", "magnet": "test", "quality": "480"}]}
-                self.shows.add_level1(new_show)
-                self.data = self.shows.read()
-
             episode_name, episode_quality = quality_extract(x.title)
 
-            if any(player['episode_name'] == episode_name for player in self.data[x.tv_show_name]):
-                pass
-            else:
+            show_exists = self.database.run_sql(f"SELECT COUNT(1) "
+                                                f"FROM tv_show "
+                                                f"WHERE episode_name='{episode_name}' AND name='{x.tv_show_name}';")
+
+            if not show_exists:
                 found = False
                 if len(show_list) != 0:
                     for row in show_list:
@@ -58,18 +54,16 @@ class ShowDownloader:
                                 row[1] = episode_name
                                 row[2] = x.link
                                 row[3] = episode_quality
-
                 if not found:
                     show_list.append([x.tv_episode_id, episode_name, x.link, episode_quality, x.tv_show_name])
 
         for row in show_list:
-            show = {"episode_id": row[0], "episode_name": row[1], "magnet": row[2], "quality": str(row[3])}
             success, torrent_id = transmission.download(row[2])
-            # torrent_id = os.system("transmission-remote -a " + row[2])
 
             if success:
-                self.shows.add_level2(row[4], show)
-                self.data = self.shows.read()
+                columns = "name, episode_id, episode_name, magnet, quality, torrent_name"
+                val = (row[4], row[0], row[1], row[2], str(row[3]), str(torrent_id))
+                self.database.insert('tv_show', columns, val)
                 logger.log(torrent_id, source="TOR")
 
                 message = str(row[1]) + " added at " + str(row[3]) + " torrent id = " + str(torrent_id)
@@ -78,7 +72,6 @@ class ShowDownloader:
                                            group=self.telepot_chat_group)
                 logger.log(message, source="SHOW")
                 time.sleep(3)
-
             else:
                 logger.log("Torrent Add Failed: " + str(row[2]), source="TOR", message_type="error")
 

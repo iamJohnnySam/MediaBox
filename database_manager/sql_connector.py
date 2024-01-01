@@ -26,6 +26,11 @@ class SQLConnector:
         else:
             return True
 
+    def run_sql(self, query):
+        self.cursor.execute(query)
+        result = self.cursor.fetchone()
+        return result
+
     def insert(self, table, columns, val, get_id=False, id_column=None):
         placeholder = "%s"
         for i in range(columns.count(",")):
