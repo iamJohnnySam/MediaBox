@@ -35,12 +35,16 @@ def extractor(x_column, categories, y_column, convert_time=False):
             for x_column_value in x_column_values:
                 data[cat][x_column_value] = 0
 
-        data[cat][x_column[i]] = data[cat][x_column[i]] + float(y_column[i])
+        if convert_time:
+            x = convert_to_time(x_column[i])
+        else:
+            x = x_column[i]
+        data[cat][x] = data[cat][x] + float(y_column[i])
 
         if x_column[i] in total_data.keys():
-            total_data[x_column[i]] = total_data[x_column[i]] + float(y_column[i])
+            total_data[x] = total_data[x] + float(y_column[i])
         else:
-            total_data[x_column[i]] = float(y_column[i])
+            total_data[x] = float(y_column[i])
         i = i+1
 
     return data, total_data
