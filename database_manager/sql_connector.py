@@ -32,6 +32,7 @@ class SQLConnector:
         print(sql)
         try:
             self.my_cursor.execute(sql, val)
+            print(1)
             self.my_db.commit()
             return True, self.my_cursor.lastrowid
 
