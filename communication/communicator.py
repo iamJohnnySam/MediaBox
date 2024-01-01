@@ -449,12 +449,11 @@ class Communicator(CommunicatorBase):
         if len(data) == 4:
             day_total = 0.0
 
-            query = f'SELECT amount FROM feed WHERE date = {data[0]}'
+            query = f'SELECT amount FROM feed WHERE date = "{data[0]}"'
             result = list(self.baby_sql.run_sql(query, fetch_all=1))
 
             for val in result:
                 day_total = day_total + val[0]
-
             day_total = day_total + float(data[2])
 
             columns = "date, time, amount, source, added_by"
