@@ -14,6 +14,7 @@ backup.move_png_files.append('charts/')
 backup.copy_files.append('settings.py')
 backup.move_files.append('../nohup.out')
 backup.databases.append('transactions')
+backup.databases.append('entertainment')
 
 media_path = "/mnt/MediaBox"
 

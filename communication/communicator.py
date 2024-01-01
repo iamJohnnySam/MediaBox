@@ -445,7 +445,7 @@ class Communicator(CommunicatorBase):
             self.send_to_group("baby",
                                # "resources/baby_milk.png",
                                # True,
-                               "\U0001F37C" +
+                               "\U0001F37C \n" +
                                "Baby was fed " + data[2] + "ml on " + data[0] +
                                " at " + data[1] + " with " + data[3] +
                                " milk. \n For today your baby has had " + "{:10.1f}".format(day_total) +
@@ -472,17 +472,22 @@ class Communicator(CommunicatorBase):
                                                               "what": "pee",
                                                               "count": 1}}
             JSONEditor(global_var.baby_diaper_database).add_level1(write_data)
+            emoji = '\U0001F6BC \U0001F4A6 \U0001F4A9 '
         else:
             write_data = {str(data[0]) + " " + str(data[1]): {"date": data[0],
                                                               "time": data[1],
                                                               "what": data[2],
                                                               "count": 1}}
             JSONEditor(global_var.baby_diaper_database).add_level1(write_data)
+            if data[2] == "pee":
+                emoji = '\U0001F6BC \U0001F4A6 '
+            else:
+                emoji = '\U0001F6BC \U0001F4A9 '
 
         self.send_to_group("baby",
                            # "resources/baby_diaper.png",
                            # True,
-                           "\U0001F4A9" +
+                           emoji + "\n" +
                            data[2] + " diaper recorded on " + data[0] + " at " + data[1] +
                            ". \n Use /diaper to submit a new entry.")
 
