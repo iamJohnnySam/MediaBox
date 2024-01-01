@@ -5,11 +5,13 @@ import telepot
 import logger
 from datetime import datetime
 import global_var
+import settings
 from charts.grapher import grapher_category_dictionary, grapher_trend, grapher_simple_trend
 
 from communication.communicator_base import CommunicatorBase
 from database_manager import sql_connector
 from database_manager.json_editor import JSONEditor
+from database_manager.sql_connector import SQLConnector
 from show import transmission
 
 
@@ -20,6 +22,7 @@ class Communicator(CommunicatorBase):
 
     def __init__(self, telepot_account):
         super().__init__(telepot_account)
+        self.baby_sql = SQLConnector(settings.database_user, settings.database_password, 'baby')
         self.source = "TG-C"
 
     def alive(self, msg, chat_id, message_id, value):
@@ -134,6 +137,11 @@ class Communicator(CommunicatorBase):
             return
 
         key = datetime.now().strftime('%Y/%m/%d')
+
+        columns = "date, weight, added_by"
+        val = (key, weight, str(chat_id))
+        self.baby_sql.insert('weight', columns, val)
+
         val = {key: weight}
 
         database = JSONEditor(global_var.baby_weight_database)
@@ -436,6 +444,10 @@ class Communicator(CommunicatorBase):
                     day_total = day_total + float(database[key]["ml"])
             day_total = day_total + float(data[2])
 
+            columns = "date, time, amount, source, added_by"
+            val = (data[0], data[1], float(data[2]), data[3], str(from_id))
+            self.baby_sql.insert('feed', columns, val)
+
             write_data = {str(data[0]) + " " + str(data[1]): {"date": data[0],
                                                               "time": data[1],
                                                               "ml": data[2],
@@ -461,19 +473,29 @@ class Communicator(CommunicatorBase):
 
         data = value.split(" ")
 
+        columns = "date, time, what, source, added_by"
+
         if data[2] == "pp":
+            val = (data[0], data[1], "poo", 1, str(from_id))
+            self.baby_sql.insert('diaper', columns, val)
+            val = (data[0], data[1], "pee", 1, str(from_id))
+            self.baby_sql.insert('diaper', columns, val)
+
             write_data = {str(data[0]) + " " + str(data[1]): {"date": data[0],
                                                               "time": data[1],
                                                               "what": "poo",
                                                               "count": 1}}
             JSONEditor(global_var.baby_diaper_database).add_level1(write_data)
-            write_data = {str(data[0]) + " " + str(data[1]): {"date": data[0],
-                                                              "time": data[1],
-                                                              "what": "pee",
-                                                              "count": 1}}
+            write_data = {str(data[0]) + " " + str(data[1] + "1"): {"date": data[0],
+                                                                    "time": data[1],
+                                                                    "what": "pee",
+                                                                    "count": 1}}
             JSONEditor(global_var.baby_diaper_database).add_level1(write_data)
             emoji = '\U0001F6BC \U0001F4A6 \U0001F4A9 '
         else:
+            val = (data[0], data[1], data[2], 1, str(from_id))
+            self.baby_sql.insert('diaper', columns, val)
+
             write_data = {str(data[0]) + " " + str(data[1]): {"date": data[0],
                                                               "time": data[1],
                                                               "what": data[2],

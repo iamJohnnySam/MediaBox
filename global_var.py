@@ -30,14 +30,13 @@ backup.copy_folders.append(telepot_commands)
 backup.copy_folders.append(telepot_callback_database)
 
 feed_link = "https://showrss.info/user/275495.rss?magnets=true&namespaces=true&name=clean&quality=null&re=null"
-show_download_database = 'database/downloadedFiles.json'
 requested_show_database = 'database/requested_shows.json'
-backup.copy_files.append(show_download_database)
 backup.copy_files.append(requested_show_database)
 
 news_link = "https://www.adaderana.lk/rss.php"
 news_database = 'database/newsRSS.json'
 backup.copy_files.append(news_database)
+backup.databases.append('news')
 
 cctv_download = "cctv/CCTVImages"
 cctv_save = "/mnt/MediaBox/MediaBox/CCTVSaved"
@@ -53,5 +52,6 @@ baby_weight_database = 'database/baby_weight.json'
 backup.copy_files.append(baby_feed_database)
 backup.copy_files.append(baby_diaper_database)
 backup.copy_files.append(baby_weight_database)
+backup.databases.append('baby')
 
 

@@ -3,14 +3,22 @@ import settings
 from database_manager.json_editor import JSONEditor
 from database_manager.sql_connector import SQLConnector
 
-sql = SQLConnector(settings.database_user, settings.database_password, 'entertainment')
+sql = SQLConnector(settings.database_user, settings.database_password, 'baby')
 
-data = JSONEditor(global_var.show_download_database).read()
+data = JSONEditor(global_var.baby_feed_database).read()
+for key in data.keys():
+    columns = "date, time, amount, source"
+    val = (data[key]['date'], data[key]['time'], float(data[key]['ml']), data[key]['source'])
+    sql.insert('feed', columns, val)
 
-for show in data.keys():
-    for episode in data[show]:
-        columns = "name, episode_id, episode_name, magnet, quality"
-        if episode['episode_name'] != "Test" and episode['episode_name'] != "test":
-            print(episode['episode_name'])
-            val = (show, episode['episode_id'], episode['episode_name'], episode['magnet'], episode['quality'])
-            sql.insert('tv_show', columns, val)
+data = JSONEditor(global_var.baby_diaper_database).read()
+for key in data.keys():
+    columns = "date, time, what, source"
+    val = (data[key]['date'], data[key]['time'], data[key]['what'], 1)
+    sql.insert('diaper', columns, val)
+
+data = JSONEditor(global_var.baby_weight_database).read()
+for key in data.keys():
+    columns = "date, weight"
+    val = (data[key]['date'], float(data[key]['weight']))
+    sql.insert('weight', columns, val)

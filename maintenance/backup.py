@@ -1,11 +1,7 @@
 import glob
-import time
-
-import pyodbc
 import os
 import shutil
 from datetime import datetime
-import pandas as pd
 
 import logger
 import settings
@@ -27,6 +23,13 @@ class BackUp:
         self.databases = []
 
     def run_code(self):
+        self.backup_copy_files()
+        self.backup_move_files()
+        self.backup_copy_folders()
+        self.backup_move_folders()
+        self.backup_databases()
+
+    def backup_copy_files(self):
         for file in self.copy_files:
             destination = os.path.join(self.backup_location, file)
             if not os.path.exists(os.path.dirname(destination)):
@@ -36,6 +39,7 @@ class BackUp:
             shutil.copy(file, destination)
             logger.log(f"Copied {file} -> {destination}", source=self.source)
 
+    def backup_move_files(self):
         for file in self.move_files:
             if "../" in file:
                 ufile = str(file).replace("../", "")
@@ -53,12 +57,14 @@ class BackUp:
             except FileNotFoundError:
                 pass
 
+    def backup_copy_folders(self):
         for folder in self.copy_folders:
             destination = os.path.join(self.backup_location, folder)
 
             shutil.copytree(folder, destination)
             logger.log(f"Copied {folder} -> {destination}", source=self.source)
 
+    def backup_move_folders(self):
         for folder in self.move_folders:
             allfiles = glob.glob(os.path.join(folder, '*_A_*'), recursive=True)
             destination = os.path.join(self.backup_location, folder)
@@ -82,6 +88,7 @@ class BackUp:
                     shutil.move(file_path, dst_path)
                     logger.log(f"Moved {file_path} -> {dst_path}", source=self.source)
 
+    def backup_databases(self):
         for database in self.databases:
             backup_file = f'{database}_database_backup.sql'
             backup_file_path = os.path.join(self.backup_location, backup_file)
@@ -92,19 +99,3 @@ class BackUp:
 
             gzip_cmd = f'gzip {backup_file_path}'
             os.system(gzip_cmd)
-
-    def sql_backup(self, database, username,password):
-        conn = pyodbc.connect('DRIVER={SQL Server};SERVER=' + 'localhost' +
-                              ';DATABASE=' + database +
-                              ';UID=' + username +
-                              ';PWD=' + password)
-        cursor = conn.cursor()
-        backup_file = database + '_backup_' + str(datetime.now().strftime('%Y%m%d_%H%M%S')) + '.bak'
-        backup_command = 'BACKUP DATABASE ' + database + \
-                         ' TO DISK=\'' + os.path.join(self.backup_location, backup_file) + '\''
-        cursor.execute(backup_command)
-        backup_details = {'database': [database], 'backup_file': [backup_file], 'backup_datetime': [datetime.now()]}
-        backup_df = pd.DataFrame(data=backup_details)
-
-        backup_details_file = os.path.join(self.backup_location, 'backup_details.csv')
-        backup_df.to_csv(backup_details_file, index=False)

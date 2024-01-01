@@ -51,6 +51,7 @@ def run_scheduler():
     # schedule.every(15).minutes.do(schedule_handler, func=cctv.run_code)
     schedule.every().day.at("05:00").do(schedule_handler, func=my_shows.run_code)
     schedule.every().day.at("07:00").do(schedule_handler, func=cctv.run_code)
+    schedule.every().day.at("09:00").do(schedule_handler, func=global_var.backup.backup_databases)
 
     while exit_condition:
         schedule.run_pending()

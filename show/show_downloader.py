@@ -1,11 +1,9 @@
 import feedparser
-import os
 import time
 import global_var
 import logger
 import settings
 from communication import communicator
-from database_manager.json_editor import JSONEditor
 from database_manager.sql_connector import SQLConnector
 from show import transmission
 
@@ -26,6 +24,7 @@ def quality_extract(topic):
 class ShowDownloader:
     telepot_chat_group = "show"
     telepot_account = "main"
+    source = "SHOW"
 
     def __init__(self):
         self.database = SQLConnector(settings.database_user, settings.database_password, 'entertainment')
@@ -44,7 +43,7 @@ class ShowDownloader:
                     f'WHERE episode_name="{episode_name}" AND name="{x.tv_show_name}";'
 
             show_exists = self.database.run_sql(query=query)
-            logger.log(f'SQL > {query} RESULT > {show_exists}')
+            logger.log(f'SQL > {query} RESULT > {show_exists}', source=self.source)
 
             if show_exists[0] == 0:
                 found = False
@@ -67,13 +66,13 @@ class ShowDownloader:
                 columns = "name, episode_id, episode_name, magnet, quality, torrent_name"
                 val = (row[4], row[0], row[1], row[2], str(row[3]), str(torrent_id))
                 self.database.insert('tv_show', columns, val)
-                logger.log(torrent_id, source="TOR")
+                logger.log(torrent_id, source=self.source)
 
                 message = str(row[1]) + " added at " + str(row[3]) + " torrent id = " + str(torrent_id)
                 communicator.send_to_group(self.telepot_account,
                                            message,
                                            group=self.telepot_chat_group)
-                logger.log(message, source="SHOW")
+                logger.log(message, source=self.source)
                 time.sleep(3)
             else:
                 logger.log("Torrent Add Failed: " + str(row[2]), source="TOR", message_type="error")
