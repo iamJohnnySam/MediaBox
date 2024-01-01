@@ -1,3 +1,4 @@
+import math
 import threading
 import feedparser
 import telepot
@@ -106,16 +107,16 @@ class Communicator(CommunicatorBase):
         columns = 'transaction_by, amount'
         val = (chat_id, amount)
         success, sql_id = self.finance_sql.insert('transaction_lkr', columns, val, get_id=True)
-        identifier = str(sql_id) + " "
+        identifier = str(sql_id) + ";"
 
         self.send_message_with_keyboard(msg=f'Is LKR {value} an income or expense?',
                                         chat_id=chat_id,
                                         button_text=["Income", "Expense", "Invest", "Delete"],
                                         button_cb=["finance", "finance", "finance", "finance"],
-                                        button_val=[identifier + "income",
-                                                    identifier + "expense",
-                                                    identifier + "invest",
-                                                    identifier + "delete"],
+                                        button_val=[identifier + "1;income",
+                                                    identifier + "1;expense",
+                                                    identifier + "1;invest",
+                                                    identifier + "1;delete"],
                                         arrangement=[3, 1],
                                         reply_to=message_id
                                         )
@@ -414,12 +415,41 @@ class Communicator(CommunicatorBase):
         self.bot.answerCallbackQuery(query_id, text='Downloaded')
 
     def cb_finance(self, callback_id, query_id, from_id, value):
-        self.update_in_line_buttons(callback_id)
+        message_id = self.update_in_line_buttons(callback_id)
         self.bot.answerCallbackQuery(query_id, text='Got it')
 
-        data = value.split(" ")
-        if len(data) == 2:
-            pass
+        data = value.split(";")
+        if data[1] == "1":
+            query = f'SELECT DISTINCT type FROM transaction_lkr WHERE in_out = "{data[2]}"'
+            result = list(self.finance_sql.run_sql(query, fetch_all=True))
+
+            button_text, button_cb, button_value, arrangement = self.keyboard_extractor(data[0], "2", result)
+
+            self.send_message_with_keyboard(msg="What was the type of expense?",
+                                            chat_id=from_id,
+                                            button_text=button_text,
+                                            button_cb=button_cb,
+                                            button_val=button_text,
+                                            arrangement=arrangement,
+                                            reply_to=message_id
+                                            )
+        elif data[1] == "2":
+            query = f'SELECT DISTINCT category FROM transaction_lkr WHERE type = "{data[2]}"'
+            result = list(self.finance_sql.run_sql(query, fetch_all=True))
+
+            button_text, button_cb, button_value, arrangement = self.keyboard_extractor(data[0], "3", result)
+
+            self.send_message_with_keyboard(msg="What was the category of expense?",
+                                            chat_id=from_id,
+                                            button_text=button_text,
+                                            button_cb=button_cb,
+                                            button_val=button_text,
+                                            arrangement=arrangement,
+                                            reply_to=message_id
+                                            )
+
+
+
 
     def cb_feed(self, callback_id, query_id, from_id, value):
         if callback_id is not None:

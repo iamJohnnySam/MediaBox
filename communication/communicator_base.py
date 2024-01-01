@@ -1,3 +1,4 @@
+import math
 from datetime import datetime
 
 import telepot
@@ -195,6 +196,7 @@ class CommunicatorBase:
         logger.log("Buttons to remove from message id " + str(message['message_id']), self.source)
         message_id = telepot.message_identifier(message)
         self.bot.editMessageReplyMarkup(message_id, reply_markup=keyboard)
+        return message_id
 
     def send_message_with_keyboard(self, msg, chat_id, button_text, button_cb, button_val,
                                    arrangement, reply_to=None):
@@ -226,6 +228,19 @@ class CommunicatorBase:
                                 reply_to=reply_to)
 
         self.link_msg_to_buttons(message, button_ids)
+
+    def keyboard_extractor(self, identifier, num, result):
+        button_text = [row[0] for row in result]
+        button_text.append("Delete")
+        button_cb = ['finance'] * (len(button_text) + 1)
+        button_value = []
+        for text in button_text:
+            button_value.append(f'{identifier};{num};{text}')
+        arrangement = [3 for i in range(int(math.floor(len(button_text) / 3)))]
+        arrangement.append(len(button_text) % 3)
+        arrangement.append(1)
+
+        return button_text, button_cb, button_value, arrangement
 
 
 

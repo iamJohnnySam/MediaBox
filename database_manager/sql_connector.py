@@ -25,7 +25,7 @@ class SQLConnector:
         else:
             return True
 
-    def run_sql(self, query, fetch_all=0):
+    def run_sql(self, query, fetch_all=False):
         self.cursor.execute(query)
         if fetch_all:
             result = self.cursor.fetchall()
