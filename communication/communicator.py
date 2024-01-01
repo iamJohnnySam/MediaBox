@@ -448,10 +448,8 @@ class Communicator(CommunicatorBase):
 
         if len(data) == 4:
             day_total = 0.0
-
             query = f'SELECT amount FROM feed WHERE date = "{data[0]}"'
             result = list(self.baby_sql.run_sql(query, fetch_all=1))
-
             for val in result:
                 day_total = day_total + val[0]
             day_total = day_total + float(data[2])
@@ -493,10 +491,19 @@ class Communicator(CommunicatorBase):
             else:
                 emoji = '\U0001F6BC \U0001F4A9 '
 
+        day_total = 0
+        query = f'SELECT count FROM diaper WHERE date = "{data[0]}"'
+        result = list(self.baby_sql.run_sql(query, fetch_all=1))
+        for val in result:
+            day_total = day_total + val[0]
+        day_total = day_total + float(data[2])
+
         self.send_to_group("baby",
                            emoji + "\n" +
                            data[2] + " diaper recorded on " + data[0] + " at " + data[1] +
-                           ". \nUse /diaper to submit a new entry.")
+                           ". \nYour baby has had " + str(day_total) + "nappy/diaper changes today\n" +
+                           "Use /diaper to submit a new entry or\n" +
+                           "Use /diaper_history to see the history.")
 
 
 telepot_lock = threading.Lock()
