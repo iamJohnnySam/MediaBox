@@ -531,7 +531,6 @@ class Communicator(CommunicatorBase):
         result = list(self.baby_sql.run_sql(query, fetch_all=1))
         for val in result:
             day_total = day_total + val[0]
-        day_total = day_total + float(data[2])
 
         self.send_to_group("baby",
                            emoji + "\n" +
