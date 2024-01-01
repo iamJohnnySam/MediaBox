@@ -39,9 +39,9 @@ class ShowDownloader:
         for x in feed.entries:
             episode_name, episode_quality = quality_extract(x.title)
 
-            show_exists = self.database.run_sql(f"SELECT COUNT(1) "
-                                                f"FROM tv_show "
-                                                f"WHERE episode_name='{episode_name}' AND name='{x.tv_show_name}';")
+            show_exists = self.database.run_sql(f'SELECT COUNT(1) '
+                                                f'FROM tv_show '
+                                                f'WHERE episode_name="{episode_name}" AND name="{x.tv_show_name}";')
 
             if not show_exists:
                 found = False
