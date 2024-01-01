@@ -9,7 +9,6 @@ import settings
 from charts.grapher import grapher_trend, grapher_simple_trend, grapher_category
 
 from communication.communicator_base import CommunicatorBase
-from database_manager import sql_connector
 from database_manager.json_editor import JSONEditor
 from database_manager.sql_connector import SQLConnector
 from show import transmission

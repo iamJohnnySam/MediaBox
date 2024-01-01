@@ -17,8 +17,8 @@ sql = SQLConnector(settings.database_user, settings.database_password, 'baby')
 #     val = (data[key]['date'], data[key]['time'], data[key]['what'], 1)
 #     sql.insert('diaper', columns, val)
 
-data = JSONEditor(global_var.baby_weight_database).read()
-for key in data.keys():
-    columns = "date, weight"
-    val = (key, float(data[key]))
-    sql.insert('weight', columns, val)
+# data = JSONEditor(global_var.baby_weight_database).read()
+# for key in data.keys():
+#     columns = "date, weight"
+#     val = (key, float(data[key]))
+#     sql.insert('weight', columns, val)

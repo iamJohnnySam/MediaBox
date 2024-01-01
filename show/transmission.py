@@ -1,4 +1,3 @@
-import requests
 from transmission_rpc import Client
 
 import logger

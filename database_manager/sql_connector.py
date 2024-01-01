@@ -1,7 +1,6 @@
 import mysql.connector
 
 import logger
-import settings
 
 
 # http://192.168.1.32/phpmyadmin
