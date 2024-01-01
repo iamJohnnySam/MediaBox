@@ -422,7 +422,7 @@ class Communicator(CommunicatorBase):
 
         data = value.split(";")
         if data[1] == "1":
-            query = f'SELECT DISTINCT type FROM transaction_lkr WHERE in_out = "{data[2]}"'
+            query = f'SELECT DISTINCT type FROM categories WHERE in_out = "{data[2]}"'
             result = list(self.finance_sql.run_sql(query, fetch_all=True))
 
             button_text, button_cb, button_value, arrangement = self.keyboard_extractor(data[0], "2", result)
@@ -436,7 +436,7 @@ class Communicator(CommunicatorBase):
                                             reply_to=message_id
                                             )
         elif data[1] == "2":
-            query = f'SELECT DISTINCT category FROM transaction_lkr WHERE type = "{data[2]}"'
+            query = f'SELECT DISTINCT category FROM categories WHERE type = "{data[2]}"'
             result = list(self.finance_sql.run_sql(query, fetch_all=True))
 
             button_text, button_cb, button_value, arrangement = self.keyboard_extractor(data[0], "3", result)
