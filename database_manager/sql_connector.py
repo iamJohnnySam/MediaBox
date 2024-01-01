@@ -29,6 +29,7 @@ class SQLConnector:
     def run_sql(self, query):
         self.cursor.execute(query)
         result = self.cursor.fetchone()
+        logger.log(query, source=self.source)
         return result
 
     def insert(self, table, columns, val, get_id=False, id_column=None):

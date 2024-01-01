@@ -6,7 +6,7 @@ import logger
 from datetime import datetime
 import global_var
 import settings
-from charts.grapher import grapher_category_dictionary, grapher_trend, grapher_simple_trend
+from charts.grapher import grapher_trend, grapher_simple_trend, grapher_category
 
 from communication.communicator_base import CommunicatorBase
 from database_manager import sql_connector
@@ -138,26 +138,19 @@ class Communicator(CommunicatorBase):
 
         key = datetime.now().strftime('%Y/%m/%d')
 
+        query = 'SELECT date, weight FROM weight ORDER BY ID DESC LIMIT 1";'
+        last_entry = self.baby_sql.run_sql(query=query)
+
         columns = "date, weight, added_by"
         val = (key, weight, str(chat_id))
         self.baby_sql.insert('weight', columns, val)
 
-        val = {key: weight}
+        send_string = "\U0001F37C \U0001F3C6 \n" + \
+                      "Baby Weight Added - " + value + "kg. \nThat's a weight gain of " + \
+                      "{:10.2f}".format(weight - last_entry[1]) + "kg since " + str(last_entry[0]) + "."
 
-        database = JSONEditor(global_var.baby_weight_database)
-        if key in database.read().keys():
-            self.send_now("Entry for today is already existing", chat=chat_id, reply_to=message_id)
-            logger.log("Date already existing - " + value, source=self.source)
-        else:
-            last_weight = float(list(database.read().values())[-1])
-            last_date = list(database.read())[-1]
-
-            database.add_level1(val)
-            send_string = "Baby Weight Added - " + value + "kg. \nThat's a weight gain of " + \
-                          "{:10.2f}".format(weight - last_weight) + "kg since " + str(last_date) + "."
-
-            logger.log(send_string, source=self.source)
-            self.baby_weight_trend(msg, chat_id, message_id, value, caption=send_string)
+        logger.log(send_string, source=self.source)
+        self.baby_weight_trend(msg, chat_id, message_id, value, caption=send_string)
 
     def add_me_to_cctv(self, msg, chat_id, message_id, value):
         self.send_now("Function Not yet implemented",
@@ -237,36 +230,36 @@ class Communicator(CommunicatorBase):
                                         )
 
     def baby_feed_history(self, msg, chat_id, message_id, value):
-        pic = grapher_category_dictionary(graph_dict=JSONEditor(global_var.baby_feed_database).read(),
-                                          x_column="date",
-                                          cat_column="source",
-                                          data_column="ml",
-                                          x_name="Date",
-                                          y_name="Amount (ml)",
-                                          chart_title="Feed History - " + datetime.now().strftime('%Y-%m-%d %H:%M'))
+        query = 'SELECT date, source, amount FROM feed ORDER BY timestamp'
+        result = list(self.baby_sql.run_sql(query))
+
+        pic = grapher_category(graph_list=result,
+                               x_name="Date",
+                               y_name="Amount (ml)",
+                               chart_title="Feed History - " + datetime.now().strftime('%Y-%m-%d %H:%M'))
         self.send_now(pic,
                       image=True,
                       chat=chat_id,
                       reply_to=message_id)
 
     def baby_diaper_history(self, msg, chat_id, message_id, value):
-        pic = grapher_category_dictionary(graph_dict=JSONEditor(global_var.baby_diaper_database).read(),
-                                          x_column="date",
-                                          cat_column="what",
-                                          data_column="count",
-                                          x_name="Date",
-                                          y_name="Diapers",
-                                          chart_title="Diaper History - " + datetime.now().strftime('%Y-%m-%d %H:%M'))
+        query = 'SELECT date, what, count FROM diaper ORDER BY timestamp'
+        result = list(self.baby_sql.run_sql(query))
+
+        pic = grapher_category(graph_list=result,
+                               x_name="Date",
+                               y_name="Diapers",
+                               chart_title="Diaper History - " + datetime.now().strftime('%Y-%m-%d %H:%M'))
         self.send_now(pic,
                       image=True,
                       chat=chat_id,
                       reply_to=message_id)
 
     def baby_feed_trend(self, msg, chat_id, message_id, value):
-        pic = grapher_trend(graph_dict=JSONEditor(global_var.baby_feed_database).read(),
-                            t_column="time",
-                            cat_column="source",
-                            data_column="ml",
+        query = 'SELECT time, source, amount FROM feed ORDER BY timestamp'
+        result = list(self.baby_sql.run_sql(query))
+
+        pic = grapher_trend(graph_list=result,
                             x_name="Time of Day (round to nearest hour)",
                             y_name="Source",
                             chart_title="Feed Trend - " + datetime.now().strftime('%Y-%m-%d %H:%M'),
@@ -277,10 +270,10 @@ class Communicator(CommunicatorBase):
                       reply_to=message_id)
 
     def baby_diaper_trend(self, msg, chat_id, message_id, value):
-        pic = grapher_trend(graph_dict=JSONEditor(global_var.baby_diaper_database).read(),
-                            t_column="time",
-                            cat_column="what",
-                            data_column="count",
+        query = 'SELECT time, what, count FROM diaper ORDER BY timestamp'
+        result = list(self.baby_sql.run_sql(query))
+
+        pic = grapher_trend(graph_list=result,
                             x_name="Time of Day (round to nearest hour)",
                             y_name="Type",
                             chart_title="Diaper Trend - " + datetime.now().strftime('%Y-%m-%d %H:%M'),
@@ -291,10 +284,10 @@ class Communicator(CommunicatorBase):
                       reply_to=message_id)
 
     def baby_feed_trend_date(self, msg, chat_id, message_id, value):
-        pic = grapher_trend(graph_dict=JSONEditor(global_var.baby_feed_database).read(),
-                            t_column="time",
-                            cat_column="date",
-                            data_column="ml",
+        query = 'SELECT time, date, amount FROM feed ORDER BY timestamp'
+        result = list(self.baby_sql.run_sql(query))
+
+        pic = grapher_trend(graph_list=result,
                             x_name="Time of Day (round to nearest hour)",
                             y_name="Amount (ml)",
                             chart_title="Feed Trend - " + datetime.now().strftime('%Y-%m-%d %H:%M'))
@@ -304,10 +297,10 @@ class Communicator(CommunicatorBase):
                       reply_to=message_id)
 
     def baby_diaper_trend_date(self, msg, chat_id, message_id, value):
-        pic = grapher_trend(graph_dict=JSONEditor(global_var.baby_diaper_database).read(),
-                            t_column="time",
-                            cat_column="date",
-                            data_column="count",
+        query = 'SELECT time, date, count FROM diaper ORDER BY timestamp'
+        result = list(self.baby_sql.run_sql(query))
+
+        pic = grapher_trend(graph_list=result,
                             x_name="Time of Day (round to nearest hour)",
                             y_name="Diapers",
                             chart_title="Diaper Trend - " + datetime.now().strftime('%Y-%m-%d %H:%M'))
@@ -317,10 +310,10 @@ class Communicator(CommunicatorBase):
                       reply_to=message_id)
 
     def baby_feed_trend_cat(self, msg, chat_id, message_id, value):
-        pic = grapher_trend(graph_dict=JSONEditor(global_var.baby_feed_database).read(),
-                            t_column="time",
-                            cat_column="source",
-                            data_column="ml",
+        query = 'SELECT time, source, amount FROM feed ORDER BY timestamp'
+        result = list(self.baby_sql.run_sql(query))
+
+        pic = grapher_trend(graph_list=result,
                             x_name="Time of Day (round to nearest hour)",
                             y_name="Amount (ml)",
                             chart_title="Feed Trend - " + datetime.now().strftime('%Y-%m-%d %H:%M'))
@@ -330,10 +323,10 @@ class Communicator(CommunicatorBase):
                       reply_to=message_id)
 
     def baby_diaper_trend_cat(self, msg, chat_id, message_id, value):
-        pic = grapher_trend(graph_dict=JSONEditor(global_var.baby_feed_database).read(),
-                            t_column="time",
-                            cat_column="what",
-                            data_column="count",
+        query = 'SELECT time, what, count FROM diaper ORDER BY timestamp'
+        result = list(self.baby_sql.run_sql(query))
+
+        pic = grapher_trend(graph_list=result,
                             x_name="Time of Day (round to nearest hour)",
                             y_name="Number of Diapers",
                             chart_title="Diaper Trend - " + datetime.now().strftime('%Y-%m-%d %H:%M'))
@@ -343,10 +336,13 @@ class Communicator(CommunicatorBase):
                       reply_to=message_id)
 
     def baby_weight_trend(self, msg, chat_id, message_id, value, caption=None):
-        if caption is None:
-            caption = "Baby Weight trend. Add new weight using /weight command"
+        query = 'SELECT date, weight FROM weight ORDER BY timestamp'
+        result = list(self.baby_sql.run_sql(query))
 
-        pic = grapher_simple_trend(graph_dict=JSONEditor(global_var.baby_weight_database).read(),
+        if caption is None:
+            caption = "\U0001F37C \U0001F3C6 \nBaby Weight trend. Add new weight using /weight command"
+
+        pic = grapher_simple_trend(graph_list=result,
                                    x_name="Date",
                                    y_name="Weight (kg)",
                                    chart_title="Baby Weight Trend - " + datetime.now().strftime('%Y-%m-%d %H:%M'))
@@ -448,20 +444,12 @@ class Communicator(CommunicatorBase):
             val = (data[0], data[1], float(data[2]), data[3], str(from_id))
             self.baby_sql.insert('feed', columns, val)
 
-            write_data = {str(data[0]) + " " + str(data[1]): {"date": data[0],
-                                                              "time": data[1],
-                                                              "ml": data[2],
-                                                              "source": data[3]}}
-            JSONEditor(global_var.baby_feed_database).add_level1(write_data)
-
             self.send_to_group("baby",
-                               # "resources/baby_milk.png",
-                               # True,
                                "\U0001F37C \n" +
                                "Baby was fed " + data[2] + "ml on " + data[0] +
                                " at " + data[1] + " with " + data[3] +
-                               " milk. \n For today your baby has had " + "{:10.1f}".format(day_total) +
-                               "ml of milk\n Use /feed to submit a new entry or\n " +
+                               " milk. \nFor today your baby has had " + "{:10.1f}".format(day_total) +
+                               "ml of milk\nUse /feed to submit a new entry or\n" +
                                "Use /feed_history to see the history.")
 
     def cb_diaper(self, callback_id, query_id, from_id, value):
@@ -480,38 +468,19 @@ class Communicator(CommunicatorBase):
             self.baby_sql.insert('diaper', columns, val)
             val = (data[0], data[1], "pee", 1, str(from_id))
             self.baby_sql.insert('diaper', columns, val)
-
-            write_data = {str(data[0]) + " " + str(data[1]): {"date": data[0],
-                                                              "time": data[1],
-                                                              "what": "poo",
-                                                              "count": 1}}
-            JSONEditor(global_var.baby_diaper_database).add_level1(write_data)
-            write_data = {str(data[0]) + " " + str(data[1] + "1"): {"date": data[0],
-                                                                    "time": data[1],
-                                                                    "what": "pee",
-                                                                    "count": 1}}
-            JSONEditor(global_var.baby_diaper_database).add_level1(write_data)
             emoji = '\U0001F6BC \U0001F4A6 \U0001F4A9 '
         else:
             val = (data[0], data[1], data[2], 1, str(from_id))
             self.baby_sql.insert('diaper', columns, val)
-
-            write_data = {str(data[0]) + " " + str(data[1]): {"date": data[0],
-                                                              "time": data[1],
-                                                              "what": data[2],
-                                                              "count": 1}}
-            JSONEditor(global_var.baby_diaper_database).add_level1(write_data)
             if data[2] == "pee":
                 emoji = '\U0001F6BC \U0001F4A6 '
             else:
                 emoji = '\U0001F6BC \U0001F4A9 '
 
         self.send_to_group("baby",
-                           # "resources/baby_diaper.png",
-                           # True,
                            emoji + "\n" +
                            data[2] + " diaper recorded on " + data[0] + " at " + data[1] +
-                           ". \n Use /diaper to submit a new entry.")
+                           ". \nUse /diaper to submit a new entry.")
 
 
 telepot_lock = threading.Lock()

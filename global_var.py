@@ -46,12 +46,6 @@ cctv_model2_google = 'https://drive.google.com/file/d/1qkNWVF28CRyTo96fLCgB2BvEL
 cctv_model1 = "cctv/nn_models/modelA01.tflite"
 cctv_model2 = "cctv/nn_models/modelA02.tflite"
 
-baby_feed_database = 'database/baby_feed.json'
-baby_diaper_database = 'database/baby_diaper.json'
-baby_weight_database = 'database/baby_weight.json'
-backup.copy_files.append(baby_feed_database)
-backup.copy_files.append(baby_diaper_database)
-backup.copy_files.append(baby_weight_database)
 backup.databases.append('baby')
 
 

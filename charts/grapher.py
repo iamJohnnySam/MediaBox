@@ -16,43 +16,44 @@ def convert_to_date(val):
     return x
 
 
-def extractor(graph_dict, x_column, cat_column, data_column, convert_time=False):
+def extractor(x_column, categories, y_column, convert_time=False):
     data = {}
     total_data = {}
 
     x_column_values = []
-    for val in graph_dict.keys():
-        if graph_dict[val][x_column] not in x_column_values:
-            x_column_values.append(graph_dict[val][x_column])
+    for x in x_column:
+        if x not in x_column_values:
+            if convert_time:
+                x_column_values.append(convert_to_time(x))
+            else:
+                x_column_values.append(x)
 
-    for val in graph_dict.keys():
-        if convert_time:
-            x = convert_to_time(graph_dict[val][x_column])
-        else:
-            x = graph_dict[val][x_column]
-
-        category = graph_dict[val][cat_column]
-
-        if category not in data.keys():
-            data[category] = {}
+    i = 0
+    for cat in categories:
+        if cat not in data.keys():
+            data[cat] = {}
             for x_column_value in x_column_values:
-                data[category][x_column_value] = 0
+                data[cat][x_column_value] = 0
 
-        data[category][x] = data[category][x] + float(graph_dict[val][data_column])
+        data[cat][x_column[i]] = data[cat][x_column[i]] + float(y_column[i])
 
-        if x in total_data.keys():
-            total_data[x] = total_data[x] + float(graph_dict[val][data_column])
+        if x_column[i] in total_data.keys():
+            total_data[x_column[i]] = total_data[x_column[i]] + float(y_column[i])
         else:
-            total_data[x] = float(graph_dict[val][data_column])
+            total_data[x_column[i]] = float(y_column[i])
+        i = i+1
 
     return data, total_data
 
 
-def grapher_category_dictionary(graph_dict, x_column, cat_column, data_column, x_name, y_name, chart_title):
+def grapher_category(graph_list, x_name, y_name, chart_title):
     colors = ['b', 'g', 'r', 'c', 'm', 'y']
     color_val = 0
 
-    data, total_data = extractor(graph_dict, x_column, cat_column, data_column)
+    x_column = [row[0] for row in graph_list]
+    categories = [row[1] for row in graph_list]
+    y_column = [row[2] for row in graph_list]
+    data, total_data = extractor(x_column, categories, y_column)
 
     fig1 = plt.figure()
     fig1.set_figwidth(10)
@@ -81,9 +82,11 @@ def grapher_category_dictionary(graph_dict, x_column, cat_column, data_column, x
     return fig_path
 
 
-def grapher_trend(graph_dict, t_column, cat_column, data_column, x_name, y_name, chart_title, size=False):
+def grapher_trend(graph_list, x_name, y_name, chart_title, size=False):
     colors = ['b', 'g', 'r', 'c', 'm', 'y']
     color_val = 0
+
+    t_column = [row[0] for row in graph_list]
 
     fig1 = plt.figure()
     fig1.set_figwidth(10)
@@ -91,13 +94,11 @@ def grapher_trend(graph_dict, t_column, cat_column, data_column, x_name, y_name,
 
     if size:
         t_data = []
-        y_data = []
-        size_data = []
+        y_data = [row[1] for row in graph_list]
+        size_data = [row[2] for row in graph_list]
 
-        for key in graph_dict.keys():
-            t_data.append(convert_to_time(graph_dict[key][t_column]))
-            y_data.append(graph_dict[key][cat_column])
-            size_data.append(float(graph_dict[key][data_column]))
+        for t in t_column:
+            t_data.append(convert_to_time(t))
 
         plt.scatter(t_data, y_data,
                     c=size_data,
@@ -106,7 +107,9 @@ def grapher_trend(graph_dict, t_column, cat_column, data_column, x_name, y_name,
                     cmap="jet")
 
     else:
-        data, total_data = extractor(graph_dict, t_column, cat_column, data_column, convert_time=True)
+        data, total_data = extractor([row[0] for row in graph_list],
+                                     [row[1] for row in graph_list],
+                                     [row[2] for row in graph_list], convert_time=True)
         for cat in data.keys():
             plt.scatter(list(data[cat].keys()), list(data[cat].values()),
                         color=colors[color_val],
@@ -128,19 +131,12 @@ def grapher_trend(graph_dict, t_column, cat_column, data_column, x_name, y_name,
     return fig_path
 
 
-def grapher_simple_trend(graph_dict, x_name, y_name, chart_title):
+def grapher_simple_trend(graph_list, x_name, y_name, chart_title):
     fig1 = plt.figure()
     fig1.set_figwidth(10)
     fig1.set_figheight(5)
 
-    x_data = []
-    y_data = []
-
-    for key in graph_dict.keys():
-        x_data.append(convert_to_date(key))
-        y_data.append(float(graph_dict[key]))
-
-    plt.plot(x_data, y_data)
+    plt.plot([row[0] for row in graph_list], [row[1] for row in graph_list])
 
     plt.title(chart_title)
     plt.xlabel(x_name)
