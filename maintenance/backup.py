@@ -86,7 +86,8 @@ class BackUp:
             backup_file = f'{database}_database_backup.sql'
             backup_file_path = os.path.join(self.backup_location, backup_file)
 
-            mysqldump_cmd = f'mysqldump -h localhost -u {settings.database_user} -p {settings.database_password} {database} > {backup_file_path}'
+            mysqldump_cmd = f'mysqldump -h localhost -u {settings.database_user} -p{settings.database_password}' \
+                            f' {database} > {backup_file_path}'
             os.system(mysqldump_cmd)
 
             gzip_cmd = f'gzip {backup_file_path}'
