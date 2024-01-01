@@ -20,5 +20,5 @@ sql = SQLConnector(settings.database_user, settings.database_password, 'baby')
 data = JSONEditor(global_var.baby_weight_database).read()
 for key in data.keys():
     columns = "date, weight"
-    val = (key, float(data['weight']))
+    val = (key, float(data[key]))
     sql.insert('weight', columns, val)
