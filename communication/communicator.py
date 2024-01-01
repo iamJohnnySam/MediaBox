@@ -145,7 +145,7 @@ class Communicator(CommunicatorBase):
         val = (key, weight, str(chat_id))
         self.baby_sql.insert('weight', columns, val)
 
-        send_string = "\U0001F37C \U0001F3C6 \n" + \
+        send_string = "\U0001F6BC \U0001F3C6 \n" + \
                       "Baby Weight Added - " + value + "kg. \nThat's a weight gain of " + \
                       "{:10.2f}".format(weight - last_entry[1]) + "kg since " + str(last_entry[0]) + "."
 
