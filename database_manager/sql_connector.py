@@ -45,7 +45,7 @@ class SQLConnector:
         self.my_db.commit()
 
         if get_id:
-            self.cursor.execute(f'SELECT {id_column} FROM {table} ORDER BY ID DESC LIMIT 1')
+            self.cursor.execute(f'SELECT {id_column} FROM {table} ORDER BY {id_column} DESC LIMIT 1')
             result = self.cursor.fetchone()
             last_id = result[0]
             return True, last_id
