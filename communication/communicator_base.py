@@ -202,6 +202,9 @@ class CommunicatorBase:
                                    arrangement, reply_to=None):
         if len(button_text) == 0 or len(button_text) != len(button_cb) or len(button_text) != len(button_val):
             logger.log("Keyboard Generation error: " + str(msg), source=self.source, message_type="error")
+            logger.log("Button Text Length" + str(len(button_text)), source=self.source, message_type="error")
+            logger.log("Button CB Length" + str(len(button_cb)), source=self.source, message_type="error")
+            logger.log("Button Value Length" + str(len(button_val)), source=self.source, message_type="error")
             return
 
         button_ids = []
@@ -231,14 +234,14 @@ class CommunicatorBase:
 
     def keyboard_extractor(self, identifier, num, result):
         button_text = [row[0] for row in result]
-        button_text.append("Delete")
-        button_cb = ['finance'] * (len(button_text) + 1)
+        button_cb = ['finance'] * len(button_text)
         button_value = []
         for text in button_text:
             button_value.append(f'{identifier};{num};{text}')
         arrangement = [3 for i in range(int(math.floor(len(button_text) / 3)))]
         arrangement.append(len(button_text) % 3)
         arrangement.append(1)
+        logger.log("Keyboard extracted > " + str(arrangement))
 
         return button_text, button_cb, button_value, arrangement
 

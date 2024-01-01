@@ -426,6 +426,9 @@ class Communicator(CommunicatorBase):
             result = list(self.finance_sql.run_sql(query, fetch_all=True))
 
             button_text, button_cb, button_value, arrangement = self.keyboard_extractor(data[0], "2", result)
+            button_text.append("Delete")
+            button_cb.append("finance")
+            button_value.append(f'{data[2]};2;Delete')
 
             self.send_message_with_keyboard(msg="What was the type of expense?",
                                             chat_id=from_id,
