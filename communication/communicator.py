@@ -473,7 +473,7 @@ class Communicator(CommunicatorBase):
 
         data = value.split(" ")
 
-        columns = "date, time, what, source, added_by"
+        columns = "date, time, what, count, added_by"
 
         if data[2] == "pp":
             val = (data[0], data[1], "poo", 1, str(from_id))
