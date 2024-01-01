@@ -29,6 +29,7 @@ class SQLConnector:
             placeholder = placeholder + ", %s"
 
         sql = "INSERT INTO " + table + " (" + columns + ") VALUES (" + placeholder + ")"
+        print(sql)
         try:
             self.my_cursor.execute(sql, val)
             self.my_db.commit()
