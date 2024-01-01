@@ -231,7 +231,7 @@ class Communicator(CommunicatorBase):
 
     def baby_feed_history(self, msg, chat_id, message_id, value):
         query = 'SELECT date, source, amount FROM feed ORDER BY timestamp'
-        result = list(self.baby_sql.run_sql(query))
+        result = list(self.baby_sql.run_sql(query, fetch_all=1))
 
         pic = grapher_category(graph_list=result,
                                x_name="Date",
@@ -244,7 +244,7 @@ class Communicator(CommunicatorBase):
 
     def baby_diaper_history(self, msg, chat_id, message_id, value):
         query = 'SELECT date, what, count FROM diaper ORDER BY timestamp'
-        result = list(self.baby_sql.run_sql(query))
+        result = list(self.baby_sql.run_sql(query, fetch_all=1))
 
         pic = grapher_category(graph_list=result,
                                x_name="Date",
@@ -257,7 +257,7 @@ class Communicator(CommunicatorBase):
 
     def baby_feed_trend(self, msg, chat_id, message_id, value):
         query = 'SELECT time, source, amount FROM feed ORDER BY timestamp'
-        result = list(self.baby_sql.run_sql(query))
+        result = list(self.baby_sql.run_sql(query, fetch_all=1))
 
         pic = grapher_trend(graph_list=result,
                             x_name="Time of Day (round to nearest hour)",
@@ -271,7 +271,7 @@ class Communicator(CommunicatorBase):
 
     def baby_diaper_trend(self, msg, chat_id, message_id, value):
         query = 'SELECT time, what, count FROM diaper ORDER BY timestamp'
-        result = list(self.baby_sql.run_sql(query))
+        result = list(self.baby_sql.run_sql(query, fetch_all=1))
 
         pic = grapher_trend(graph_list=result,
                             x_name="Time of Day (round to nearest hour)",
@@ -285,7 +285,7 @@ class Communicator(CommunicatorBase):
 
     def baby_feed_trend_date(self, msg, chat_id, message_id, value):
         query = 'SELECT time, date, amount FROM feed ORDER BY timestamp'
-        result = list(self.baby_sql.run_sql(query))
+        result = list(self.baby_sql.run_sql(query, fetch_all=1))
 
         pic = grapher_trend(graph_list=result,
                             x_name="Time of Day (round to nearest hour)",
@@ -298,7 +298,7 @@ class Communicator(CommunicatorBase):
 
     def baby_diaper_trend_date(self, msg, chat_id, message_id, value):
         query = 'SELECT time, date, count FROM diaper ORDER BY timestamp'
-        result = list(self.baby_sql.run_sql(query))
+        result = list(self.baby_sql.run_sql(query, fetch_all=1))
 
         pic = grapher_trend(graph_list=result,
                             x_name="Time of Day (round to nearest hour)",
@@ -311,7 +311,7 @@ class Communicator(CommunicatorBase):
 
     def baby_feed_trend_cat(self, msg, chat_id, message_id, value):
         query = 'SELECT time, source, amount FROM feed ORDER BY timestamp'
-        result = list(self.baby_sql.run_sql(query))
+        result = list(self.baby_sql.run_sql(query, fetch_all=1))
 
         pic = grapher_trend(graph_list=result,
                             x_name="Time of Day (round to nearest hour)",
@@ -324,7 +324,7 @@ class Communicator(CommunicatorBase):
 
     def baby_diaper_trend_cat(self, msg, chat_id, message_id, value):
         query = 'SELECT time, what, count FROM diaper ORDER BY timestamp'
-        result = list(self.baby_sql.run_sql(query))
+        result = list(self.baby_sql.run_sql(query, fetch_all=1))
 
         pic = grapher_trend(graph_list=result,
                             x_name="Time of Day (round to nearest hour)",
@@ -337,7 +337,7 @@ class Communicator(CommunicatorBase):
 
     def baby_weight_trend(self, msg, chat_id, message_id, value, caption=None):
         query = 'SELECT date, weight FROM weight ORDER BY timestamp'
-        result = list(self.baby_sql.run_sql(query))
+        result = list(self.baby_sql.run_sql(query, fetch_all=1))
 
         if caption is None:
             caption = "\U0001F37C \U0001F3C6 \nBaby Weight trend. Add new weight using /weight command"
