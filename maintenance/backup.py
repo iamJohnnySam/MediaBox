@@ -68,6 +68,18 @@ class BackUp:
                 shutil.move(file_path, dst_path)
                 logger.log(f"Moved {file_path} -> {dst_path}", source=self.source)
 
+        for folder in self.move_png_files:
+            allfiles = glob.glob(os.path.join(folder, '*_A_*'), recursive=True)
+            destination = os.path.join(self.backup_location, folder)
+            if not os.path.exists(os.path.dirname(destination)):
+                os.makedirs(os.path.dirname(destination))
+
+            for file_path in allfiles:
+                dst_path = os.path.join(destination, os.path.basename(file_path))
+                if ".png" in dst_path:
+                    shutil.move(file_path, dst_path)
+                    logger.log(f"Moved {file_path} -> {dst_path}", source=self.source)
+
         for database in self.databases:
             self.sql_backup(database, settings.database_user, settings.database_password)
 

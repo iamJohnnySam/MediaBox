@@ -3,9 +3,9 @@ import csv
 import settings
 from database_manager.sql_connector import SQLConnector
 
-connector = SQLConnector(settings.database_user, settings.database_password, 'transactions', host='192.168.1.32')
+connector = SQLConnector(settings.database_user, settings.database_password, 'transactions')
 
-with open('C:\\Users\\johns\\Desktop\\categories.csv', newline='') as csvfile:
+with open('categories.csv', newline='') as csvfile:
     data = list(csv.reader(csvfile))
 
 val = []
