@@ -338,6 +338,7 @@ class Communicator(CommunicatorBase):
     def baby_weight_trend(self, msg, chat_id, message_id, value, caption=None):
         query = 'SELECT date, weight FROM weight ORDER BY timestamp'
         result = list(self.baby_sql.run_sql(query))
+        print(result)
 
         if caption is None:
             caption = "\U0001F37C \U0001F3C6 \nBaby Weight trend. Add new weight using /weight command"
