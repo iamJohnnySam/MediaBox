@@ -20,5 +20,5 @@ for key in data.keys():
 data = JSONEditor(global_var.baby_weight_database).read()
 for key in data.keys():
     columns = "date, weight"
-    val = (data[key]['date'], float(data[key]['weight']))
+    val = (key, float(data['weight']))
     sql.insert('weight', columns, val)
