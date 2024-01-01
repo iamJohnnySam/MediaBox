@@ -46,7 +46,7 @@ class ShowDownloader:
             show_exists = self.database.run_sql(query=query)
             logger.log(f'SQL > {query} RESULT > {show_exists}')
 
-            if show_exists == 0:
+            if show_exists[0] == 0:
                 found = False
                 if len(show_list) != 0:
                     for row in show_list:
