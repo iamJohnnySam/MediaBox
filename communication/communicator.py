@@ -23,6 +23,7 @@ class Communicator(CommunicatorBase):
     def __init__(self, telepot_account):
         super().__init__(telepot_account)
         self.baby_sql = SQLConnector(settings.database_user, settings.database_password, 'baby')
+        self.finance_sql = SQLConnector(settings.database_user, settings.database_password, 'transactions')
         self.source = "TG-C"
 
     def alive(self, msg, chat_id, message_id, value):
@@ -96,10 +97,19 @@ class Communicator(CommunicatorBase):
                           "command and type the amount\n /finance", chat=chat_id, reply_to=message_id)
             return
 
-        sql_id = sql_connector.insert('transactions', "amount", str(value), 'finance')
-        identifier = "transactions_" + str(sql_id) + "_"
+        try:
+            amount = float(value)
+        except ValueError:
+            self.send_now("Please type the amount after the command. You can press and hold this "
+                          "command and type the amount\n /finance", chat=chat_id, reply_to=message_id)
+            return
 
-        self.send_message_with_keyboard(msg="Let's fill some missing info",
+        columns = 'transaction_by, amount'
+        val = (chat_id, amount)
+        success, sql_id = self.finance_sql.insert('transaction_lkr', columns, val, get_id=True)
+        identifier = str(sql_id) + " "
+
+        self.send_message_with_keyboard(msg=f'Is LKR {value} an income or expense?',
                                         chat_id=chat_id,
                                         button_text=["Income", "Expense", "Invest", "Delete"],
                                         button_cb=["finance", "finance", "finance", "finance"],
@@ -405,7 +415,12 @@ class Communicator(CommunicatorBase):
         self.bot.answerCallbackQuery(query_id, text='Downloaded')
 
     def cb_finance(self, callback_id, query_id, from_id, value):
-        pass
+        self.update_in_line_buttons(callback_id)
+        self.bot.answerCallbackQuery(query_id, text='Got it')
+
+        data = value.split(" ")
+        if len(data) == 2:
+            pass
 
     def cb_feed(self, callback_id, query_id, from_id, value):
         if callback_id is not None:
@@ -434,10 +449,13 @@ class Communicator(CommunicatorBase):
 
         if len(data) == 4:
             day_total = 0.0
-            database = JSONEditor(global_var.baby_feed_database).read()
-            for key in database.keys():
-                if database[key]["date"] == data[0]:
-                    day_total = day_total + float(database[key]["ml"])
+
+            query = f'SELECT amount FROM feed WHERE date = {data[0]}'
+            result = list(self.baby_sql.run_sql(query, fetch_all=1))
+
+            for val in result:
+                day_total = day_total + val[0]
+
             day_total = day_total + float(data[2])
 
             columns = "date, time, amount, source, added_by"
