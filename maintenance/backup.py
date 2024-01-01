@@ -1,4 +1,6 @@
 import glob
+import time
+
 import pyodbc
 import os
 import shutil
@@ -76,12 +78,19 @@ class BackUp:
 
             for file_path in allfiles:
                 dst_path = os.path.join(destination, os.path.basename(file_path))
-                if ".png" in dst_path:
+                if ".png" in dst_path.lower():
                     shutil.move(file_path, dst_path)
                     logger.log(f"Moved {file_path} -> {dst_path}", source=self.source)
 
         for database in self.databases:
-            self.sql_backup(database, settings.database_user, settings.database_password)
+            backup_file = f'{database}_database_backup.sql'
+            backup_file_path = os.path.join(self.backup_location, backup_file)
+
+            mysqldump_cmd = f'mysqldump -h localhost -u {settings.database_user} -p {settings.database_password} {database} > {backup_file_path}'
+            os.system(mysqldump_cmd)
+
+            gzip_cmd = f'gzip {backup_file_path}'
+            os.system(gzip_cmd)
 
     def sql_backup(self, database, username,password):
         conn = pyodbc.connect('DRIVER={SQL Server};SERVER=' + 'localhost' +

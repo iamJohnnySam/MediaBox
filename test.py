@@ -3,9 +3,12 @@ import csv
 import settings
 from database_manager.sql_connector import SQLConnector
 
+
+# python MediaBox/test/test.py
+
 connector = SQLConnector(settings.database_user, settings.database_password, 'transactions')
 
-with open('categories.csv', newline='') as csvfile:
+with open('test/categories.csv', newline='') as csvfile:
     data = list(csv.reader(csvfile))
 
 val = []
