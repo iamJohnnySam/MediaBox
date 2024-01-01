@@ -436,19 +436,21 @@ class Communicator(CommunicatorBase):
                     day_total = day_total + float(database[key]["ml"])
             day_total = day_total + float(data[2])
 
-            self.send_to_group("baby",
-                               "resources/baby_milk.png",
-                               True,
-                               "Baby was fed " + data[2] + "ml on " + data[0] +
-                               " at " + data[1] + " with " + data[3] +
-                               " milk. \n For today your baby has had " + "{:10.1f}".format(day_total) +
-                               "ml of milk\n Use /feed to submit a new entry or\n " +
-                               "Use /feed_history to see the history.")
             write_data = {str(data[0]) + " " + str(data[1]): {"date": data[0],
                                                               "time": data[1],
                                                               "ml": data[2],
                                                               "source": data[3]}}
             JSONEditor(global_var.baby_feed_database).add_level1(write_data)
+
+            self.send_to_group("baby",
+                               # "resources/baby_milk.png",
+                               # True,
+                               "\U0001F37C" +
+                               "Baby was fed " + data[2] + "ml on " + data[0] +
+                               " at " + data[1] + " with " + data[3] +
+                               " milk. \n For today your baby has had " + "{:10.1f}".format(day_total) +
+                               "ml of milk\n Use /feed to submit a new entry or\n " +
+                               "Use /feed_history to see the history.")
 
     def cb_diaper(self, callback_id, query_id, from_id, value):
         self.update_in_line_buttons(callback_id)
@@ -458,11 +460,6 @@ class Communicator(CommunicatorBase):
             pass
 
         data = value.split(" ")
-        self.send_to_group("baby",
-                           "resources/baby_diaper.png",
-                           True,
-                           data[2] + " diaper recorded on " + data[0] + " at " + data[1] +
-                           ". \n Use /diaper to submit a new entry.")
 
         if data[2] == "pp":
             write_data = {str(data[0]) + " " + str(data[1]): {"date": data[0],
@@ -481,6 +478,13 @@ class Communicator(CommunicatorBase):
                                                               "what": data[2],
                                                               "count": 1}}
             JSONEditor(global_var.baby_diaper_database).add_level1(write_data)
+
+        self.send_to_group("baby",
+                           # "resources/baby_diaper.png",
+                           # True,
+                           "\U0001F4A9" +
+                           data[2] + " diaper recorded on " + data[0] + " at " + data[1] +
+                           ". \n Use /diaper to submit a new entry.")
 
 
 telepot_lock = threading.Lock()

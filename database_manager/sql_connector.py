@@ -3,10 +3,12 @@ import mysql.connector
 import settings
 
 
+# http://192.168.1.32/phpmyadmin
+
 class SQLConnector:
-    def __init__(self, user, password, database):
+    def __init__(self, user, password, database, host="localhost"):
         self.my_db = mysql.connector.connect(
-            host="localhost",
+            host=host,
             user=user,
             password=password,
             database=database
@@ -36,10 +38,3 @@ class SQLConnector:
             return False, 0
 
 
-finance_db = SQLConnector(settings.database_user, settings.database_password, 'transactions')
-
-
-def insert(table, columns, values, model="finance"):
-    if model == "finance":
-        pass
-    pass
