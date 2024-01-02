@@ -150,7 +150,7 @@ class Communicator(CommunicatorBase):
 
         key = datetime.now().strftime('%Y/%m/%d')
 
-        query = 'SELECT date, weight FROM weight ORDER BY ID DESC LIMIT 1";'
+        query = 'SELECT date, weight FROM weight ORDER BY ID DESC LIMIT 1;'
         last_entry = self.baby_sql.run_sql(query=query)
 
         columns = "date, weight, added_by"
@@ -452,9 +452,6 @@ class Communicator(CommunicatorBase):
                                             arrangement=arrangement,
                                             reply_to=message_id
                                             )
-
-
-
 
     def cb_feed(self, callback_id, query_id, from_id, value):
         if callback_id is not None:
