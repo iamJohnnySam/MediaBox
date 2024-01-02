@@ -150,7 +150,7 @@ class Communicator(CommunicatorBase):
 
         key = datetime.now().strftime('%Y/%m/%d')
 
-        query = 'SELECT date, weight FROM weight ORDER BY ID DESC LIMIT 1;'
+        query = 'SELECT date, weight FROM weight ORDER BY weight_id DESC LIMIT 1;'
         last_entry = self.baby_sql.run_sql(query=query)
 
         columns = "date, weight, added_by"
