@@ -41,7 +41,7 @@ class SQLConnector:
 
         sql = "INSERT INTO " + table + " (" + columns + ") VALUES (" + placeholder + ")"
         self.cursor.execute(sql, val)
-        logger.log(f'SQL > {sql} Inserted at {self.cursor.lastrowid}', source=self.source)
+        logger.log(f'SQL > {sql} \tID > {self.cursor.lastrowid}', source=self.source)
         self.my_db.commit()
 
         if get_id:

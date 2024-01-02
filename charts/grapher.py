@@ -45,7 +45,7 @@ def extractor(x_column, categories, y_column, convert_time=False):
             total_data[x] = total_data[x] + float(y_column[i])
         else:
             total_data[x] = float(y_column[i])
-        i = i+1
+        i = i + 1
 
     return data, total_data
 
@@ -74,6 +74,9 @@ def grapher_category(graph_list, x_name, y_name, chart_title):
             color_val = 0
 
     plt.plot(list(total_data.keys()), list(total_data.values()), color=colors[color_val], label="Total")
+
+    for i in range(len(total_data.keys())):
+        plt.text(i, list(total_data.values())[i], list(total_data.values())[i])
 
     plt.title(chart_title)
     plt.xlabel(x_name)
