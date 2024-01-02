@@ -61,7 +61,7 @@ class CommunicatorBase:
             self.current_callback_id = self.current_callback_id + 1
             message = self.bot.sendMessage(chat, msg, reply_markup=keyboard, reply_to_message_id=reply_to)
         else:
-            message = self.bot.sendMessage(chat, msg, reply_to_message_id=reply_to)
+            message = self.bot.sendMessage(chat, str(msg), reply_to_message_id=reply_to)
 
         logger.log(str(chat) + " - " + str(message['message_id']) + " - Message: " + msg, self.source)
 
@@ -228,8 +228,7 @@ class CommunicatorBase:
 
         keyboard = InlineKeyboardMarkup(inline_keyboard=keyboard_markup)
 
-        message = self.send_now(msg, chat=chat_id, keyboard=keyboard,
-                                reply_to=reply_to)
+        message = self.send_now(msg, chat=chat_id, keyboard=keyboard, reply_to=reply_to)
 
         self.link_msg_to_buttons(message, button_ids)
 
