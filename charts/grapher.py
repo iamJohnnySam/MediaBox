@@ -76,7 +76,7 @@ def grapher_category(graph_list, x_name, y_name, chart_title):
     plt.plot(list(total_data.keys()), list(total_data.values()), color=colors[color_val], label="Total")
 
     for i in range(len(total_data.keys())):
-        plt.text(i, list(total_data.values())[i], list(total_data.values())[i])
+        plt.text(i, list(total_data.values())[i], list(total_data.values())[i], ha='center')
 
     plt.title(chart_title)
     plt.xlabel(x_name)
