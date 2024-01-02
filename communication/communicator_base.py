@@ -214,6 +214,7 @@ class CommunicatorBase:
             key_id, key_button = self.keyboard_button(button_text[i], button_cb[i], button_val[i])
             buttons.append(key_button)
             button_ids.append(key_id)
+            logger.log(f'Keyboard button created > {button_text[i]}, {button_cb[i]}, {button_val[i]}')
 
         keyboard_markup = []
         c = 0

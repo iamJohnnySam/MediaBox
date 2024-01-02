@@ -38,12 +38,11 @@ class ShowDownloader:
         for x in feed.entries:
             episode_name, episode_quality = quality_extract(x.title)
 
-            query = f'SELECT COUNT(1) '\
-                    f'FROM tv_show '\
+            query = f'SELECT COUNT(1) ' \
+                    f'FROM tv_show ' \
                     f'WHERE episode_name="{episode_name}" AND name="{x.tv_show_name}";'
 
             show_exists = self.database.run_sql(query=query)
-            logger.log(f'SQL > {query} RESULT > {show_exists}', source=self.source)
 
             if show_exists[0] == 0:
                 found = False
@@ -68,7 +67,7 @@ class ShowDownloader:
                 self.database.insert('tv_show', columns, val)
                 logger.log(torrent_id, source=self.source)
 
-                message = str(row[1]) + " added at " + str(row[3]) + " torrent id = " + str(torrent_id)
+                message = f'{str(row[1])} added at {str(row[3])} torrent id = {str(torrent_id)}'
                 communicator.send_to_group(self.telepot_account,
                                            message,
                                            group=self.telepot_chat_group)
