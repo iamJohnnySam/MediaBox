@@ -40,8 +40,11 @@ for item in data:
     query = f'SELECT category_id FROM categories WHERE category = "{item[2]}"'
     cat_id = list(sql.run_sql(query))[0]
 
-    query = f'SELECT vendor_id FROM vendors WHERE name = "{item[4]}"'
-    ven_id = list(sql.run_sql(query))[0]
+    if item[4] == "":
+        ven_id = None
+    else:
+        query = f'SELECT vendor_id FROM vendors WHERE name = "{item[4]}"'
+        ven_id = list(sql.run_sql(query))[0]
 
     tra = str(item[1]).lower()
     date = datetime.strptime(item[0], '%d/%m/%Y').strftime('%Y-%m-%d')
