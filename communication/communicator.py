@@ -448,8 +448,7 @@ class Communicator(CommunicatorBase):
                                             button_text=button_text,
                                             button_cb=button_cb,
                                             button_val=button_value,
-                                            arrangement=arrangement,
-                                            reply_to=str(message_id)
+                                            arrangement=arrangement
                                             )
         elif data[1] == "2":
             query = f'SELECT DISTINCT category FROM categories WHERE type = "{data[2]}"'
@@ -466,8 +465,7 @@ class Communicator(CommunicatorBase):
                                             button_text=button_text,
                                             button_cb=button_cb,
                                             button_val=button_value,
-                                            arrangement=arrangement,
-                                            reply_to=str(message_id)
+                                            arrangement=arrangement
                                             )
         elif data[1] == "3":
             query = f'SELECT category_id FROM categories WHERE category = "{data[2]}"'
@@ -475,6 +473,7 @@ class Communicator(CommunicatorBase):
             query = f'UPDATE transaction_lkr SET category_id = "{cat_id}" WHERE transaction_id = "{data[0]}"'
             self.finance_sql.run_sql(query, fetch_all=True)
             logger.log(f'Updated Transaction - {data[0]}')
+            self.send_now("Transaction successfully updated", chat=from_id)
 
     def cb_feed(self, callback_id, query_id, from_id, value):
         if callback_id is not None:
