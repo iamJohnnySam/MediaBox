@@ -423,6 +423,7 @@ class Communicator(CommunicatorBase):
         if data[2] == "Delete":
             query = f'DELETE FROM transaction_lkr WHERE transaction_id = "{data[0]}"'
             self.finance_sql.run_sql(query, fetch_all=True)
+            return
 
         if data[1] == "1":
             query = f'UPDATE transaction_lkr SET type = "{data[2]}" WHERE transaction_id = "{data[0]}"'
