@@ -263,7 +263,7 @@ class Communicator(CommunicatorBase):
 
             caption = f'Your baby has had {total}ml of milk today.\nBreakdown:'
             for i in calc.keys():
-                caption = caption + f'{i} milk = {calc[i]}ml'
+                caption = caption + f'\n{i} milk = {calc[i]}ml'
 
         self.send_now(pic,
                       image=True,
