@@ -421,7 +421,15 @@ class Communicator(CommunicatorBase):
 
         data = value.split(";")
         if data[1] == "1":
-            query = f'SELECT DISTINCT type FROM categories WHERE in_out = "{data[2]}"'
+            query = f'UPDATE transaction_lkr SET type = {data[2]} WHERE transaction_id = "{data[0]}"'
+            self.finance_sql.run_sql(query, fetch_all=True)
+
+            if data[2] == "invest":
+                in_out = "income"
+            else:
+                in_out = data[2]
+
+            query = f'SELECT DISTINCT type FROM categories WHERE in_out = "{in_out}"'
             result = list(self.finance_sql.run_sql(query, fetch_all=True))
 
             button_text, button_cb, button_value, arrangement = self.keyboard_extractor(data[0], "2", result)
@@ -453,9 +461,10 @@ class Communicator(CommunicatorBase):
                                             )
         elif data[1] == "2":
             query = f'SELECT category_id FROM categories WHERE category = "{data[2]}"'
-            result = list(self.finance_sql.run_sql(query))
-            query = f'UPDATE transaction_lkr SET category_id = {result[0]} WHERE transaction_id = "{data[1]}"'
-            result = list(self.finance_sql.run_sql(query, fetch_all=True))
+            cat_id = list(self.finance_sql.run_sql(query))[0]
+            query = f'UPDATE transaction_lkr SET category_id = {cat_id} WHERE transaction_id = "{data[0]}"'
+            self.finance_sql.run_sql(query, fetch_all=True)
+            logger.log(f'Updated Transaction - {data[0]}')
 
     def cb_feed(self, callback_id, query_id, from_id, value):
         if callback_id is not None:
