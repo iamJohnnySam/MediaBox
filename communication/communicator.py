@@ -269,7 +269,7 @@ class Communicator(CommunicatorBase):
                       image=True,
                       chat=chat_id,
                       reply_to=message_id,
-                      caption=None)
+                      caption=caption)
 
     def baby_diaper_history(self, msg, chat_id, message_id, value, user_input=False, identifier=None):
         query = 'SELECT date, what, count FROM diaper ORDER BY timestamp'
