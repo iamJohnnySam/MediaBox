@@ -1,9 +1,10 @@
 import global_var
 import settings
+import csv
 from database_manager.json_editor import JSONEditor
 from database_manager.sql_connector import SQLConnector
 
-sql = SQLConnector(settings.database_user, settings.database_password, 'baby')
+sql = SQLConnector(settings.database_user, settings.database_password, 'transactions')
 
 # data = JSONEditor(global_var.baby_feed_database).read()
 # for key in data.keys():
@@ -22,3 +23,12 @@ sql = SQLConnector(settings.database_user, settings.database_password, 'baby')
 #     columns = "date, weight"
 #     val = (key, float(data[key]))
 #     sql.insert('weight', columns, val)
+
+with open('temp/vendors.csv', newline='') as f:
+    reader = csv.reader(f)
+    data = list(reader)
+
+for item in data:
+    columns = "name"
+    val = (item[0])
+    sql.insert('vendors', columns, val)

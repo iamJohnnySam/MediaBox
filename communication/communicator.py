@@ -429,13 +429,13 @@ class Communicator(CommunicatorBase):
             button_cb.append("finance")
             button_value.append(f'{data[2]};2;Delete')
 
-            self.send_message_with_keyboard(msg="What was the type of expense?",
+            self.send_message_with_keyboard(msg=f'What type of {data[2]} was it?',
                                             chat_id=from_id,
                                             button_text=button_text,
                                             button_cb=button_cb,
-                                            button_val=button_text,
+                                            button_val=button_value,
                                             arrangement=arrangement,
-                                            #reply_to=message_id
+                                            reply_to=str(message_id)
                                             )
         elif data[1] == "2":
             query = f'SELECT DISTINCT category FROM categories WHERE type = "{data[2]}"'
@@ -443,14 +443,19 @@ class Communicator(CommunicatorBase):
 
             button_text, button_cb, button_value, arrangement = self.keyboard_extractor(data[0], "3", result)
 
-            self.send_message_with_keyboard(msg="What was the category of expense?",
+            self.send_message_with_keyboard(msg=f'What is the category of {data[2]}',
                                             chat_id=from_id,
                                             button_text=button_text,
                                             button_cb=button_cb,
-                                            button_val=button_text,
+                                            button_val=button_value,
                                             arrangement=arrangement,
-                                            reply_to=message_id
+                                            reply_to=str(message_id)
                                             )
+        elif data[1] == "2":
+            query = f'SELECT category_id FROM categories WHERE category = "{data[2]}"'
+            result = list(self.finance_sql.run_sql(query))
+            query = f'UPDATE transaction_lkr SET category_id = {result[0]} WHERE transaction_id = "{data[1]}"'
+            result = list(self.finance_sql.run_sql(query, fetch_all=True))
 
     def cb_feed(self, callback_id, query_id, from_id, value):
         if callback_id is not None:
