@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import global_var
 import settings
 import csv
@@ -42,13 +44,14 @@ for item in data:
     ven_id = list(sql.run_sql(query))[0]
 
     tra = str(item[1]).lower()
+    date = datetime.strptime(item[0], '%d-%m-%Y').strftime('%Y-%m-%d')
 
     print(cat_id, ven_id)
 
     columns = "transaction_by, date, type, category_id, amount, vendor_id, foreign_amount, currency, " \
               "rate, comments"
     val = (str(settings.master),
-           item[0],
+           date,
            tra,
            cat_id,
            float(item[3]),
