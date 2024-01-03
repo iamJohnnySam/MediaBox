@@ -229,7 +229,7 @@ class CommunicatorBase:
             func(callback_id, query_id, from_id, value)
         except (ValueError, SyntaxError) as error:
             self.bot.answerCallbackQuery(query_id, text='Unhandled')
-            logger.log("Unhandled Callback: " + error, source=self.source, message_type="error")
+            logger.log("Unhandled Callback: " + str(error), source=self.source, message_type="error")
 
     def update_in_line_buttons(self, button_id, keyboard=None):
         comm = button_id.split("_")[0] + "_" + button_id.split("_")[1] + "_"
