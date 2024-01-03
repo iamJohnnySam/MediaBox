@@ -27,18 +27,6 @@ class Communicator(CommunicatorBase):
         self.finance_sql = SQLConnector(settings.database_user, settings.database_password, 'transactions')
         self.source = "TG-C"
 
-    def alive(self, msg, chat_id, message_id, value):
-        self.send_now(str(chat_id) + "\n" + "Hello " + str(msg['chat']['first_name']) + "! I'm Alive and kicking!",
-                      image=False,
-                      chat=chat_id,
-                      reply_to=message_id)
-
-    def time(self, msg, chat_id, message_id, value):
-        self.send_now(str(datetime.now()),
-                      image=False,
-                      chat=chat_id,
-                      reply_to=message_id)
-
     def check_shows(self, msg, chat_id, message_id, value):
         global_var.check_shows = True
         self.send_now("Request Initiated - TV Show Check",
@@ -60,12 +48,12 @@ class Communicator(CommunicatorBase):
                       chat=chat_id,
                       reply_to=message_id)
 
-    def find_movie(self, msg, chat_id, message_id, value):
+    def find_movie(self, msg, chat_id, message_id, value, identifier=None):
         movie = value
 
         if movie == "":
-            self.send_now("Please type the name of the movie after the command. You can press and hold this "
-                          "command and type the movie \n /find_movie", chat=chat_id, reply_to=message_id)
+            self.send_now("Please send the name of the movie", chat=chat_id, reply_to=message_id)
+            self.get_user_input(chat_id, "find_movie", None)
             return
 
         movie = movie.lower().replace(" ", "%20")
@@ -131,29 +119,30 @@ class Communicator(CommunicatorBase):
                                         reply_to=message_id
                                         )
 
-    def request_tv_show(self, msg, chat_id, message_id, value):
+    def request_tv_show(self, msg, chat_id, message_id, value, identifier=None):
         show = value
         if show == "":
-            self.send_now("Please type the name of the tv show after the command. You can press and hold this "
-                          "command and type the movie \n /request_tv_show", chat=chat_id, reply_to=message_id)
+            self.send_now("Please type name of the TV show", chat=chat_id, reply_to=message_id)
+            self.get_user_input(chat_id, "request_tv_show", None)
             return
 
         request = {show: str(msg['chat']['first_name'])}
         JSONEditor(global_var.requested_show_database).add_level1(request)
         logger.log("TV Show Requested - " + show, source=self.source)
         self.send_now("TV Show Requested - " + show, chat=chat_id, reply_to=message_id)
+        self.send_now("TV Show Requested - " + show)
 
-    def baby_weight(self, msg, chat_id, message_id, value):
+    def baby_weight(self, msg, chat_id, message_id, value, identifier=None):
         if value == "":
-            self.send_now("Please type the weight in kg after the command. You can press and hold this "
-                          "command and type the weight \n /baby_weight", chat=chat_id, reply_to=message_id)
+            self.send_now("Please enter the weight", chat=chat_id, reply_to=message_id)
+            self.get_user_input(chat_id, "baby_weight", None)
             return
 
         try:
             weight = float(value)
         except ValueError:
-            self.send_now("Please type the weight in kg. Please enter the number only",
-                          chat=chat_id, reply_to=message_id)
+            self.send_now("Please enter the weight in numbers only", chat=chat_id, reply_to=message_id)
+            self.get_user_input(chat_id, "baby_weight", None)
             return
 
         key = datetime.now().strftime('%Y/%m/%d')
@@ -203,10 +192,8 @@ class Communicator(CommunicatorBase):
                       chat=chat_id,
                       reply_to=message_id)
 
-    def baby_feed(self, msg, chat_id, message_id, value):
+    def baby_feed(self, msg, chat_id, message_id, value, identifier=None):
         identifier = datetime.now().strftime('%Y-%m-%d %H:%M:%S') + " "
-
-        value_check_fail = False
 
         if value != "":
             if "ml" in value:
@@ -214,10 +201,11 @@ class Communicator(CommunicatorBase):
             try:
                 int(value)
             except ValueError:
-                logger.log("Rejected entered feed value", source=self.source)
-                value_check_fail = True
+                self.send_now("Please the amount consumed in ml", chat=chat_id, reply_to=message_id)
+                self.get_user_input(chat_id, "baby_feed", None)
+                return
 
-        if value == "" or value_check_fail:
+        if value == "":
             self.send_message_with_keyboard(msg="Need some feeding info",
                                             chat_id=chat_id,
                                             button_text=["30ml", "60ml", "90ml", "120ml", "Cancel"],
@@ -371,41 +359,6 @@ class Communicator(CommunicatorBase):
                       chat=chat_id,
                       caption=caption,
                       reply_to=message_id)
-
-    def start_over(self, msg, chat_id, message_id, value):
-        if chat_id == self.master:
-            global_var.stop_cctv = True
-        else:
-            self.send_now("This will reboot the program. Requesting Master User...",
-                          image=False,
-                          chat=chat_id,
-                          reply_to=message_id)
-            self.send_now("Start over requested by " + str(msg['chat']['first_name']) + "\n/start_over")
-
-    def exit_all(self, msg, chat_id, message_id, value):
-        if chat_id == self.master:
-            global_var.stop_all = True
-            global_var.stop_cctv = True
-            self.send_now("Completing ongoing tasks. Please wait.")
-        else:
-            self.send_now("This will shut down the program. Requesting Master User...",
-                          image=False,
-                          chat=chat_id,
-                          reply_to=message_id)
-            self.send_now("Start over requested by " + str(msg['chat']['first_name']) + "\n/exit_all")
-
-    def reboot_pi(self, msg, chat_id, message_id, value):
-        if chat_id == self.master:
-            global_var.stop_all = True
-            global_var.stop_cctv = True
-            global_var.reboot_pi = True
-            self.send_now("Completing ongoing tasks. Please wait.")
-        else:
-            self.send_now("This will reboot the server. Requesting Master User...",
-                          image=False,
-                          chat=chat_id,
-                          reply_to=message_id)
-            self.send_now("Start over requested by " + str(msg['chat']['first_name']) + "\n/reboot_pi")
 
     # -------------- CALLBACK FUNCTIONS --------------
 

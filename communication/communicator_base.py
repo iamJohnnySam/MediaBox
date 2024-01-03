@@ -125,6 +125,7 @@ class CommunicatorBase:
     def handle_text(self, msg, chat_id, message_id):
         if chat_id in self.waiting_user_input:
             self.received_user_input(msg, chat_id, message_id)
+            return
 
         try:
             command = str(msg['text']).split(" ")[0]
@@ -299,3 +300,50 @@ class CommunicatorBase:
         func = getattr(self, cb)
         func(None, chat_id, message_id, message, user_input=True, identifier=arg)
 
+    # MAIN FUNCTIONS
+    def alive(self, msg, chat_id, message_id, value):
+        self.send_now(str(chat_id) + "\n" + "Hello " + str(msg['chat']['first_name']) + "! I'm Alive and kicking!",
+                      image=False,
+                      chat=chat_id,
+                      reply_to=message_id)
+
+    def time(self, msg, chat_id, message_id, value):
+        self.send_now(str(datetime.now()),
+                      image=False,
+                      chat=chat_id,
+                      reply_to=message_id)
+
+    def start_over(self, msg, chat_id, message_id, value):
+        if chat_id == self.master:
+            global_var.stop_cctv = True
+        else:
+            self.send_now("This will reboot the program. Requesting Master User...",
+                          image=False,
+                          chat=chat_id,
+                          reply_to=message_id)
+            self.send_now("Start over requested by " + str(msg['chat']['first_name']) + "\n/start_over")
+
+    def exit_all(self, msg, chat_id, message_id, value):
+        if chat_id == self.master:
+            global_var.stop_all = True
+            global_var.stop_cctv = True
+            self.send_now("Completing ongoing tasks. Please wait.")
+        else:
+            self.send_now("This will shut down the program. Requesting Master User...",
+                          image=False,
+                          chat=chat_id,
+                          reply_to=message_id)
+            self.send_now("Start over requested by " + str(msg['chat']['first_name']) + "\n/exit_all")
+
+    def reboot_pi(self, msg, chat_id, message_id, value):
+        if chat_id == self.master:
+            global_var.stop_all = True
+            global_var.stop_cctv = True
+            global_var.reboot_pi = True
+            self.send_now("Completing ongoing tasks. Please wait.")
+        else:
+            self.send_now("This will reboot the server. Requesting Master User...",
+                          image=False,
+                          chat=chat_id,
+                          reply_to=message_id)
+            self.send_now("Start over requested by " + str(msg['chat']['first_name']) + "\n/reboot_pi")
