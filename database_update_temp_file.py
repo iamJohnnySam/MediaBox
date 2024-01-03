@@ -34,6 +34,7 @@ with open('temp/expenses.csv', newline='') as f:
 #     sql.insert('vendors', columns, val)
 
 for item in data:
+    print(item)
     query = f'SELECT category_id FROM categories WHERE category = "{item[2]}"'
     cat_id = list(sql.run_sql(query))[0]
 
@@ -55,3 +56,4 @@ for item in data:
            item[8],
            item[9])
     sql.insert('transactions_lkr', columns, val)
+    print()
