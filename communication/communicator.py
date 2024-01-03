@@ -1,4 +1,3 @@
-import math
 import threading
 import feedparser
 import telepot
