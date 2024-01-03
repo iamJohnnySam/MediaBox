@@ -58,5 +58,5 @@ for item in data:
            item[8],
            item[9])
     print(val)
-    sql.insert('transactions_lkr', columns, val)
+    sql.insert('transaction_lkr', columns, val)
     print()
