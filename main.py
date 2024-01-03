@@ -53,7 +53,7 @@ def run_scheduler():
     schedule.every().day.at("07:00").do(schedule_handler, func=cctv.run_code)
     schedule.every().day.at("09:00").do(schedule_handler, func=global_var.backup.backup_databases)
 
-    while exit_condition:
+    while exit_condition and not global_var.stop_all:
         schedule.run_pending()
         if global_var.check_shows:
             global_var.check_shows = False
