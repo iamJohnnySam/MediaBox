@@ -12,6 +12,7 @@ class BackUp:
 
     def __init__(self, loc):
         self.backup_location = os.path.join(loc, datetime.now().strftime("%Y%m%d%H%M%S"))
+        self.common_backup_location = loc
         if not os.path.exists(self.backup_location):
             os.makedirs(self.backup_location)
 
@@ -64,10 +65,13 @@ class BackUp:
             shutil.copytree(folder, destination)
             logger.log(f"Copied {folder} -> {destination}", source=self.source)
 
-    def backup_move_folders(self):
+    def backup_move_folders(self, common=False):
         for folder in self.move_folders:
             allfiles = glob.glob(os.path.join(folder, '*_A_*'), recursive=True)
-            destination = os.path.join(self.backup_location, folder)
+            if common:
+                destination = self.common_backup_location
+            else:
+                destination = os.path.join(self.backup_location, folder)
             if not os.path.exists(os.path.dirname(destination)):
                 os.makedirs(os.path.dirname(destination))
 

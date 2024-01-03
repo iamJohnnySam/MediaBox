@@ -1,3 +1,5 @@
+import os
+import shutil
 import threading
 import feedparser
 import telepot
@@ -90,34 +92,41 @@ class Communicator(CommunicatorBase):
                                             reply_to=None
                                             )
 
-    def finance(self, msg, chat_id, message_id, value):
+    def finance(self, msg, chat_id, message_id, value, user_input=False, identifier=None):
         if value == "":
-            self.send_now("Please type the amount after the command. You can press and hold this "
-                          "command and type the amount\n /finance", chat=chat_id, reply_to=message_id)
+            self.send_now("Please type the amount", chat=chat_id, reply_to=message_id)
+            self.get_user_input(chat_id, "finance", None)
             return
 
         try:
             amount = float(value)
         except ValueError:
-            self.send_now("Please type the amount after the command. You can press and hold this "
-                          "command and type the amount\n /finance", chat=chat_id, reply_to=message_id)
+            self.send_now("Please type the amount in numbers only", chat=chat_id, reply_to=message_id)
+            self.get_user_input(chat_id, "finance", None)
             return
 
-        columns = 'transaction_by, amount'
-        val = (chat_id, amount)
-        success, sql_id = self.finance_sql.insert('transaction_lkr', columns, val,
-                                                  get_id=True,
-                                                  id_column='transaction_id')
-        identifier = str(sql_id) + ";"
+        if user_input:
+            sql_id = identifier
+            query = f'UPDATE transaction_lkr SET amount = "{amount}" WHERE transaction_id = "{sql_id}"'
+            self.finance_sql.run_sql(query)
+
+        else:
+            columns = 'transaction_by, amount'
+            val = (chat_id, amount)
+            success, sql_id = self.finance_sql.insert('transaction_lkr', columns, val,
+                                                      get_id=True,
+                                                      id_column='transaction_id')
+
+        prefix = str(sql_id) + ";"
 
         self.send_message_with_keyboard(msg=f'Is LKR {value} an income or expense?',
                                         chat_id=chat_id,
                                         button_text=["Income", "Expense", "Invest", "Delete"],
                                         button_cb=["finance", "finance", "finance", "finance"],
-                                        button_val=[identifier + "1;income",
-                                                    identifier + "1;expense",
-                                                    identifier + "1;invest",
-                                                    identifier + "1;delete"],
+                                        button_val=[prefix + "1;income",
+                                                    prefix + "1;expense",
+                                                    prefix + "1;invest",
+                                                    prefix + "1;delete"],
                                         arrangement=[3, 1],
                                         reply_to=message_id
                                         )
@@ -400,6 +409,26 @@ class Communicator(CommunicatorBase):
 
     # -------------- CALLBACK FUNCTIONS --------------
 
+    def cb_photo(self, callback_id, query_id, from_id, value):
+        message_id = self.update_in_line_buttons(callback_id)
+        self.bot.answerCallbackQuery(query_id, text='Got it')
+
+        data = value.split(";")
+        if data[0] == "save":
+            logger.log("Image saved to " + data[1])
+        elif data[0] == "finance":
+            if not os.path.exists(global_var.finance_images):
+                os.makedirs(global_var.finance_images)
+
+            columns = 'transaction_by, photo_id'
+            val = (from_id, data[1])
+            success, sql_id = self.finance_sql.insert('transaction_lkr', columns, val,
+                                                      get_id=True,
+                                                      id_column='transaction_id')
+            shutil.move(data[1], os.path.join(global_var.finance_images, data[1]))
+            self.send_now("How much is the amount?", chat=from_id, reply_to=message_id)
+            self.get_user_input(from_id, "finance", sql_id)
+
     def cb_cancel(self, callback_id, query_id, from_id, value):
         self.update_in_line_buttons(callback_id)
         self.bot.answerCallbackQuery(query_id, text='Canceled')
@@ -427,7 +456,11 @@ class Communicator(CommunicatorBase):
 
         if data[1] == "1":
             query = f'UPDATE transaction_lkr SET type = "{data[2]}" WHERE transaction_id = "{data[0]}"'
-            self.finance_sql.run_sql(query, fetch_all=True)
+            self.finance_sql.run_sql(query)
+
+            d = datetime.now().strftime("%Y-%m-%d")
+            query = f'UPDATE transaction_lkr SET date = "{d}" WHERE transaction_id = "{data[0]}"'
+            self.finance_sql.run_sql(query)
 
             if data[2] == "invest":
                 in_out = "income"

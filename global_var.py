@@ -48,4 +48,8 @@ cctv_model2 = "cctv/nn_models/modelA02.tflite"
 
 backup.databases.append('baby')
 
+telepot_image_dump = 'communication/chat_images'
+backup.move_folders.append(telepot_image_dump)
 
+finance_images = 'database/finance_images'
+backup.move_folders.append(finance_images, common=True)

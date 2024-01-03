@@ -1,6 +1,7 @@
 import math
+import os.path
 from datetime import datetime
-
+from PIL import Image
 import telepot
 from telepot.loop import MessageLoop
 from telepot.namedtuple import InlineKeyboardButton, InlineKeyboardMarkup
@@ -19,6 +20,7 @@ class CommunicatorBase:
 
         self.allowed_chats = {}
         self.telepot_groups = {}
+        self.waiting_user_input = {}
         self.telepot_account = telepot_account
 
         telepot_accounts = JSONEditor(global_var.telepot_accounts).read()
@@ -56,7 +58,10 @@ class CommunicatorBase:
             chat = self.master
 
         if image:
-            message = self.bot.sendPhoto(chat, photo=open(str(msg), 'rb'), reply_to_message_id=reply_to, caption=caption)
+            message = self.bot.sendPhoto(chat,
+                                         photo=open(str(msg), 'rb'),
+                                         reply_to_message_id=reply_to,
+                                         caption=caption)
         elif keyboard is not None:
             self.current_callback_id = self.current_callback_id + 1
             message = self.bot.sendMessage(chat, str(msg), reply_markup=keyboard, reply_to_message_id=reply_to)
@@ -118,6 +123,9 @@ class CommunicatorBase:
             logger.log("Unknown Chat type", source=self.source, message_type="error")
 
     def handle_text(self, msg, chat_id, message_id):
+        if chat_id in self.waiting_user_input:
+            self.received_user_input(msg, chat_id, message_id)
+
         try:
             command = str(msg['text']).split(" ")[0]
         except KeyError:
@@ -158,7 +166,35 @@ class CommunicatorBase:
                               chat=chat_id)
 
     def handle_photo(self, msg, chat_id, message_id):
-        pass
+        file_name = f'{chat_id}-{message_id}-{datetime.now().strftime("%y%m%d%H%M%S")}.png'
+        if not os.path.exists(global_var.telepot_image_dump):
+            os.makedirs(global_var.telepot_image_dump)
+        file_path = os.path.join(global_var.telepot_image_dump, file_name)
+        self.bot.download_file(msg['photo'][-1]['file_id'], file_path)
+
+        foo = Image.open(file_path)
+        w, h = foo.size
+        if w > h:
+            new_w = 1024
+            new_h = h * new_w / w
+        else:
+            new_h = 1024
+            new_w = w * new_h / h
+
+        foo = foo.resize((new_w, new_h), Image.ANTIALIAS)
+        foo.save(file_path, optimize=True, quality=95)
+
+        logger.log(f'Received Photo > {file_name}, File size > {foo.size}', source=self.source)
+
+        self.send_message_with_keyboard(msg="What is this image for",
+                                        chat_id=chat_id,
+                                        button_text=["Save", "Finance"],
+                                        button_cb=["photo", "photo"],
+                                        button_val=["save;" + file_name,
+                                                    "finance;" + file_name],
+                                        arrangement=[2],
+                                        reply_to=message_id
+                                        )
 
     def handle_callback(self, msg):
         query_id, from_id, query_data = telepot.glance(msg, flavor='callback_query')
@@ -223,7 +259,7 @@ class CommunicatorBase:
             keyboard_row = []
             for j in range(arrangement[i]):
                 keyboard_row.append(buttons[c])
-                c = c+1
+                c = c + 1
             keyboard_markup.append(keyboard_row)
 
         keyboard = InlineKeyboardMarkup(inline_keyboard=keyboard_markup)
@@ -241,14 +277,25 @@ class CommunicatorBase:
         button_value = []
         for text in button_text:
             button_value.append(f'{identifier};{num};{text}')
-        arrangement = [3 for i in range(int(math.floor(len(button_text) / 3)))]
+        arrangement = [3 for _ in range(int(math.floor(len(button_text) / 3)))]
         if len(button_text) % 3 != 0:
             arrangement.append(len(button_text) % 3)
-        logger.log("Keyboard extracted > " + str(arrangement))
+        logger.log("Keyboard extracted > " + str(arrangement), source=self.source)
 
         return button_text, button_cb, button_value, arrangement
 
+    def get_user_input(self, user_id, callback, argument):
+        self.waiting_user_input[user_id] = {"callback": callback,
+                                            "argument": argument}
 
+    def received_user_input(self, msg, chat_id, message_id):
+        cb = self.waiting_user_input[chat_id]["callback"]
+        arg = self.waiting_user_input[chat_id]["argument"]
+        del self.waiting_user_input[chat_id]
 
+        message = str(msg['text'])
 
+        logger.log(f'Calling function: {cb} with arguments {arg} and {message}.')
+        func = getattr(self, cb)
+        func(None, chat_id, message_id, message, user_input=True, identifier=arg)
 

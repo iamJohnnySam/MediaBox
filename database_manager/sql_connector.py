@@ -45,7 +45,6 @@ class SQLConnector:
         else:
             result = "error"
 
-
         return result
 
     def insert(self, table, columns, val, get_id=False, id_column=None):
@@ -65,6 +64,3 @@ class SQLConnector:
             return True, last_id
 
         return True, self.cursor.lastrowid
-
-
-
