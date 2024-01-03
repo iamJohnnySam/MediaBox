@@ -182,10 +182,10 @@ class CommunicatorBase:
         w, h = foo.size
         if w > h:
             new_w = 1024
-            new_h = h * new_w / w
+            new_h = int(h * new_w / w)
         else:
             new_h = 1024
-            new_w = w * new_h / h
+            new_w = int(w * new_h / h)
 
         foo = foo.resize((new_w, new_h))
         foo.save(file_path, optimize=True, quality=95)
