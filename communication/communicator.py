@@ -420,7 +420,8 @@ class Communicator(CommunicatorBase):
             success, sql_id = self.finance_sql.insert('transaction_lkr', columns, val,
                                                       get_id=True,
                                                       id_column='transaction_id')
-            shutil.move(data[1], os.path.join(global_var.finance_images, data[1]))
+            shutil.move(os.path.join(global_var.telepot_image_dump,data[1]),
+                        os.path.join(global_var.finance_images, data[1]))
             self.send_now("How much is the amount?", chat=from_id, reply_to=message_id)
             self.get_user_input(from_id, "finance", sql_id)
 
