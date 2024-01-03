@@ -24,7 +24,7 @@ sql = SQLConnector(settings.database_user, settings.database_password, 'transact
 #     val = (key, float(data[key]))
 #     sql.insert('weight', columns, val)
 
-with open('temp/expenses.csv', newline='') as f:
+with open('temp/expenses.csv', newline='', encoding='utf-8-sig') as f:
     reader = csv.reader(f)
     data = list(reader)
 
