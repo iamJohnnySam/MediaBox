@@ -51,6 +51,11 @@ for item in data:
     else:
         fval = float(item[6])
 
+    if item[8] == "":
+        rate = 0
+    else:
+        rate = item[8]
+
     print(cat_id, ven_id)
 
     columns = "transaction_by, date, type, category_id, amount, vendor_id, foreign_amount, currency, " \
@@ -63,7 +68,7 @@ for item in data:
            ven_id,
            fval,
            item[7],
-           item[8],
+           rate,
            item[9])
     print(val)
     sql.insert('transaction_lkr', columns, val)
