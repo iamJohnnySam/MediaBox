@@ -46,6 +46,11 @@ for item in data:
     tra = str(item[1]).lower()
     date = datetime.strptime(item[0], '%d/%m/%Y').strftime('%Y-%m-%d')
 
+    if item[6] == "":
+        fval = item[6]
+    else:
+        fval = float(item[6])
+
     print(cat_id, ven_id)
 
     columns = "transaction_by, date, type, category_id, amount, vendor_id, foreign_amount, currency, " \
@@ -56,7 +61,7 @@ for item in data:
            cat_id,
            float(item[3]),
            ven_id,
-           float(item[6]),
+           fval,
            item[7],
            item[8],
            item[9])
