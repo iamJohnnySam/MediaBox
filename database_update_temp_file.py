@@ -40,6 +40,8 @@ for item in data:
     query = f'SELECT vendor_id FROM vendors WHERE name = "{item[4]}"'
     ven_id = list(sql.run_sql(query))[0]
 
+    print(cat_id, ven_id)
+
     columns = "transaction_by, date, type, category_id, amount, vendor_id, foreign_amount, currency, " \
               "rate, comments"
     val = (str(settings.master),
