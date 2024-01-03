@@ -175,6 +175,7 @@ class CommunicatorBase:
         try:
             self.bot.download_file(msg['photo'][-1]['file_id'], file_path)
         except PermissionError:
+            logger.log("Persmission Error", source=self.source)
             os.system(f'chmod 755 {global_var.telepot_image_dump}')
             time.sleep(5)
             self.bot.download_file(msg['photo'][-1]['file_id'], file_path)
