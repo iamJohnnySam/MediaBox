@@ -34,22 +34,22 @@ with open('temp/expenses.csv', newline='') as f:
 #     sql.insert('vendors', columns, val)
 
 for item in data:
-    query = f'SELECT category_id FROM categories WHERE category = "{data[2]}"'
+    query = f'SELECT category_id FROM categories WHERE category = "{item[2]}"'
     cat_id = list(sql.run_sql(query))[0]
 
-    query = f'SELECT vendor_id FROM vendors WHERE name = "{data[4]}"'
+    query = f'SELECT vendor_id FROM vendors WHERE name = "{item[4]}"'
     ven_id = list(sql.run_sql(query))[0]
 
     columns = "transaction_by, date, type, category_id, amount, vendor_id, foreign_amount, currency, " \
               "rate, comments"
     val = (str(settings.master),
-           data[0],
-           str(data[1]).lower,
+           item[0],
+           str(item[1]).lower,
            cat_id,
-           data[3],
+           item[3],
            ven_id,
-           data[6],
-           data[7],
-           data[8],
-           data[9])
+           item[6],
+           item[7],
+           item[8],
+           item[9])
     sql.insert('transactions_lkr', columns, val)
