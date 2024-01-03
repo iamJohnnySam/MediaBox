@@ -468,7 +468,7 @@ class Communicator(CommunicatorBase):
                                             arrangement=arrangement,
                                             reply_to=str(message_id)
                                             )
-        elif data[1] == "2":
+        elif data[1] == "3":
             query = f'SELECT category_id FROM categories WHERE category = "{data[2]}"'
             cat_id = list(self.finance_sql.run_sql(query))[0]
             query = f'UPDATE transaction_lkr SET category_id = "{cat_id}" WHERE transaction_id = "{data[0]}"'
