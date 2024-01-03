@@ -44,13 +44,9 @@ class SQLConnector:
         logger.log(f'SQL > {sql} \tID > {self.cursor.lastrowid}', source=self.source)
         self.my_db.commit()
 
-        if get_id:
-            self.cursor.execute(f'SELECT {id_column} FROM {table} ORDER BY {id_column} DESC LIMIT 1')
-            result = self.cursor.fetchone()
-            last_id = result[0]
-            return True, last_id
-
         return True, self.cursor.lastrowid
+
+
 
 
 
