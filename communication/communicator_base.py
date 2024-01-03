@@ -176,9 +176,7 @@ class CommunicatorBase:
             self.bot.download_file(msg['photo'][-1]['file_id'], file_path)
         except PermissionError:
             logger.log("Permission Error", source=self.source)
-            os.system(f'sudo chmod 755 {global_var.telepot_image_dump}')
-            time.sleep(5)
-            self.bot.download_file(msg['photo'][-1]['file_id'], file_path)
+            self.send_now("PERMISSION ERROR")
 
         foo = Image.open(file_path)
         w, h = foo.size
@@ -189,7 +187,7 @@ class CommunicatorBase:
             new_h = 1024
             new_w = w * new_h / h
 
-        foo = foo.resize((new_w, new_h), Image.ANTIALIAS)
+        foo = foo.resize((new_w, new_h))
         foo.save(file_path, optimize=True, quality=95)
 
         logger.log(f'Received Photo > {file_name}, File size > {foo.size}', source=self.source)

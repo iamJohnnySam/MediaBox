@@ -38,5 +38,4 @@ try:
     logging.basicConfig(filename='log/log-' + today_date + '.log', level=logging.DEBUG)
 except PermissionError:
     log("PERMISSION ERROR", source="LOG", message_type="error")
-    log("Launching permission error correction script", source="LOG")
-    os.system('sh ../permission_error_correction.sh')
+    communicator.send_to_master("PERMISSION ERROR")
