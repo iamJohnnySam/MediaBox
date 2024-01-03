@@ -422,7 +422,7 @@ class Communicator(CommunicatorBase):
                                                       id_column='transaction_id')
             shutil.move(os.path.join(global_var.telepot_image_dump,data[1]),
                         os.path.join(global_var.finance_images, data[1]))
-            self.send_now("How much is the amount?", chat=from_id, reply_to=message_id)
+            self.send_now("How much is the amount?", chat=from_id, reply_to=bytes(message_id))
             self.get_user_input(from_id, "finance", sql_id)
 
     def cb_cancel(self, callback_id, query_id, from_id, value):
