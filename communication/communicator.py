@@ -421,7 +421,7 @@ class Communicator(CommunicatorBase):
 
         data = value.split(";")
         if data[1] == "1":
-            query = f'UPDATE transaction_lkr SET type = {data[2]} WHERE transaction_id = "{data[0]}"'
+            query = f'UPDATE transaction_lkr SET type = "{data[2]}" WHERE transaction_id = "{data[0]}"'
             self.finance_sql.run_sql(query, fetch_all=True)
 
             if data[2] == "invest":
@@ -462,7 +462,7 @@ class Communicator(CommunicatorBase):
         elif data[1] == "2":
             query = f'SELECT category_id FROM categories WHERE category = "{data[2]}"'
             cat_id = list(self.finance_sql.run_sql(query))[0]
-            query = f'UPDATE transaction_lkr SET category_id = {cat_id} WHERE transaction_id = "{data[0]}"'
+            query = f'UPDATE transaction_lkr SET category_id = "{cat_id}" WHERE transaction_id = "{data[0]}"'
             self.finance_sql.run_sql(query, fetch_all=True)
             logger.log(f'Updated Transaction - {data[0]}')
 
