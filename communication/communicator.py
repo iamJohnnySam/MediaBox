@@ -107,7 +107,7 @@ class Communicator(CommunicatorBase):
 
         prefix = str(sql_id) + ";"
 
-        self.send_message_with_keyboard(msg=f'Is LKR {value} an income or expense?',
+        self.send_message_with_keyboard(msg=f'[{sql_id}] Is LKR {value} an income or expense?',
                                         chat_id=chat_id,
                                         button_text=["Income", "Expense", "Invest", "Delete"],
                                         button_cb=["finance", "finance", "finance", "finance"],
@@ -429,7 +429,7 @@ class Communicator(CommunicatorBase):
             button_value.append(f'{data[0]};2;Delete')
             arrangement.append(1)
 
-            self.send_message_with_keyboard(msg=f'What type of {data[2]} was it?',
+            self.send_message_with_keyboard(msg=f'[{data[0]}] What type of {data[2]} was it?',
                                             chat_id=from_id,
                                             button_text=button_text,
                                             button_cb=button_cb,
@@ -446,7 +446,7 @@ class Communicator(CommunicatorBase):
             button_value.append(f'{data[0]};3;Delete')
             arrangement.append(1)
 
-            self.send_message_with_keyboard(msg=f'What is the category of {data[2]}',
+            self.send_message_with_keyboard(msg=f'[{data[0]}] What is the category of {data[2]}',
                                             chat_id=from_id,
                                             button_text=button_text,
                                             button_cb=button_cb,
@@ -459,7 +459,7 @@ class Communicator(CommunicatorBase):
             query = f'UPDATE transaction_lkr SET category_id = "{cat_id}" WHERE transaction_id = "{data[0]}"'
             self.finance_sql.run_sql(query, fetch_all=True)
             logger.log(f'Updated Transaction - {data[0]}')
-            self.send_now("Transaction successfully updated", chat=from_id)
+            self.send_now(f'[{data[0]}] Transaction successfully updated', chat=from_id)
 
     def cb_feed(self, callback_id, query_id, from_id, value):
         if callback_id is not None:
@@ -499,10 +499,9 @@ class Communicator(CommunicatorBase):
             self.baby_sql.insert('feed', columns, val)
 
             self.send_to_group("baby",
-                               "\U0001F37C \n" +
-                               "Baby was fed " + data[2] + "ml on " + data[0] +
-                               " at " + data[1] + " with " + data[3] +
-                               " milk. \nFor today your baby has had " + "{:10.1f}".format(day_total) +
+                               f'\U0001F37C '
+                               f'\nBaby was fed {data[2]}ml on {data[0]} at {data[1]} with {data[3]}  milk. '
+                               f'\nFor today your baby has had ' + "{:10.1f}".format(day_total) +
                                "ml of milk\nUse /feed to submit a new entry or\n" +
                                "Use /feed_history to see the history.")
 
