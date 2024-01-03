@@ -281,7 +281,7 @@ class Communicator(CommunicatorBase):
                                chart_title="Diaper History - " + datetime.now().strftime('%Y-%m-%d %H:%M'))
 
         today = datetime.now().strftime('%Y-%m-%d')
-        query = f'SELECT source, what FROM diaper WHERE date = "{today}"'
+        query = f'SELECT what, count FROM diaper WHERE date = "{today}"'
         result = list(self.baby_sql.run_sql(query, fetch_all=1))
 
         caption = None
