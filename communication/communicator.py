@@ -439,7 +439,7 @@ class Communicator(CommunicatorBase):
             button_text, button_cb, button_value, arrangement = self.keyboard_extractor(data[0], "2", result)
             button_text.append("Delete")
             button_cb.append("finance")
-            button_value.append(f'{data[2]};2;Delete')
+            button_value.append(f'{data[0]};2;Delete')
             arrangement.append(1)
 
             self.send_message_with_keyboard(msg=f'What type of {data[2]} was it?',
@@ -457,7 +457,7 @@ class Communicator(CommunicatorBase):
             button_text, button_cb, button_value, arrangement = self.keyboard_extractor(data[0], "3", result)
             button_text.append("Delete")
             button_cb.append("finance")
-            button_value.append(f'{data[2]};1;Delete')
+            button_value.append(f'{data[0]};3;Delete')
             arrangement.append(1)
 
             self.send_message_with_keyboard(msg=f'What is the category of {data[2]}',
