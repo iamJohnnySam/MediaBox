@@ -37,8 +37,11 @@ with open('temp/expenses.csv', newline='', encoding='utf-8-sig') as f:
 
 for item in data:
     print(item)
-    query = f'SELECT category_id FROM categories WHERE category = "{item[2]}"'
-    cat_id = list(sql.run_sql(query))[0]
+    if item[2] == "":
+        cat_id = None
+    else:
+        query = f'SELECT category_id FROM categories WHERE category = "{item[2]}"'
+        cat_id = list(sql.run_sql(query))[0]
 
     if item[4] == "":
         ven_id = None
