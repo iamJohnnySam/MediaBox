@@ -245,10 +245,31 @@ class Communicator(CommunicatorBase):
                                x_name="Date",
                                y_name="Amount (ml)",
                                chart_title="Feed History - " + datetime.now().strftime('%Y-%m-%d %H:%M'))
+
+        today = datetime.now().strftime('%Y-%m-%d')
+        query = f'SELECT source, amount FROM feed ORDER BY timestamp WHERE date = "{today}"'
+        result = list(self.baby_sql.run_sql(query, fetch_all=1))
+
+        caption = None
+        if result is not None:
+            calc = {}
+            total = 0
+            for i in result:
+                if i[0] in calc.keys():
+                    calc[i[0]] = calc[i[0]] + i[1]
+                else:
+                    calc[i[0]] = i[1]
+                total = total + i[1]
+
+            caption = f'Your baby has had {total}ml of milk today.\nBreakdown:'
+            for i in calc.keys():
+                caption = caption + f'{i} milk = {calc[i]}ml'
+
         self.send_now(pic,
                       image=True,
                       chat=chat_id,
-                      reply_to=message_id)
+                      reply_to=message_id,
+                      caption=None)
 
     def baby_diaper_history(self, msg, chat_id, message_id, value, user_input=False, identifier=None):
         query = 'SELECT date, what, count FROM diaper ORDER BY timestamp'
