@@ -420,7 +420,7 @@ class Communicator(CommunicatorBase):
         self.bot.answerCallbackQuery(query_id, text='Got it')
 
         data = value.split(";")
-        if data[2] == "Delete":
+        if data[2].lower() == "delete":
             query = f'DELETE FROM transaction_lkr WHERE transaction_id = "{data[0]}"'
             self.finance_sql.run_sql(query, fetch_all=True)
             return
