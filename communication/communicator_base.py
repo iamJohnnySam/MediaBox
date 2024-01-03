@@ -244,7 +244,6 @@ class CommunicatorBase:
         arrangement = [3 for i in range(int(math.floor(len(button_text) / 3)))]
         if len(button_text) % 3 != 0:
             arrangement.append(len(button_text) % 3)
-        arrangement.append(1)
         logger.log("Keyboard extracted > " + str(arrangement))
 
         return button_text, button_cb, button_value, arrangement

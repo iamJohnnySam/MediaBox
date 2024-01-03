@@ -420,6 +420,10 @@ class Communicator(CommunicatorBase):
         self.bot.answerCallbackQuery(query_id, text='Got it')
 
         data = value.split(";")
+        if data[2] == "Delete":
+            query = f'DELETE FROM transaction_lkr WHERE transaction_id = "{data[0]}"'
+            self.finance_sql.run_sql(query, fetch_all=True)
+
         if data[1] == "1":
             query = f'UPDATE transaction_lkr SET type = "{data[2]}" WHERE transaction_id = "{data[0]}"'
             self.finance_sql.run_sql(query, fetch_all=True)
@@ -436,6 +440,7 @@ class Communicator(CommunicatorBase):
             button_text.append("Delete")
             button_cb.append("finance")
             button_value.append(f'{data[2]};2;Delete')
+            arrangement.append(1)
 
             self.send_message_with_keyboard(msg=f'What type of {data[2]} was it?',
                                             chat_id=from_id,
@@ -450,6 +455,10 @@ class Communicator(CommunicatorBase):
             result = list(self.finance_sql.run_sql(query, fetch_all=True))
 
             button_text, button_cb, button_value, arrangement = self.keyboard_extractor(data[0], "3", result)
+            button_text.append("Delete")
+            button_cb.append("finance")
+            button_value.append(f'{data[2]};1;Delete')
+            arrangement.append(1)
 
             self.send_message_with_keyboard(msg=f'What is the category of {data[2]}',
                                             chat_id=from_id,
