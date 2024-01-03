@@ -228,7 +228,10 @@ class CommunicatorBase:
 
         keyboard = InlineKeyboardMarkup(inline_keyboard=keyboard_markup)
 
-        message = self.send_now(msg, chat=chat_id, keyboard=keyboard, reply_to=reply_to)
+        message = self.send_now(msg,
+                                chat=chat_id,
+                                keyboard=keyboard,
+                                reply_to=reply_to)
 
         self.link_msg_to_buttons(message, button_ids)
 

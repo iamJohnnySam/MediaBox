@@ -2,12 +2,6 @@ import logging
 import os
 from datetime import date, datetime
 
-if not os.path.exists('log/'):
-    os.makedirs('log/')
-
-today_date = str(date.today())
-logging.basicConfig(filename='log/log-' + today_date + '.log', level=logging.DEBUG)
-
 
 def log(msg, source="MBOX", message_type="info"):
     message = str(msg)
@@ -35,3 +29,14 @@ def log(msg, source="MBOX", message_type="info"):
               source + ", >,",
               segment)
 
+
+if not os.path.exists('log/'):
+    os.makedirs('log/')
+
+today_date = str(date.today())
+try:
+    logging.basicConfig(filename='log/log-' + today_date + '.log', level=logging.DEBUG)
+except PermissionError:
+    log("PERMISSION ERROR", source="LOG", message_type="error")
+    log("Launching permission error correction script", source="LOG")
+    os.system('sh ../permission_error_correction.sh')

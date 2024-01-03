@@ -435,7 +435,7 @@ class Communicator(CommunicatorBase):
                                             button_cb=button_cb,
                                             button_val=button_text,
                                             arrangement=arrangement,
-                                            reply_to=message_id
+                                            #reply_to=message_id
                                             )
         elif data[1] == "2":
             query = f'SELECT DISTINCT category FROM categories WHERE type = "{data[2]}"'

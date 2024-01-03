@@ -89,8 +89,9 @@ class BackUp:
                     logger.log(f"Moved {file_path} -> {dst_path}", source=self.source)
 
     def backup_databases(self):
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         for database in self.databases:
-            backup_file = f'{database}_database_backup.sql'
+            backup_file = f'{database}_{timestamp}_database_backup.sql'
             backup_file_path = os.path.join(self.backup_location, backup_file)
 
             mysqldump_cmd = f'mysqldump -h localhost -u {settings.database_user} -p{settings.database_password}' \
