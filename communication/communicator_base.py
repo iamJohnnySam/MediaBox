@@ -1,5 +1,6 @@
 import math
 import os.path
+import time
 from datetime import datetime
 from PIL import Image
 import telepot
@@ -171,7 +172,12 @@ class CommunicatorBase:
         if not os.path.exists(global_var.telepot_image_dump):
             os.makedirs(global_var.telepot_image_dump)
         file_path = os.path.join(global_var.telepot_image_dump, file_name)
-        self.bot.download_file(msg['photo'][-1]['file_id'], file_path)
+        try:
+            self.bot.download_file(msg['photo'][-1]['file_id'], file_path)
+        except PermissionError:
+            os.system(f'chmod 755 {global_var.telepot_image_dump}')
+            time.sleep(5)
+            self.bot.download_file(msg['photo'][-1]['file_id'], file_path)
 
         foo = Image.open(file_path)
         w, h = foo.size

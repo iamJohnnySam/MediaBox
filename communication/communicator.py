@@ -279,10 +279,31 @@ class Communicator(CommunicatorBase):
                                x_name="Date",
                                y_name="Diapers",
                                chart_title="Diaper History - " + datetime.now().strftime('%Y-%m-%d %H:%M'))
+
+        today = datetime.now().strftime('%Y-%m-%d')
+        query = f'SELECT source, what FROM diaper WHERE date = "{today}"'
+        result = list(self.baby_sql.run_sql(query, fetch_all=1))
+
+        caption = None
+        if result is not None:
+            calc = {}
+            total = 0
+            for i in result:
+                if i[0] in calc.keys():
+                    calc[i[0]] = calc[i[0]] + i[1]
+                else:
+                    calc[i[0]] = i[1]
+                total = total + i[1]
+
+            caption = f'Your baby has had {total} nappy changes today.\nBreakdown:'
+            for i in calc.keys():
+                caption = caption + f'\n{i} = {calc[i]} nappies/diapers'
+
         self.send_now(pic,
                       image=True,
                       chat=chat_id,
-                      reply_to=message_id)
+                      reply_to=message_id,
+                      caption=caption)
 
     def baby_feed_trend(self, msg, chat_id, message_id, value, user_input=False, identifier=None):
         query = 'SELECT time, source, amount FROM feed ORDER BY timestamp'
@@ -560,7 +581,7 @@ class Communicator(CommunicatorBase):
         self.send_to_group("baby",
                            emoji + "\n" +
                            data[2] + " diaper recorded on " + data[0] + " at " + data[1] +
-                           ". \nYour baby has had " + str(day_total) + "nappy/diaper changes today\n" +
+                           ". \nYour baby has had " + str(day_total) + " nappy/diaper changes today\n" +
                            "Use /diaper to submit a new entry or\n" +
                            "Use /diaper_history to see the history.")
 
