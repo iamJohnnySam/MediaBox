@@ -52,4 +52,4 @@ telepot_image_dump = 'communication/chat_images'
 backup.move_folders.append(telepot_image_dump)
 
 finance_images = 'database/finance_images'
-backup.move_folders.append(finance_images, common=True)
+backup.move_folders_common.append(finance_images)

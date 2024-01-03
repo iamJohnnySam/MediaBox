@@ -19,6 +19,7 @@ class BackUp:
         self.copy_folders = []
         self.copy_files = []
         self.move_folders = []
+        self.move_folders_common = []
         self.move_files = []
         self.move_png_files = []
         self.databases = []
@@ -65,13 +66,21 @@ class BackUp:
             shutil.copytree(folder, destination)
             logger.log(f"Copied {folder} -> {destination}", source=self.source)
 
-    def backup_move_folders(self, common=False):
+    def backup_move_folders(self):
         for folder in self.move_folders:
             allfiles = glob.glob(os.path.join(folder, '*_A_*'), recursive=True)
-            if common:
-                destination = self.common_backup_location
-            else:
-                destination = os.path.join(self.backup_location, folder)
+            destination = os.path.join(self.backup_location, folder)
+            if not os.path.exists(os.path.dirname(destination)):
+                os.makedirs(os.path.dirname(destination))
+
+            for file_path in allfiles:
+                dst_path = os.path.join(destination, os.path.basename(file_path))
+                shutil.move(file_path, dst_path)
+                logger.log(f"Moved {file_path} -> {dst_path}", source=self.source)
+
+        for folder in self.move_folders_common:
+            allfiles = glob.glob(os.path.join(folder, '*_A_*'), recursive=True)
+            destination = os.path.join(self.common_backup_location, folder)
             if not os.path.exists(os.path.dirname(destination)):
                 os.makedirs(os.path.dirname(destination))
 
