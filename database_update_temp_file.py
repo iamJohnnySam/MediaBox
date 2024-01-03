@@ -24,11 +24,32 @@ sql = SQLConnector(settings.database_user, settings.database_password, 'transact
 #     val = (key, float(data[key]))
 #     sql.insert('weight', columns, val)
 
-with open('temp/vendors.csv', newline='') as f:
+with open('temp/transactions.csv', newline='') as f:
     reader = csv.reader(f)
     data = list(reader)
 
+# for item in data:
+#     columns = "name"
+#     val = (item[0], )
+#     sql.insert('vendors', columns, val)
+
 for item in data:
-    columns = "name"
-    val = (item[0], )
-    sql.insert('vendors', columns, val)
+    query = f'SELECT category_id FROM categories WHERE category = "{data[2]}"'
+    cat_id = list(sql.run_sql(query))[0]
+
+    query = f'SELECT vendor_id FROM vendors WHERE name = "{data[4]}"'
+    ven_id = list(sql.run_sql(query))[0]
+
+    columns = "transaction_by, date, type, category_id, amount, vendor_id, foreign_amount, currency, " \
+              "rate, comments"
+    val = (str(settings.master),
+           data[0],
+           str(data[1]).lower,
+           cat_id,
+           data[3],
+           ven_id,
+           data[6],
+           data[7],
+           data[8],
+           data[9])
+    sql.insert('transactions_lkr', columns, val)
