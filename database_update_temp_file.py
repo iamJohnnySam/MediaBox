@@ -48,9 +48,9 @@ for item in data:
            item[0],
            str(item[1]).lower,
            cat_id,
-           item[3],
+           float(item[3]),
            ven_id,
-           item[6],
+           float(item[6]),
            item[7],
            item[8],
            item[9])
