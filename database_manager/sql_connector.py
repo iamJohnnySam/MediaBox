@@ -27,11 +27,25 @@ class SQLConnector:
 
     def run_sql(self, query, fetch_all=False):
         self.cursor.execute(query)
-        if fetch_all:
-            result = self.cursor.fetchall()
-        else:
-            result = self.cursor.fetchone()
         logger.log(query, source=self.source)
+
+        if query.startswith("DELETE") or query.startswith("UPDATE"):
+            self.my_db.commit()
+            result = "DONE"
+            logger.log(str(self.cursor.rowcount) + " record(s) affected", source=self.source)
+
+        elif query.startswith("SELECT"):
+            if fetch_all:
+                result = self.cursor.fetchall()
+                logger.log(str(len(result)) + " record(s) retrieved", source=self.source)
+            else:
+                result = self.cursor.fetchone()
+                logger.log(str(result), source=self.source)
+
+        else:
+            result = "error"
+
+
         return result
 
     def insert(self, table, columns, val, get_id=False, id_column=None):
@@ -44,9 +58,13 @@ class SQLConnector:
         logger.log(f'SQL > {sql} \tID > {self.cursor.lastrowid}', source=self.source)
         self.my_db.commit()
 
+        if get_id:
+            self.cursor.execute(f'SELECT {id_column} FROM {table} ORDER BY {id_column} DESC LIMIT 1')
+            result = self.cursor.fetchone()
+            last_id = result[0]
+            return True, last_id
+
         return True, self.cursor.lastrowid
-
-
 
 
 
