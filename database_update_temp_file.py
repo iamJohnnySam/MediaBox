@@ -47,7 +47,7 @@ for item in data:
               "rate, comments"
     val = (str(settings.master),
            item[0],
-           str(item[1]).lower,
+           item[1],
            cat_id,
            float(item[3]),
            ven_id,
