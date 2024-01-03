@@ -27,28 +27,28 @@ class Communicator(CommunicatorBase):
         self.finance_sql = SQLConnector(settings.database_user, settings.database_password, 'transactions')
         self.source = "TG-C"
 
-    def check_shows(self, msg, chat_id, message_id, value):
+    def check_shows(self, msg, chat_id, message_id, value, user_input=False, identifier=None):
         global_var.check_shows = True
         self.send_now("Request Initiated - TV Show Check",
                       image=False,
                       chat=chat_id,
                       reply_to=message_id)
 
-    def check_news(self, msg, chat_id, message_id, value):
+    def check_news(self, msg, chat_id, message_id, value, user_input=False, identifier=None):
         global_var.check_news = True
         self.send_now("Request Initiated - News Check",
                       image=False,
                       chat=chat_id,
                       reply_to=message_id)
 
-    def check_cctv(self, msg, chat_id, message_id, value):
+    def check_cctv(self, msg, chat_id, message_id, value, user_input=False, identifier=None):
         global_var.check_cctv = True
         self.send_now("Request Initiated - CCTV Check",
                       image=False,
                       chat=chat_id,
                       reply_to=message_id)
 
-    def find_movie(self, msg, chat_id, message_id, value, identifier=None):
+    def find_movie(self, msg, chat_id, message_id, value, user_input=False, identifier=None):
         movie = value
 
         if movie == "":
@@ -119,7 +119,7 @@ class Communicator(CommunicatorBase):
                                         reply_to=message_id
                                         )
 
-    def request_tv_show(self, msg, chat_id, message_id, value, identifier=None):
+    def request_tv_show(self, msg, chat_id, message_id, value, user_input=False, identifier=None):
         show = value
         if show == "":
             self.send_now("Please type name of the TV show", chat=chat_id, reply_to=message_id)
@@ -132,7 +132,7 @@ class Communicator(CommunicatorBase):
         self.send_now("TV Show Requested - " + show, chat=chat_id, reply_to=message_id)
         self.send_now("TV Show Requested - " + show)
 
-    def baby_weight(self, msg, chat_id, message_id, value, identifier=None):
+    def baby_weight(self, msg, chat_id, message_id, value, user_input=False, identifier=None):
         if value == "":
             self.send_now("Please enter the weight", chat=chat_id, reply_to=message_id)
             self.get_user_input(chat_id, "baby_weight", None)
@@ -161,38 +161,38 @@ class Communicator(CommunicatorBase):
         logger.log(send_string, source=self.source)
         self.baby_weight_trend(msg, chat_id, message_id, value, caption=send_string)
 
-    def add_me_to_cctv(self, msg, chat_id, message_id, value):
+    def add_me_to_cctv(self, msg, chat_id, message_id, value, user_input=False, identifier=None):
         self.send_now("Function Not yet implemented",
                       image=False,
                       chat=chat_id,
                       reply_to=message_id)
 
-    def add_me_to_news(self, msg, chat_id, message_id, value):
+    def add_me_to_news(self, msg, chat_id, message_id, value, user_input=False, identifier=None):
         self.send_now("Function Not yet implemented",
                       image=False,
                       chat=chat_id,
                       reply_to=message_id)
 
-    def remove_me_from_cctv(self, msg, chat_id, message_id, value):
+    def remove_me_from_cctv(self, msg, chat_id, message_id, value, user_input=False, identifier=None):
         self.send_now("Function Not yet implemented",
                       image=False,
                       chat=chat_id,
                       reply_to=message_id)
 
-    def remove_me_from_news(self, msg, chat_id, message_id, value):
+    def remove_me_from_news(self, msg, chat_id, message_id, value, user_input=False, identifier=None):
         self.send_now("Function Not yet implemented",
                       image=False,
                       chat=chat_id,
                       reply_to=message_id)
 
-    def list_torrents(self, msg, chat_id, message_id, value):
+    def list_torrents(self, msg, chat_id, message_id, value, user_input=False, identifier=None):
         torrent_list = transmission.list_all()
         self.send_now(str(torrent_list),
                       image=False,
                       chat=chat_id,
                       reply_to=message_id)
 
-    def baby_feed(self, msg, chat_id, message_id, value, identifier=None):
+    def baby_feed(self, msg, chat_id, message_id, value, user_input=False, identifier=None):
         identifier = datetime.now().strftime('%Y-%m-%d %H:%M:%S') + " "
 
         if value != "":
@@ -222,7 +222,7 @@ class Communicator(CommunicatorBase):
         else:
             self.cb_feed(None, None, chat_id, identifier + str(value))
 
-    def baby_diaper(self, msg, chat_id, message_id, value):
+    def baby_diaper(self, msg, chat_id, message_id, value, user_input=False, identifier=None):
         identifier = datetime.now().strftime('%Y-%m-%d %H:%M:%S') + " "
 
         self.send_message_with_keyboard(msg="Need some diaper info",
@@ -237,7 +237,7 @@ class Communicator(CommunicatorBase):
                                         reply_to=message_id
                                         )
 
-    def baby_feed_history(self, msg, chat_id, message_id, value):
+    def baby_feed_history(self, msg, chat_id, message_id, value, user_input=False, identifier=None):
         query = 'SELECT date, source, amount FROM feed ORDER BY timestamp'
         result = list(self.baby_sql.run_sql(query, fetch_all=1))
 
@@ -250,7 +250,7 @@ class Communicator(CommunicatorBase):
                       chat=chat_id,
                       reply_to=message_id)
 
-    def baby_diaper_history(self, msg, chat_id, message_id, value):
+    def baby_diaper_history(self, msg, chat_id, message_id, value, user_input=False, identifier=None):
         query = 'SELECT date, what, count FROM diaper ORDER BY timestamp'
         result = list(self.baby_sql.run_sql(query, fetch_all=1))
 
@@ -263,7 +263,7 @@ class Communicator(CommunicatorBase):
                       chat=chat_id,
                       reply_to=message_id)
 
-    def baby_feed_trend(self, msg, chat_id, message_id, value):
+    def baby_feed_trend(self, msg, chat_id, message_id, value, user_input=False, identifier=None):
         query = 'SELECT time, source, amount FROM feed ORDER BY timestamp'
         result = list(self.baby_sql.run_sql(query, fetch_all=1))
 
@@ -277,7 +277,7 @@ class Communicator(CommunicatorBase):
                       chat=chat_id,
                       reply_to=message_id)
 
-    def baby_diaper_trend(self, msg, chat_id, message_id, value):
+    def baby_diaper_trend(self, msg, chat_id, message_id, value, user_input=False, identifier=None):
         query = 'SELECT time, what, count FROM diaper ORDER BY timestamp'
         result = list(self.baby_sql.run_sql(query, fetch_all=1))
 
@@ -291,7 +291,7 @@ class Communicator(CommunicatorBase):
                       chat=chat_id,
                       reply_to=message_id)
 
-    def baby_feed_trend_date(self, msg, chat_id, message_id, value):
+    def baby_feed_trend_date(self, msg, chat_id, message_id, value, user_input=False, identifier=None):
         query = 'SELECT time, date, amount FROM feed ORDER BY timestamp'
         result = list(self.baby_sql.run_sql(query, fetch_all=1))
 
@@ -304,7 +304,7 @@ class Communicator(CommunicatorBase):
                       chat=chat_id,
                       reply_to=message_id)
 
-    def baby_diaper_trend_date(self, msg, chat_id, message_id, value):
+    def baby_diaper_trend_date(self, msg, chat_id, message_id, value, user_input=False, identifier=None):
         query = 'SELECT time, date, count FROM diaper ORDER BY timestamp'
         result = list(self.baby_sql.run_sql(query, fetch_all=1))
 
@@ -317,7 +317,7 @@ class Communicator(CommunicatorBase):
                       chat=chat_id,
                       reply_to=message_id)
 
-    def baby_feed_trend_cat(self, msg, chat_id, message_id, value):
+    def baby_feed_trend_cat(self, msg, chat_id, message_id, value, user_input=False, identifier=None):
         query = 'SELECT time, source, amount FROM feed ORDER BY timestamp'
         result = list(self.baby_sql.run_sql(query, fetch_all=1))
 
@@ -330,7 +330,7 @@ class Communicator(CommunicatorBase):
                       chat=chat_id,
                       reply_to=message_id)
 
-    def baby_diaper_trend_cat(self, msg, chat_id, message_id, value):
+    def baby_diaper_trend_cat(self, msg, chat_id, message_id, value, user_input=False, identifier=None):
         query = 'SELECT time, what, count FROM diaper ORDER BY timestamp'
         result = list(self.baby_sql.run_sql(query, fetch_all=1))
 
@@ -343,7 +343,7 @@ class Communicator(CommunicatorBase):
                       chat=chat_id,
                       reply_to=message_id)
 
-    def baby_weight_trend(self, msg, chat_id, message_id, value, caption=None):
+    def baby_weight_trend(self, msg, chat_id, message_id, value, caption=None, user_input=False, identifier=None):
         query = 'SELECT date, weight FROM weight ORDER BY timestamp'
         result = list(self.baby_sql.run_sql(query, fetch_all=1))
 
