@@ -247,7 +247,7 @@ class Communicator(CommunicatorBase):
                                chart_title="Feed History - " + datetime.now().strftime('%Y-%m-%d %H:%M'))
 
         today = datetime.now().strftime('%Y-%m-%d')
-        query = f'SELECT source, amount FROM feed ORDER BY timestamp WHERE date = "{today}"'
+        query = f'SELECT source, amount FROM feed WHERE date = "{today}"'
         result = list(self.baby_sql.run_sql(query, fetch_all=1))
 
         caption = None
