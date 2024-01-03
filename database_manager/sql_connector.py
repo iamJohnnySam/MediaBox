@@ -39,6 +39,9 @@ class SQLConnector:
         for i in range(columns.count(",")):
             placeholder = placeholder + ", %s"
 
+        if columns.count(",") == 0:
+            placeholder = placeholder + ","
+
         sql = "INSERT INTO " + table + " (" + columns + ") VALUES (" + placeholder + ")"
         self.cursor.execute(sql, val)
         logger.log(f'SQL > {sql} \tID > {self.cursor.lastrowid}', source=self.source)

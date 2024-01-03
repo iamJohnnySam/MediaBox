@@ -30,5 +30,5 @@ with open('temp/vendors.csv', newline='') as f:
 
 for item in data:
     columns = "name"
-    val = (item[0])
+    val = (item[0], )
     sql.insert('vendors', columns, val)
