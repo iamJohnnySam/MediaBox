@@ -105,7 +105,7 @@ class Communicator(CommunicatorBase):
             self.get_user_input(chat_id, "finance", None)
             return
 
-        if user_input:
+        if user_input and identifier is not None:
             sql_id = identifier
             query = f'UPDATE transaction_lkr SET amount = "{amount}" WHERE transaction_id = "{sql_id}"'
             self.finance_sql.run_sql(query)
