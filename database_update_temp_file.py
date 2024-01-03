@@ -47,7 +47,7 @@ for item in data:
     date = datetime.strptime(item[0], '%d/%m/%Y').strftime('%Y-%m-%d')
 
     if item[6] == "":
-        fval = item[6]
+        fval = 0
     else:
         fval = float(item[6])
 
