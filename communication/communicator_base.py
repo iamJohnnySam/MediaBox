@@ -329,7 +329,7 @@ class CommunicatorBase:
             self.get_user_input(chat_id, call_frame[1][3], None)
             return False
 
-        if fl:
+        if fl and value != "":
             try:
                 x = float(value)
             except ValueError:
