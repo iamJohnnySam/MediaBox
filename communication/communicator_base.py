@@ -304,7 +304,7 @@ class CommunicatorBase:
 
         logger.log(f'Calling function: {cb} with arguments {arg} and {message}.')
         func = getattr(self, cb)
-        func(None, chat_id, message_id, message, user_input=True, identifier=arg)
+        func(msg, chat_id, message_id, message, user_input=True, identifier=arg)
 
     def check_command_value(self, inquiry, value, chat_id, message_id):
         current_frame = inspect.currentframe()

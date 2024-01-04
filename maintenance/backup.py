@@ -113,3 +113,4 @@ class BackUp:
 
             gzip_cmd = f'gzip {backup_file_path}'
             os.system(gzip_cmd)
+            logger.log(f'Backed up {database} database at {backup_file_path}.')
