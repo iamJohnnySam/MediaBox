@@ -51,7 +51,6 @@ class RefactorFolder:
                                             base_name),
                                base_name + file_name)
 
-
     def get_file_and_directory(self, path):
         files_list = []
         directories_list = []
@@ -71,7 +70,7 @@ class RefactorFolder:
     def move_file(self, old_location, new_location, file):
         if not os.path.exists(new_location):
             os.makedirs(new_location)
-        destination = shutil.move(old_location, os.path.join(new_location,file))
+        destination = shutil.move(old_location, os.path.join(new_location, file))
         return destination
 
     def breakdown_torrent_file_name(self, file_name):
@@ -89,7 +88,10 @@ class RefactorFolder:
         if match_tv:
             tv_show = True
             movie = False
-            file_name = str(file_name[0:match_tv.end()])
+            if "." in file_name:
+                file_name = str(file_name[0:file_name.find('.', match_tv.end()-1)])
+            else:
+                file_name = str(file_name[0:match_tv.end()])
             base_name = str(file_name[0:match_tv.start()])
             if "." in file_name:
                 file_name = file_name.replace(".", " ").strip()
@@ -100,7 +102,7 @@ class RefactorFolder:
             tv_show = False
             movie = True
             file_name = str(file_name[0:match_quality.end()])
-            base_name = str(file_name[0:match_quality.start()-1])
+            base_name = str(file_name[0:match_quality.start() - 1])
             if "." in file_name:
                 file_name = file_name.replace(".", " ").strip()
                 base_name = base_name.replace(".", " ").strip()
