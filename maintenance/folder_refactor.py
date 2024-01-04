@@ -3,9 +3,12 @@ import re
 import shutil
 
 import global_var
+import logger
 
 
 class RefactorFolder:
+    source = "RFAC"
+
     def __init__(self, path):
         self.path = path
 
@@ -13,6 +16,7 @@ class RefactorFolder:
         for root, dirs, files in os.walk(self.path):
             for file in files:
                 file_name, tv_show, movie, subtitle, base_name = self.breakdown_torrent_file_name(file)
+                logger.log(f'{file_name}, {tv_show}, {movie}, {subtitle}, {base_name}', source=self.source)
                 if tv_show:
                     self.move_file(os.path.join(self.path, file),
                                    os.path.join(global_var.torrent_tv_shows,
