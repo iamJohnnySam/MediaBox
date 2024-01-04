@@ -13,6 +13,7 @@ from charts.grapher import grapher_trend, grapher_simple_trend, grapher_category
 from communication.communicator_base import CommunicatorBase
 from database_manager.json_editor import JSONEditor
 from database_manager.sql_connector import SQLConnector
+from maintenance.folder_refactor import RefactorFolder
 from show import transmission
 
 
@@ -182,6 +183,15 @@ class Communicator(CommunicatorBase):
     def list_torrents(self, msg, chat_id, message_id, value, user_input=False, identifier=None):
         torrent_list = transmission.list_all()
         self.send_now(str(torrent_list),
+                      image=False,
+                      chat=chat_id,
+                      reply_to=message_id)
+
+    def clean_up_downloads(self, msg, chat_id, message_id, value, user_input=False, identifier=None):
+        logger.log("Starting Downloads Refactor", source=self.source)
+        RefactorFolder(global_var.torrent_download).clean_torrent_downloads()
+        logger.log("Completed Downloads Refactor", source=self.source)
+        self.send_now("Downloads Folder re-arrangement completed",
                       image=False,
                       chat=chat_id,
                       reply_to=message_id)

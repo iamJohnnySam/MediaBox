@@ -47,6 +47,10 @@
     "function": "list_torrents",
     "definition": "List Torrents"
   },
+  "/clean_downloads": {
+    "function": "clean_up_downloads",
+    "definition": "Re-arrange torrent downloads"
+  },
   "/finance": {
     "function": "finance",
     "definition": "Add Transactions",
