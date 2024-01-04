@@ -13,21 +13,20 @@ class RefactorFolder:
         self.path = path
 
     def clean_torrent_downloads(self):
-        for root, dirs, files in os.walk(self.path):
-            for file in files:
-                file_name, tv_show, movie, subtitle, base_name = self.breakdown_torrent_file_name(file)
-                logger.log(f'{file_name}, {tv_show}, {movie}, {subtitle}, {base_name}', source=self.source)
-                if tv_show:
-                    self.move_file(os.path.join(self.path, file),
-                                   os.path.join(global_var.torrent_tv_shows,
-                                                base_name,
-                                                file_name))
+        root, dirs, files = os.walk(self.path)
+        for file in files:
+            file_name, tv_show, movie, subtitle, base_name = self.breakdown_torrent_file_name(file)
+            logger.log(f'{file_name}, {tv_show}, {movie}, {subtitle}, {base_name}', source=self.source)
+            if tv_show:
+                self.move_file(os.path.join(self.path, file),
+                               os.path.join(global_var.torrent_tv_shows,
+                                            base_name),
+                               file_name)
 
-    def move_file(self, old_location, new_location):
-        loc = os.path.dirname(os.path.abspath(new_location))
-        if not os.path.exists(loc):
-            os.makedirs(loc)
-        destination = shutil.move(old_location, new_location)
+    def move_file(self, old_location, new_location, file):
+        if not os.path.exists(new_location):
+            os.makedirs(new_location)
+        destination = shutil.move(old_location, os.path.join(new_location,file))
         return destination
 
     def breakdown_torrent_file_name(self, file_name):
