@@ -63,8 +63,8 @@ class RefactorFolder:
             file_name = str(file_name[0:match_tv.end()])
             base_name = str(file_name[0:match_tv.start()])
             if "." in file_name:
-                file_name.replace(".", " ").strip()
-                base_name.replace(".", " ").strip()
+                file_name = file_name.replace(".", " ").strip()
+                base_name = base_name.replace(".", " ").strip()
             file_name = file_name + "." + extension
 
         elif match_video and match_quality:
