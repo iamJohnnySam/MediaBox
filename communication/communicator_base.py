@@ -193,13 +193,22 @@ class CommunicatorBase:
 
         logger.log(f'Received Photo > {file_name}, File size > {foo.size}', source=self.source)
 
-        self.send_message_with_keyboard(msg="What is this image for",
+        button_text = ["save_photo"]
+        for key in self.command_dictionary.keys():
+            if "photo" in self.command_dictionary[key].keys():
+                button_text.append(f'{self.command_dictionary[key]["function"]}_photo')
+
+        button_text, button_cb, button_value, arrangement = self.keyboard_extractor(file_name, None,
+                                                                                    button_text,
+                                                                                    'run_command',
+                                                                                    sql_result=False,
+                                                                                    command_only=True)
+        self.send_message_with_keyboard(msg="Which function to call?",
                                         chat_id=chat_id,
-                                        button_text=["Save", "Finance"],
-                                        button_cb=["photo", "photo"],
-                                        button_val=["save;" + file_name,
-                                                    "finance;" + file_name],
-                                        arrangement=[2],
+                                        button_text=button_text,
+                                        button_cb=button_cb,
+                                        button_val=button_value,
+                                        arrangement=arrangement,
                                         reply_to=message_id
                                         )
 
@@ -239,7 +248,7 @@ class CommunicatorBase:
         logger.log("Buttons to remove from message id " + str(message['message_id']), self.source)
         message_id = telepot.message_identifier(message)
         self.bot.editMessageReplyMarkup(message_id, reply_markup=keyboard)
-        return message_id
+        return message['message_id']
 
     def send_message_with_keyboard(self, msg, chat_id, button_text, button_cb, button_val,
                                    arrangement, reply_to=None):
@@ -278,14 +287,20 @@ class CommunicatorBase:
 
         self.link_msg_to_buttons(message, button_ids)
 
-    def keyboard_extractor(self, identifier, num, result):
-        button_text = [row[0] for row in result]
-        button_cb = ['finance'] * len(button_text)
+    def keyboard_extractor(self, identifier, num, result, cb, bpr=3, sql_result=True, command_only=False):
+        if sql_result:
+            button_text = [row[0] for row in result]
+        else:
+            button_text = result
+        button_cb = cb * len(button_text)
         button_value = []
         for text in button_text:
-            button_value.append(f'{identifier};{num};{text}')
-        arrangement = [3 for _ in range(int(math.floor(len(button_text) / 3)))]
-        if len(button_text) % 3 != 0:
+            if command_only:
+                button_value.append(f'{identifier};{text}')
+            else:
+                button_value.append(f'{identifier};{num};{text}')
+        arrangement = [bpr for _ in range(int(math.floor(len(button_text) / 3)))]
+        if len(button_text) % bpr != 0:
             arrangement.append(len(button_text) % 3)
         logger.log("Keyboard extracted > " + str(arrangement), source=self.source)
 
@@ -306,14 +321,23 @@ class CommunicatorBase:
         func = getattr(self, cb)
         func(msg, chat_id, message_id, message, user_input=True, identifier=arg)
 
-    def check_command_value(self, inquiry, value, chat_id, message_id):
+    def check_command_value(self, inquiry, value, chat_id, message_id, tx=True, fl=False):
         current_frame = inspect.currentframe()
         call_frame = inspect.getouterframes(current_frame, 2)
 
-        if value == "":
+        if value == "" and tx:
             self.send_now(f'Please send the {inquiry}', chat=chat_id, reply_to=message_id)
             self.get_user_input(chat_id, call_frame[1][3], None)
             return False
+
+        if fl:
+            try:
+                x = float(value)
+            except ValueError:
+                self.send_now(f'Please send the {inquiry} USING DIGITS ONLY', chat=chat_id, reply_to=message_id)
+                self.get_user_input(chat_id, call_frame[1][3], None)
+                return False
+
         return True
 
     # MAIN FUNCTIONS
@@ -325,6 +349,13 @@ class CommunicatorBase:
 
     def time(self, msg, chat_id, message_id, value):
         self.send_now(str(datetime.now()),
+                      image=False,
+                      chat=chat_id,
+                      reply_to=message_id)
+
+    def save_photo(self, msg, chat_id, message_id, value):
+        logger.log("Image saved as " + value)
+        self.send_now("Image saved as " + value,
                       image=False,
                       chat=chat_id,
                       reply_to=message_id)
@@ -363,3 +394,17 @@ class CommunicatorBase:
                           chat=chat_id,
                           reply_to=message_id)
             self.send_now("Start over requested by " + str(msg['chat']['first_name']) + "\n/reboot_pi")
+
+    def cb_cancel(self, callback_id, query_id, from_id, value):
+        self.update_in_line_buttons(callback_id)
+        self.bot.answerCallbackQuery(query_id, text='Canceled')
+
+    def cb_echo(self, callback_id, query_id, from_id, value):
+        self.send_now(value, chat=from_id)
+        self.bot.answerCallbackQuery(query_id, text='Sent')
+
+    def cb_run_command(self, callback_id, query_id, from_id, value):
+        result = value.split(';')
+        logger.log("Calling function: " + result[1])
+        func = getattr(self, result[1])
+        func(callback_id, query_id, from_id, result[0])

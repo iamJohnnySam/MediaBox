@@ -120,9 +120,7 @@ class Communicator(CommunicatorBase):
                                         )
 
     def sms_bill(self, msg, chat_id, message_id, value, user_input=False, identifier=None):
-        if value == "":
-            self.send_now("Please reply with the bank sms", chat=chat_id, reply_to=message_id)
-            self.get_user_input(chat_id, "sms_bill", None)
+        if not self.check_command_value("sms received from bank", value, chat_id, message_id):
             return
         pass
 
@@ -137,17 +135,9 @@ class Communicator(CommunicatorBase):
         self.send_now("TV Show Requested - " + show)
 
     def baby_weight(self, msg, chat_id, message_id, value, user_input=False, identifier=None):
-        if value == "":
-            self.send_now("Please enter the weight", chat=chat_id, reply_to=message_id)
-            self.get_user_input(chat_id, "baby_weight", None)
+        if not self.check_command_value("weight of the baby in kg", value, chat_id, message_id, fl=True):
             return
-
-        try:
-            weight = float(value)
-        except ValueError:
-            self.send_now("Please enter the weight in numbers only", chat=chat_id, reply_to=message_id)
-            self.get_user_input(chat_id, "baby_weight", None)
-            return
+        weight = float(value)
 
         key = datetime.now().strftime('%Y/%m/%d')
 
@@ -197,17 +187,12 @@ class Communicator(CommunicatorBase):
                       reply_to=message_id)
 
     def baby_feed(self, msg, chat_id, message_id, value, user_input=False, identifier=None):
-        identifier = datetime.now().strftime('%Y-%m-%d %H:%M:%S') + " "
+        if "ml" in value:
+            value = str(value).replace("ml", "").strip()
+        if not self.check_command_value("amount consumed in ml", value, chat_id, message_id, tx=False, fl=True):
+            return
 
-        if value != "":
-            if "ml" in value:
-                value = str(value).replace("ml", "").strip()
-            try:
-                int(value)
-            except ValueError:
-                self.send_now("Please the amount consumed in ml", chat=chat_id, reply_to=message_id)
-                self.get_user_input(chat_id, "baby_feed", None)
-                return
+        identifier = datetime.now().strftime('%Y-%m-%d %H:%M:%S') + " "
 
         if value == "":
             self.send_message_with_keyboard(msg="Need some feeding info",
@@ -222,7 +207,6 @@ class Communicator(CommunicatorBase):
                                             arrangement=[4, 1],
                                             reply_to=message_id
                                             )
-
         else:
             self.cb_feed(None, None, chat_id, identifier + str(value))
 
@@ -406,36 +390,26 @@ class Communicator(CommunicatorBase):
                       caption=caption,
                       reply_to=message_id)
 
-    # -------------- CALLBACK FUNCTIONS --------------
+    # -------------- PHOTO FUNCTIONS --------------
 
-    def cb_photo(self, callback_id, query_id, from_id, value):
+    def finance_photo(self, callback_id, query_id, from_id, value):
         message_id = self.update_in_line_buttons(callback_id)
         self.bot.answerCallbackQuery(query_id, text='Got it')
 
-        data = value.split(";")
-        if data[0] == "save":
-            logger.log("Image saved to " + data[1])
-        elif data[0] == "finance":
-            if not os.path.exists(global_var.finance_images):
-                os.makedirs(global_var.finance_images)
+        if not os.path.exists(global_var.finance_images):
+            os.makedirs(global_var.finance_images)
 
-            columns = 'transaction_by, photo_id'
-            val = (from_id, data[1])
-            success, sql_id = self.finance_sql.insert('transaction_lkr', columns, val,
-                                                      get_id=True,
-                                                      id_column='transaction_id')
-            shutil.move(os.path.join(global_var.telepot_image_dump,data[1]),
-                        os.path.join(global_var.finance_images, data[1]))
-            self.send_now("How much is the amount?", chat=from_id, reply_to=str(message_id))
-            self.get_user_input(from_id, "finance", sql_id)
+        columns = 'transaction_by, photo_id'
+        val = (from_id, value)
+        success, sql_id = self.finance_sql.insert('transaction_lkr', columns, val,
+                                                  get_id=True,
+                                                  id_column='transaction_id')
+        shutil.move(os.path.join(global_var.telepot_image_dump, value),
+                    os.path.join(global_var.finance_images, value))
+        self.send_now("How much is the amount?", chat=from_id, reply_to=str(message_id))
+        self.get_user_input(from_id, "finance", sql_id)
 
-    def cb_cancel(self, callback_id, query_id, from_id, value):
-        self.update_in_line_buttons(callback_id)
-        self.bot.answerCallbackQuery(query_id, text='Canceled')
-
-    def cb_echo(self, callback_id, query_id, from_id, value):
-        self.send_now(value, chat=from_id)
-        self.bot.answerCallbackQuery(query_id, text='Sent')
+    # -------------- CALLBACK FUNCTIONS --------------
 
     def cb_download(self, callback_id, query_id, from_id, value):
         success, torrent_id = transmission.download(value)
@@ -470,7 +444,7 @@ class Communicator(CommunicatorBase):
             query = f'SELECT DISTINCT type FROM categories WHERE in_out = "{in_out}"'
             result = list(self.finance_sql.run_sql(query, fetch_all=True))
 
-            button_text, button_cb, button_value, arrangement = self.keyboard_extractor(data[0], "2", result)
+            button_text, button_cb, button_value, arrangement = self.keyboard_extractor(data[0], "2", result, 'finance')
             button_text.append("Delete")
             button_cb.append("finance")
             button_value.append(f'{data[0]};2;Delete')
@@ -481,13 +455,14 @@ class Communicator(CommunicatorBase):
                                             button_text=button_text,
                                             button_cb=button_cb,
                                             button_val=button_value,
-                                            arrangement=arrangement
+                                            arrangement=arrangement,
+                                            reply_to=message_id
                                             )
         elif data[1] == "2":
             query = f'SELECT DISTINCT category FROM categories WHERE type = "{data[2]}"'
             result = list(self.finance_sql.run_sql(query, fetch_all=True))
 
-            button_text, button_cb, button_value, arrangement = self.keyboard_extractor(data[0], "3", result)
+            button_text, button_cb, button_value, arrangement = self.keyboard_extractor(data[0], "3", result, 'finance')
             button_text.append("Delete")
             button_cb.append("finance")
             button_value.append(f'{data[0]};3;Delete')
@@ -498,7 +473,8 @@ class Communicator(CommunicatorBase):
                                             button_text=button_text,
                                             button_cb=button_cb,
                                             button_val=button_value,
-                                            arrangement=arrangement
+                                            arrangement=arrangement,
+                                            reply_to=message_id
                                             )
         elif data[1] == "3":
             query = f'SELECT category_id FROM categories WHERE category = "{data[2]}"'
