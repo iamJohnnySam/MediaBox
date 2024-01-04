@@ -1,7 +1,6 @@
 import inspect
 import math
 import os.path
-import time
 from datetime import datetime
 from PIL import Image
 import telepot
@@ -353,11 +352,14 @@ class CommunicatorBase:
                       chat=chat_id,
                       reply_to=message_id)
 
-    def save_photo(self, msg, chat_id, message_id, value):
+    def save_photo(self, callback_id, query_id, from_id, value):
+        message_id = self.update_in_line_buttons(callback_id)
+        self.bot.answerCallbackQuery(query_id, text='Image will be saved')
+
         logger.log("Image saved as " + value)
         self.send_now("Image saved as " + value,
                       image=False,
-                      chat=chat_id,
+                      chat=from_id,
                       reply_to=message_id)
 
     def start_over(self, msg, chat_id, message_id, value):
