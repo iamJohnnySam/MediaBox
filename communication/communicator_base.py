@@ -313,7 +313,8 @@ class CommunicatorBase:
         if value == "":
             self.send_now(f'Please send the {inquiry}', chat=chat_id, reply_to=message_id)
             self.get_user_input(chat_id, call_frame[1][3], None)
-            return
+            return False
+        return True
 
     # MAIN FUNCTIONS
     def alive(self, msg, chat_id, message_id, value):
