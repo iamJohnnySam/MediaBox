@@ -19,7 +19,7 @@ class RefactorFolder:
         for directory in directories:
             directory_path = os.path.join(self.path, directory)
             sub_files, sub_directories = self.get_file_and_directory(directory_path)
-            self.sort_torrent_files(sub_files, self.path)
+            self.sort_torrent_files(sub_files, directory_path)
 
             sub_files, sub_directories = self.get_file_and_directory(directory_path)
             if len(sub_directories) == 0 and len(sub_files) == 0:
