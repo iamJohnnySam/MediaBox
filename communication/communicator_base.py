@@ -254,9 +254,9 @@ class CommunicatorBase:
                                    arrangement, reply_to=None):
         if len(button_text) == 0 or len(button_text) != len(button_cb) or len(button_text) != len(button_val):
             logger.log("Keyboard Generation error: " + str(msg), source=self.source, message_type="error")
-            logger.log("Button Text Length" + str(len(button_text)), source=self.source, message_type="error")
-            logger.log("Button CB Length" + str(len(button_cb)), source=self.source, message_type="error")
-            logger.log("Button Value Length" + str(len(button_val)), source=self.source, message_type="error")
+            logger.log("Button Text Length " + str(len(button_text)), source=self.source, message_type="error")
+            logger.log("Button CB Length " + str(len(button_cb)), source=self.source, message_type="error")
+            logger.log("Button Value Length " + str(len(button_val)), source=self.source, message_type="error")
             return
 
         button_ids = []
@@ -292,7 +292,7 @@ class CommunicatorBase:
             button_text = [row[0] for row in result]
         else:
             button_text = result
-        button_cb = cb * len(button_text)
+        button_cb = [cb] * len(button_text)
         button_value = []
         for text in button_text:
             if command_only:
