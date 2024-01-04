@@ -49,7 +49,12 @@
   },
   "/finance": {
     "function": "finance",
-    "definition": "Add Transactions"
+    "definition": "Add Transactions",
+    "photo": 1
+  },
+  "/sms_bill": {
+    "function": "sms_bill",
+    "definition": "Forward bank SMS"
   },
   "/start_over": {
     "function": "start_over",

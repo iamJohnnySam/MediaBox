@@ -2,6 +2,8 @@ import logging
 import os
 from datetime import date, datetime
 
+from communication import communicator
+
 
 def log(msg, source="MBOX", message_type="info"):
     message = str(msg)
@@ -38,4 +40,4 @@ try:
     logging.basicConfig(filename='log/log-' + today_date + '.log', level=logging.DEBUG)
 except PermissionError:
     log("PERMISSION ERROR", source="LOG", message_type="error")
-    communicator.send_to_master("PERMISSION ERROR")
+    communicator.send_to_master('main', "PERMISSION ERROR")

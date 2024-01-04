@@ -1,3 +1,4 @@
+import inspect
 import math
 import os.path
 import time
@@ -304,6 +305,15 @@ class CommunicatorBase:
         logger.log(f'Calling function: {cb} with arguments {arg} and {message}.')
         func = getattr(self, cb)
         func(None, chat_id, message_id, message, user_input=True, identifier=arg)
+
+    def check_command_value(self, inquiry, value, chat_id, message_id):
+        current_frame = inspect.currentframe()
+        call_frame = inspect.getouterframes(current_frame, 2)
+
+        if value == "":
+            self.send_now(f'Please send the {inquiry}', chat=chat_id, reply_to=message_id)
+            self.get_user_input(chat_id, call_frame[1][3], None)
+            return
 
     # MAIN FUNCTIONS
     def alive(self, msg, chat_id, message_id, value):

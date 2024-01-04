@@ -1,5 +1,6 @@
 /settings.py
 *.json
+*.sql
 /log
 /cctv/nn_models
 tensorflow-2.5.0-cp37-none-linux_armv7l.whl

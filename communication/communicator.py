@@ -119,11 +119,15 @@ class Communicator(CommunicatorBase):
                                         reply_to=message_id
                                         )
 
-    def request_tv_show(self, msg, chat_id, message_id, value, user_input=False, identifier=None):
-        show = value
-        if show == "":
-            self.send_now("Please type name of the TV show", chat=chat_id, reply_to=message_id)
-            self.get_user_input(chat_id, "request_tv_show", None)
+    def sms_bill(self, msg, chat_id, message_id, value, user_input=False, identifier=None):
+        if value == "":
+            self.send_now("Please reply with the bank sms", chat=chat_id, reply_to=message_id)
+            self.get_user_input(chat_id, "sms_bill", None)
+            return
+        pass
+
+    def request_tv_show(self, msg, chat_id, message_id, show, user_input=False, identifier=None):
+        if not self.check_command_value("name of TV show", show, chat_id, message_id):
             return
 
         request = {show: str(msg['chat']['first_name'])}
