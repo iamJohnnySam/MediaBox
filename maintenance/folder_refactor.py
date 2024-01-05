@@ -40,13 +40,15 @@ class RefactorFolder:
 
     def move_subs_folder(self, directory_path, last_loc):
         subs_folder = os.path.join(directory_path, "Subs")
-        allfiles = glob.glob(os.path.join(subs_folder, '*_A_*'), recursive=True)
+        sub_files, sub_directories = self.get_file_and_directory(subs_folder)
+
         destination = os.path.join(last_loc, "Subs")
         if not os.path.exists(os.path.dirname(destination)):
             os.makedirs(os.path.dirname(destination))
 
-        for file_path in allfiles:
-            dst_path = os.path.join(destination, os.path.basename(file_path))
+        for file in sub_files:
+            dst_path = os.path.join(destination, file)
+            file_path = os.path.join(subs_folder, file)
             shutil.move(file_path, dst_path)
             logger.log(f"Moved {file_path} -> {dst_path}", source=self.source)
 
