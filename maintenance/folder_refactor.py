@@ -111,7 +111,7 @@ class RefactorFolder:
         else:
             subtitle = False
 
-        no_words = ["EXTENDED", "REMASTERED", "REPACK", "BLURAY", "Dir Cut"]
+        no_words = ["EXTENDED", "REMASTERED", "REPACK", "BLURAY", "Dir Cut", "IMAX", "EDITION"]
         match_video = any(ext in extension for ext in ("mp4", "flv", "mkv", "avi", "srt"))
 
         match_tv = re.search('S[0-9][0-9]E[0-9][0-9]', file_name, flags=re.IGNORECASE)
