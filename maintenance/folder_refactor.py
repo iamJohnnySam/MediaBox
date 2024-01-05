@@ -29,6 +29,11 @@ class RefactorFolder:
                 self.move_subs_folder(directory_path, last_loc)
 
             sub_files, sub_directories = self.get_file_and_directory(directory_path)
+            for sub_sub_directory in sub_directories:
+                self.move_files_and_directories(os.path.join(directory_path, sub_sub_directory),
+                                                last_loc)
+
+            sub_files, sub_directories = self.get_file_and_directory(directory_path)
             if len(sub_directories) == 0 and len(sub_files) == 0:
                 try:
                     os.rmdir(directory_path)
@@ -156,3 +161,15 @@ class RefactorFolder:
         filtered_words = [word for word in words if word.lower() not in map(str.lower, words_to_remove)]
         filtered_sentence = ' '.join(filtered_words)
         return filtered_sentence
+
+    def move_files_and_directories(self, source_folder, destination_folder):
+        items = os.listdir(source_folder)
+        for item in items:
+            source_path = os.path.join(source_folder, item)
+            destination_path = os.path.join(destination_folder, item)
+            try:
+                # Move the item to the destination folder
+                shutil.move(source_path, destination_path)
+                logger.log(f"Moved '{item}' to '{destination_folder}'", source=self.source)
+            except Exception as e:
+                logger.log(f"Failed to move '{item}': {str(e)}", source=self.source)
