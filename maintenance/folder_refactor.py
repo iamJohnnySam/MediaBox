@@ -127,7 +127,6 @@ class RefactorFolder:
             base_name = str(file_name[0:match_tv.start()])
             if "." in file_name:
                 file_name = file_name.replace(".", " ").strip()
-                file_name = string.capwords(file_name)
                 base_name = self.remove_words(base_name.replace(".", " ").strip(), no_words)
                 base_name = string.capwords(base_name)
             file_name = file_name + "." + extension
@@ -139,7 +138,6 @@ class RefactorFolder:
             base_name = str(file_name[0:match_quality.start() - 1])
             if "." in file_name:
                 file_name = file_name.replace(".", " ").strip()
-                file_name = string.capwords(file_name)
                 base_name = self.remove_words(base_name.replace(".", " ").strip(), no_words)
                 base_name = string.capwords(base_name)
             file_name = file_name + "." + extension
