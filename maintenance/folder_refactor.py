@@ -18,21 +18,43 @@ class RefactorFolder:
         self.sort_torrent_files(files, self.path)
 
         for directory in directories:
-            directory_path = os.path.join(self.path, directory)
-            sub_files, sub_directories = self.get_file_and_directory(directory_path)
-            last_loc = self.sort_torrent_files(sub_files, directory_path)
+            directory_path, sub_directories, last_loc = self.torrent_step_1(self.path, directory)
 
-            if last_loc is not None:
-                if "Subs" in sub_directories:
-                    self.move_subs_folder(directory_path, last_loc)
-
-                sub_files, sub_directories = self.get_file_and_directory(directory_path)
+            if last_loc is None and len(sub_directories) > 0:
                 for sub_directory in sub_directories:
-                    self.move_files_and_directories(os.path.join(directory_path, sub_directory),
-                                                    last_loc)
-                    self.remove_directory(os.path.join(directory_path, sub_directory))
+                    sub_directory_path, sub_sub_directories, sub_last_loc = self.torrent_step_1(directory_path,
+                                                                                                sub_directory)
+                    if sub_last_loc is not None:
+                        self.torrent_step_2(sub_sub_directories, sub_directory_path, sub_last_loc)
+                    else:
+                        logger.log(f'Folder Refactor Error - {sub_directory_path}, Base location - {sub_last_loc}',
+                                   source=self.source,
+                                   message_type="error")
+
+            elif last_loc is not None:
+                self.torrent_step_2(sub_directories, directory_path, last_loc)
+            else:
+                logger.log(f'Folder Refactor Error - {directory_path}, Base location - {last_loc}',
+                           source=self.source,
+                           message_type="error")
 
             self.remove_directory(directory_path)
+
+    def torrent_step_1(self, path, directory):
+        directory_path = os.path.join(path, directory)
+        sub_files, sub_directories = self.get_file_and_directory(directory_path)
+        last_loc = self.sort_torrent_files(sub_files, directory_path)
+        return directory_path, sub_directories, last_loc
+
+    def torrent_step_2(self, sub_directories, directory_path, last_loc):
+        if "Subs" in sub_directories:
+            self.move_subs_folder(directory_path, last_loc)
+
+        sub_files, sub_directories = self.get_file_and_directory(directory_path)
+        for sub_directory in sub_directories:
+            self.move_files_and_directories(os.path.join(directory_path, sub_directory),
+                                            last_loc)
+            self.remove_directory(os.path.join(directory_path, sub_directory))
 
     def move_subs_folder(self, directory_path, last_loc):
         subs_folder = os.path.join(directory_path, "Subs")
