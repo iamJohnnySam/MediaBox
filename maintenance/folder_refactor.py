@@ -22,14 +22,15 @@ class RefactorFolder:
             sub_files, sub_directories = self.get_file_and_directory(directory_path)
             last_loc = self.sort_torrent_files(sub_files, directory_path)
 
-            if "Subs" in sub_directories:
-                self.move_subs_folder(directory_path, last_loc)
+            if last_loc is not None:
+                if "Subs" in sub_directories:
+                    self.move_subs_folder(directory_path, last_loc)
 
-            sub_files, sub_directories = self.get_file_and_directory(directory_path)
-            for sub_directory in sub_directories:
-                self.move_files_and_directories(os.path.join(directory_path, sub_directory),
-                                                last_loc)
-                self.remove_directory(os.path.join(directory_path, sub_directory))
+                sub_files, sub_directories = self.get_file_and_directory(directory_path)
+                for sub_directory in sub_directories:
+                    self.move_files_and_directories(os.path.join(directory_path, sub_directory),
+                                                    last_loc)
+                    self.remove_directory(os.path.join(directory_path, sub_directory))
 
             self.remove_directory(directory_path)
 
