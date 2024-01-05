@@ -2,6 +2,7 @@ import glob
 import os
 import re
 import shutil
+import string
 
 import global_var
 import logger
@@ -125,7 +126,9 @@ class RefactorFolder:
             base_name = str(file_name[0:match_tv.start()])
             if "." in file_name:
                 file_name = file_name.replace(".", " ").strip()
+                file_name = string.capwords(file_name)
                 base_name = base_name.replace(".", " ").strip()
+                base_name = string.capwords(base_name)
             file_name = file_name + "." + extension
 
         elif not match_tv and match_video and match_quality:
@@ -135,7 +138,9 @@ class RefactorFolder:
             base_name = str(file_name[0:match_quality.start() - 1])
             if "." in file_name:
                 file_name = file_name.replace(".", " ").strip()
+                file_name = string.capwords(file_name)
                 base_name = base_name.replace(".", " ").strip()
+                base_name = string.capwords(base_name)
             file_name = file_name + "." + extension
 
         else:
