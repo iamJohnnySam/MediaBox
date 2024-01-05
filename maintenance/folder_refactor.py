@@ -17,19 +17,27 @@ class RefactorFolder:
         files, directories = self.get_file_and_directory(self.path)
         self.sort_torrent_files(files, self.path)
 
+        last_loc = None
         for directory in directories:
-            directory_path, sub_directories, last_loc = self.torrent_step_1(self.path, directory)
+            directory_path, sub_directories, get_last_loc = self.torrent_step_1(self.path, directory)
+            if get_last_loc is not None:
+                last_loc = get_last_loc
 
             if last_loc is None and len(sub_directories) > 0:
+                sub_last_loc = None
                 for sub_directory in sub_directories:
-                    sub_directory_path, sub_sub_directories, sub_last_loc = self.torrent_step_1(directory_path,
-                                                                                                sub_directory)
+                    sub_directory_path, sub_sub_directories, get_sub_last_loc = self.torrent_step_1(directory_path,
+                                                                                                    sub_directory)
+                    if get_sub_last_loc is not None:
+                        sub_last_loc = get_sub_last_loc
+
                     if sub_last_loc is not None:
                         self.torrent_step_2(sub_sub_directories, sub_directory_path, sub_last_loc)
                     else:
                         logger.log(f'Folder Refactor Error - {sub_directory_path}, Base location - {sub_last_loc}',
                                    source=self.source,
                                    message_type="error")
+                    self.remove_directory(sub_directory_path)
 
             elif last_loc is not None:
                 self.torrent_step_2(sub_directories, directory_path, last_loc)
@@ -92,6 +100,7 @@ class RefactorFolder:
                 self.move_file(os.path.join(directory, file),
                                base_loc,
                                base_name + file_name)
+                base_loc = None
         return base_loc
 
     def get_file_and_directory(self, path):

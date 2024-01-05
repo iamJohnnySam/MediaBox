@@ -46,7 +46,7 @@ def run_scheduler():
     schedule.every(60).minutes.do(schedule_handler, func=news_read.run_code)
     schedule.every().day.at("03:00").do(schedule_handler, func=cctv.clean_up)
 
-    schedule.run_all(delay_seconds=10)
+    schedule.run_all(delay_seconds=2)
 
     # schedule.every(15).minutes.do(schedule_handler, func=cctv.run_code)
     schedule.every().day.at("05:00").do(schedule_handler, func=my_shows.run_code)
