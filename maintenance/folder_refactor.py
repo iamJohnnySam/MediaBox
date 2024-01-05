@@ -26,10 +26,10 @@ class RefactorFolder:
                 self.move_subs_folder(directory_path, last_loc)
 
             sub_files, sub_directories = self.get_file_and_directory(directory_path)
-            for sub_sub_directory in sub_directories:
-                self.move_files_and_directories(os.path.join(directory_path, sub_sub_directory),
+            for sub_directory in sub_directories:
+                self.move_files_and_directories(os.path.join(directory_path, sub_directory),
                                                 last_loc)
-                self.remove_directory(sub_sub_directory)
+                self.remove_directory(os.path.join(directory_path, sub_directory))
 
             self.remove_directory(directory_path)
 
