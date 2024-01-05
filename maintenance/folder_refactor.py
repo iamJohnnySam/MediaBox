@@ -1,4 +1,3 @@
-import glob
 import os
 import re
 import shutil
@@ -18,8 +17,6 @@ class RefactorFolder:
         files, directories = self.get_file_and_directory(self.path)
         self.sort_torrent_files(files, self.path)
 
-        last_loc = None
-
         for directory in directories:
             directory_path = os.path.join(self.path, directory)
             sub_files, sub_directories = self.get_file_and_directory(directory_path)
@@ -32,16 +29,9 @@ class RefactorFolder:
             for sub_sub_directory in sub_directories:
                 self.move_files_and_directories(os.path.join(directory_path, sub_sub_directory),
                                                 last_loc)
+                self.remove_directory(sub_sub_directory)
 
-            sub_files, sub_directories = self.get_file_and_directory(directory_path)
-            if len(sub_directories) == 0 and len(sub_files) == 0:
-                try:
-                    os.rmdir(directory_path)
-                    logger.log(f"Directory '{directory_path}' has been successfully deleted.", source=self.source)
-                except OSError as e:
-                    logger.log(f"Error: {str(e)}", source=self.source)
-            else:
-                logger.log(f"Cannot Delete '{directory_path}'. Not empty!", source=self.source, message_type="warn")
+            self.remove_directory(directory_path)
 
     def move_subs_folder(self, directory_path, last_loc):
         subs_folder = os.path.join(directory_path, "Subs")
@@ -57,15 +47,7 @@ class RefactorFolder:
             shutil.move(file_path, dst_path)
             logger.log(f"Moved {file_path} -> {dst_path}", source=self.source)
 
-        sub_files, sub_directories = self.get_file_and_directory(subs_folder)
-        if len(sub_directories) == 0 and len(sub_files) == 0:
-            try:
-                os.rmdir(subs_folder)
-                logger.log(f"Directory '{subs_folder}' has been successfully deleted.", source=self.source)
-            except OSError as e:
-                logger.log(f"Error: {str(e)}", source=self.source)
-        else:
-            logger.log(f"Cannot Delete '{subs_folder}'. Not empty!", source=self.source, message_type="warn")
+        self.remove_directory(subs_folder)
 
     def sort_torrent_files(self, files, directory):
         base_loc = None
@@ -83,7 +65,7 @@ class RefactorFolder:
                                base_loc,
                                file_name)
             else:
-                base_loc = os.path.join(global_var.torrent_unknown,base_name)
+                base_loc = os.path.join(global_var.torrent_unknown, base_name)
                 self.move_file(os.path.join(directory, file),
                                base_loc,
                                base_name + file_name)
@@ -92,10 +74,8 @@ class RefactorFolder:
     def get_file_and_directory(self, path):
         files_list = []
         directories_list = []
-
         if os.path.exists(path):
             contents = os.listdir(path)
-
             for item in contents:
                 item_path = os.path.join(path, item)
                 if os.path.isfile(item_path):
@@ -103,12 +83,14 @@ class RefactorFolder:
                 elif os.path.isdir(item_path):
                     directories_list.append(item)
 
+        logger.log(f'Got files in {path}.', source=self.source)
         return files_list, directories_list
 
     def move_file(self, old_location, new_location, file):
         if not os.path.exists(new_location):
             os.makedirs(new_location)
         destination = shutil.move(old_location, os.path.join(new_location, file))
+        logger.log(f"Moved '{file}' to '{destination}'", source=self.source)
         return destination
 
     def breakdown_torrent_file_name(self, file_name):
@@ -128,7 +110,7 @@ class RefactorFolder:
             tv_show = True
             movie = False
             if "." in file_name:
-                file_name = str(file_name[0:file_name.find('.', match_tv.end()-1)])
+                file_name = str(file_name[0:file_name.find('.', match_tv.end() - 1)])
             else:
                 file_name = str(file_name[0:match_tv.end()])
             base_name = str(file_name[0:match_tv.start()])
@@ -160,6 +142,7 @@ class RefactorFolder:
         words = sentence.split()
         filtered_words = [word for word in words if word.lower() not in map(str.lower, words_to_remove)]
         filtered_sentence = ' '.join(filtered_words)
+        logger.log(f'Filtered words from {sentence} > {filtered_sentence}.', source=self.source)
         return filtered_sentence
 
     def move_files_and_directories(self, source_folder, destination_folder):
@@ -173,3 +156,14 @@ class RefactorFolder:
                 logger.log(f"Moved '{item}' to '{destination_folder}'", source=self.source)
             except Exception as e:
                 logger.log(f"Failed to move '{item}': {str(e)}", source=self.source)
+
+    def remove_directory(self, path):
+        sub_files, sub_directories = self.get_file_and_directory(path)
+        if len(sub_directories) == 0 and len(sub_files) == 0:
+            try:
+                os.rmdir(path)
+                logger.log(f"Directory '{path}' has been successfully deleted.", source=self.source)
+            except OSError as e:
+                logger.log(f"Error: {str(e)}", source=self.source)
+        else:
+            logger.log(f"Cannot Delete '{path}'. Not empty!", source=self.source, message_type="warn")
