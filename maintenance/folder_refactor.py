@@ -111,6 +111,7 @@ class RefactorFolder:
         else:
             subtitle = False
 
+        no_words = []
         match_video = any(ext in extension for ext in ("mp4", "flv", "mkv", "avi", "srt"))
 
         match_tv = re.search('S[0-9][0-9]E[0-9][0-9]', file_name, flags=re.IGNORECASE)
@@ -125,9 +126,9 @@ class RefactorFolder:
                 file_name = str(file_name[0:match_tv.end()])
             base_name = str(file_name[0:match_tv.start()])
             if "." in file_name:
-                file_name = file_name.replace(".", " ").strip()
+                file_name = self.remove_words(file_name.replace(".", " ").strip())
                 file_name = string.capwords(file_name)
-                base_name = base_name.replace(".", " ").strip()
+                base_name = self.remove_words(base_name.replace(".", " ").strip())
                 base_name = string.capwords(base_name)
             file_name = file_name + "." + extension
 
@@ -137,9 +138,9 @@ class RefactorFolder:
             file_name = str(file_name[0:match_quality.end()])
             base_name = str(file_name[0:match_quality.start() - 1])
             if "." in file_name:
-                file_name = file_name.replace(".", " ").strip()
+                file_name = self.remove_words(file_name.replace(".", " ").strip())
                 file_name = string.capwords(file_name)
-                base_name = base_name.replace(".", " ").strip()
+                base_name = self.remove_words(base_name.replace(".", " ").strip())
                 base_name = string.capwords(base_name)
             file_name = file_name + "." + extension
 
@@ -149,3 +150,9 @@ class RefactorFolder:
             base_name = ""
 
         return file_name, tv_show, movie, subtitle, base_name
+
+    def remove_words(self, sentence, words_to_remove):
+        words = sentence.split()
+        filtered_words = [word for word in words if word.lower() not in map(str.lower, words_to_remove)]
+        filtered_sentence = ' '.join(filtered_words)
+        return filtered_sentence
