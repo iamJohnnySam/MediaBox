@@ -131,7 +131,7 @@ def grapher_bar_trend(graph_list, x_name, y_name, chart_title, x_time=False):
             graph_dict[x_column[x]][c_column[x]] = graph_dict[x_column[x]][c_column[x]] + int(y_column[x] / total_dates)
         for x in graph_dict.keys():
             for cat in graph_dict[x]:
-                y_plots[cat] = graph_dict[x][cat]
+                y_plots[cat].append(graph_dict[x][cat])
 
     else:
         for x in range(len(x_column)):
