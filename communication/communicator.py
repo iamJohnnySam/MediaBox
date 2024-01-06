@@ -208,11 +208,10 @@ class Communicator(CommunicatorBase):
             self.send_message_with_keyboard(msg="Need some feeding info",
                                             chat_id=chat_id,
                                             button_text=["30ml", "60ml", "90ml", "Other", "Cancel"],
-                                            button_cb=["feed", "feed", "feed", "feed", "feed", "cancel"],
+                                            button_cb=["feed", "feed", "feed", "feed", "cancel"],
                                             button_val=[identifier + "30",
                                                         identifier + "60",
                                                         identifier + "90",
-                                                        identifier + "120",
                                                         "GET",
                                                         ""],
                                             arrangement=[5, 1],
@@ -319,14 +318,14 @@ class Communicator(CommunicatorBase):
                       reply_to=message_id)
 
     def baby_diaper_trend(self, msg, chat_id, message_id, value, user_input=False, identifier=None):
-        query = 'SELECT time, what, count FROM diaper ORDER BY timestamp'
+        query = 'SELECT time, count, date, what FROM diaper ORDER BY timestamp'
         result = list(self.baby_sql.run_sql(query, fetch_all=1))
 
-        pic = grapher_trend(graph_list=result,
-                            x_name="Time of Day (round to nearest hour)",
-                            y_name="Type",
-                            chart_title="Diaper Trend - " + datetime.now().strftime('%Y-%m-%d %H:%M'),
-                            size=True)
+        pic = grapher_bar_trend(graph_list=result,
+                                x_name="Time of Day (round to nearest hour)",
+                                y_name="Amount (nappies/diapers)",
+                                chart_title="Nappy/Diaper Trend - " + datetime.now().strftime('%Y-%m-%d %H:%M'),
+                                x_time=True)
         self.send_now(pic,
                       image=True,
                       chat=chat_id,

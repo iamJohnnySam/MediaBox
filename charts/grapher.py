@@ -90,6 +90,16 @@ def grapher_category(graph_list, x_name, y_name, chart_title):
 
 
 def grapher_bar_trend(graph_list, x_name, y_name, chart_title, x_time=False):
+    # graph list
+    # COLUMN 1 - X values
+    # COLUMN 2 - Values for y plot
+    # COLUMN 3 - iteration
+    # COLUMN 4 - category
+
+    cat_exists = (len(graph_list[0]) == 4)
+
+    colors = ['b', 'g', 'r', 'c', 'm', 'y']
+    color_val = 0
 
     x_column = [row[0] for row in graph_list]
     y_column = [row[1] for row in graph_list]
@@ -98,10 +108,13 @@ def grapher_bar_trend(graph_list, x_name, y_name, chart_title, x_time=False):
     total_dates = 1
 
     if x_time:
-        collection_dict = {}
-
         for i in range(24):
-            graph_dict[str(i)] = 0
+            if cat_exists:
+                graph_dict[str(i)] = {}
+                for c in set([row[3] for row in graph_list]):
+                    graph_dict[str(i)][c] = 0
+            else:
+                graph_dict[str(i)] = 0
 
         total_dates = len(set([row[2] for row in graph_list]))
         t_column = []
@@ -109,17 +122,37 @@ def grapher_bar_trend(graph_list, x_name, y_name, chart_title, x_time=False):
             t_column.append(convert_to_time(t).strftime("%-H"))
             x_column = t_column
 
-    for x in range(len(x_column)):
-        if x_column[x] in graph_dict.keys():
-            graph_dict[x_column[x]] = graph_dict[x_column[x]] + int(y_column[x]/total_dates)
-        else:
-            graph_dict[x_column[x]] = int(y_column[x]/total_dates)
+    y_plots = {}
+    if cat_exists:
+        c_column = [row[3] for row in graph_list]
+        for cat in set(c_column):
+            y_plots[cat] = []
+        for x in range(len(x_column)):
+            graph_dict[x_column[x]][c_column[x]] = graph_dict[x_column[x]][c_column[x]] + int(y_column[x] / total_dates)
+        for x in graph_dict.keys():
+            for cat in graph_dict[x]:
+                y_plots[cat] = graph_dict[x][cat]
+
+    else:
+        for x in range(len(x_column)):
+            if x_column[x] in graph_dict.keys():
+                graph_dict[x_column[x]] = graph_dict[x_column[x]] + int(y_column[x] / total_dates)
+            else:
+                graph_dict[x_column[x]] = int(y_column[x] / total_dates)
 
     fig1 = plt.figure()
     fig1.set_figwidth(10)
     fig1.set_figheight(5)
 
-    plt.plot(list(graph_dict.keys()), list(graph_dict.values()))
+    if cat_exists:
+        for cat in y_plots:
+            plt.plot(list(graph_dict.keys()), list(y_plots[cat]), label=cat, color=colors[color_val])
+
+            color_val = color_val + 1
+            if color_val == len(colors):
+                color_val = 0
+    else:
+        plt.plot(list(graph_dict.keys()), list(graph_dict.values()))
     for i in range(len(graph_dict.keys())):
         plt.text(i, list(graph_dict.values())[i], list(graph_dict.values())[i], ha='center')
 
@@ -132,6 +165,7 @@ def grapher_bar_trend(graph_list, x_name, y_name, chart_title, x_time=False):
     plt.savefig(fig_path)
 
     return fig_path
+
 
 def grapher_trend(graph_list, x_name, y_name, chart_title, size=False):
     colors = ['b', 'g', 'r', 'c', 'm', 'y']
