@@ -331,57 +331,45 @@ class Communicator(CommunicatorBase):
                       chat=chat_id,
                       reply_to=message_id)
 
-    def baby_feed_trend_date(self, msg, chat_id, message_id, value, user_input=False, identifier=None):
-        query = 'SELECT time, date, amount FROM feed ORDER BY timestamp'
+    def baby_feed_trend_today(self, msg, chat_id, message_id, value, user_input=False, identifier=None):
+        query = f'SELECT time, amount, date FROM feed WHERE date = {datetime.now().strftime("%Y-%m-%d")} ' \
+                f'ORDER BY timestamp'
         result = list(self.baby_sql.run_sql(query, fetch_all=1))
 
-        pic = grapher_trend(graph_list=result,
-                            x_name="Time of Day (round to nearest hour)",
-                            y_name="Amount (ml)",
-                            chart_title="Feed Trend - " + datetime.now().strftime('%Y-%m-%d %H:%M'))
+        pic = grapher_bar_trend(graph_list=result,
+                                x_name="Time of Day (round to nearest hour)",
+                                y_name="Amount (ml)",
+                                chart_title="Feed Trend - " + datetime.now().strftime('%Y-%m-%d %H:%M'),
+                                x_time=True)
+        caption = "Record:"
+        for row in result:
+            caption = caption + f"\n{row[0]} - {row[1]}"
+
         self.send_now(pic,
                       image=True,
                       chat=chat_id,
-                      reply_to=message_id)
+                      reply_to=message_id,
+                      caption= caption)
 
-    def baby_diaper_trend_date(self, msg, chat_id, message_id, value, user_input=False, identifier=None):
-        query = 'SELECT time, date, count FROM diaper ORDER BY timestamp'
+    def baby_diaper_trend_today(self, msg, chat_id, message_id, value, user_input=False, identifier=None):
+        query = f'SELECT time, count, date, what FROM diaper WHERE date = {datetime.now().strftime("%Y-%m-%d")} ' \
+                f'ORDER BY timestamp'
         result = list(self.baby_sql.run_sql(query, fetch_all=1))
 
-        pic = grapher_trend(graph_list=result,
-                            x_name="Time of Day (round to nearest hour)",
-                            y_name="Diapers",
-                            chart_title="Diaper Trend - " + datetime.now().strftime('%Y-%m-%d %H:%M'))
+        pic = grapher_bar_trend(graph_list=result,
+                                x_name="Time of Day (round to nearest hour)",
+                                y_name="Amount (nappies/diapers)",
+                                chart_title="Diaper Trend - " + datetime.now().strftime('%Y-%m-%d %H:%M'),
+                                x_time=True)
+        caption = "Record:"
+        for row in result:
+            caption = caption + f"\n{row[0]} - {row[1]}"
+
         self.send_now(pic,
                       image=True,
                       chat=chat_id,
-                      reply_to=message_id)
-
-    def baby_feed_trend_cat(self, msg, chat_id, message_id, value, user_input=False, identifier=None):
-        query = 'SELECT time, source, amount FROM feed ORDER BY timestamp'
-        result = list(self.baby_sql.run_sql(query, fetch_all=1))
-
-        pic = grapher_trend(graph_list=result,
-                            x_name="Time of Day (round to nearest hour)",
-                            y_name="Amount (ml)",
-                            chart_title="Feed Trend - " + datetime.now().strftime('%Y-%m-%d %H:%M'))
-        self.send_now(pic,
-                      image=True,
-                      chat=chat_id,
-                      reply_to=message_id)
-
-    def baby_diaper_trend_cat(self, msg, chat_id, message_id, value, user_input=False, identifier=None):
-        query = 'SELECT time, what, count FROM diaper ORDER BY timestamp'
-        result = list(self.baby_sql.run_sql(query, fetch_all=1))
-
-        pic = grapher_trend(graph_list=result,
-                            x_name="Time of Day (round to nearest hour)",
-                            y_name="Number of Diapers",
-                            chart_title="Diaper Trend - " + datetime.now().strftime('%Y-%m-%d %H:%M'))
-        self.send_now(pic,
-                      image=True,
-                      chat=chat_id,
-                      reply_to=message_id)
+                      reply_to=message_id,
+                      caption=caption)
 
     def baby_weight_trend(self, msg, chat_id, message_id, value, caption=None, user_input=False, identifier=None):
         query = 'SELECT date, weight FROM weight ORDER BY timestamp'
