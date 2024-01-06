@@ -305,7 +305,7 @@ class Communicator(CommunicatorBase):
                       caption=caption)
 
     def baby_feed_trend(self, msg, chat_id, message_id, value, user_input=False, identifier=None):
-        query = 'SELECT time, amount FROM feed ORDER BY timestamp'
+        query = 'SELECT time, amount, date FROM feed ORDER BY timestamp'
         result = list(self.baby_sql.run_sql(query, fetch_all=1))
 
         pic = grapher_bar_trend(graph_list=result,
