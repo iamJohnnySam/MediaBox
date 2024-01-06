@@ -324,7 +324,7 @@ class Communicator(CommunicatorBase):
         pic = grapher_bar_trend(graph_list=result,
                                 x_name="Time of Day (round to nearest hour)",
                                 y_name="Amount (nappies/diapers)",
-                                chart_title="Nappy/Diaper Trend - " + datetime.now().strftime('%Y-%m-%d %H:%M'),
+                                chart_title="Diaper Trend - " + datetime.now().strftime('%Y-%m-%d %H:%M'),
                                 x_time=True)
         self.send_now(pic,
                       image=True,
