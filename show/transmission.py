@@ -28,6 +28,7 @@ class Transmission:
         torrent_id = torrent.id
         if torrent_id not in self.active_torrents.keys():
             self.active_torrents[torrent_id] = torrent
+            logger.log(f'Torrent Added - {torrent.name}', source="TRMS")
             return True, torrent_id
         else:
             return False, ""
@@ -38,6 +39,7 @@ class Transmission:
             if self.active_torrents[torrent_number].percent_done == 1:
                 torrent_id = self.active_torrents[torrent_number].id
                 self.client.remove_torrent(torrent_id)
+                logger.log(f'Torrent deleted - {self.active_torrents[torrent_number].name}', source="TRMS")
 
 
 client = Transmission()

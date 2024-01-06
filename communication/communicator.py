@@ -189,7 +189,7 @@ class Communicator(CommunicatorBase):
 
     def clean_up_downloads(self, msg, chat_id, message_id, value, user_input=False, identifier=None):
         transmission.torrent_complete_sequence()
-        self.send_now("Downloads folder re-arrangement completed",
+        self.send_now("Clean-up completed successfully",
                       image=False,
                       chat=chat_id,
                       reply_to=message_id)
