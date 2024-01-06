@@ -154,8 +154,8 @@ def grapher_bar_trend(graph_list, x_name, y_name, chart_title, x_time=False):
                 color_val = 0
     else:
         plt.plot(list(graph_dict.keys()), list(graph_dict.values()))
-    for i in range(len(graph_dict.keys())):
-        plt.text(i, list(graph_dict.values())[i], list(graph_dict.values())[i], ha='center')
+        for i in range(len(graph_dict.keys())):
+            plt.text(i, list(graph_dict.values())[i], list(graph_dict.values())[i], ha='center')
 
     plt.title(chart_title)
     plt.xlabel(x_name)
