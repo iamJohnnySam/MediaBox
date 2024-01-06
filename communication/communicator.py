@@ -334,7 +334,7 @@ class Communicator(CommunicatorBase):
                       reply_to=message_id)
 
     def baby_feed_trend_today(self, msg, chat_id, message_id, value, user_input=False, identifier=None):
-        query = f'SELECT time, amount, date FROM feed WHERE date = {datetime.now().strftime("%Y-%m-%d")} ' \
+        query = f'SELECT time, amount, date FROM feed WHERE date = "{datetime.now().strftime("%Y-%m-%d")}" ' \
                 f'ORDER BY timestamp'
         result = list(self.baby_sql.run_sql(query, fetch_all=1))
 
@@ -354,7 +354,7 @@ class Communicator(CommunicatorBase):
                       caption= caption)
 
     def baby_diaper_trend_today(self, msg, chat_id, message_id, value, user_input=False, identifier=None):
-        query = f'SELECT time, count, date, what FROM diaper WHERE date = {datetime.now().strftime("%Y-%m-%d")} ' \
+        query = f'SELECT time, count, date, what FROM diaper WHERE date = "{datetime.now().strftime("%Y-%m-%d")}" ' \
                 f'ORDER BY timestamp'
         result = list(self.baby_sql.run_sql(query, fetch_all=1))
 
