@@ -341,7 +341,7 @@ class Communicator(CommunicatorBase):
         pic = grapher_bar_trend(graph_list=result,
                                 x_name="Time of Day (round to nearest hour)",
                                 y_name="Amount (ml)",
-                                chart_title="Feed Trend - " + datetime.now().strftime('%Y-%m-%d %H:%M'),
+                                chart_title="Feed Trend Today - " + datetime.now().strftime('%Y-%m-%d %H:%M'),
                                 x_time=True)
         caption = "Record:"
         for row in result:
@@ -361,7 +361,7 @@ class Communicator(CommunicatorBase):
         pic = grapher_bar_trend(graph_list=result,
                                 x_name="Time of Day (round to nearest hour)",
                                 y_name="Amount (nappies/diapers)",
-                                chart_title="Diaper Trend - " + datetime.now().strftime('%Y-%m-%d %H:%M'),
+                                chart_title="Diaper Trend Today - " + datetime.now().strftime('%Y-%m-%d %H:%M'),
                                 x_time=True)
         caption = "Record:"
         for row in result:
