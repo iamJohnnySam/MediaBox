@@ -2,6 +2,8 @@ from datetime import datetime, timedelta
 
 from matplotlib import pyplot as plt
 
+import logger
+
 
 def convert_to_time(val):
     format_string = "%H:%M:%S"
@@ -132,7 +134,6 @@ def grapher_bar_trend(graph_list, x_name, y_name, chart_title, x_time=False):
         for x in graph_dict.keys():
             for cat in graph_dict[x]:
                 y_plots[cat].append(graph_dict[x][cat])
-
     else:
         for x in range(len(x_column)):
             if x_column[x] in graph_dict.keys():
@@ -146,8 +147,8 @@ def grapher_bar_trend(graph_list, x_name, y_name, chart_title, x_time=False):
 
     if cat_exists:
         for cat in y_plots:
+            logger.log("Plotting: " + str(y_plots[cat]), source="GRPH")
             plt.plot(list(graph_dict.keys()), list(y_plots[cat]), label=cat, color=colors[color_val])
-
             color_val = color_val + 1
             if color_val == len(colors):
                 color_val = 0
