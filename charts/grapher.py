@@ -56,6 +56,9 @@ def grapher_category(graph_list, x_name, y_name, chart_title):
     colors = ['b', 'g', 'r', 'c', 'm', 'y']
     color_val = 0
 
+    if graph_list is None:
+        return
+
     x_column = [row[0] for row in graph_list]
     categories = [row[1] for row in graph_list]
     y_column = [row[2] for row in graph_list]
@@ -97,6 +100,9 @@ def grapher_bar_trend(graph_list, x_name, y_name, chart_title, x_time=False):
     # COLUMN 2 - Values for y plot
     # COLUMN 3 - iteration
     # COLUMN 4 - category
+
+    if graph_list is None:
+        return
 
     cat_exists = (len(graph_list[0]) == 4)
 
