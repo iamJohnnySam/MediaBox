@@ -49,6 +49,6 @@ def list_all():
     for torrent_number in client.active_torrents.keys():
         torrent_path = str(client.active_torrents[torrent_number].torrent_file).split("/")
         completion = str(int(client.active_torrents[torrent_number].percent_done * 100)) + "%"
-        return_string = return_string + "\n" + torrent_number + ": " + torrent_path[-1] + " - " + completion
+        return_string = return_string + "\n" + str(torrent_number) + ": " + torrent_path[-1] + " - " + completion
 
     return return_string
