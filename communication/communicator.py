@@ -492,7 +492,7 @@ class Communicator(CommunicatorBase):
             except telepot.exception.TelegramError:
                 pass
             if value == "GET":
-                self.check_command_value("amount consumed in ml", "", from_id, message_id, tx=False, fl=True)
+                self.check_command_value("amount consumed in ml", "", from_id, message_id, tx=True, fl=False)
 
         # FORMAT
         # ID <SPACE> ml <SPACE> source
