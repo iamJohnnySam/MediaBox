@@ -95,38 +95,25 @@ def grapher_bar_trend(graph_list, x_name, y_name, chart_title, x_time=False):
     y_column = [row[1] for row in graph_list]
 
     graph_dict = {}
+    total_dates = 1
 
     if x_time:
         collection_dict = {}
 
         for i in range(24):
-            collection_dict[str(i)] = {}
             graph_dict[str(i)] = 0
 
-        date_column = [row[2] for row in graph_list]
+        total_dates = len(set([row[2] for row in graph_list]))
         t_column = []
         for t in x_column:
             t_column.append(convert_to_time(t).strftime("%-H"))
             x_column = t_column
 
-        i = 0
-        for time_val in x_column:
-            collection_dict[time_val][date_column[i]] = y_column[i]
-            i = i + 1
-
-        for time_val in collection_dict.keys():
-            date_count = len(collection_dict[time_val].keys())
-            if date_count > 0:
-                total_amount = 0
-                for date in collection_dict[time_val].keys():
-                    total_amount = total_amount + collection_dict[time_val][date]
-                graph_dict[time_val] = int(total_amount/date_count)
-
     for x in range(len(x_column)):
         if x_column[x] in graph_dict.keys():
-            graph_dict[x_column[x]] = graph_dict[x_column[x]] + y_column[x]
+            graph_dict[x_column[x]] = graph_dict[x_column[x]] + int(y_column[x]/total_dates)
         else:
-            graph_dict[x_column[x]] = y_column[x]
+            graph_dict[x_column[x]] = int(y_column[x]/total_dates)
 
     fig1 = plt.figure()
     fig1.set_figwidth(10)
