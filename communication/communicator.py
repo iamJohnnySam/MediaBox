@@ -214,7 +214,7 @@ class Communicator(CommunicatorBase):
                                                         identifier + "90",
                                                         "GET",
                                                         ""],
-                                            arrangement=[5, 1],
+                                            arrangement=[4, 1],
                                             reply_to=message_id
                                             )
         else:
