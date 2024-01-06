@@ -29,11 +29,11 @@
   },
   "/feed_trend": {
     "function": "baby_feed_trend",
-    "definition": "See the feeding trend by date"
+    "definition": "See the feeding trend by time"
   },
   "/diaper_trend": {
     "function": "baby_diaper_trend",
-    "definition": "See the diaper trend by date"
+    "definition": "See the diaper trend"
   },
   "/feed_trend_date": {
     "function": "baby_feed_trend_date",

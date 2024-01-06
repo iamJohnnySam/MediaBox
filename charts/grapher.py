@@ -98,8 +98,8 @@ def grapher_bar_trend(graph_list, x_name, y_name, chart_title, x_time=False):
 
     if x_time:
         t_column = []
-        for t in range(len(x_column)):
-            t_column.append(convert_to_time(x_column[t]))
+        for t in x_column:
+            t_column.append(convert_to_time(t))
             x_column = t_column
 
     for x in range(len(x_column)):
