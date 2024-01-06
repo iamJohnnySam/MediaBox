@@ -114,7 +114,7 @@ def grapher_bar_trend(graph_list, x_name, y_name, chart_title, x_time=False):
             if cat_exists:
                 graph_dict[str(i)] = {}
                 for c in set([row[3] for row in graph_list]):
-                    graph_dict[str(i)][c] = 0
+                    graph_dict[str(i)][c] = 0.0
             else:
                 graph_dict[str(i)] = 0
 
@@ -130,7 +130,7 @@ def grapher_bar_trend(graph_list, x_name, y_name, chart_title, x_time=False):
         for cat in set(c_column):
             y_plots[cat] = []
         for x in range(len(x_column)):
-            graph_dict[x_column[x]][c_column[x]] = graph_dict[x_column[x]][c_column[x]] + int(y_column[x] / total_dates)
+            graph_dict[x_column[x]][c_column[x]] = graph_dict[x_column[x]][c_column[x]] + (y_column[x] / total_dates)
         for x in graph_dict.keys():
             for cat in graph_dict[x]:
                 y_plots[cat].append(graph_dict[x][cat])
@@ -140,7 +140,7 @@ def grapher_bar_trend(graph_list, x_name, y_name, chart_title, x_time=False):
     else:
         for x in range(len(x_column)):
             if x_column[x] in graph_dict.keys():
-                graph_dict[x_column[x]] = graph_dict[x_column[x]] + int(y_column[x] / total_dates)
+                graph_dict[x_column[x]] = graph_dict[x_column[x]] + (y_column[x] / total_dates)
             else:
                 graph_dict[x_column[x]] = int(y_column[x] / total_dates)
 
