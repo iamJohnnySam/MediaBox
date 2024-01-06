@@ -123,7 +123,7 @@ if not global_var.stop_all:
     logger.log("argv was" + str(sys.argv))
     logger.log("sys.executable was" + str(sys.executable))
 
-    logger.log("Restarting now...")
+    logger.log("Restarting application now...")
     start_up.keep_gap()
     start_up.print_logo()
 
@@ -132,7 +132,8 @@ if not global_var.stop_all:
 
 else:
     communicator.send_to_master("main", "Exiting...")
-    logger.log("EXIT")
+    logger.log("CLEAN EXIT")
 
     if global_var.reboot_pi:
+        logger.log("Rebooting Pi now...")
         os.system("sudo reboot")

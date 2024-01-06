@@ -15,17 +15,21 @@ class RefactorFolder:
 
     def clean_torrent_downloads(self):
         files, directories = self.get_file_and_directory(self.path)
+        if len(files) == 0 and len(directories) == 0:
+            logger.log("Nothing to refactor", source=self.source)
+            return
+
         self.sort_torrent_files(files, self.path)
 
-        last_loc = None
         for directory in directories:
+            last_loc = None
             directory_path, sub_directories, get_last_loc = self.torrent_step_1(self.path, directory)
             if get_last_loc is not None:
                 last_loc = get_last_loc
 
             if last_loc is None and len(sub_directories) > 0:
-                sub_last_loc = None
                 for sub_directory in sub_directories:
+                    sub_last_loc = None
                     sub_directory_path, sub_sub_directories, get_sub_last_loc = self.torrent_step_1(directory_path,
                                                                                                     sub_directory)
                     if get_sub_last_loc is not None:
@@ -136,16 +140,29 @@ class RefactorFolder:
         match_video = any(ext in extension for ext in ("mp4", "flv", "mkv", "avi", "srt"))
 
         match_tv = re.search('S[0-9][0-9]E[0-9][0-9]', file_name, flags=re.IGNORECASE)
+        match_tv2 = re.search('[0-9]x[0-9][0-9]', file_name, flags=re.IGNORECASE)
+        match_tv3 = re.search('S[0-9][0-9] E[0-9][0-9]', file_name, flags=re.IGNORECASE)
         match_quality = re.search('[0-9][0-9][0-9]p', file_name, flags=re.IGNORECASE)
 
-        if match_tv and match_video:
+        if (match_tv or match_tv2 or match_tv3) and match_video:
+            if match_tv:
+                match_start = match_tv.start()
+                match_end = match_tv.end()
+            elif match_tv2:
+                match_start = match_tv2.start()
+                match_end = match_tv2.end()
+            elif match_tv3:
+                match_start = match_tv3.start()
+                match_end = match_tv3.end()
+            else:
+                return
             tv_show = True
             movie = False
             if "." in file_name:
-                file_name = str(file_name[0:file_name.find('.', match_tv.end() - 1)])
+                file_name = str(file_name[0:file_name.find('.', match_end - 1)])
             else:
-                file_name = str(file_name[0:match_tv.end()])
-            base_name = str(file_name[0:match_tv.start()])
+                file_name = str(file_name[0:match_end])
+            base_name = str(file_name[0:match_start])
             if "." in file_name:
                 file_name = file_name.replace(".", " ").strip()
                 base_name = self.remove_words(base_name.replace(".", " ").strip(), no_words)

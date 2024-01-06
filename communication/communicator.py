@@ -8,7 +8,7 @@ import logger
 from datetime import datetime
 import global_var
 import settings
-from charts.grapher import grapher_trend, grapher_simple_trend, grapher_category
+from charts.grapher import grapher_trend, grapher_simple_trend, grapher_category, grapher_bar_trend
 
 from communication.communicator_base import CommunicatorBase
 from database_manager.json_editor import JSONEditor
@@ -191,7 +191,7 @@ class Communicator(CommunicatorBase):
         logger.log("Starting Downloads Refactor", source=self.source)
         RefactorFolder(global_var.torrent_download).clean_torrent_downloads()
         logger.log("Completed Downloads Refactor", source=self.source)
-        self.send_now("Downloads Folder re-arrangement completed",
+        self.send_now("Downloads folder re-arrangement completed",
                       image=False,
                       chat=chat_id,
                       reply_to=message_id)
@@ -304,14 +304,14 @@ class Communicator(CommunicatorBase):
                       caption=caption)
 
     def baby_feed_trend(self, msg, chat_id, message_id, value, user_input=False, identifier=None):
-        query = 'SELECT time, source, amount FROM feed ORDER BY timestamp'
+        query = 'SELECT time, amount FROM feed ORDER BY timestamp'
         result = list(self.baby_sql.run_sql(query, fetch_all=1))
 
-        pic = grapher_trend(graph_list=result,
-                            x_name="Time of Day (round to nearest hour)",
-                            y_name="Source",
-                            chart_title="Feed Trend - " + datetime.now().strftime('%Y-%m-%d %H:%M'),
-                            size=True)
+        pic = grapher_bar_trend(graph_list=result,
+                                x_name="Time of Day (round to nearest hour)",
+                                y_name="Amount (ml)",
+                                chart_title="Feed Trend - " + datetime.now().strftime('%Y-%m-%d %H:%M'),
+                                x_time=True)
         self.send_now(pic,
                       image=True,
                       chat=chat_id,

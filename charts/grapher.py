@@ -89,6 +89,43 @@ def grapher_category(graph_list, x_name, y_name, chart_title):
     return fig_path
 
 
+def grapher_bar_trend(graph_list, x_name, y_name, chart_title, x_time=False):
+
+    x_column = [row[0] for row in graph_list]
+    y_column = [row[1] for row in graph_list]
+
+    graph_dict = {}
+
+    if x_time:
+        t_column = []
+        for t in range(len(x_column)):
+            t_column.append(convert_to_time(x_column[t]))
+            x_column = t_column
+
+    for x in range(len(x_column)):
+        if x_column[x] in graph_dict.keys():
+            graph_dict[x_column[x]] = graph_dict[x_column[x]] + y_column[x]
+        else:
+            graph_dict[x_column[x]] = y_column[x]
+
+    fig1 = plt.figure()
+    fig1.set_figwidth(10)
+    fig1.set_figheight(5)
+
+    plt.bar(list(graph_dict.keys()), list(graph_dict.values()))
+    for i in range(len(graph_dict.keys())):
+        plt.text(i, list(graph_dict.values())[i], list(graph_dict.values())[i], ha='center')
+
+    plt.title(chart_title)
+    plt.xlabel(x_name)
+    plt.ylabel(y_name)
+    plt.legend(loc="upper right")
+
+    fig_path = "charts/" + chart_title + '.png'
+    plt.savefig(fig_path)
+
+    return fig_path
+
 def grapher_trend(graph_list, x_name, y_name, chart_title, size=False):
     colors = ['b', 'g', 'r', 'c', 'm', 'y']
     color_val = 0
