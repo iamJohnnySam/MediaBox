@@ -498,11 +498,12 @@ class Communicator(CommunicatorBase):
         # ID <SPACE> ml <SPACE> source
 
         if callback_id is None:
-            data = value
-            if not self.check_command_value("amount consumed in ml", "", from_id, query_id, tx=True, fl=False):
+            if not self.check_command_value("amount consumed in ml", value, from_id, query_id, tx=True, fl=False):
                 return
-        else:
-            data = value.split(" ")
+            value = datetime.now().strftime('%Y-%m-%d %H:%M:%S') + " " + value
+
+        data = value.split(" ")
+
 
         if len(data) == 3:
             self.send_message_with_keyboard(msg="How did you feed " + data[2] + "ml at " + data[1],
