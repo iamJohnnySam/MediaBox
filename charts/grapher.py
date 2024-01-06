@@ -134,6 +134,9 @@ def grapher_bar_trend(graph_list, x_name, y_name, chart_title, x_time=False):
         for x in graph_dict.keys():
             for cat in graph_dict[x]:
                 y_plots[cat].append(graph_dict[x][cat])
+
+        print(graph_dict)
+        print(y_plots)
     else:
         for x in range(len(x_column)):
             if x_column[x] in graph_dict.keys():
