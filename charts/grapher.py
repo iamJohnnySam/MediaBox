@@ -97,9 +97,12 @@ def grapher_bar_trend(graph_list, x_name, y_name, chart_title, x_time=False):
     graph_dict = {}
 
     if x_time:
+        for i in range(24):
+            graph_dict[str(i)] = 0
+
         t_column = []
         for t in x_column:
-            t_column.append(convert_to_time(t))
+            t_column.append(convert_to_time(t).strftime("%-H"))
             x_column = t_column
 
     for x in range(len(x_column)):
@@ -112,7 +115,7 @@ def grapher_bar_trend(graph_list, x_name, y_name, chart_title, x_time=False):
     fig1.set_figwidth(10)
     fig1.set_figheight(5)
 
-    plt.bar(list(graph_dict.keys()), list(graph_dict.values()))
+    plt.plot(list(graph_dict.keys()), list(graph_dict.values()))
     for i in range(len(graph_dict.keys())):
         plt.text(i, list(graph_dict.values())[i], list(graph_dict.values())[i], ha='center')
 
