@@ -207,14 +207,15 @@ class Communicator(CommunicatorBase):
         if value == "":
             self.send_message_with_keyboard(msg="Need some feeding info",
                                             chat_id=chat_id,
-                                            button_text=["30ml", "60ml", "90ml", "120ml", "Cancel"],
-                                            button_cb=["feed", "feed", "feed", "feed", "cancel"],
+                                            button_text=["30ml", "60ml", "90ml", "Other", "Cancel"],
+                                            button_cb=["feed", "feed", "feed", "feed", "feed", "cancel"],
                                             button_val=[identifier + "30",
                                                         identifier + "60",
                                                         identifier + "90",
                                                         identifier + "120",
+                                                        "GET",
                                                         ""],
-                                            arrangement=[4, 1],
+                                            arrangement=[5, 1],
                                             reply_to=message_id
                                             )
         else:
@@ -496,11 +497,13 @@ class Communicator(CommunicatorBase):
 
     def cb_feed(self, callback_id, query_id, from_id, value):
         if callback_id is not None:
-            self.update_in_line_buttons(callback_id)
+            message_id = self.update_in_line_buttons(callback_id)
             try:
                 self.bot.answerCallbackQuery(query_id, text='Got it')
             except telepot.exception.TelegramError:
                 pass
+            if value == "GET":
+                self.check_command_value("amount consumed in ml", "", from_id, message_id, tx=False, fl=True)
 
         # FORMAT
         # ID <SPACE> ml <SPACE> source
