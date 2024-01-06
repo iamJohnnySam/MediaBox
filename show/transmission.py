@@ -1,6 +1,8 @@
 from transmission_rpc import Client
 
+import global_var
 import logger
+from maintenance.folder_refactor import RefactorFolder
 
 
 class Transmission:
@@ -30,6 +32,13 @@ class Transmission:
         else:
             return False, ""
 
+    def delete_downloaded(self):
+        self.list_torrents()
+        for torrent_number in self.active_torrents.keys():
+            if self.active_torrents[torrent_number].percent_done == 1:
+                torrent_id = self.active_torrents[torrent_number].id
+                self.client.remove_torrent(torrent_id)
+
 
 client = Transmission()
 
@@ -47,8 +56,17 @@ def list_all():
         return_string = "- ACTIVE TORRENTS- "
 
     for torrent_number in client.active_torrents.keys():
-        torrent_path = str(client.active_torrents[torrent_number].torrent_file).split("/")
+        # torrent_path = str(client.active_torrents[torrent_number].torrent_file).split("/")
+        torrent_path = str(client.active_torrents[torrent_number].name)
         completion = str(int(client.active_torrents[torrent_number].percent_done * 100)) + "%"
         return_string = return_string + "\n" + str(torrent_number) + ": " + torrent_path[-1] + " - " + completion
 
     return return_string
+
+
+def torrent_complete_sequence():
+    logger.log("Starting Transmission Cleanup", source="TRMS")
+    client.delete_downloaded()
+    logger.log("Starting Downloads Refactor", source="TRMS")
+    RefactorFolder(global_var.torrent_download).clean_torrent_downloads()
+    logger.log("Sequence Complete", source="TRMS")

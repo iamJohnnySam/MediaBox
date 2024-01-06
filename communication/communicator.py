@@ -188,9 +188,7 @@ class Communicator(CommunicatorBase):
                       reply_to=message_id)
 
     def clean_up_downloads(self, msg, chat_id, message_id, value, user_input=False, identifier=None):
-        logger.log("Starting Downloads Refactor", source=self.source)
-        RefactorFolder(global_var.torrent_download).clean_torrent_downloads()
-        logger.log("Completed Downloads Refactor", source=self.source)
+        transmission.torrent_complete_sequence()
         self.send_now("Downloads folder re-arrangement completed",
                       image=False,
                       chat=chat_id,
