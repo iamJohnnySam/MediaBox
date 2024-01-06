@@ -1,15 +1,15 @@
 import os
 import shutil
 import threading
+from datetime import datetime
+
 import feedparser
 import telepot
 
-import logger
-from datetime import datetime
 import global_var
+import logger
 import settings
-from charts.grapher import grapher_trend, grapher_simple_trend, grapher_category, grapher_bar_trend
-
+from charts.grapher import grapher_simple_trend, grapher_category, grapher_bar_trend
 from communication.communicator_base import CommunicatorBase
 from database_manager.json_editor import JSONEditor
 from database_manager.sql_connector import SQLConnector
@@ -262,7 +262,10 @@ class Communicator(CommunicatorBase):
             caption = f'Your baby has had {total}ml of milk today.\nBreakdown:'
             for i in calc.keys():
                 caption = caption + f'\n{i} milk = {calc[i]}ml'
-            caption = caption + "\n\n For more information send /feed_trend or /feed_trend_today"
+            caption = caption + "\nUse /feed to submit a new entry or"\
+                                "\nUse /feed_history to see the history."\
+                                "\n\n Use /feed_trend to see the trend over time"\
+                                "\n Use /feed_trend_today to see what happened today."
 
         self.send_now(pic,
                       image=True,
@@ -297,7 +300,10 @@ class Communicator(CommunicatorBase):
             caption = f'Your baby has had {total} nappy changes today.\nBreakdown:'
             for i in calc.keys():
                 caption = caption + f'\n{i} = {calc[i]} nappies/diapers'
-            caption = caption + "\n\n For more information send /diaper_trend or /diaper_trend_today"
+            caption = caption + "\nUse /diaper to submit a new entry or"\
+                                "\nUse /diaper_history to see the history."\
+                                "\n\n Use /diaper_trend to see the trend over time"\
+                                "\n Use /diaper_trend_today to see what happened today."
 
         self.send_now(pic,
                       image=True,
@@ -343,9 +349,18 @@ class Communicator(CommunicatorBase):
                                 y_name="Amount (ml)",
                                 chart_title="Feed Trend Today - " + datetime.now().strftime('%Y-%m-%d %H:%M'),
                                 x_time=True)
+
+        query = f'SELECT time, amount, source FROM feed WHERE date = "{datetime.now().strftime("%Y-%m-%d")}" ' \
+                f'ORDER BY timestamp'
+        result = list(self.baby_sql.run_sql(query, fetch_all=1))
+
         caption = "Record:"
         for row in result:
-            caption = caption + f"\n{row[0]} - {row[1]}"
+            caption = caption + f"\n{row[0]} - {row[1]} - {row[2]}"
+        caption = caption + "\nUse /feed to submit a new entry or" \
+                            "\nUse /feed_history to see the history." \
+                            "\n\n Use /feed_trend to see the trend over time" \
+                            "\n Use /feed_trend_today to see what happened today."
 
         self.send_now(pic,
                       image=True,
@@ -365,7 +380,11 @@ class Communicator(CommunicatorBase):
                                 x_time=True)
         caption = "Record:"
         for row in result:
-            caption = caption + f"\n{row[0]} - {row[1]}"
+            caption = caption + f"\n{row[0]} - {row[1]} - {row[3]}"
+        caption = caption + "\nUse /diaper to submit a new entry or" \
+                            "\nUse /diaper_history to see the history." \
+                            "\n\n Use /diaper_trend to see the trend over time" \
+                            "\n Use /diaper_trend_today to see what happened today."
 
         self.send_now(pic,
                       image=True,
@@ -504,7 +523,6 @@ class Communicator(CommunicatorBase):
 
         data = value.split(" ")
 
-
         if len(data) == 3:
             self.send_message_with_keyboard(msg="How did you feed " + data[2] + "ml at " + data[1],
                                             chat_id=from_id,
@@ -532,9 +550,11 @@ class Communicator(CommunicatorBase):
             self.send_to_group("baby",
                                f'\U0001F37C '
                                f'\nBaby was fed {data[2]}ml on {data[0]} at {data[1]} with {data[3]}  milk. '
-                               f'\nFor today your baby has had ' + "{:10.1f}".format(day_total) + "ml of milk"
+                               f'\nFor today your baby has had ' + "{:10.1f}".format(day_total) + "ml of milk" +
                                "\nUse /feed to submit a new entry or"
-                               "\nUse /feed_history to see the history.")
+                               "\nUse /feed_history to see the history."
+                               "\n\n Use /feed_trend to see the trend over time"
+                               "\n Use /feed_trend_today to see what happened today.")
 
     def cb_diaper(self, callback_id, query_id, from_id, value):
         self.update_in_line_buttons(callback_id)
@@ -571,8 +591,10 @@ class Communicator(CommunicatorBase):
                            emoji + "\n" +
                            data[2] + " diaper recorded on " + data[0] + " at " + data[1] +
                            ". \nYour baby has had " + str(day_total) + " nappy/diaper changes today\n" +
-                           "Use /diaper to submit a new entry or\n" +
-                           "Use /diaper_history to see the history.")
+                           "Use /diaper to submit a new entry or"
+                           "\nUse /diaper_history to see the history."
+                           "\n\n Use /diaper_trend to see the trend over time or "
+                           "\n Use /diaper_trend_today to see what happened today.")
 
 
 telepot_lock = threading.Lock()
