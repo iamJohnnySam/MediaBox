@@ -497,7 +497,12 @@ class Communicator(CommunicatorBase):
         # FORMAT
         # ID <SPACE> ml <SPACE> source
 
-        data = value.split(" ")
+        if callback_id is None:
+            data = value
+            if not self.check_command_value("amount consumed in ml", "", from_id, query_id, tx=True, fl=False):
+                return
+        else:
+            data = value.split(" ")
 
         if len(data) == 3:
             self.send_message_with_keyboard(msg="How did you feed " + data[2] + "ml at " + data[1],
@@ -526,9 +531,9 @@ class Communicator(CommunicatorBase):
             self.send_to_group("baby",
                                f'\U0001F37C '
                                f'\nBaby was fed {data[2]}ml on {data[0]} at {data[1]} with {data[3]}  milk. '
-                               f'\nFor today your baby has had ' + "{:10.1f}".format(day_total) +
-                               "ml of milk\nUse /feed to submit a new entry or\n" +
-                               "Use /feed_history to see the history.")
+                               f'\nFor today your baby has had ' + "{:10.1f}".format(day_total) + "ml of milk"
+                               "\nUse /feed to submit a new entry or"
+                               "\nUse /feed_history to see the history.")
 
     def cb_diaper(self, callback_id, query_id, from_id, value):
         self.update_in_line_buttons(callback_id)

@@ -318,7 +318,10 @@ class CommunicatorBase:
 
         logger.log(f'Calling function: {cb} with arguments {arg} and {message}.')
         func = getattr(self, cb)
-        func(msg, chat_id, message_id, message, user_input=True, identifier=arg)
+        if "cb_" in cb:
+            func(msg, chat_id, message_id, message, user_input=True, identifier=arg)
+        else:
+            func(None, message_id, chat_id, message)
 
     def check_command_value(self, inquiry, value, chat_id, message_id, tx=True, fl=False):
         current_frame = inspect.currentframe()
