@@ -86,6 +86,7 @@ def grapher_category(graph_list, x_name, y_name, chart_title):
     plt.title(chart_title)
     plt.xlabel(x_name)
     plt.ylabel(y_name)
+    plt.xticks(rotation=75)
     plt.legend(loc="upper right")
 
     fig_path = "charts/" + chart_title + '.png'
@@ -166,6 +167,7 @@ def grapher_bar_trend(graph_list, x_name, y_name, chart_title, x_time=False):
     plt.title(chart_title)
     plt.xlabel(x_name)
     plt.ylabel(y_name)
+    plt.xticks(rotation=75)
     plt.legend(loc="upper right")
 
     fig_path = "charts/" + chart_title + '.png'
@@ -215,6 +217,7 @@ def grapher_trend(graph_list, x_name, y_name, chart_title, size=False):
     plt.title(chart_title)
     plt.xlabel(x_name)
     plt.ylabel(y_name)
+    plt.xticks(rotation=75)
     plt.legend(loc="upper right")
 
     fig_path = "charts/" + chart_title + '.png'
@@ -233,6 +236,7 @@ def grapher_simple_trend(graph_list, x_name, y_name, chart_title):
     plt.title(chart_title)
     plt.xlabel(x_name)
     plt.ylabel(y_name)
+    plt.xticks(rotation=75)
     plt.legend(loc="upper right")
 
     fig_path = "charts/" + chart_title + '.png'
