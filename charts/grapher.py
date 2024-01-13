@@ -230,7 +230,11 @@ def grapher_simple_trend(graph_list, x_name, y_name, chart_title):
     fig1.set_figwidth(10)
     fig1.set_figheight(5)
 
-    plt.plot([row[0] for row in graph_list], [row[1] for row in graph_list])
+    x = []
+    for row in graph_list:
+        x.append(convert_to_date(row[0]))
+
+    plt.plot(x, [row[1] for row in graph_list])
 
     plt.title(chart_title)
     plt.xlabel(x_name)
