@@ -160,12 +160,18 @@ class RefactorFolder:
             movie = False
             if "." in file_name:
                 file_name = str(file_name[0:file_name.find('.', match_end - 1)])
+            elif "+" in file_name:
+                file_name = str(file_name[0:file_name.find('+', match_end - 1)])
             else:
                 file_name = str(file_name[0:match_end])
             base_name = str(file_name[0:match_start])
             if "." in file_name:
                 file_name = file_name.replace(".", " ").strip()
                 base_name = self.remove_words(base_name.replace(".", " ").strip(), no_words)
+                base_name = string.capwords(base_name)
+            elif "+" in file_name:
+                file_name = file_name.replace("+", " ").strip()
+                base_name = self.remove_words(base_name.replace("+", " ").strip(), no_words)
                 base_name = string.capwords(base_name)
             file_name = file_name + "." + extension
 
@@ -177,6 +183,10 @@ class RefactorFolder:
             if "." in file_name:
                 file_name = file_name.replace(".", " ").strip()
                 base_name = self.remove_words(base_name.replace(".", " ").strip(), no_words)
+                base_name = string.capwords(base_name)
+            elif "+" in file_name:
+                file_name = file_name.replace("+", " ").strip()
+                base_name = self.remove_words(base_name.replace("+", " ").strip(), no_words)
                 base_name = string.capwords(base_name)
             file_name = file_name + "." + extension
 

@@ -15,6 +15,7 @@ from database_manager.json_editor import JSONEditor
 from database_manager.sql_connector import SQLConnector
 from maintenance.folder_refactor import RefactorFolder
 from show import transmission
+from show.movie_finder import get_movies_by_name, get_movie_details
 
 
 # os.environ['_BARD_API_KEY'] = settings.bard
@@ -31,52 +32,36 @@ class Communicator(CommunicatorBase):
     def check_shows(self, msg, chat_id, message_id, value, user_input=False, identifier=None):
         global_var.check_shows = True
         self.send_now("Request Initiated - TV Show Check",
-                      image=False,
                       chat=chat_id,
                       reply_to=message_id)
 
     def check_news(self, msg, chat_id, message_id, value, user_input=False, identifier=None):
         global_var.check_news = True
         self.send_now("Request Initiated - News Check",
-                      image=False,
                       chat=chat_id,
                       reply_to=message_id)
 
     def check_cctv(self, msg, chat_id, message_id, value, user_input=False, identifier=None):
         global_var.check_cctv = True
         self.send_now("Request Initiated - CCTV Check",
-                      image=False,
                       chat=chat_id,
                       reply_to=message_id)
 
-    def find_movie(self, msg, chat_id, message_id, value, user_input=False, identifier=None):
-        movie = value
-
-        if movie == "":
-            self.send_now("Please send the name of the movie", chat=chat_id, reply_to=message_id)
-            self.get_user_input(chat_id, "find_movie", None)
+    def find_movie(self, msg, chat_id, message_id, movie, user_input=False, identifier=None):
+        if not self.check_command_value("name of movie", movie, chat_id, message_id):
             return
 
-        movie = movie.lower().replace(" ", "%20")
-        movie = movie.lower().replace("/", "")
-        search_string = "https://yts.mx/rss/" + movie + "/720p/all/0/en"
+        self.send_now(f"Searching movie: {movie} for chat_id: {chat_id}.")
+        movie_feed = get_movies_by_name(movie)
 
-        self.send_now("Searching " + search_string)
-        logger.log("Searching " + search_string, source="MOV")
-        movie_feed = feedparser.parse(search_string)
+        for movie_name in movie_feed.entries:
+            title, image, link, torrent = get_movie_details(movie_name)
 
-        for x in movie_feed.entries:
-            image_string = x.summary_detail.value
-            sub1 = 'src="'
-            idx1 = image_string.index(sub1)
-            idx2 = image_string.index('" /></a>')
-            image = image_string[idx1 + len(sub1): idx2]
-
-            self.send_message_with_keyboard(msg=x.title,
+            self.send_message_with_keyboard(msg=title,
                                             chat_id=chat_id,
                                             button_text=["See Image", "Visit Page", "Cancel", "Download"],
                                             button_cb=["echo", "echo", "cancel", "download"],
-                                            button_val=[image, x.link, "", x.links[1].href],
+                                            button_val=[image, link, "", torrent],
                                             arrangement=[3, 1],
                                             reply_to=None
                                             )
