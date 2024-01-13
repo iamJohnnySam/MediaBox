@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-
+import matplotlib.dates as mdates
 from matplotlib import image
 from matplotlib import pyplot as plt
 
@@ -232,9 +232,12 @@ def grapher_simple_trend(graph_list, x_name, y_name, chart_title):
 
     x = []
     for row in graph_list:
-        x.append(convert_to_date(row[0]))
+        x.append(convert_to_date(row[0]).date())
 
+    plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y/%m/%d'))
+    plt.gca().xaxis.set_major_locator(mdates.DayLocator())
     plt.plot(x, [row[1] for row in graph_list])
+    plt.gcf().autofmt_xdate()
 
     plt.title(chart_title)
     plt.xlabel(x_name)
