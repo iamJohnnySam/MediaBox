@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 
+from matplotlib import image
 from matplotlib import pyplot as plt
 
 import logger
@@ -237,6 +238,32 @@ def grapher_simple_trend(graph_list, x_name, y_name, chart_title):
     plt.xticks(rotation=75)
     plt.legend(loc="upper right")
 
+    fig_path = "charts/" + chart_title + '.png'
+    plt.savefig(fig_path)
+
+    return fig_path
+
+
+def grapher_weight_trend(graph_list, chart_title):
+    fig1 = image.imread('resources/baby_weight_6m.png')
+
+    # 0 days = 196
+    # 91 days = 738
+
+    # 1.7kg = 903
+    # 11.3kg = 214
+
+    x = []
+    y = []
+
+    for row in graph_list:
+        days = (convert_to_date(row[0]) - datetime.strptime("2023/12/23", "%Y/%m/%d")).days
+        x.append(196 + (days * 542 / 91))
+        y.append(((903 - 214) * row[1] / (1.7 - 11.3)) + 1025)
+
+    plt.plot(x, y)
+    plt.axis('off')
+    plt.imshow(fig1)
     fig_path = "charts/" + chart_title + '.png'
     plt.savefig(fig_path)
 

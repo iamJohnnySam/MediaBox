@@ -2,6 +2,8 @@ import logging
 import os
 from datetime import date, datetime
 
+today_date = str(date.today())
+
 
 def log(msg, source="MBOX", message_type="info"):
     message = str(msg)
@@ -33,7 +35,7 @@ def log(msg, source="MBOX", message_type="info"):
 if not os.path.exists('log/'):
     os.makedirs('log/')
 
-today_date = str(date.today())
+
 try:
     logging.basicConfig(filename='log/log-' + today_date + '.log', level=logging.DEBUG)
 except PermissionError:

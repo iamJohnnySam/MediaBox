@@ -9,7 +9,7 @@ import telepot
 import global_var
 import logger
 import settings
-from charts.grapher import grapher_simple_trend, grapher_category, grapher_bar_trend
+from charts.grapher import grapher_simple_trend, grapher_category, grapher_bar_trend, grapher_weight_trend
 from communication.communicator_base import CommunicatorBase
 from database_manager.json_editor import JSONEditor
 from database_manager.sql_connector import SQLConnector
@@ -386,6 +386,14 @@ class Communicator(CommunicatorBase):
                                    x_name="Date",
                                    y_name="Weight (kg)",
                                    chart_title="Baby Weight Trend - " + datetime.now().strftime('%Y-%m-%d %H:%M'))
+        self.send_now(pic,
+                      image=True,
+                      chat=chat_id,
+                      caption=caption,
+                      reply_to=message_id)
+
+        pic = grapher_weight_trend(graph_list=result,
+                                   chart_title="Baby Weight Trend WHO - " + datetime.now().strftime('%Y-%m-%d %H:%M'))
         self.send_now(pic,
                       image=True,
                       chat=chat_id,
