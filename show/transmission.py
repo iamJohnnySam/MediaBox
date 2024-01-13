@@ -9,7 +9,7 @@ class Transmission:
     def __init__(self):
         self.client = Client()
         self.active_torrents = {}
-        self.source = "TRM"
+        self.source = "TRMS"
 
     def list_torrents(self):
         torrent_list = self.client.get_torrents()
@@ -28,7 +28,7 @@ class Transmission:
         torrent_id = torrent.id
         if torrent_id not in self.active_torrents.keys():
             self.active_torrents[torrent_id] = torrent
-            logger.log(f'Torrent Added - {torrent.name}', source="TRMS")
+            logger.log(f'Torrent Added - {torrent.name}', source=self.source)
             return True, torrent_id
         else:
             return False, ""
@@ -61,7 +61,7 @@ def list_all():
         # torrent_path = str(client.active_torrents[torrent_number].torrent_file).split("/")
         torrent_path = str(client.active_torrents[torrent_number].name)
         completion = str(int(client.active_torrents[torrent_number].percent_done * 100)) + "%"
-        return_string = return_string + "\n" + str(torrent_number) + ": " + torrent_path[-1] + " - " + completion
+        return_string = return_string + "\n" + str(torrent_number) + ": " + torrent_path + " - " + completion
 
     return return_string
 
