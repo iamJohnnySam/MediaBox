@@ -29,8 +29,8 @@ backup.copy_files.append(telepot_allowed_chats)
 backup.copy_folders.append(telepot_commands)
 backup.copy_folders.append(telepot_callback_database)
 
-# feed_link = "https://showrss.info/user/275495.rss?magnets=true&namespaces=true&name=clean&quality=null&re=null"
-feed_link = "https://showrss.info/user/275495.rss?magnets=true&namespaces=true&name=null&quality=null&re=null"
+feed_link = "https://showrss.info/user/275495.rss?magnets=true&namespaces=true&name=clean&quality=null&re=null"
+# feed_link = "https://showrss.info/user/275495.rss?magnets=true&namespaces=true&name=null&quality=null&re=null"
 requested_show_database = 'database/requested_shows.json'
 backup.copy_files.append(requested_show_database)
 
