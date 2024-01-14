@@ -3,8 +3,6 @@ import global_var
 import logger
 import settings
 from communication import communicator
-from datetime import datetime
-from database_manager.json_editor import JSONEditor
 from database_manager.sql_connector import SQLConnector
 
 
@@ -12,6 +10,7 @@ class NewsReader:
     telepot_account = "news"
     telepot_chat_group = "news"
     database_table = "adaderana_news"
+    source = "NEWS"
 
     def __init__(self):
         self.id_prefix = "http://www.adaderana.lk/news.php?nid="
@@ -19,10 +18,10 @@ class NewsReader:
         self.last_news_id = self.database.get_last_id(self.database_table, "news_id")
         if self.last_news_id is None:
             self.last_news_id = 0
-        logger.log("Object Created")
+        logger.log("Object Created", source=self.source)
 
     def run_code(self):
-        logger.log("-------STARTED NEWS READER SCRIPT-------")
+        logger.log("-------STARTED NEWS READER SCRIPT-------", source=self.source)
         feed = feedparser.parse(global_var.news_link)
 
         for article in feed.entries:
@@ -36,8 +35,8 @@ class NewsReader:
                     communicator.send_to_group(self.telepot_account,
                                                article.title + " - " + article.link,
                                                self.telepot_chat_group)
-                    logger.log(article_id, source="NEWS")
+                    logger.log(article_id, source=self.source)
 
         self.last_news_id = self.database.get_last_id(self.database_table, "news_id")
 
-        logger.log("-------ENDED NEWS READER SCRIPT-------")
+        logger.log("-------ENDED NEWS READER SCRIPT-------", source=self.source)

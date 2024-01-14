@@ -150,8 +150,11 @@ class CommunicatorBase:
 
             elif command == '/help' or command.lower() == 'help' or command == "/start":
                 message = "--- AVAILABLE COMMANDS ---"
-                for commands in self.command_dictionary.keys():
-                    message = message + "\n" + commands + " - " + self.command_dictionary[commands]["definition"]
+                for command in self.command_dictionary.keys():
+                    if command.startswith('/'):
+                        message = message + "\n" + command + " - " + self.command_dictionary[command]["definition"]
+                    else:
+                        message = message + "\n\n" + command
 
                 self.send_now(message,
                               image=False,
