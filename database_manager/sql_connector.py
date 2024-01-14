@@ -28,7 +28,11 @@ class SQLConnector:
     def get_last_id(self, table, id_column):
         query = f'SELECT {id_column} FROM {table} ORDER BY {id_column} DESC LIMIT 1;'
         self.cursor.execute(query)
-        return self.cursor.fetchone()[0]
+        result = self.cursor.fetchone()
+        if result is None:
+            return None
+        else:
+            return result[0]
 
     def check_exists(self, table, where):
         query = f'SELECT COUNT(1) FROM {table} WHERE {where}";'
