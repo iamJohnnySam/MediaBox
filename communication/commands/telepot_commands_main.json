@@ -1,4 +1,5 @@
 {
+  "Administrative": false,
   "/alive": {
     "function": "alive",
     "definition": "Check bot"
@@ -7,17 +8,11 @@
     "function": "time",
     "definition": "Check bot time"
   },
+
+  "Entertainment Controls": false,
   "/check_shows": {
     "function": "check_shows",
     "definition": "Check new TV shows"
-  },
-  "/check_news": {
-    "function": "check_news",
-    "definition": "Get latest News"
-  },
-  "/check_cctv": {
-    "function": "check_cctv",
-    "definition": "Check latest cctv"
   },
   "/find_movie": {
     "function": "find_movie",
@@ -27,22 +22,20 @@
     "function": "request_tv_show",
     "definition": "Type name of TV Show after command"
   },
-  "/add_me_to_cctv": {
-    "function": "add_me_to_cctv",
-    "definition": "Add to CCTV group"
+
+  "News Controls": false,
+  "/check_news": {
+    "function": "check_news",
+    "definition": "Get latest News"
   },
-  "/add_me_to_news": {
-    "function": "add_me_to_news",
-    "definition": "Add to news group"
+
+  "CCTV Controls": false,
+  "/check_cctv": {
+    "function": "check_cctv",
+    "definition": "Check latest cctv"
   },
-  "/remove_me_from_cctv": {
-    "function": "remove_me_from_cctv",
-    "definition": "Remove from CCTV group"
-  },
-  "/remove_me_from_news": {
-    "function": "remove_me_from_cctv",
-    "definition": "Remove from news group"
-  },
+
+  "Torrent Controls": false,
   "/list_torrents": {
     "function": "list_torrents",
     "definition": "List Torrents"
@@ -51,6 +44,8 @@
     "function": "clean_up_downloads",
     "definition": "Re-arrange torrent downloads"
   },
+
+  "Finance Controls": false,
   "/finance": {
     "function": "finance",
     "definition": "Add Transactions",
@@ -60,6 +55,8 @@
     "function": "sms_bill",
     "definition": "Forward bank SMS"
   },
+
+  "Server Controls": false,
   "/start_over": {
     "function": "start_over",
     "definition": "Reboot Bot"
