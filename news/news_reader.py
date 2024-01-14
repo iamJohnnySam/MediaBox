@@ -64,7 +64,5 @@ class NewsReader:
 
                 communicator.send_to_group(self.telepot_account,
                                            image,
-                                           self.telepot_chat_group,
-                                           image=True,
-                                           caption=article.title)
+                                           self.telepot_chat_group)
                 logger.log(article.title, source=self.source)
