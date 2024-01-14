@@ -1,4 +1,5 @@
 {
+  "Administrative": false,
   "/alive": {
     "function": "alive",
     "definition": "Check bot"
@@ -7,10 +8,6 @@
     "function": "time",
     "definition": "Check bot time"
   },
-  "/check_news": {
-    "function": "check_news",
-    "definition": "Check latest cctv"
-  },
   "/add_me_to_news": {
     "function": "add_me_to_news",
     "definition": "Add to CCTV group"
@@ -18,5 +15,10 @@
   "/remove_me_from_news": {
     "function": "remove_me_from_news",
     "definition": "Remove from CCTV group"
+  },
+  "News Controls": false,
+  "/check_news": {
+    "function": "check_news",
+    "definition": "Check latest cctv"
   }
 }
