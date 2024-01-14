@@ -36,8 +36,7 @@ requested_show_database = 'database/requested_shows.json'
 backup.copy_files.append(requested_show_database)
 
 news_link = "https://www.adaderana.lk/rss.php"
-news_database = 'database/newsRSS.json'
-backup.copy_files.append(news_database)
+news_cartoon = "https://www.dailymirror.lk/rss/cartoon_of_the_day/167"
 backup.databases.append('news')
 
 cctv_download = "cctv/CCTVImages"

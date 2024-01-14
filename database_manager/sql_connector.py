@@ -30,7 +30,7 @@ class SQLConnector:
         self.cursor.execute(query)
         result = self.cursor.fetchone()
         if result is None:
-            return None
+            return 0
         else:
             return result[0]
 
