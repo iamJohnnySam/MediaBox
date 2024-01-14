@@ -30,7 +30,7 @@ class CommunicatorBase:
 
         telepot_accounts = JSONEditor(global_var.telepot_accounts).read()
         self.bot = telepot.Bot(telepot_accounts[telepot_account]["account"])
-        self.master = self.database.run_sql(f"SELECT chat_id FROM {self.database_allowed_chats} WHERE master = '1'")
+        self.master = self.database.run_sql(f"SELECT chat_id FROM {self.database_allowed_chats} WHERE master = '1'")[0]
 
         self.telepot_chat_id = JSONEditor(global_var.telepot_groups)
         self.command_dictionary = JSONEditor(global_var.telepot_commands + 'telepot_commands_' +
