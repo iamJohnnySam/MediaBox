@@ -39,7 +39,7 @@ class SQLConnector:
         self.cursor.execute(query)
         result = self.cursor.fetchone()
         logger.log(f'SQL > {query} | Result > {result}')
-        return result
+        return result[0]
 
     def run_sql(self, query, fetch_all=False):
         self.cursor.execute(query)
