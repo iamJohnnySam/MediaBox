@@ -45,7 +45,8 @@ class CommunicatorBase:
             logger.log("Group does not exist", source=self.source, message_type="error")
             return
 
-        result = self.database.run_sql(f"SELECT chat_id FROM {self.database_groups} WHERE group_name = '{group}'")
+        result = self.database.run_sql(f"SELECT chat_id FROM {self.database_groups} WHERE group_name = '{group}'",
+                                       fetch_all=True)
         chats = [row[0] for row in result]
 
         logger.log(str(chats) + " - Group Message: " + msg, self.source)
