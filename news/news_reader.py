@@ -47,9 +47,9 @@ class NewsReader:
         database_table = "dailymirror_cartoon"
 
         feed = feedparser.parse(global_var.news_cartoon)
+        print(feed)
 
         for article in feed.entries:
-            print(article)
             article_date = datetime.strptime(article.title[-10], "%d-%m-%Y")
             cols = "title, link, date"
             val = (article.title, article.link, article_date)
