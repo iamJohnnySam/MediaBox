@@ -16,29 +16,23 @@ backup.move_files.append('../nohup.out')
 backup.databases.append('transactions')
 backup.databases.append('entertainment')
 backup.databases.append('administration')
+backup.databases.append('news')
 
 media_path = "/mnt/MediaBox"
 
 telepot_accounts = 'communication/telepot_accounts.json'
-telepot_groups = 'communication/telepot_groups.json'
-telepot_allowed_chats = 'communication/telepot_allowed_chats.json'
 telepot_commands = 'communication/commands/'
 telepot_callback_database = 'database/telepot/'
 backup.copy_files.append(telepot_accounts)
-backup.copy_files.append(telepot_groups)
-backup.copy_files.append(telepot_allowed_chats)
 backup.copy_folders.append(telepot_commands)
 backup.copy_folders.append(telepot_callback_database)
 
 feed_link = "https://showrss.info/user/275495.rss?magnets=true&namespaces=true&name=clean&quality=null&re=null"
-# feed_link = "https://showrss.info/user/275495.rss?magnets=true&namespaces=true&name=null&quality=null&re=null"
 requested_show_database = 'database/requested_shows.json'
 backup.copy_files.append(requested_show_database)
 
 news_adaderana = "https://www.adaderana.lk/rss.php"
 news_cartoon = "https://www.dailymirror.lk/rss/cartoon_of_the_day/167"
-news_parliament = "https://www.parliament.lk/en/component/syndicator/?format=raw&feed_id=2&rss_type=news&sub_type=6"
-backup.databases.append('news')
 
 cctv_download = "cctv/CCTVImages"
 cctv_save = "/mnt/MediaBox/MediaBox/CCTVSaved"
