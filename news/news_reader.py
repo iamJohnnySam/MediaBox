@@ -28,7 +28,7 @@ class NewsReader:
         for article in feed.entries:
             article_id = int(article.id.replace(self.id_prefix, ""))
             if article_id > self.last_news_id:
-                if not self.database.check_exists(self.database_table, f'news_id = "{article_id}"'):
+                if not self.database.check_exists(self.database_table, f"news_id = '{article_id}'"):
                     cols = "news_id, title, pub_date, link"
                     val = (article_id, article.title, article.published, article.link)
                     self.database.insert(self.database_table, cols, val)
