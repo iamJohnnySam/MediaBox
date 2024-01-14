@@ -142,28 +142,28 @@ class Communicator(CommunicatorBase):
         self.baby_weight_trend(msg, chat_id, message_id, value, caption=send_string)
 
     def add_me_to_cctv(self, msg, chat_id, message_id, value, user_input=False, identifier=None):
-        self.send_now("Function Not yet implemented",
-                      image=False,
-                      chat=chat_id,
-                      reply_to=message_id)
+        self.manage_chat_group("cctv", chat_id)
+        self.send_now("Done", chat=chat_id, reply_to=message_id)
 
     def add_me_to_news(self, msg, chat_id, message_id, value, user_input=False, identifier=None):
-        self.send_now("Function Not yet implemented",
-                      image=False,
-                      chat=chat_id,
-                      reply_to=message_id)
+        self.manage_chat_group("news", chat_id)
+        self.send_now("Done", chat=chat_id, reply_to=message_id)
+
+    def add_me_to_baby(self, msg, chat_id, message_id, value, user_input=False, identifier=None):
+        self.manage_chat_group("baby", chat_id)
+        self.send_now("Done", chat=chat_id, reply_to=message_id)
 
     def remove_me_from_cctv(self, msg, chat_id, message_id, value, user_input=False, identifier=None):
-        self.send_now("Function Not yet implemented",
-                      image=False,
-                      chat=chat_id,
-                      reply_to=message_id)
+        self.manage_chat_group("cctv", chat_id, add=False, remove=True)
+        self.send_now("Done", chat=chat_id, reply_to=message_id)
 
     def remove_me_from_news(self, msg, chat_id, message_id, value, user_input=False, identifier=None):
-        self.send_now("Function Not yet implemented",
-                      image=False,
-                      chat=chat_id,
-                      reply_to=message_id)
+        self.manage_chat_group("news", chat_id, add=False, remove=True)
+        self.send_now("Done", chat=chat_id, reply_to=message_id)
+
+    def remove_me_from_baby(self, msg, chat_id, message_id, value, user_input=False, identifier=None):
+        self.manage_chat_group("baby", chat_id, add=False, remove=True)
+        self.send_now("Done", chat=chat_id, reply_to=message_id)
 
     def list_torrents(self, msg, chat_id, message_id, value, user_input=False, identifier=None):
         torrent_list = transmission.list_all()

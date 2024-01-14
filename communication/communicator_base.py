@@ -113,6 +113,21 @@ class CommunicatorBase:
         else:
             return True
 
+    def manage_chat_group(self, group, chat_id, add=True, remove=False):
+        if not add ^ remove:
+            logger.log("Invalid command", source=self.source, message_type="error")
+        elif add and self.database.check_exists(self.database_groups, f"chat_id = '{chat_id}'") == 0:
+            cols = "chat_id, group_name"
+            vals = (chat_id, group)
+            self.database.insert(self.database_groups, cols, vals)
+            logger.log(f"Added {chat_id} to {group} group", source=self.source)
+        elif remove and self.database.check_exists(self.database_groups, f"chat_id = '{chat_id}'") != 0:
+            self.database.run_sql(f"DELETE FROM {self.database_groups} "
+                                  f"WHERE chat_id = '{chat_id}' AND group_name = '{group}';")
+            logger.log(f"Removed {chat_id} from {group} group", source=self.source)
+        else:
+            logger.log("Nothing to do", source=self.source)
+
     def handle(self, msg):
         chat_id = msg['chat']['id']
         message_id = msg['message_id']
