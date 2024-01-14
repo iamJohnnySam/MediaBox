@@ -9,24 +9,28 @@ from telepot.namedtuple import InlineKeyboardButton, InlineKeyboardMarkup
 
 import global_var
 import logger
+import settings
 from database_manager.json_editor import JSONEditor
+from database_manager.sql_connector import SQLConnector
 
 
 class CommunicatorBase:
     source = "TG-B"
+    database_allowed_chats = "telepot_allowed_chats"
+    database_groups = "telepot_groups"
 
     def __init__(self, telepot_account):
+        self.database = SQLConnector(settings.database_user, settings.database_password, 'administration')
+
         self.current_callback_id = 0
         self.callback_id_prefix = telepot_account + "_" + datetime.now().strftime("%y%m%d%H%M") + "_"
 
-        self.allowed_chats = {}
-        self.telepot_groups = {}
         self.waiting_user_input = {}
         self.telepot_account = telepot_account
 
         telepot_accounts = JSONEditor(global_var.telepot_accounts).read()
         self.bot = telepot.Bot(telepot_accounts[telepot_account]["account"])
-        self.master = telepot_accounts[telepot_account]["master"]
+        self.master = self.database.run_sql(f"SELECT chat_id FROM {self.database_allowed_chats} WHERE master = '1'")
 
         self.telepot_chat_id = JSONEditor(global_var.telepot_groups)
         self.command_dictionary = JSONEditor(global_var.telepot_commands + 'telepot_commands_' +
@@ -37,10 +41,12 @@ class CommunicatorBase:
         logger.log('Telepot ' + telepot_account + ' listening', source=self.source)
 
     def send_to_group(self, group, msg, image=False, caption=""):
-        if self.telepot_groups == {} or self.telepot_groups is None:
-            self.telepot_groups = self.telepot_chat_id.read()
+        if self.database.check_exists(self.database_groups, f"group_name = '{group}'") == 0:
+            logger.log("Group does not exist", source=self.source, message_type="error")
+            return
 
-        chats = self.telepot_groups[group]
+        result = self.database.run_sql(f"SELECT chat_id FROM {self.database_groups} WHERE group_name = '{group}'")
+        chats = [row[0] for row in result]
 
         logger.log(str(chats) + " - Group Message: " + msg, self.source)
 
@@ -96,32 +102,27 @@ class CommunicatorBase:
                        self.callback_id_prefix + 'telepot_button_link.json').add_level1(button_dict)
 
     def check_allowed_sender(self, chat_id, msg):
-        # Load allowed list of chats first time
         sender_name = str(msg['chat']['first_name'])
-
-        if self.allowed_chats is None or self.allowed_chats == {}:
-            self.allowed_chats = JSONEditor(global_var.telepot_allowed_chats).read().keys()
-
-        if str(chat_id) in self.allowed_chats:
-            return True
-        else:
-            self.bot.sendMessage(chat_id,
-                                 "Hello " + sender_name + "! You're not allowed to be here")
-            self.send_now("Unauthorised Chat access: " + sender_name)
-            logger.log("Unauthorised Chat access: " + sender_name, source=self.source,
+        if self.database.check_exists(self.database_allowed_chats, f"chat_id = '{chat_id}'") == 0:
+            self.bot.sendMessage(chat_id, "Hello " + sender_name + "! You're not allowed to be here")
+            self.send_now(f"Unauthorised Chat access: {sender_name}, chat_id: {chat_id}")
+            logger.log(f"Unauthorised Chat access: {sender_name}, chat_id: {chat_id}", source=self.source,
                        message_type="warn")
             return False
+        else:
+            return True
 
     def handle(self, msg):
         chat_id = msg['chat']['id']
         message_id = msg['message_id']
 
-        if 'text' in msg.keys():
-            self.handle_text(msg, chat_id, message_id)
-        elif 'photo' in msg.keys():
-            self.handle_photo(msg, chat_id, message_id)
-        else:
-            logger.log("Unknown Chat type", source=self.source, message_type="error")
+        if self.check_allowed_sender(chat_id, msg):
+            if 'text' in msg.keys():
+                self.handle_text(msg, chat_id, message_id)
+            elif 'photo' in msg.keys():
+                self.handle_photo(msg, chat_id, message_id)
+            else:
+                logger.log("Unknown Chat type", source=self.source, message_type="error")
 
     def handle_text(self, msg, chat_id, message_id):
         if chat_id in self.waiting_user_input:
@@ -136,39 +137,36 @@ class CommunicatorBase:
 
         logger.log(str(self.telepot_account) + "\t" + str(chat_id) + " - " + str(command), source=self.source)
 
-        # Check if sender is in allowed list
-        if self.check_allowed_sender(chat_id, msg):
+        # If command is in command list
+        if command in self.command_dictionary.keys():
+            function = self.command_dictionary[command]["function"]
+            logger.log(str(chat_id) + ' - Calling Function: ' + function, source=self.source)
+            value = str(msg['text']).replace(str(msg['text']).split(" ")[0], "").strip()
 
-            # If command is in command list
-            if command in self.command_dictionary.keys():
-                function = self.command_dictionary[command]["function"]
-                logger.log(str(chat_id) + ' - Calling Function: ' + function, source=self.source)
-                value = str(msg['text']).replace(str(msg['text']).split(" ")[0], "").strip()
+            func = getattr(self, function)
+            func(msg, chat_id, message_id, value)
 
-                func = getattr(self, function)
-                func(msg, chat_id, message_id, value)
+        elif command == '/help' or command.lower() == 'help' or command == "/start":
+            message = "--- AVAILABLE COMMANDS ---"
+            for command in self.command_dictionary.keys():
+                if command.startswith('/'):
+                    message = message + "\n" + command + " - " + self.command_dictionary[command]["definition"]
+                else:
+                    message = message + "\n\n" + command
 
-            elif command == '/help' or command.lower() == 'help' or command == "/start":
-                message = "--- AVAILABLE COMMANDS ---"
-                for command in self.command_dictionary.keys():
-                    if command.startswith('/'):
-                        message = message + "\n" + command + " - " + self.command_dictionary[command]["definition"]
-                    else:
-                        message = message + "\n\n" + command
+            self.send_now(message,
+                          image=False,
+                          chat=chat_id)
 
-                self.send_now(message,
-                              image=False,
-                              chat=chat_id)
-
-            elif "/" in command:
-                self.send_now("Sorry, that command is not known to me...",
-                              image=False,
-                              chat=chat_id)
-            else:
-                # self.send_now(Bard().get_answer(msg)['content']
-                self.send_now("Chatbot Disabled. Type /help to find more information",
-                              image=False,
-                              chat=chat_id)
+        elif "/" in command:
+            self.send_now("Sorry, that command is not known to me...",
+                          image=False,
+                          chat=chat_id)
+        else:
+            # self.send_now(Bard().get_answer(msg)['content']
+            self.send_now("Chatbot Disabled. Type /help to find more information",
+                          image=False,
+                          chat=chat_id)
 
     def handle_photo(self, msg, chat_id, message_id):
         file_name = f'{chat_id}-{message_id}-{datetime.now().strftime("%y%m%d%H%M%S")}.png'
