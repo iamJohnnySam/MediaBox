@@ -72,6 +72,8 @@ class NewsReader:
         database_table = "dailymirror_cartoon"
 
         feed = feedparser.parse(global_var.news_parliament)
+        print(feed)
+        print()
 
         for article in feed.entries:
             print(article)
