@@ -37,7 +37,9 @@ class SQLConnector:
     def check_exists(self, table, where):
         query = f"SELECT COUNT(1) FROM {table} WHERE {where};"
         self.cursor.execute(query)
-        return self.cursor.fetchone()
+        result = self.cursor.fetchone()
+        logger.log(f'SQL > {query} | Result > {result}')
+        return result
 
     def run_sql(self, query, fetch_all=False):
         self.cursor.execute(query)
