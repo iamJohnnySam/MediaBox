@@ -35,8 +35,9 @@ feed_link = "https://showrss.info/user/275495.rss?magnets=true&namespaces=true&n
 requested_show_database = 'database/requested_shows.json'
 backup.copy_files.append(requested_show_database)
 
-news_link = "https://www.adaderana.lk/rss.php"
+news_adaderana = "https://www.adaderana.lk/rss.php"
 news_cartoon = "https://www.dailymirror.lk/rss/cartoon_of_the_day/167"
+news_parliament = "https://www.parliament.lk/en/component/syndicator/?format=raw&feed_id=2&rss_type=news&sub_type=6"
 backup.databases.append('news')
 
 cctv_download = "cctv/CCTVImages"

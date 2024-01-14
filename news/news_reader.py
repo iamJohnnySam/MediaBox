@@ -22,13 +22,14 @@ class NewsReader:
         logger.log("-------STARTED NEWS READER SCRIPT-------", source=self.source)
         self.adaderana_news()
         self.dailymirror_cartoon()
+        self.parliament_news()
         logger.log("-------ENDED NEWS READER SCRIPT-------", source=self.source)
 
     def adaderana_news(self):
         database_table = "adaderana_news"
         last_news_id = self.database.get_last_id(database_table, "news_id")
 
-        feed = feedparser.parse(global_var.news_link)
+        feed = feedparser.parse(global_var.news_adaderana)
 
         for article in feed.entries:
             article_id = int(article.id.replace(self.id_prefix, ""))
@@ -66,3 +67,11 @@ class NewsReader:
                                            image,
                                            self.telepot_chat_group)
                 logger.log(article.title, source=self.source)
+
+    def parliament_news(self):
+        database_table = "dailymirror_cartoon"
+
+        feed = feedparser.parse(global_var.news_parliament)
+
+        for article in feed.entries:
+            print(article)
