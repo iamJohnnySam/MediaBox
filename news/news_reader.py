@@ -49,15 +49,21 @@ class NewsReader:
         feed = feedparser.parse(global_var.news_cartoon)
 
         for article in feed.entries:
-            print(article)
-            article_date = datetime.strptime(article.title[-10], "%d-%m-%Y")
+            article_date = datetime.strptime(article.title[-10:], "%d-%m-%Y")
+
+            image_string = article.summary
+            sub1 = '<img src="'
+            idx1 = image_string.index(sub1)
+            idx2 = image_string.index('" /></p>')
+            image = image_string[idx1 + len(sub1): idx2]
+
             cols = "title, link, date"
-            val = (article.title, article.link, article_date)
+            val = (article.title, image, article_date)
             if self.database.check_exists(database_table, f"date = '{article_date}'") == 0:
                 self.database.insert(database_table, cols, val)
 
                 communicator.send_to_group(self.telepot_account,
-                                           article.link,
+                                           image,
                                            self.telepot_chat_group,
                                            image=True,
                                            caption=article.title)

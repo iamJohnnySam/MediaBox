@@ -12,6 +12,7 @@ def get_movies_by_name(movie):
     movie_feed = feedparser.parse(search_string)
     return movie_feed
 
+
 def get_movie_details(movie):
     image_string = movie.summary_detail.value
     sub1 = 'src="'
