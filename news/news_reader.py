@@ -1,51 +1,41 @@
 import feedparser
 import global_var
 import logger
+import settings
 from communication import communicator
 from datetime import datetime
 from database_manager.json_editor import JSONEditor
+from database_manager.sql_connector import SQLConnector
 
 
 class NewsReader:
     telepot_account = "news"
     telepot_chat_group = "news"
+    database_table = "adaderana_news"
 
     def __init__(self):
-        self.id_inhibitor = "http://www.adaderana.lk/news.php?nid="
-        self.news_database = JSONEditor(global_var.news_database)
-        self.data = self.news_database.read()
-        self.last_clean = datetime(2022, 11, 2, 14, 40, 00, 000000)
-        logger.log("News Watcher Object Created")
+        self.id_prefix = "http://www.adaderana.lk/news.php?nid="
+        self.database = SQLConnector(settings.database_user, settings.database_password, 'news')
+        self.last_news_id = self.database.get_last_id(self.database_table, "news_id")
+        logger.log("Object Created")
 
     def run_code(self):
         logger.log("-------STARTED NEWS READER SCRIPT-------")
         feed = feedparser.parse(global_var.news_link)
-        self.data = self.news_database.read()
 
-        available_news = []
+        for article in feed.entries:
+            article_id = int(article.id.replace(self.id_prefix, ""))
+            if article_id > self.last_news_id:
+                if not self.database.check_exists(self.database_table, f'news_id = "{article_id}"'):
+                    cols = "news_id, title, pub_date, link"
+                    val = (article_id, article.title, article.published, article.link)
+                    self.database.insert(self.database_table, cols, val)
 
-        for x in feed.entries:
-            news_id = x.id
-            news_id = news_id.replace(self.id_inhibitor, "")
-            available_news.append(news_id)
+                    communicator.send_to_group(self.telepot_account,
+                                               article.title + " - " + article.link,
+                                               self.telepot_chat_group)
+                    logger.log(article_id, source="NEWS")
 
-            if news_id not in self.data:
-                new_news = {
-                    news_id: [{
-                        "Title": x.title,
-                        "Pub Date": x.published,
-                        "Link": x.link,
-                    }]
-                }
-                self.news_database.add_level1(new_news)
-
-                communicator.send_to_group(self.telepot_account,
-                                           x.title + " - " + x.link,
-                                           self.telepot_chat_group)
-                logger.log(news_id, source="NEWS")
-
-        if (datetime.now() - self.last_clean).days >= 1:
-            self.news_database.delete(available_news)
-            self.last_clean = datetime.now()
+        self.last_news_id = self.database.get_last_id(self.database_table, "news_id")
 
         logger.log("-------ENDED NEWS READER SCRIPT-------")
