@@ -17,6 +17,8 @@ class NewsReader:
         self.id_prefix = "http://www.adaderana.lk/news.php?nid="
         self.database = SQLConnector(settings.database_user, settings.database_password, 'news')
         self.last_news_id = self.database.get_last_id(self.database_table, "news_id")
+        if self.last_news_id is None:
+            self.last_news_id = 0
         logger.log("Object Created")
 
     def run_code(self):
