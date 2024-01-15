@@ -281,9 +281,10 @@ cd</code></pre>
 for account in JSONEditor('communication/telepot_accounts.json').read().keys():
     telepot_channels[account] = Communicator(account)</code></pre>
 <p>This can be done by calling any of the below functions from anywhere on the code.</p>
-<pre><code>send_message(telepot_account, chat_id, msg, image=False, keyboard=None, reply_to=None, caption="")</code></pre>
-<pre><code>send_to_master(telepot_account, msg, image=False, keyboard=None, reply_to=None, caption="")</code></pre>
-<pre><code>send_to_group(telepot_account, msg, group, image=False, caption="")</code></pre>
+<pre><code>communicator.send_message(telepot_account, chat_id, msg, image=False, keyboard=None, reply_to=None, 
+	caption="")</code></pre>
+<pre><code>communicator.send_to_master(telepot_account, msg, image=False, keyboard=None, reply_to=None, caption="")</code></pre>
+<pre><code>communicator.send_to_group(telepot_account, msg, group, image=False, caption="")</code></pre>
 
 
 
