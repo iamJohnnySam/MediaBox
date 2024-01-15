@@ -2,8 +2,6 @@ import os
 import shutil
 import threading
 from datetime import datetime
-
-import feedparser
 import telepot
 
 import global_var
@@ -13,7 +11,6 @@ from charts.grapher import grapher_simple_trend, grapher_category, grapher_bar_t
 from communication.communicator_base import CommunicatorBase
 from database_manager.json_editor import JSONEditor
 from database_manager.sql_connector import SQLConnector
-from maintenance.folder_refactor import RefactorFolder
 from show import transmission
 from show.movie_finder import get_movies_by_name, get_movie_details
 
