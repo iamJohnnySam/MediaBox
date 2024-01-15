@@ -59,7 +59,9 @@ sudo service apache2 restart
 sudo ln -s /usr/share/phpmyadmin /var/www/html</code></pre>
 <p>Next we will set up the Python environment</p>
 <pre><code>sudo apt install python3.11-venv
-sudo apt-get install --yes libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev llvm libncurses5-dev libncursesw5-dev xz-utils tk-dev libgdbm-dev lzma lzma-dev tcl-dev libxml2-dev libxmlsec1-dev libffi-dev liblzma-dev wget curl make build-essential openssl
+sudo apt-get install --yes libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev llvm libncurses5-dev
+sudo apt-get install --yes libncursesw5-dev xz-utils tk-dev libgdbm-dev lzma lzma-dev tcl-dev libxml2-dev libxmlsec1-dev
+sudo apt-get install --yes libffi-dev liblzma-dev wget curl make build-essential openssl
 sudo apt-get install python3-dev default-libmysqlclient-dev build-essential
 sudo apt-get install python3-flask
 sudo apt-get install libopenjp2-7-dev
@@ -173,7 +175,7 @@ python database_update_temp_file.py
 deactivate
 cd</code></pre>
 
-
+<br>
 <h3>FUNCTION: Logger</h3>
 <p>This is one of the most important functions which help to log the activities of the program to keep track,
     monitor and troubleshoot any issues that may come up.</p>
