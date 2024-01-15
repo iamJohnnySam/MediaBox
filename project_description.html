@@ -175,30 +175,30 @@ git pull origin master
 python database_update_temp_file.py
 deactivate
 cd</code></pre>
-
-
-
 <br>
+
+
+
 <h3>MAIN METHOD: main.py</h3>
 <p>The code can be broken down in to 3 main areas which are the main interactions of the program. These three
 	sections of the program will run on its own thread.</p>
 <ol>
-	<li>Communicator: Interact the program through the chatbot.</li>
-	<li>Web App: Interact with the program through the web app. (t_webapp)</li>
+	<li>Communicator: Interact the program through the chatbot. (daemon thread)</li>
+	<li>Web App: Interact with the program through the web app. (thread: t_webapp)</li>
 	<li>Scheduler: The program will interact with itself using a scheduler at predefined time intervals.
-		(t_scheduler)</li>
+		(thread: t_scheduler, daemon thread)</li>
 </ol>
 <p>At the start of the program it will execute "platform.machine()" to identify if the code is running on Raspberry
 	Pi. In which case it will run in full operation. If the identified platform is not armv7l it will only run the
 	programmed functions for the purpose of debugging the code.</p>
-
-<h4>MAIN METHOD: Scheduling</h4>
-<p>The scheduler runs on the main method and controls objects of the following classes through the main method.</p>
-<ul>
-	<li>Show Downloader</li>
-	<li>CCTV Checker</li>
-	<li>News Reader</li>
-</ul>
+<p>Instead of using threading.join() to wait until the threads have completed. The main function has a loop which
+	runs on t_scheduler.is_alive() since t_scheduler is the only non-daemon thread. Inside the thread, the scheduler
+	will perform a check for running sub_threads inside scheduler and sleep for 10 seconds.</p>
+<p>If at any point the code exits this loop is because the scheduler thread has ended. Which can only be if
+	something in the code has failed or if one of the threads have triggered a planned exit. All planned stops in the
+	program is controlled by "stop_all" global variable. If the "stop_all" is not enabled the program will
+	automatically reboot itself after a minute. If the "stop_all" global variable is enabled then it will proceed to
+	exit the program or perform the necessary operations defined by the variables in the global variables</p>
 
 
 <h3>GLOBAL VARIABLES: global_var.py</h3>
@@ -206,10 +206,36 @@ cd</code></pre>
 <ul>
 	<li>ready_to_run - Signals for the Communicator to run after all objects have been initialized as certain
 		commands from the communication module can be waiting before the program is initialized.</li>
+	<li>stop_all - Signals for all threads that a program stop has been requested.</li>
+	<li>restart - Signals the main thread that a reboot of the program is requested. This must be coupled with a
+		stop_all to ensure that the program stops before the reboot can happen.</li>
+	<li>reboot_pi - Signals the main thread that a reboot of the Raspberry pi is requested. This must be coupled with a
+		stop_all to ensure that the program stops before the reboot can happen.</li>
+	<li>check_shows - Signal the Scheduler to run Show Downloader</li>
+	<li>check_cctv - Signal the Scheduler to run CCTV Checker</li>
+	<li>check_news - Signal the Scheduler to run News Reader</li>
 </ul>
 
 
-<br>
+
+<h3>THREAD: Scheduler</h3>
+<p>Based off from - <a href="https://github.com/dbader/schedule">schedule</a> </p>
+<p>The scheduler runs from the main method and controls objects of the following classes through the main method.</p>
+<ul>
+	<li>Show Downloader</li>
+	<li>CCTV Checker</li>
+	<li>News Reader</li>
+</ul>
+<p>The functions of the above objects and the time that they are required to run are programmed in to the scheduler.
+	However, at the start of the program all functions are programmed to run once with a small time-delay between
+	each. Each of the functions can also be executed by calling the relevant variable from the global variables list
+	.</p>
+<p>One of the interesting features about the scheduler is that, if by any chance there is already a function
+	of the same class already running, it will put the function on a queue which will check to run again after 1
+	minute of delay.</p>
+
+
+
 <h3>FUNCTION: Logger</h3>
 <p>This is one of the most important functions which help to log the activities of the program to keep track, monitor
 	and troubleshoot any issues that may come up. The logger function performs the following actions.</p>

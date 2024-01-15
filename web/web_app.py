@@ -12,3 +12,8 @@ def index():
 @app.route('/movies/')
 def movies():
     return render_template('movies.html')
+
+
+def run_webapp():
+    if __name__ == '__main__':
+        app.run(debug=False, host='0.0.0.0')

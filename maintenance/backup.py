@@ -114,3 +114,17 @@ class BackUp:
             gzip_cmd = f'gzip {backup_file_path}'
             os.system(gzip_cmd)
             logger.log(f'Backed up {database} database at {backup_file_path}.')
+
+
+backup = BackUp('/mnt/MediaBox/MediaBox/Backup')
+
+backup.databases.append('transactions')
+backup.databases.append('entertainment')
+backup.databases.append('administration')
+backup.databases.append('news')
+backup.databases.append('baby')
+
+backup.move_folders.append('log/')
+backup.move_png_files.append('charts/')
+backup.copy_files.append('settings.py')
+backup.move_files.append('../nohup.out')

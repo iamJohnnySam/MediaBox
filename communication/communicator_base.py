@@ -37,11 +37,11 @@ class CommunicatorBase:
 
         MessageLoop(self.bot, {'chat': self.handle,
                                'callback_query': self.handle_callback}).run_as_thread()
-        logger.log('Telepot ' + telepot_account + ' listening', source=self.source)
+        logger.log('Telepot ' + telepot_account + ' listening')
 
     def send_to_group(self, group, msg, image=False, caption=""):
         if self.database.check_exists(self.database_groups, f"group_name = '{group}'") == 0:
-            logger.log("Group does not exist", source=self.source, message_type="error")
+            logger.log("Group does not exist", message_type="error")
             return
 
         result = self.database.run_sql(f"SELECT chat_id FROM {self.database_groups} WHERE group_name = '{group}'",
@@ -58,7 +58,7 @@ class CommunicatorBase:
 
     def send_now(self, msg, image=False, chat=None, keyboard=None, reply_to=None, caption=""):
         if msg == "" or msg is None:
-            logger.log("NO MESSAGE", source=self.source, message_type="error")
+            logger.log("NO MESSAGE", message_type="error")
             return
 
         if chat is None:
@@ -383,7 +383,8 @@ class CommunicatorBase:
 
     def start_over(self, msg, chat_id, message_id, value):
         if chat_id == self.master:
-            global_var.stop_cctv = True
+            global_var.stop_all = True
+            global_var.restart = True
         else:
             self.send_now("This will reboot the program. Requesting Master User...",
                           image=False,
