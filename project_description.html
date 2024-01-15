@@ -17,8 +17,9 @@ sudo blkid
 sudo nano /etc/fstab
 UUID=27705CE4072C15B2	/mnt/MediaBox	ntfs	defaults,auto,users,rw 0 0
 </code></pre>
-
-# STATIC IP
+<br>
+<p>Set up static IP to be able to consistently access the system from your local network</p>
+<pre><code>
 sudo nmcli connection modify 'Wired connection 1' ipv4.address 192.168.1.32/24
 sudo nmcli connection modify 'Wired connection 1' ipv4.gateway 192.168.1.1
 sudo nmcli connection modify 'Wired connection 1' ipv4.method manual
