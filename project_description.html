@@ -178,5 +178,14 @@ cd</code></pre>
 
 <br>
 <h3>FUNCTION: Logger</h3>
-<p>This is one of the most important functions which help to log the activities of the program to keep track,
-    monitor and troubleshoot any issues that may come up.</p>
+<p>This is one of the most important functions which help to log the activities of the program to keep track, monitor and troubleshoot any issues that may come up. The logger function performs the folling actions.</p>
+<ul>
+	<li>Creates a log file in the log folder with the current date</li>
+	<li>Adds the message in to the log file under the classification of debug, information, error or warning</li>
+	<li>Inspects the stack and identifies where the call is coming from</li>
+	<li>Prints the message type, timestamp, calling information and the message to the console</li>
+</ul>
+<p>The message to console is printed as follows:</p>
+<pre><code>f'{message_type},{timestamp},{caller_name},>,{message}'</code></pre>
+<p>The logger can be called from anywhere in the code with the following call.</p>
+<pre><code>logger.log(log_message, message_type="info")</code></pre>
