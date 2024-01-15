@@ -8,32 +8,28 @@ sudo apt-get upgrade</code>
 <pre><code>sudo mkdir /mnt/MediaBox
 sudo mount /dev/sda1 /mnt/MediaBox
 sudo blkid
-/dev/sda1: LABEL="data-ntfs" BLOCK_SIZE="512" UUID="27705CE4072C15B2" TYPE="ntfs" PARTLABEL="data-ntfs"
-	PARTUUID="b62c5b39-5e0f-493c-95a5-032c5cb7adb7"
+/dev/sda1: LABEL="data-ntfs" BLOCK_SIZE="512" UUID="27705CE4072C15B2" TYPE="ntfs" PARTLABEL="data-ntfs" PARTUUID="b62c5b39-5e0f-493c-95a5-032c5cb7adb7"
 
 sudo nano /etc/fstab
-UUID=27705CE4072C15B2	/mnt/MediaBox	ntfs	defaults,auto,users,rw 0 0</code>
+</code></pre>
+<pre><code>UUID=27705CE4072C15B2	/mnt/MediaBox	ntfs	defaults,auto,users,rw 0 0</code>
 </pre>
 <p>Set up static IP to be able to consistently access the system from your local network</p>
-<pre>
-	<code>sudo nmcli connection modify 'Wired connection 1' ipv4.address 192.168.1.32/24</code>
-	<code>sudo nmcli connection modify 'Wired connection 1' ipv4.gateway 192.168.1.1</code>
-	<code>sudo nmcli connection modify 'Wired connection 1' ipv4.method manual</code>
-	<code>sudo nmcli connection modify 'Wired connection 1' ipv4.dns '1.1.1.1'</code>
-	<code>sudo nmcli connection down 'Wired connection 1'</code>
-	<code>sudo nmcli connection up 'Wired connection 1'</code>
-	<code>sudo nmcli connection up 'Wired connection 1'</code>
+<pre><code>sudo nmcli connection modify 'Wired connection 1' ipv4.address 192.168.1.32/24
+sudo nmcli connection modify 'Wired connection 1' ipv4.gateway 192.168.1.1
+sudo nmcli connection modify 'Wired connection 1' ipv4.method manual
+sudo nmcli connection modify 'Wired connection 1' ipv4.dns '1.1.1.1'
+sudo nmcli connection down 'Wired connection 1'
+sudo nmcli connection up 'Wired connection 1'
+sudo nmcli connection up 'Wired connection 1'</code>
 </pre>
 <p>Setting up the Samba server</p>
-<pre>
-	<code>sudo apt-get install samba samba-common-bin</code>
-	<code>sudo nano /etc/samba/smb.conf</code>
+<pre><code>sudo apt-get install samba samba-common-bin
+sudo nano /etc/samba/smb.conf</code>
 </pre>
 <p>Set up 2 Samba server locations. One for the media location and one for managing the project files. The Media
 	location will not be password protected and will be visible to everyone on the network.</p>
-<pre>
-	<code>
-[Media]
+<pre><code>[Media]
 path = /mnt/MediaBox
 writeable=Yes
 create mask=0777
@@ -49,9 +45,8 @@ public=no
 	</code>
 </pre>
 <p>Complete Samba server set up</p>
-<pre>
-	<code>sudo smbpasswd -a pi</code>
-	<code>sudo systemctl restart smbd</code>
+<pre><code>sudo smbpasswd -a pi
+sudo systemctl restart smbd</code>
 </pre>
 
 
