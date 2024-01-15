@@ -155,7 +155,7 @@ def grapher_bar_trend(graph_list, x_name, y_name, chart_title, x_time=False):
 
     if cat_exists:
         for cat in y_plots.keys():
-            logger.log("Plotting: " + str(y_plots[cat]), source="GRPH")
+            logger.log("Plotting: " + str(y_plots[cat]))
             plt.plot(list(graph_dict.keys()), list(y_plots[cat]), label=cat, color=colors[color_val])
             color_val = color_val + 1
             if color_val == len(colors):

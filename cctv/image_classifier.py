@@ -2,8 +2,9 @@ from datetime import datetime
 import random
 import tflite_runtime.interpreter as tflite
 import numpy as np
+
+import global_var
 import logger
-import settings
 from PIL import Image
 import os
 import shutil
@@ -34,10 +35,10 @@ class ImageClassifier:
 
         if output > self.threshold:
             sus = True
-            sav = os.path.join(settings.cctv_save, self.nn_name, "1")
+            sav = os.path.join(global_var.cctv_save, self.nn_name, "1")
         else:
             sus = False
-            sav = os.path.join(settings.cctv_save, self.nn_name, "0")
+            sav = os.path.join(global_var.cctv_save, self.nn_name, "0")
 
         copy_destination = "None"
         if random.random() > self.save_random:
@@ -48,5 +49,5 @@ class ImageClassifier:
 
             copy_destination = shutil.copyfile(att_path,
                                                os.path.join(sav, file_name))
-            logger.log("Image Saved - " + copy_destination, source="CCTV")
+            logger.log("Image Saved - " + copy_destination)
         return output, sus, copy_destination

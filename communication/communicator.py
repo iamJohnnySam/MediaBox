@@ -24,7 +24,7 @@ class Communicator(CommunicatorBase):
         super().__init__(telepot_account)
         self.baby_sql = SQLConnector(settings.database_user, settings.database_password, 'baby')
         self.finance_sql = SQLConnector(settings.database_user, settings.database_password, 'transactions')
-        self.source = "TG-C"
+        self.entertainment_sql = SQLConnector(settings.database_user, settings.database_password, 'entertainment')
 
     def check_shows(self, msg, chat_id, message_id, value, user_input=False, identifier=None):
         global_var.check_shows = True
@@ -111,9 +111,10 @@ class Communicator(CommunicatorBase):
         if not self.check_command_value("name of TV show", show, chat_id, message_id):
             return
 
-        request = {show: str(msg['chat']['first_name'])}
-        JSONEditor(global_var.requested_show_database).add_level1(request)
-        logger.log("TV Show Requested - " + show, source=self.source)
+        self.entertainment_sql.insert("requested_shows",
+                                      "name, requested_by, requested_id",
+                                      (show, str(msg['chat']['first_name']), chat_id))
+        logger.log("TV Show Requested - " + show)
         self.send_now("TV Show Requested - " + show, chat=chat_id, reply_to=message_id)
         self.send_now("TV Show Requested - " + show)
 
@@ -135,7 +136,7 @@ class Communicator(CommunicatorBase):
                       "Baby Weight Added - " + value + "kg. \nThat's a weight gain of " + \
                       "{:10.2f}".format(weight - last_entry[1]) + "kg since " + str(last_entry[0]) + "."
 
-        logger.log(send_string, source=self.source)
+        logger.log(send_string)
         self.baby_weight_trend(msg, chat_id, message_id, value, caption=send_string)
 
     def add_me_to_cctv(self, msg, chat_id, message_id, value, user_input=False, identifier=None):

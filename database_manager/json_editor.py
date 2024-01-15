@@ -15,8 +15,7 @@ class JSONEditor:
                 json.dump({}, f)
 
     def add_level1(self, data):
-        logger.log("Added Level 1 data: " + str(list(data.keys())[0]) + " at " + self.file,
-                   source="JSON")
+        logger.log("Added Level 1 data: " + str(list(data.keys())[0]) + " at " + self.file)
         with open(self.file, 'r+') as file:
             file_data = json.load(file)
             file_data.update(data)
@@ -24,8 +23,7 @@ class JSONEditor:
             json.dump(file_data, file, indent=4)
 
     def add_level2(self, level, data):
-        logger.log("Added Level 2 data: " + str(list(data.keys())[0]) + " to " + level + " at " + self.file,
-                   source="JSON")
+        logger.log("Added Level 2 data: " + str(list(data.keys())[0]) + " to " + level + " at " + self.file)
         with open(self.file, 'r+') as file:
             file_data = json.load(file)
             file_data[level].append(data)
@@ -34,7 +32,7 @@ class JSONEditor:
 
     def read(self):
         with open(self.file, 'r') as file:
-            logger.log("Loaded - " + str(self.file), source="JSON")
+            logger.log("Loaded - " + str(self.file))
             return json.load(file)
 
     def delete(self, keep_keys):
@@ -46,7 +44,7 @@ class JSONEditor:
         for key in data.copy().keys():
             if key not in keep_keys:
                 del data[key]
-                logger.log("Deleted Key - " + str(key), source="JSON")
+                logger.log("Deleted Key - " + str(key))
 
         with open(self.file, 'w+') as file:
             json.dump(data, file, indent=4)

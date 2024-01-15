@@ -9,7 +9,6 @@ class Transmission:
     def __init__(self):
         self.client = Client()
         self.active_torrents = {}
-        self.source = "TRMS"
 
     def list_torrents(self):
         torrent_list = self.client.get_torrents()
@@ -17,7 +16,7 @@ class Transmission:
         for torrent in torrent_list:
             success, torrent_id = self.add_torrent_to_list(torrent)
             if not success:
-                logger.log("Torrent Listing Error", self.source, message_type="error")
+                logger.log("Torrent Listing Error", message_type="error")
 
     def add_torrent(self, path, paused=False):
         torrent = self.client.add_torrent(path, paused=paused)
@@ -28,7 +27,7 @@ class Transmission:
         torrent_id = torrent.id
         if torrent_id not in self.active_torrents.keys():
             self.active_torrents[torrent_id] = torrent
-            logger.log(f'Torrent Added - {torrent.name}', source=self.source)
+            logger.log(f'Torrent Added - {torrent.name}')
             return True, torrent_id
         else:
             return False, ""
@@ -39,7 +38,7 @@ class Transmission:
             if self.active_torrents[torrent_number].percent_done == 1:
                 torrent_id = self.active_torrents[torrent_number].id
                 self.client.remove_torrent(torrent_id)
-                logger.log(f'Torrent deleted - {self.active_torrents[torrent_number].name}', source="TRMS")
+                logger.log(f'Torrent deleted - {self.active_torrents[torrent_number].name}')
 
 
 client = Transmission()
@@ -67,8 +66,8 @@ def list_all():
 
 
 def torrent_complete_sequence():
-    logger.log("Starting Transmission Cleanup", source="TRMS")
+    logger.log("Starting Transmission Cleanup")
     client.delete_downloaded()
-    logger.log("Starting Downloads Refactor", source="TRMS")
+    logger.log("Starting Downloads Refactor")
     RefactorFolder(global_var.torrent_download).clean_torrent_downloads()
-    logger.log("Sequence Complete", source="TRMS")
+    logger.log("Sequence Complete")

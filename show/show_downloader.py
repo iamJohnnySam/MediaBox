@@ -24,7 +24,6 @@ def quality_extract(topic):
 class ShowDownloader:
     telepot_chat_group = "show"
     telepot_account = "main"
-    source = "SHOW"
 
     def __init__(self):
         self.database = SQLConnector(settings.database_user, settings.database_password, 'entertainment')
@@ -65,16 +64,16 @@ class ShowDownloader:
                 columns = "name, episode_id, episode_name, magnet, quality, torrent_name"
                 val = (row[4], row[0], row[1], row[2], str(row[3]), str(torrent_id))
                 self.database.insert('tv_show', columns, val)
-                logger.log(torrent_id, source=self.source)
+                logger.log(torrent_id)
 
                 message = f'{str(row[1])} added at {str(row[3])} torrent id = {str(torrent_id)}'
                 communicator.send_to_group(self.telepot_account,
                                            message,
                                            group=self.telepot_chat_group)
-                logger.log(message, source=self.source)
+                logger.log(message)
                 time.sleep(3)
             else:
-                logger.log("Torrent Add Failed: " + str(row[2]), source="TOR", message_type="error")
+                logger.log("Torrent Add Failed: " + str(row[2]), message_type="error")
 
         communicator.send_to_master(self.telepot_account, "TV Show Check Completed")
         logger.log("-------ENDED TV SHOW CHECK SCRIPT-------")

@@ -11,18 +11,17 @@ from database_manager.sql_connector import SQLConnector
 class NewsReader:
     telepot_account = "news"
     telepot_chat_group = "news"
-    source = "NEWS"
 
     def __init__(self):
         self.id_prefix = "http://www.adaderana.lk/news.php?nid="
         self.database = SQLConnector(settings.database_user, settings.database_password, 'news')
-        logger.log("Object Created", source=self.source)
+        logger.log("Object Created")
 
     def run_code(self):
-        logger.log("-------STARTED NEWS READER SCRIPT-------", source=self.source)
+        logger.log("-------STARTED NEWS READER SCRIPT-------")
         self.adaderana_news()
         self.dailymirror_cartoon()
-        logger.log("-------ENDED NEWS READER SCRIPT-------", source=self.source)
+        logger.log("-------ENDED NEWS READER SCRIPT-------")
 
     def adaderana_news(self):
         database_table = "adaderana_news"
@@ -41,7 +40,7 @@ class NewsReader:
                     communicator.send_to_group(self.telepot_account,
                                                article.title + " - " + article.link,
                                                self.telepot_chat_group)
-                    logger.log(article_id, source=self.source)
+                    logger.log(article_id)
 
     def dailymirror_cartoon(self):
         database_table = "dailymirror_cartoon"
@@ -65,5 +64,5 @@ class NewsReader:
                 communicator.send_to_group(self.telepot_account,
                                            image,
                                            self.telepot_chat_group)
-                logger.log(article.title, source=self.source)
+                logger.log(article.title)
 

@@ -34,7 +34,7 @@ class EmailManager:
             self.myEmail.select(mailbox=mailbox, readonly=False)
             return True
         except imaplib.IMAP4.error:
-            logger.log("Mailbox select error", source="EM", message_type="error")
+            logger.log("Mailbox select error", message_type="error")
             self.connection_err = self.connection_err + 1
             return False
 
@@ -44,7 +44,7 @@ class EmailManager:
             self.unread_emails = len(self.messages[0].split(b' '))
             return True, self.unread_emails
         except imaplib.IMAP4.error:
-            logger.log("Mailbox search error", source="EM", message_type="error")
+            logger.log("Mailbox search error", message_type="error")
             return False
 
     def connect(self, mailbox=None):
@@ -54,7 +54,7 @@ class EmailManager:
 
         if not (b and c):
             self.result = "Not OK"
-            logger.log("Email Error", source="EM", message_type="error")
+            logger.log("Email Error", message_type="error")
             self.mail_connect_error = True
 
     def email_close(self):
@@ -72,7 +72,7 @@ class EmailManager:
             try:
                 self.msg = email.message_from_bytes(data[0][1])
             except AttributeError:
-                logger.log("No new emails to read.", source="EM")
+                logger.log("No new emails to read.")
                 self.email_close()
                 return False
 
@@ -85,7 +85,7 @@ class EmailManager:
             self.myEmail.store(self.current_message, '+FLAGS', '\\Deleted')
             self.myEmail.expunge()
         except imaplib.IMAP4.error:
-            logger.log("1 message skipped delete", source="EM", message_type="warn")
+            logger.log("1 message skipped delete", message_type="warn")
             self.connection_err = self.connection_err + 1
 
     def delete_all_emails(self, mailbox="Sent"):
@@ -106,24 +106,24 @@ class EmailManager:
             except (imaplib.IMAP4.error, imaplib.IMAP4.abort) as error:
                 exit_condition = False
                 self.connection_err = self.connection_err + 1
-                logger.log("Error Occurred: " + str(error), source="EM")
+                logger.log("Error Occurred: " + str(error))
                 return
             try:
                 self.msg = email.message_from_bytes(data[0][1])
             except AttributeError:
                 exit_condition = False
-                logger.log("No new emails to delete.", source="EM")
+                logger.log("No new emails to delete.")
                 self.email_close()
-                logger.log("Deleted " + str(count) + " emails from " + self.mb, source="EM")
+                logger.log("Deleted " + str(count) + " emails from " + self.mb)
                 logger.log("-------ENDED EMAIL CLEAN-UP SCRIPT-------")
                 return
             try:
                 self.myEmail.store(message, '+FLAGS', '\\Deleted')
                 self.myEmail.expunge()
                 count = count + 1
-                logger.log("Deleted Email - " + self.msg['Date'], source="EM")
+                logger.log("Deleted Email - " + self.msg['Date'])
             except AttributeError:
-                logger.log("Failed to delete - " + self.msg['Date'], source="EM")
+                logger.log("Failed to delete - " + self.msg['Date'])
 
     def get_next_attachment(self):
         self.connect()

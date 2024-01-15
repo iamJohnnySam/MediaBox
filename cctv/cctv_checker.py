@@ -30,14 +30,14 @@ class CCTVChecker:
 
     def create_object(self):
         self.outlook = EmailManager(settings.em, settings.pw, 'Security')
-        logger.log("Created CCTV Object", "CCTV")
+        logger.log("Created CCTV Object")
 
     def run_code(self):
         logger.log("-------STARTED CCTV MAIN SCRIPT-------")
 
         if self.outlook.connection_err > 0:
             del self.outlook
-            logger.log("Deleted CCTV Object", "CCTV")
+            logger.log("Deleted CCTV Object")
             time.sleep(10)
             self.create_object()
 
@@ -47,7 +47,7 @@ class CCTVChecker:
         while running:
             running, attachment, date, file_n = self.outlook.get_next_attachment()
 
-            if (not running) or global_var.stop_cctv:
+            if (not running) or global_var.stop_all:
                 break
 
             save_as = date + " " + file_n
@@ -77,7 +77,7 @@ class CCTVChecker:
                 communicator.send_to_group(self.telepot_account, att_path, self.telepot_chat_group,
                                            image=True, caption=str(val))
 
-            logger.log(save_as + "\t SUS: " + str("%.2f" % val), source="CCTV")
+            logger.log(save_as + "\t SUS: " + str("%.2f" % val))
             os.remove(att_path)
 
         logger.log("-------ENDED CCTV MAIN SCRIPT-------")

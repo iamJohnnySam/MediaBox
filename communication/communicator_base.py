@@ -19,20 +19,23 @@ class CommunicatorBase:
     database_groups = "telepot_groups"
 
     def __init__(self, telepot_account):
+        self.telepot_account = telepot_account
+
         self.database = SQLConnector(settings.database_user, settings.database_password, 'administration')
 
+        # Callback
         self.current_callback_id = 0
         self.callback_id_prefix = telepot_account + "_" + datetime.now().strftime("%y%m%d%H%M") + "_"
 
+        # Waiting user input
         self.waiting_user_input = {}
-        self.telepot_account = telepot_account
 
         telepot_accounts = JSONEditor(global_var.telepot_accounts).read()
         self.bot = telepot.Bot(telepot_accounts[telepot_account]["account"])
         self.master = self.database.run_sql(f"SELECT chat_id FROM {self.database_allowed_chats} WHERE master = '1'")[0]
 
-        self.command_dictionary = JSONEditor(global_var.telepot_commands + 'telepot_commands_' +
-                                             self.telepot_account + '.json').read()
+        self.command_dictionary = JSONEditor(f'{global_var.telepot_commands}telepot_commands_'
+                                             f'{self.telepot_account}.json').read()
 
         MessageLoop(self.bot, {'chat': self.handle,
                                'callback_query': self.handle_callback}).run_as_thread()
@@ -122,9 +125,9 @@ class CommunicatorBase:
             logger.log(f"Added {chat_id} to {group} group")
         elif remove and self.database.check_exists(self.database_groups, where) != 0:
             self.database.run_sql(f"DELETE FROM {self.database_groups} WHERE " + where)
-            logger.log(f"Removed {chat_id} from {group} group", source=self.source)
+            logger.log(f"Removed {chat_id} from {group} group")
         else:
-            logger.log("Nothing to do", source=self.source)
+            logger.log("Nothing to do")
 
     def handle(self, msg):
         chat_id = msg['chat']['id']
@@ -136,7 +139,7 @@ class CommunicatorBase:
             elif 'photo' in msg.keys():
                 self.handle_photo(msg, chat_id, message_id)
             else:
-                logger.log("Unknown Chat type", source=self.source, message_type="error")
+                logger.log("Unknown Chat type", message_type="error")
 
     def handle_text(self, msg, chat_id, message_id):
         if chat_id in self.waiting_user_input:
@@ -149,12 +152,12 @@ class CommunicatorBase:
             logger.log('Telepot Key Error: ' + str(msg), message_type="error")
             return
 
-        logger.log(str(self.telepot_account) + "\t" + str(chat_id) + " - " + str(command), source=self.source)
+        logger.log(str(self.telepot_account) + "\t" + str(chat_id) + " - " + str(command))
 
         # If command is in command list
         if command in self.command_dictionary.keys():
             function = self.command_dictionary[command]["function"]
-            logger.log(str(chat_id) + ' - Calling Function: ' + function, source=self.source)
+            logger.log(str(chat_id) + ' - Calling Function: ' + function)
             value = str(msg['text']).replace(str(msg['text']).split(" ")[0], "").strip()
 
             func = getattr(self, function)
@@ -190,7 +193,7 @@ class CommunicatorBase:
         try:
             self.bot.download_file(msg['photo'][-1]['file_id'], file_path)
         except PermissionError:
-            logger.log("Permission Error", source=self.source)
+            logger.log("Permission Error")
             self.send_now("PERMISSION ERROR")
 
         foo = Image.open(file_path)
@@ -205,7 +208,7 @@ class CommunicatorBase:
         foo = foo.resize((new_w, new_h))
         foo.save(file_path, optimize=True, quality=95)
 
-        logger.log(f'Received Photo > {file_name}, File size > {foo.size}', source=self.source)
+        logger.log(f'Received Photo > {file_name}, File size > {foo.size}')
 
         button_text = ["save_photo"]
         for key in self.command_dictionary.keys():
@@ -228,7 +231,7 @@ class CommunicatorBase:
 
     def handle_callback(self, msg):
         query_id, from_id, query_data = telepot.glance(msg, flavor='callback_query')
-        logger.log('Callback Query: ' + " " + str(query_id) + " " + str(from_id) + " " + str(query_data), self.source)
+        logger.log('Callback Query: ' + " " + str(query_id) + " " + str(from_id) + " " + str(query_data))
 
         callback_id = str(query_data).split(",")[0]
         command = str(query_data).split(",")[1]
@@ -239,7 +242,7 @@ class CommunicatorBase:
                                            + comm + 'telepot_callback_database.json').read()
 
             query_data = telepot_callbacks[callback_id]
-            logger.log("Recovered Query: " + query_data, self.source)
+            logger.log("Recovered Query: " + query_data)
 
             command = str(query_data).split(",")[0]
             value = str(query_data).split(",")[1]
@@ -253,13 +256,13 @@ class CommunicatorBase:
             func(callback_id, query_id, from_id, value)
         except (ValueError, SyntaxError) as error:
             self.bot.answerCallbackQuery(query_id, text='Unhandled')
-            logger.log("Unhandled Callback: " + str(error), source=self.source, message_type="error")
+            logger.log("Unhandled Callback: " + str(error), message_type="error")
 
     def update_in_line_buttons(self, button_id, keyboard=None):
         comm = button_id.split("_")[0] + "_" + button_id.split("_")[1] + "_"
         message = JSONEditor(global_var.telepot_callback_database
                              + comm + 'telepot_button_link.json').read()[button_id]
-        logger.log("Buttons to remove from message id " + str(message['message_id']), self.source)
+        logger.log("Buttons to remove from message id " + str(message['message_id']))
         message_id = telepot.message_identifier(message)
         self.bot.editMessageReplyMarkup(message_id, reply_markup=keyboard)
         return message['message_id']
@@ -267,10 +270,10 @@ class CommunicatorBase:
     def send_message_with_keyboard(self, msg, chat_id, button_text, button_cb, button_val,
                                    arrangement, reply_to=None):
         if len(button_text) == 0 or len(button_text) != len(button_cb) or len(button_text) != len(button_val):
-            logger.log("Keyboard Generation error: " + str(msg), source=self.source, message_type="error")
-            logger.log("Button Text Length " + str(len(button_text)), source=self.source, message_type="error")
-            logger.log("Button CB Length " + str(len(button_cb)), source=self.source, message_type="error")
-            logger.log("Button Value Length " + str(len(button_val)), source=self.source, message_type="error")
+            logger.log("Keyboard Generation error: " + str(msg), message_type="error")
+            logger.log("Button Text Length " + str(len(button_text)), message_type="error")
+            logger.log("Button CB Length " + str(len(button_cb)), message_type="error")
+            logger.log("Button Value Length " + str(len(button_val)), message_type="error")
             return
 
         button_ids = []
@@ -316,7 +319,7 @@ class CommunicatorBase:
         arrangement = [bpr for _ in range(int(math.floor(len(button_text) / 3)))]
         if len(button_text) % bpr != 0:
             arrangement.append(len(button_text) % 3)
-        logger.log("Keyboard extracted > " + str(arrangement), source=self.source)
+        logger.log("Keyboard extracted > " + str(arrangement))
 
         return button_text, button_cb, button_value, arrangement
 

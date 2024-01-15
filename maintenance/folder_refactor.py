@@ -8,7 +8,6 @@ import logger
 
 
 class RefactorFolder:
-    source = "RFAC"
 
     def __init__(self, path):
         self.path = path
@@ -16,7 +15,7 @@ class RefactorFolder:
     def clean_torrent_downloads(self):
         files, directories = self.get_file_and_directory(self.path)
         if len(files) == 0 and len(directories) == 0:
-            logger.log("Nothing to refactor", source=self.source)
+            logger.log("Nothing to refactor")
             return
 
         self.sort_torrent_files(files, self.path)
@@ -39,7 +38,6 @@ class RefactorFolder:
                         self.torrent_step_2(sub_sub_directories, sub_directory_path, sub_last_loc)
                     else:
                         logger.log(f'Folder Refactor Error - {sub_directory_path}, Base location - {sub_last_loc}',
-                                   source=self.source,
                                    message_type="error")
                     self.remove_directory(sub_directory_path)
 
@@ -47,7 +45,6 @@ class RefactorFolder:
                 self.torrent_step_2(sub_directories, directory_path, last_loc)
             else:
                 logger.log(f'Folder Refactor Error - {directory_path}, Base location - {last_loc}',
-                           source=self.source,
                            message_type="error")
 
             self.remove_directory(directory_path)
@@ -80,7 +77,7 @@ class RefactorFolder:
             dst_path = os.path.join(destination, file)
             file_path = os.path.join(subs_folder, file)
             shutil.move(file_path, dst_path)
-            logger.log(f"Moved {file_path} -> {dst_path}", source=self.source)
+            logger.log(f"Moved {file_path} -> {dst_path}")
 
         self.remove_directory(subs_folder)
 
@@ -88,7 +85,7 @@ class RefactorFolder:
         base_loc = None
         for file in files:
             file_name, tv_show, movie, subtitle, base_name = self.breakdown_torrent_file_name(file)
-            logger.log(f'{file_name}, {tv_show}, {movie}, {subtitle}, {base_name}', source=self.source)
+            logger.log(f'{file_name}, {tv_show}, {movie}, {subtitle}, {base_name}')
             if tv_show and not movie:
                 base_loc = os.path.join(global_var.torrent_tv_shows, base_name)
                 self.move_file(os.path.join(directory, file),
@@ -119,14 +116,14 @@ class RefactorFolder:
                 elif os.path.isdir(item_path):
                     directories_list.append(item)
 
-        logger.log(f'Got files in {path}.', source=self.source)
+        logger.log(f'Got files in {path}.')
         return files_list, directories_list
 
     def move_file(self, old_location, new_location, file):
         if not os.path.exists(new_location):
             os.makedirs(new_location)
         destination = shutil.move(old_location, os.path.join(new_location, file))
-        logger.log(f"Moved '{file}' to '{destination}'", source=self.source)
+        logger.log(f"Moved '{file}' to '{destination}'")
         return destination
 
     def breakdown_torrent_file_name(self, file_name):
@@ -201,7 +198,7 @@ class RefactorFolder:
         words = sentence.split()
         filtered_words = [word for word in words if word.lower() not in map(str.lower, words_to_remove)]
         filtered_sentence = ' '.join(filtered_words)
-        logger.log(f'Filtered words from {sentence} > {filtered_sentence}.', source=self.source)
+        logger.log(f'Filtered words from {sentence} > {filtered_sentence}.')
         return filtered_sentence
 
     def move_files_and_directories(self, source_folder, destination_folder):
@@ -212,17 +209,17 @@ class RefactorFolder:
             try:
                 # Move the item to the destination folder
                 shutil.move(source_path, destination_path)
-                logger.log(f"Moved '{item}' to '{destination_folder}'", source=self.source)
+                logger.log(f"Moved '{item}' to '{destination_folder}'")
             except Exception as e:
-                logger.log(f"Failed to move '{item}': {str(e)}", source=self.source)
+                logger.log(f"Failed to move '{item}': {str(e)}")
 
     def remove_directory(self, path):
         sub_files, sub_directories = self.get_file_and_directory(path)
         if len(sub_directories) == 0 and len(sub_files) == 0:
             try:
                 os.rmdir(path)
-                logger.log(f"Directory '{path}' has been successfully deleted.", source=self.source)
+                logger.log(f"Directory '{path}' has been successfully deleted.")
             except OSError as e:
-                logger.log(f"Error: {str(e)}", source=self.source)
+                logger.log(f"Error: {str(e)}")
         else:
-            logger.log(f"Cannot Delete '{path}'. Not empty!", source=self.source, message_type="warn")
+            logger.log(f"Cannot Delete '{path}'. Not empty!", message_type="warn")

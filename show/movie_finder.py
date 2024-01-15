@@ -8,7 +8,7 @@ def get_movies_by_name(movie):
     movie = movie.lower().replace("/", "")
     search_string = "https://yts.mx/rss/" + movie + "/720p/all/0/en"
 
-    logger.log("Searching " + search_string, source="MOV")
+    logger.log("Searching " + search_string)
     movie_feed = feedparser.parse(search_string)
     return movie_feed
 
