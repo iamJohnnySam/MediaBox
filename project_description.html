@@ -1,39 +1,31 @@
 <h3>INSTALLATION: Setting up the Raspberry Pi</h3>
-<p>Target Operating System: Raspbian - Bookworm</p>
+<p>Target Operating System: Raspbian -
+	<a href="https://www.raspberrypi.com/documentation/computers/os.html#python-on-raspberry-pi">Bookworm</a></p>
 <p>Update the Raspberry Pi</p>
-<pre><code>
-sudo apt-get update
-sudo apt-get upgrade
-</code></pre>
+<pre><code>sudo apt-get update
+sudo apt-get upgrade</code></pre>
 <p>Plug in an external drive and mount</p>
-<pre><code>
-sudo mkdir /mnt/MediaBox
+<pre><code>sudo mkdir /mnt/MediaBox
 sudo mount /dev/sda1 /mnt/MediaBox
 sudo blkid
 /dev/sda1: LABEL="data-ntfs" BLOCK_SIZE="512" UUID="27705CE4072C15B2" TYPE="ntfs" PARTLABEL="data-ntfs" PARTUUID="b62c5b39-5e0f-493c-95a5-032c5cb7adb7"
 
-sudo nano /etc/fstab
-</code></pre>
+sudo nano /etc/fstab</code></pre>
 <pre><code>UUID=27705CE4072C15B2	/mnt/MediaBox	ntfs	defaults,auto,users,rw 0 0</code></pre>
 <p>Set up static IP to be able to consistently access the system from your local network</p>
-<pre><code>
-sudo nmcli connection modify 'Wired connection 1' ipv4.address 192.168.1.32/24
+<pre><code>sudo nmcli connection modify 'Wired connection 1' ipv4.address 192.168.1.32/24
 sudo nmcli connection modify 'Wired connection 1' ipv4.gateway 192.168.1.1
 sudo nmcli connection modify 'Wired connection 1' ipv4.method manual
 sudo nmcli connection modify 'Wired connection 1' ipv4.dns '1.1.1.1'
 sudo nmcli connection down 'Wired connection 1'
 sudo nmcli connection up 'Wired connection 1'
-sudo nmcli connection up 'Wired connection 1'
-</code></pre>
+sudo nmcli connection up 'Wired connection 1'</code></pre>
 <p>Setting up the Samba server</p>
-<pre><code>
-sudo apt-get install samba samba-common-bin
-sudo nano /etc/samba/smb.conf
-</code></pre>
+<pre><code>sudo apt-get install samba samba-common-bin
+sudo nano /etc/samba/smb.conf</code></pre>
 <p>Set up 2 Samba server locations. One for the media location and one for managing the project files. The Media
 	location will not be password protected and will be visible to everyone on the network.</p>
-<pre><code>
-[Media]
+<pre><code>[Media]
 path = /mnt/MediaBox
 writeable=Yes
 create mask=0777
@@ -45,52 +37,41 @@ path = /home/pi
 writeable=Yes
 create mask=0777
 directory mask=0777
-public=no
-</code></pre>
+public=no</code></pre>
 <p>Complete Samba server set up</p>
-<pre><code>
-sudo smbpasswd -a pi
-sudo systemctl restart smbd
-</code></pre>
+<pre><code>sudo smbpasswd -a pi
+sudo systemctl restart smbd</code></pre>
 <p>Setting up transmission for automated torrent downloads</p>
-<pre><code>
-sudo apt-get install transmission-daemon
+<pre><code>sudo apt-get install transmission-daemon
 sudo systemctl stop transmission-daemon
-sudo nano /etc/transmission-daemon/settings.json
-</code></pre>
-<p>Transmission configuration file can be found <a>here</a>.</p>
-
-
-
-
-# SQL Database
-sudo apt install mariadb-server
+sudo nano /etc/transmission-daemon/settings.json</code></pre>
+<p>Transmission configuration file can be found
+	<a href="https://github.com/iamJohnnySam/MediaBox/blob/master/show/settings.json">here</a>.
+</p>
+<p>Setting up mySQL database for maintaining required databases for the program</p>
+<pre><code>sudo apt install mariadb-server
 sudo mysql_secure_installation
-sudo apt install phpmyadmin
-
-sudo nano /etc/apache2/apache2.conf
+sudo apt install phpmyadmin</code></pre>
+<p>Setting up the Apache to be able to access the SQL database from within the network if needed.</p>
+<pre><code>sudo nano /etc/apache2/apache2.conf
 Include /etc/phpmyadmin/apache.conf
 sudo service apache2 restart
-sudo ln -s /usr/share/phpmyadmin /var/www/html
-
-
-# PYTHON ENVIRONMENT
-# https://www.raspberrypi.com/documentation/computers/os.html#python-on-raspberry-pi
-
-sudo apt install python3.11-venv
+sudo ln -s /usr/share/phpmyadmin /var/www/html</code></pre>
+<p>Next we will set up the Python environment</p>
+<pre><code>sudo apt install python3.11-venv
 sudo apt-get install --yes libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev llvm libncurses5-dev libncursesw5-dev xz-utils tk-dev libgdbm-dev lzma lzma-dev tcl-dev libxml2-dev libxmlsec1-dev libffi-dev liblzma-dev wget curl make build-essential openssl
 sudo apt-get install python3-dev default-libmysqlclient-dev build-essential
 sudo apt-get install python3-flask
 sudo apt-get install libopenjp2-7-dev
-sudo apt install unixodbc-dev
-
-
-git clone https://github.com/iamJohnnySam/MediaBox.git
-cd MediaBox
+sudo apt install unixodbc-dev</code></pre>
+<p>Loading the project files from github</p>
+<pre><code>git clone https://github.com/iamJohnnySam/MediaBox.git</code></pre>
+<p>Creating virtual environment at project location.</p>
+<pre><code>cd MediaBox
 python -m venv env
-source env/bin/activate
-
-pip install schedule
+source env/bin/activate</code></pre>
+<p>Installing all needed Python libraries while inside virtual environment</p>
+<pre><code>pip install schedule
 pip install logger
 pip install Flask
 pip install telepot
@@ -114,101 +95,84 @@ pip install gdown
 pip install opencv-python
 pip install matplotlib
 pip install pyodbc
-pip install pandas
-
-deactivate
-
-
-cd /home/pi/MediaBox/cctv/
+pip install pandas</code></pre>
+<pre><code>deactivate</code></pre>
+<p>Installing the 2 neural networks for the CCTV image recognition</p>
+<pre><code>cd /home/pi/MediaBox/cctv/
 mkdir nn_models
 cd nn_models
 curl -L "https://drive.google.com/file/d/1-1i0UqlOT46jTQZP980FOhBcdHFGfaPW/view?usp=sharing" -o modelA01.tflite
-curl -L "https://drive.google.com/file/d/1qkNWVF28CRyTo96fLCgB2BvELqPFTdcO/view?usp=sharing" -o modelA02.tflite
+curl -L "https://drive.google.com/file/d/1qkNWVF28CRyTo96fLCgB2BvELqPFTdcO/view?usp=sharing" -o modelA02.tflite</code></pre>
+<p>Installing the auto launcher</p>
+<pre><code>cd /home/pi
+nano launcher.sh</code>
+<code>#!/bin/sh
+# launcher.sh
+# navigate to home directory, then to this directory, then execute python script, then back home
 
-cd /home/pi
-nano launcher.sh
+sudo apt-get update -y
 
-	#!/bin/sh
-	# launcher.sh
-	# navigate to home directory, then to this directory, then execute python script, then back home
-
-	sudo apt-get update -y
-
-	reset
-	echo "   _                           _           _                               ____                      "
-	echo "  (_)   __ _   _ __ ___       | |   ___   | |__    _ __    _ __    _   _  / ___|    __ _   _ __ ___  "
-	echo "  | |  / _\ | |  _   _ \   _  | |  / _ \  |  _ \  |  _ \  |  _ \  | | | | \___ \   / _\ | |  _   _ \ "
-	echo "  | | | (_| | | | | | | | | |_| | | (_) | | | | | | | | | | | | | | |_| |  ___) | | (_| | | | | | | |"
-	echo "  |_|  \__,_| |_| |_| |_|  \___/   \___/  |_| |_| |_| |_| |_| |_|  \__, | |____/   \__,_| |_| |_| |_|"
-	echo "                                                                   |___/                             "
-	echo
-	echo
-	echo
-	cd /home/pi/MediaBox
-	python -V
-	git pull origin master
-	. /home/pi/MediaBox/env/bin/activate
-	python main.py
-	deactivate
-
-chmod 755 launcher.sh
-
-
-cd /home/pi
-nano permission_error_correction.sh
-
+reset
+echo "   _                           _           _                               ____                      "
+echo "  (_)   __ _   _ __ ___       | |   ___   | |__    _ __    _ __    _   _  / ___|    __ _   _ __ ___  "
+echo "  | |  / _\ | |  _   _ \   _  | |  / _ \  |  _ \  |  _ \  |  _ \  | | | | \___ \   / _\ | |  _   _ \ "
+echo "  | | | (_| | | | | | | | | |_| | | (_) | | | | | | | | | | | | | | |_| |  ___) | | (_| | | | | | | |"
+echo "  |_|  \__,_| |_| |_| |_|  \___/   \___/  |_| |_| |_| |_| |_| |_|  \__, | |____/   \__,_| |_| |_| |_|"
+echo "                                                                   |___/                             "
+echo
+echo
+echo
+cd /home/pi/MediaBox
+python -V
+git pull origin master
+. /home/pi/MediaBox/env/bin/activate
+python main.py
+deactivate</code>
+<code>chmod 755 launcher.sh</code>
+<code>sudo crontab -e</code>
+<code>@reboot sh /home/pi/launcher.sh</code>
+<code>git config --global --add safe.directory /home/pi/MediaBox
+sudo git config --global --add safe.directory /home/pi/MediaBox</code></pre>
+<p>Sometimes there are permission issues which come up all of a sudden with git. Installing the below shell file
+	will make it easier to debug later.</p>
+<pre><code>cd /home/pi
+nano permission_error_correction.sh</code>
+<code>#!/bin/sh
+# launcher.sh
 sudo chmod -R 777 MediaBox
 cd /home/pi/MediaBox
 git reset --hard origin/master
 cd
-sh launcher.sh
+sh launcher.sh</code>
+<code>chmod 755 permission_error_correction.sh</code></pre>
+<br>
+<h3>INSTALLATION: Configuring Installation</h3>
+<p>Setting up the databases. <a href="https://pimylifeup.com/raspberry-pi-mysql/">More Information.</a> </p>
+<pre><code>sudo mysql -u root -p</code></pre>
+<pre>
+	<code>CREATE USER 'mediabox'@'localhost' IDENTIFIED BY 'pw';</code>
+	<code>CREATE DATABASE transactions;
+GRANT ALL PRIVILEGES ON transactions.* TO 'mediabox'@'localhost';</code>
+	<code>CREATE DATABASE administration;
+GRANT ALL PRIVILEGES ON administration.* TO 'mediabox'@'localhost';</code>
+	<code>CREATE DATABASE entertainment;
+GRANT ALL PRIVILEGES ON entertainment.* TO 'mediabox'@'localhost';</code>
+	<code>CREATE DATABASE news;
+GRANT ALL PRIVILEGES ON news.* TO 'mediabox'@'localhost';</code>
+	<code>CREATE DATABASE baby;
+GRANT ALL PRIVILEGES ON baby.* TO 'mediabox'@'localhost';</code>
+	<code>FLUSH PRIVILEGES;</code>
+</pre>
+<p>Run the program</p>
+<pre><code>sh launcher.sh</code></pre>
 
-chmod 755 permission_error_correction.sh
-
-
-sudo crontab -e
-@reboot sh /home/pi/launcher.sh
-
-git config --global --add safe.directory /home/pi/MediaBox
-sudo git config --global --add safe.directory /home/pi/MediaBox
-
-# https://pimylifeup.com/raspberry-pi-mysql/
-
-sudo mysql -u root -p
-
-CREATE USER 'mediabox'@'localhost' IDENTIFIED BY 'pw';
-
-CREATE DATABASE transactions;
-GRANT ALL PRIVILEGES ON transactions.* TO 'mediabox'@'localhost';
-FLUSH PRIVILEGES;
-
-CREATE DATABASE administration;
-GRANT ALL PRIVILEGES ON administration.* TO 'mediabox'@'localhost';
-FLUSH PRIVILEGES;
-
-CREATE DATABASE entertainment;
-GRANT ALL PRIVILEGES ON entertainment.* TO 'mediabox'@'localhost';
-FLUSH PRIVILEGES;
-
-CREATE DATABASE news;
-GRANT ALL PRIVILEGES ON news.* TO 'mediabox'@'localhost';
-FLUSH PRIVILEGES;
-
-CREATE DATABASE baby;
-GRANT ALL PRIVILEGES ON baby.* TO 'mediabox'@'localhost';
-FLUSH PRIVILEGES;
-
-sh launcher.sh
-
-
-
-# Run Test File
-cd /home/pi/MediaBox
+<p>Run the Test Program</p>
+<pre><code>cd /home/pi/MediaBox
 git pull origin master
 . /home/pi/MediaBox/env/bin/activate
 python database_update_temp_file.py
 deactivate
-cd
+cd</code></pre>
 
 
 <h3>FUNCTION: Logger</h3>
