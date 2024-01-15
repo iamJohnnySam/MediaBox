@@ -275,12 +275,12 @@ cd</code></pre>
 <p>The file communicator.py in the communication folder contains a for loop which creates objects of the
 	Communicator class and stores them in a dictionary with the account name as the key. Whenever a communication
 	from a specific account is needed, the object can be called from the dictionary by looking for the account name
-	in the keys.
-</p>
+	in the keys. This is done by the following code snippet.</p>
 <pre><code>telepot_channels = {}
-for account in JSONEditor('communication/telepot_accounts.json').read().keys():
+for account in telegram_accounts:
     telepot_channels[account] = Communicator(account)</code></pre>
-<p>This can be done by calling any of the below functions from anywhere on the code.</p>
+<p>If a message needs to be sent on any of these channels, it can be done by calling any of the below functions from
+	anywhere on the code.</p>
 <pre><code>communicator.send_message(telepot_account, chat_id, msg, image=False, keyboard=None, reply_to=None,
 	caption="")</code></pre>
 <pre><code>communicator.send_to_master(telepot_account, msg, image=False, keyboard=None, reply_to=None, caption="")</code></pre>
@@ -293,7 +293,49 @@ for account in JSONEditor('communication/telepot_accounts.json').read().keys():
 
 
 <h3>CLASS: Communicator</h3>
+The communicator class is based off from <a href="https://telepot.readthedocs.io/en/latest/reference.html">telepot
+</a> which enables me to use the telegram API. This class is one of the main classes of the entire program and hence
+it is split into a base code which contains all the basic functions and the top level code which contains the main
+interactions with the user.
 
+<h4>Telepot accounts and commands</h4>
+<p>Using the BotFather on telegram, I created the following bots to manage my communications separately.</p>
+<ul>
+	<li>Main</li>
+	<li>CCTV Images</li>
+	<li>News</li>
+	<li>Baby Activity Tracking</li>
+</ul>
+<p>The API keys for each of these bots are saved on a json so that the constructor is able to create an instance of
+	telepot at the start.</p>
+<p>This class is also connected to the mySQL database named "administration" which contain all the chat IDs that are
+	allowed to communicate with the bot, the master chat ID who has administrative access and chat IDs that are
+	subscribed for different group communications across the functions.</p>
+<p>Once the telegram bot is initialized, the constructor automatically loads a JSON file with the same name as the
+	channel from the commands' folder. This JSON files contains a list of all functions that should be accepted by
+	this bot. The outer dictionary key refers to the command that is sent by the user. Each value contains another
+	dictionary which contains the name of the function that needs to be called if the command is sent and the
+	definition of the command to be sent to the user if asked for a list of commands. If the outer dictionary key
+	does not start with a "/" it is considered as a heading for the next set of commands. This is useful to separate
+	the commands out into groups when listing all the commands to the user.</p>
+<pre><code>{
+  "Administrative": false,
+  "/alive": {
+    "function": "alive",
+    "definition": "Check bot"
+  },
+  "/time": {
+    "function": "time",
+    "definition": "Check bot time"
+  }
+}</code></pre>
+<p>Finally in the constructor of this class the telepot MessageLoop is initialized as a thread which contains both a
+	handle function which handles the standard messages which come through the chat and a callback query function which
+	handles all the queries which are returned through the in-line keyboards.</p>
+
+<h4>Base Communicator</h4>
+
+<h4>Top level Communicator</h4>
 
 
 <h3>CLASS: BackUp</h3>

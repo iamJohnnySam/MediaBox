@@ -2,8 +2,9 @@ import inspect
 import math
 import os.path
 from datetime import datetime
-from PIL import Image
+
 import telepot
+from PIL import Image
 from telepot.loop import MessageLoop
 from telepot.namedtuple import InlineKeyboardButton, InlineKeyboardMarkup
 
