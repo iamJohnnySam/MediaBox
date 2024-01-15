@@ -25,8 +25,6 @@ news_cartoon = "https://www.dailymirror.lk/rss/cartoon_of_the_day/167"
 cctv_download = "cctv/CCTVImages"
 cctv_save = "/mnt/MediaBox/MediaBox/CCTVSaved"
 
-cctv_model1_google = 'https://drive.google.com/file/d/1-1i0UqlOT46jTQZP980FOhBcdHFGfaPW/view?usp=sharing'
-cctv_model2_google = 'https://drive.google.com/file/d/1qkNWVF28CRyTo96fLCgB2BvELqPFTdcO/view?usp=sharing'
 cctv_model1 = "cctv/nn_models/modelA01.tflite"
 cctv_model2 = "cctv/nn_models/modelA02.tflite"
 

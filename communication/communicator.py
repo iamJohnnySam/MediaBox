@@ -595,22 +595,28 @@ for account in JSONEditor('communication/telepot_accounts.json').read().keys():
     telepot_channels[account] = Communicator(account)
 
 
-def send_message(telepot_account, chat_id, msg, image=False, caption=""):
+def send_message(telepot_account, chat_id, msg, image=False, keyboard=None, reply_to=None, caption=""):
     telepot_lock.acquire()
-    msg_id = telepot_channels[telepot_account].send_now(msg, image, chat_id, caption=caption)
-    logger.log(str(chat_id) + " - " + str(msg), source="TG-R")
+    msg_id = telepot_channels[telepot_account].send_now(msg, image, chat_id,
+                                                        caption=caption,
+                                                        reply_to=reply_to,
+                                                        keyboard=keyboard)
     telepot_lock.release()
     return msg_id
 
 
-def send_to_master(telepot_account, msg, image=False, caption=""):
+def send_to_master(telepot_account, msg, image=False, keyboard=None, reply_to=None, caption=""):
     telepot_lock.acquire()
-    msg_id = telepot_channels[telepot_account].send_now(msg, image, caption=caption)
+    msg_id = telepot_channels[telepot_account].send_now(msg, image,
+                                                        caption=caption,
+                                                        reply_to=reply_to,
+                                                        keyboard=keyboard)
     telepot_lock.release()
     return msg_id
 
 
 def send_to_group(telepot_account, msg, group, image=False, caption=""):
     telepot_lock.acquire()
-    telepot_channels[telepot_account].send_to_group(group, msg, image, caption=caption)
+    telepot_channels[telepot_account].send_to_group(group, msg, image,
+                                                    caption=caption)
     telepot_lock.release()

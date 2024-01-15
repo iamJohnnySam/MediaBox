@@ -217,6 +217,7 @@ cd</code></pre>
 	<li>check_cctv - Signal the Scheduler to run CCTV Checker</li>
 	<li>check_news - Signal the Scheduler to run News Reader</li>
 </ul>
+<p>This file also holds all the paths and links that the program needs.</p>
 
 
 
@@ -270,8 +271,19 @@ cd</code></pre>
 
 
 
-<h3>THREAD: Communicator</h3>
-
+<h3>THREADS: Communicators</h3>
+<p>The file communicator.py in the communication folder contains a for loop which creates objects of the
+	Communicator class and stores them in a dictionary with the account name as the key. Whenever a communication
+	from a specific account is needed, the object can be called from the dictionary by looking for the account name
+	in the keys.
+</p>
+<pre><code>telepot_channels = {}
+for account in JSONEditor('communication/telepot_accounts.json').read().keys():
+    telepot_channels[account] = Communicator(account)</code></pre>
+<p>This can be done by calling any of the below functions from anywhere on the code.</p>
+<pre><code>send_message(telepot_account, chat_id, msg, image=False, keyboard=None, reply_to=None, caption="")</code></pre>
+<pre><code>send_to_master(telepot_account, msg, image=False, keyboard=None, reply_to=None, caption="")</code></pre>
+<pre><code>send_to_group(telepot_account, msg, group, image=False, caption="")</code></pre>
 
 
 
@@ -292,3 +304,4 @@ cd</code></pre>
 	<li>move_png_files</li>
 	<li>databases</li>
 </ul>
+

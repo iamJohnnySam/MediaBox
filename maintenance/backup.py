@@ -23,22 +23,26 @@ class BackUp:
         self.move_png_files = []
         self.databases = []
 
+        logger.log("Object Created")
+
     def run_code(self):
+        logger.log("Backup Started")
         self.backup_copy_files()
         self.backup_move_files()
         self.backup_copy_folders()
         self.backup_move_folders()
         self.backup_databases()
+        logger.log("Backup Ended")
 
     def backup_copy_files(self):
         for file in self.copy_files:
             destination = os.path.join(self.backup_location, file)
             if not os.path.exists(os.path.dirname(destination)):
                 os.makedirs(os.path.dirname(destination))
-                logger.log(f"Directories created for {os.path.dirname(destination)}", source=self.source)
+                logger.log(f"Directory created > {os.path.dirname(destination)}")
 
             shutil.copy(file, destination)
-            logger.log(f"Copied {file} -> {destination}", source=self.source)
+            logger.log(f"Copied {file} -> {destination}")
 
     def backup_move_files(self):
         for file in self.move_files:
@@ -50,11 +54,11 @@ class BackUp:
             destination = os.path.join(self.backup_location, ufile)
             if not os.path.exists(os.path.dirname(destination)):
                 os.makedirs(os.path.dirname(destination))
-                logger.log(f"Directories created for {os.path.dirname(destination)}", source=self.source)
+                logger.log(f"Directory created > {os.path.dirname(destination)}")
 
             try:
                 shutil.move(file, destination)
-                logger.log(f"Moved {file} -> {destination}", source=self.source)
+                logger.log(f"Moved {file} -> {destination}")
             except FileNotFoundError:
                 pass
 
@@ -63,7 +67,7 @@ class BackUp:
             destination = os.path.join(self.backup_location, folder)
 
             shutil.copytree(folder, destination)
-            logger.log(f"Copied {folder} -> {destination}", source=self.source)
+            logger.log(f"Copied {folder} -> {destination}")
 
     def backup_move_folders(self):
         for folder in self.move_folders:
@@ -71,34 +75,37 @@ class BackUp:
             destination = os.path.join(self.backup_location, folder)
             if not os.path.exists(os.path.dirname(destination)):
                 os.makedirs(os.path.dirname(destination))
+                logger.log(f"Directory created > {os.path.dirname(destination)}")
 
             for file_path in allfiles:
                 dst_path = os.path.join(destination, os.path.basename(file_path))
                 shutil.move(file_path, dst_path)
-                logger.log(f"Moved {file_path} -> {dst_path}", source=self.source)
+                logger.log(f"Moved {file_path} -> {dst_path}")
 
         for folder in self.move_folders_common:
             allfiles = glob.glob(os.path.join(folder, '*_A_*'), recursive=True)
             destination = os.path.join(self.common_backup_location, folder)
             if not os.path.exists(os.path.dirname(destination)):
                 os.makedirs(os.path.dirname(destination))
+                logger.log(f"Directory created > {os.path.dirname(destination)}")
 
             for file_path in allfiles:
                 dst_path = os.path.join(destination, os.path.basename(file_path))
                 shutil.move(file_path, dst_path)
-                logger.log(f"Moved {file_path} -> {dst_path}", source=self.source)
+                logger.log(f"Moved {file_path} -> {dst_path}")
 
         for folder in self.move_png_files:
             allfiles = glob.glob(os.path.join(folder, '*_A_*'), recursive=True)
             destination = os.path.join(self.backup_location, folder)
             if not os.path.exists(os.path.dirname(destination)):
                 os.makedirs(os.path.dirname(destination))
+                logger.log(f"Directory created > {os.path.dirname(destination)}")
 
             for file_path in allfiles:
                 dst_path = os.path.join(destination, os.path.basename(file_path))
                 if ".png" in dst_path.lower():
                     shutil.move(file_path, dst_path)
-                    logger.log(f"Moved {file_path} -> {dst_path}", source=self.source)
+                    logger.log(f"Moved {file_path} -> {dst_path}")
 
     def backup_databases(self):
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -112,7 +119,7 @@ class BackUp:
 
             gzip_cmd = f'gzip {backup_file_path}'
             os.system(gzip_cmd)
-            logger.log(f'Backed up {database} database at {backup_file_path}.')
+            logger.log(f'BackUp {database} database > {backup_file_path}.')
 
 
 backup = BackUp('/mnt/MediaBox/MediaBox/Backup')

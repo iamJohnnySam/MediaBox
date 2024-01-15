@@ -15,7 +15,6 @@ from database_manager.sql_connector import SQLConnector
 
 
 class CommunicatorBase:
-    source = "TG-B"
     database_allowed_chats = "telepot_allowed_chats"
     database_groups = "telepot_groups"
 
@@ -48,7 +47,7 @@ class CommunicatorBase:
                                        fetch_all=True)
         chats = [row[0] for row in result]
 
-        logger.log(str(chats) + " - Group Message: " + msg, self.source)
+        logger.log(str(chats) + " - Group Message: " + msg)
 
         for chat in chats:
             if image:
@@ -75,7 +74,7 @@ class CommunicatorBase:
         else:
             message = self.bot.sendMessage(chat, str(msg), reply_to_message_id=reply_to)
 
-        logger.log(str(chat) + " - " + str(message['message_id']) + " - Message: " + str(msg), self.source)
+        logger.log(str(chat) + " - " + str(message['message_id']) + " - Message: " + str(msg))
 
         return message
 
@@ -106,7 +105,7 @@ class CommunicatorBase:
         if self.database.check_exists(self.database_allowed_chats, f"chat_id = '{chat_id}'") == 0:
             self.bot.sendMessage(chat_id, "Hello " + sender_name + "! You're not allowed to be here")
             self.send_now(f"Unauthorised Chat access: {sender_name}, chat_id: {chat_id}")
-            logger.log(f"Unauthorised Chat access: {sender_name}, chat_id: {chat_id}", source=self.source,
+            logger.log(f"Unauthorised Chat access: {sender_name}, chat_id: {chat_id}",
                        message_type="warn")
             return False
         else:
@@ -115,12 +114,12 @@ class CommunicatorBase:
     def manage_chat_group(self, group, chat_id, add=True, remove=False):
         where = f"chat_id = '{chat_id}' AND group_name = '{group}';"
         if not add ^ remove:
-            logger.log("Invalid command", source=self.source, message_type="error")
+            logger.log("Invalid command", message_type="error")
         elif add and self.database.check_exists(self.database_groups, where) == 0:
             cols = "chat_id, group_name"
             vals = (chat_id, group)
             self.database.insert(self.database_groups, cols, vals)
-            logger.log(f"Added {chat_id} to {group} group", source=self.source)
+            logger.log(f"Added {chat_id} to {group} group")
         elif remove and self.database.check_exists(self.database_groups, where) != 0:
             self.database.run_sql(f"DELETE FROM {self.database_groups} WHERE " + where)
             logger.log(f"Removed {chat_id} from {group} group", source=self.source)
@@ -147,7 +146,7 @@ class CommunicatorBase:
         try:
             command = str(msg['text']).split(" ")[0]
         except KeyError:
-            logger.log('Telepot Key Error: ' + str(msg), source=self.source, message_type="error")
+            logger.log('Telepot Key Error: ' + str(msg), message_type="error")
             return
 
         logger.log(str(self.telepot_account) + "\t" + str(chat_id) + " - " + str(command), source=self.source)
