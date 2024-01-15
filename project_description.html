@@ -2,8 +2,10 @@
 <p>Target Operating System: Raspbian -
 	<a href="https://www.raspberrypi.com/documentation/computers/os.html#python-on-raspberry-pi">Bookworm</a></p>
 <p>Update the Raspberry Pi</p>
-<pre><code>sudo apt-get update
-sudo apt-get upgrade</code></pre>
+<code>
+	sudo apt-get update
+	sudo apt-get upgrade
+</code>
 <p>Plug in an external drive and mount</p>
 <pre><code>sudo mkdir /mnt/MediaBox
 sudo mount /dev/sda1 /mnt/MediaBox
@@ -149,19 +151,18 @@ sh launcher.sh</code>
 <h3>INSTALLATION: Configuring Installation</h3>
 <p>Setting up the databases. <a href="https://pimylifeup.com/raspberry-pi-mysql/">More Information.</a> </p>
 <pre><code>sudo mysql -u root -p</code></pre>
-<pre>
-	<code>CREATE USER 'mediabox'@'localhost' IDENTIFIED BY 'pw';</code>
-	<code>CREATE DATABASE transactions;
+<pre><code>CREATE USER 'mediabox'@'localhost' IDENTIFIED BY 'pw';</code>
+<code>CREATE DATABASE transactions;
 GRANT ALL PRIVILEGES ON transactions.* TO 'mediabox'@'localhost';</code>
-	<code>CREATE DATABASE administration;
+<code>CREATE DATABASE administration;
 GRANT ALL PRIVILEGES ON administration.* TO 'mediabox'@'localhost';</code>
-	<code>CREATE DATABASE entertainment;
+<code>CREATE DATABASE entertainment;
 GRANT ALL PRIVILEGES ON entertainment.* TO 'mediabox'@'localhost';</code>
-	<code>CREATE DATABASE news;
+<code>CREATE DATABASE news;
 GRANT ALL PRIVILEGES ON news.* TO 'mediabox'@'localhost';</code>
-	<code>CREATE DATABASE baby;
+<code>CREATE DATABASE baby;
 GRANT ALL PRIVILEGES ON baby.* TO 'mediabox'@'localhost';</code>
-	<code>FLUSH PRIVILEGES;</code>
+<code>FLUSH PRIVILEGES;</code>
 </pre>
 <p>Run the program</p>
 <pre><code>sh launcher.sh</code></pre>
