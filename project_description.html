@@ -8,9 +8,10 @@ sudo apt-get upgrade</code></pre>
 <pre><code>sudo mkdir /mnt/MediaBox
 sudo mount /dev/sda1 /mnt/MediaBox
 sudo blkid
-/dev/sda1: LABEL="data-ntfs" BLOCK_SIZE="512" UUID="27705CE4072C15B2" TYPE="ntfs" PARTLABEL="data-ntfs" PARTUUID="b62c5b39-5e0f-493c-95a5-032c5cb7adb7"
-
-sudo nano /etc/fstab</code></pre>
+</code></pre>
+<p>/dev/sda1: LABEL="data-ntfs" BLOCK_SIZE="512" UUID="27705CE4072C15B2" TYPE="ntfs" PARTLABEL="data-ntfs"
+	PARTUUID="b62c5b39-5e0f-493c-95a5-032c5cb7adb7"</p>
+<pre><code>sudo nano /etc/fstab</code></pre>
 <pre><code>UUID=27705CE4072C15B2	/mnt/MediaBox	ntfs	defaults,auto,users,rw 0 0</code></pre>
 <p>Set up static IP to be able to consistently access the system from your local network</p>
 <pre><code>sudo nmcli connection modify 'Wired connection 1' ipv4.address 192.168.1.32/24
