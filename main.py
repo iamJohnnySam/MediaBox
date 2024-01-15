@@ -7,15 +7,12 @@ import time
 import logger
 import global_var
 from communication import communicator
-from maintenance import start_up
+from maintenance import start_up, backup
 from scheduler import scheduler
 from web import web_app
 
-# CHECK RUNNING SYSTEM
-logger.log("Currently running code on: " + platform.machine())
-
 if platform.machine() == 'armv7l':
-    logger.log("Program Started in Full Mode")
+    logger.log("Program Started of Raspberry Pi in Full Mode")
     global_var.ready_to_run = True
 
     t_scheduler = threading.Thread(target=scheduler.run_scheduler)
@@ -32,7 +29,7 @@ if platform.machine() == 'armv7l':
         time.sleep(10)
 
 else:
-    logger.log("Code Running in Partial Mode")
+    logger.log("Code Running in Partial Mode on: " + platform.machine())
 
     if True:
         t_webapp = threading.Thread(target=web_app.run_webapp)
@@ -41,7 +38,7 @@ else:
 
     t_webapp.join()
 
-global_var.backup.run_code()
+backup.backup.run_code()
 
 # ------ EXIT CONDITIONS -----------
 if not global_var.stop_all:

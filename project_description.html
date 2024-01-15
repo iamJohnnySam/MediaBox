@@ -182,12 +182,12 @@ cd</code></pre>
 <h3>MAIN METHOD: main.py</h3>
 <p>The code can be broken down in to 3 main areas which are the main interactions of the program. These three
 	sections of the program will run on its own thread.</p>
-<ol>
+<ul>
 	<li>Communicator: Interact the program through the chatbot. (daemon thread)</li>
 	<li>Web App: Interact with the program through the web app. (thread: t_webapp)</li>
 	<li>Scheduler: The program will interact with itself using a scheduler at predefined time intervals.
 		(thread: t_scheduler, daemon thread)</li>
-</ol>
+</ul>
 <p>At the start of the program it will execute "platform.machine()" to identify if the code is running on Raspberry
 	Pi. In which case it will run in full operation. If the identified platform is not armv7l it will only run the
 	programmed functions for the purpose of debugging the code.</p>
@@ -199,6 +199,8 @@ cd</code></pre>
 	program is controlled by "stop_all" global variable. If the "stop_all" is not enabled the program will
 	automatically reboot itself after a minute. If the "stop_all" global variable is enabled then it will proceed to
 	exit the program or perform the necessary operations defined by the variables in the global variables</p>
+
+
 
 
 <h3>GLOBAL VARIABLES: global_var.py</h3>
@@ -215,6 +217,37 @@ cd</code></pre>
 	<li>check_cctv - Signal the Scheduler to run CCTV Checker</li>
 	<li>check_news - Signal the Scheduler to run News Reader</li>
 </ul>
+
+
+
+
+<h3>SECRET GLOBAL VARIABLES: settings.py</h3>
+<p>Similar to the global variables file, there is another file under the name settings.py which contains all the
+	usernames and passwords of all accounts used in the program</p>
+<ul>
+	<li>em: outlook.com Username</li>
+	<li>pw: outlook.com Password</li>
+	<li>database_user: mySQL Username</li>
+	<li>database_password: mySQL Password</li>
+</ul>
+
+
+
+
+<h3>FUNCTION: Logger</h3>
+<p>This is one of the most important functions which help to log the activities of the program to keep track, monitor
+	and troubleshoot any issues that may come up. The logger function performs the following actions.</p>
+<ul>
+	<li>Creates a log file in the log folder with the current date</li>
+	<li>Adds the message in to the log file under the classification of debug, information, error or warning</li>
+	<li>Inspects the stack and identifies where the call is coming from</li>
+	<li>Prints the message type, timestamp, calling information and the message to the console</li>
+</ul>
+<p>The message to console is printed as follows:</p>
+<pre><code>f'{message_type},{timestamp},{caller_name},>,{message}'</code></pre>
+<p>The logger can be called from anywhere in the code with the following call.</p>
+<pre><code>logger.log(log_message, message_type="info")</code></pre>
+
 
 
 
@@ -236,16 +269,26 @@ cd</code></pre>
 
 
 
-<h3>FUNCTION: Logger</h3>
-<p>This is one of the most important functions which help to log the activities of the program to keep track, monitor
-	and troubleshoot any issues that may come up. The logger function performs the following actions.</p>
+
+<h3>THREAD: Communicator</h3>
+
+
+
+
+<h3>THREAD: WebApp</h3>
+
+
+
+<h3>CLASS: BackUp</h3>
+<p>This class is responsible for backing up files and folders. One object from each class is dedicated for one
+	backup location which takes in as an argument from the constructor. The class has a number of lists which are
+	used to hold the items that need to back up.</p>
 <ul>
-	<li>Creates a log file in the log folder with the current date</li>
-	<li>Adds the message in to the log file under the classification of debug, information, error or warning</li>
-	<li>Inspects the stack and identifies where the call is coming from</li>
-	<li>Prints the message type, timestamp, calling information and the message to the console</li>
+	<li>copy_folders</li>
+	<li>copy_files</li>
+	<li>move_folders</li>
+	<li>move_folders_common: backs up in to a common location instead of a dated folder</li>
+	<li>move_files</li>
+	<li>move_png_files</li>
+	<li>databases</li>
 </ul>
-<p>The message to console is printed as follows:</p>
-<pre><code>f'{message_type},{timestamp},{caller_name},>,{message}'</code></pre>
-<p>The logger can be called from anywhere in the code with the following call.</p>
-<pre><code>logger.log(log_message, message_type="info")</code></pre>

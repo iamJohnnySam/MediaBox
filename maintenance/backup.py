@@ -8,7 +8,6 @@ import settings
 
 
 class BackUp:
-    source = "BKUP"
 
     def __init__(self, loc):
         self.backup_location = os.path.join(loc, datetime.now().strftime("%Y%m%d%H%M%S"))
