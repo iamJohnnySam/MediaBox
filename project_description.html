@@ -1,12 +1,10 @@
 <h3>INSTALLATION: Setting up the Raspberry Pi</h3>
 <p>Target Operating System: Raspbian - Bookworm</p>
-<br>
 <p>Update the Raspberry Pi</p>
 <pre>
 	<code>sudo apt-get update</code>
 	<code>sudo apt-get upgrade</code>
 </pre>
-<br>
 <p>Plug in an external drive and mount</p>
 <pre>
 	<code>sudo mkdir /mnt/MediaBox</code>
@@ -18,15 +16,14 @@
 	<code>sudo nano /etc/fstab</code>
 	<code>UUID=27705CE4072C15B2	/mnt/MediaBox	ntfs	defaults,auto,users,rw 0 0</code>
 </pre>
-<br>
 <p>Set up static IP to be able to consistently access the system from your local network</p>
-<pre><code>
-sudo nmcli connection modify 'Wired connection 1' ipv4.address 192.168.1.32/24
-sudo nmcli connection modify 'Wired connection 1' ipv4.gateway 192.168.1.1
-sudo nmcli connection modify 'Wired connection 1' ipv4.method manual
-sudo nmcli connection modify 'Wired connection 1' ipv4.dns '1.1.1.1'
-sudo nmcli connection down 'Wired connection 1'
-sudo nmcli connection up 'Wired connection 1'
+<pre>
+	<code>sudo nmcli connection modify 'Wired connection 1' ipv4.address 192.168.1.32/24
+		sudo nmcli connection modify 'Wired connection 1' ipv4.gateway 192.168.1.1
+		sudo nmcli connection modify 'Wired connection 1' ipv4.method manual
+		sudo nmcli connection modify 'Wired connection 1' ipv4.dns '1.1.1.1'
+		sudo nmcli connection down 'Wired connection 1'
+		sudo nmcli connection up 'Wired connection 1'
 </code></pre>
 
 # SAMBA SERVER
