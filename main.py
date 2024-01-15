@@ -84,12 +84,13 @@ logger.log("Currently running code on: " + platform.machine())
 
 if platform.machine() == 'armv7l':
     logger.log("Code Running in Full Mode")
+
     my_shows = ShowDownloader()
     cctv = CCTVChecker()
     news_read = NewsReader()
 
-    global_var.ready_to_run = True
     logger.log('Program Started')
+    global_var.ready_to_run = True
 
     t_scheduler = threading.Thread(target=run_scheduler)
     t_scheduler.start()

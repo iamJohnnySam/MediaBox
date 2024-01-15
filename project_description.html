@@ -176,9 +176,43 @@ python database_update_temp_file.py
 deactivate
 cd</code></pre>
 
+
+
+<br>
+<h3>MAIN METHOD: main.py</h3>
+<p>The code can be broken down in to 3 main areas which are the main interactions of the program. These three
+	sections of the program will run on its own thread.</p>
+<ol>
+	<li>Communicator: Interact the program through the chatbot.</li>
+	<li>Web App: Interact with the program through the web app. (t_webapp)</li>
+	<li>Scheduler: The program will interact with itself using a scheduler at predefined time intervals.
+		(t_scheduler)</li>
+</ol>
+<p>At the start of the program it will execute "platform.machine()" to identify if the code is running on Raspberry
+	Pi. In which case it will run in full operation. If the identified platform is not armv7l it will only run the
+	programmed functions for the purpose of debugging the code.</p>
+
+<h4>MAIN METHOD: Scheduling</h4>
+<p>The scheduler runs on the main method and controls objects of the following classes through the main method.</p>
+<ul>
+	<li>Show Downloader</li>
+	<li>CCTV Checker</li>
+	<li>News Reader</li>
+</ul>
+
+
+<h3>GLOBAL VARIABLES: global_var.py</h3>
+<p>This files contains all the global variables which need to be accessed across threads.</p>
+<ul>
+	<li>ready_to_run - Signals for the Communicator to run after all objects have been initialized as certain
+		commands from the communication module can be waiting before the program is initialized.</li>
+</ul>
+
+
 <br>
 <h3>FUNCTION: Logger</h3>
-<p>This is one of the most important functions which help to log the activities of the program to keep track, monitor and troubleshoot any issues that may come up. The logger function performs the folling actions.</p>
+<p>This is one of the most important functions which help to log the activities of the program to keep track, monitor
+	and troubleshoot any issues that may come up. The logger function performs the following actions.</p>
 <ul>
 	<li>Creates a log file in the log folder with the current date</li>
 	<li>Adds the message in to the log file under the classification of debug, information, error or warning</li>
