@@ -69,7 +69,7 @@ def run_scheduler():
     schedule.every().day.at("09:00").do(schedule_handler, func=backup.backup.backup_databases)
     logger.log("Schedule Created for Database Backup")
 
-    while global_var.stop_all:
+    while not global_var.stop_all:
         schedule.run_pending()
 
         if global_var.check_shows:
