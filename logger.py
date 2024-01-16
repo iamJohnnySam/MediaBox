@@ -20,7 +20,7 @@ def log(msg, message_type="info"):
     else:
         the_class = caller_frame.f_locals["self"].__class__.__name__
         the_method = caller_frame.f_code.co_name
-        caller_name = f"{the_class}>{the_method}"
+        caller_name = f"{the_class} > {the_method}"
 
     if today_date != str(date.today()):
         logging.basicConfig(filename='log/log-' + today_date + '.log', level=logging.DEBUG)
