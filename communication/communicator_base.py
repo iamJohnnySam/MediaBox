@@ -213,7 +213,7 @@ class CommunicatorBase:
 
         button_text = ["save_photo"]
         for key in self.command_dictionary.keys():
-            if "photo" in self.command_dictionary[key].keys():
+            if type(self.command_dictionary[key]) is dict and "photo" in self.command_dictionary[key].keys():
                 button_text.append(f'{self.command_dictionary[key]["function"]}_photo')
 
         button_text, button_cb, button_value, arrangement = self.keyboard_extractor(file_name, None,
