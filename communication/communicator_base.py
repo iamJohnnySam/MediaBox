@@ -104,7 +104,7 @@ class CommunicatorBase:
             JSONEditor(global_var.telepot_callback_database +
                        self.callback_id_prefix + 'telepot_button_link.json').add_level1(button_dict)
 
-    def check_allowed_sender(self, chat_id, msg):
+    def check_sender(self, chat_id, msg):
         sender_name = str(msg['chat']['first_name'])
         if self.database.check_exists(self.database_allowed_chats, f"chat_id = '{chat_id}'") == 0:
             self.bot.sendMessage(chat_id, "Hello " + sender_name + "! You're not allowed to be here")
@@ -134,7 +134,7 @@ class CommunicatorBase:
         chat_id = msg['chat']['id']
         message_id = msg['message_id']
 
-        if self.check_allowed_sender(chat_id, msg):
+        if self.check_sender(chat_id, msg):
             if 'text' in msg.keys():
                 self.handle_text(msg, chat_id, message_id)
             elif 'photo' in msg.keys():
