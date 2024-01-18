@@ -245,8 +245,8 @@ class Communicator(CommunicatorBase):
                 caption = caption + f'\n{i} milk = {calc[i]}ml'
             caption = caption + "\nUse /feed to submit a new entry or"\
                                 "\nUse /feed_history to see the history."\
-                                "\n\n Use /feed_trend to see the trend over time"\
-                                "\n Use /feed_trend_today to see what happened today."
+                                "\n\nUse /feed_trend to see the trend over time"\
+                                "\nUse /feed_trend_today to see what happened today."
 
         self.send_now(pic,
                       image=True,
@@ -283,8 +283,8 @@ class Communicator(CommunicatorBase):
                 caption = caption + f'\n{i} = {calc[i]} nappies/diapers'
             caption = caption + "\nUse /diaper to submit a new entry or"\
                                 "\nUse /diaper_history to see the history."\
-                                "\n\n Use /diaper_trend to see the trend over time"\
-                                "\n Use /diaper_trend_today to see what happened today."
+                                "\n\nUse /diaper_trend to see the trend over time"\
+                                "\nUse /diaper_trend_today to see what happened today."
 
         self.send_now(pic,
                       image=True,
@@ -340,8 +340,8 @@ class Communicator(CommunicatorBase):
             caption = caption + f"\n{row[0]} - {row[1]} - {row[2]}"
         caption = caption + "\nUse /feed to submit a new entry or" \
                             "\nUse /feed_history to see the history." \
-                            "\n\n Use /feed_trend to see the trend over time" \
-                            "\n Use /feed_trend_today to see what happened today."
+                            "\n\nUse /feed_trend to see the trend over time" \
+                            "\nUse /feed_trend_today to see what happened today."
 
         self.send_now(pic,
                       image=True,
@@ -364,8 +364,8 @@ class Communicator(CommunicatorBase):
             caption = caption + f"\n{row[0]} - {row[1]} - {row[3]}"
         caption = caption + "\nUse /diaper to submit a new entry or" \
                             "\nUse /diaper_history to see the history." \
-                            "\n\n Use /diaper_trend to see the trend over time" \
-                            "\n Use /diaper_trend_today to see what happened today."
+                            "\n\nUse /diaper_trend to see the trend over time" \
+                            "\nUse /diaper_trend_today to see what happened today."
 
         self.send_now(pic,
                       image=True,
@@ -539,11 +539,11 @@ class Communicator(CommunicatorBase):
             self.send_to_group("baby",
                                f'\U0001F37C '
                                f'\nBaby was fed {data[2]}ml on {data[0]} at {data[1]} with {data[3]}  milk. '
-                               f'\nFor today your baby has had ' + "{:10.1f}".format(day_total) + "ml of milk" +
+                               f'\nFor today your baby has had ' + "{:10.1f}".format(day_total).strip() + "ml of milk" +
                                "\nUse /feed to submit a new entry or"
                                "\nUse /feed_history to see the history."
-                               "\n\n Use /feed_trend to see the trend over time"
-                               "\n Use /feed_trend_today to see what happened today.")
+                               "\n\nUse /feed_trend to see the trend over time"
+                               "\nUse /feed_trend_today to see what happened today.")
 
     def cb_diaper(self, callback_id, query_id, from_id, value):
         self.update_in_line_buttons(callback_id)
@@ -582,8 +582,8 @@ class Communicator(CommunicatorBase):
                            ". \nYour baby has had " + str(day_total) + " nappy/diaper changes today\n" +
                            "Use /diaper to submit a new entry or"
                            "\nUse /diaper_history to see the history."
-                           "\n\n Use /diaper_trend to see the trend over time or "
-                           "\n Use /diaper_trend_today to see what happened today.")
+                           "\n\nUse /diaper_trend to see the trend over time or "
+                           "\nUse /diaper_trend_today to see what happened today.")
 
 
 telepot_lock = threading.Lock()
