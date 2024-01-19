@@ -3,6 +3,7 @@ import math
 import os.path
 from datetime import datetime
 
+import mysql.connector
 import telepot
 from PIL import Image
 from telepot.loop import MessageLoop
@@ -20,9 +21,10 @@ class CommunicatorBase:
     database_groups = "telepot_groups"
 
     def __init__(self, telepot_account):
+        self.database = None
         self.telepot_account = telepot_account
 
-        self.database = SQLConnector(settings.database_user, settings.database_password, 'administration')
+        self.connect_admin_db()
 
         # Callback
         self.current_callback_id = 0
@@ -42,8 +44,19 @@ class CommunicatorBase:
                                'callback_query': self.handle_callback}).run_as_thread()
         logger.log('Telepot ' + telepot_account + ' listening')
 
+    def connect_admin_db(self):
+        if self.database is not None:
+            del self.database
+        self.database = SQLConnector(settings.database_user, settings.database_password, 'administration')
+
     def send_to_group(self, group, msg, image=False, caption=""):
-        if self.database.check_exists(self.database_groups, f"group_name = '{group}'") == 0:
+        try:
+            exists = self.database.check_exists(self.database_groups, f"group_name = '{group}'") == 0
+        except mysql.connector.errors.OperationalError:
+            self.connect_admin_db()
+            exists = self.database.check_exists(self.database_groups, f"group_name = '{group}'") == 0
+
+        if exists:
             logger.log("Group does not exist", message_type="error")
             return
 
