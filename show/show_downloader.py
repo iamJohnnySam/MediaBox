@@ -2,9 +2,8 @@ import feedparser
 import time
 import global_var
 import logger
-import settings
 from communication import communicator
-from database_manager.sql_connector import SQLConnector
+from database_manager.sql_connector import db_entertainment
 from show import transmission
 
 
@@ -26,7 +25,6 @@ class ShowDownloader:
     telepot_account = "main"
 
     def __init__(self):
-        self.database = SQLConnector(settings.database_user, settings.database_password, 'entertainment')
         logger.log("Show Downloader Object Created")
 
     def run_code(self):
@@ -41,7 +39,7 @@ class ShowDownloader:
                     f'FROM tv_show ' \
                     f'WHERE episode_name="{episode_name}" AND name="{x.tv_show_name}";'
 
-            show_exists = self.database.run_sql(query=query)
+            show_exists = db_entertainment.run_sql(query=query)
 
             if show_exists[0] == 0:
                 found = False
@@ -63,7 +61,7 @@ class ShowDownloader:
             if success:
                 columns = "name, episode_id, episode_name, magnet, quality, torrent_name"
                 val = (row[4], row[0], row[1], row[2], str(row[3]), str(torrent_id))
-                self.database.insert('tv_show', columns, val)
+                db_entertainment.insert('tv_show', columns, val)
                 logger.log(torrent_id)
 
                 message = f'{str(row[1])} added at {str(row[3])} torrent id = {str(torrent_id)}'
@@ -71,7 +69,6 @@ class ShowDownloader:
                                            message,
                                            group=self.telepot_chat_group)
                 logger.log(message)
-                time.sleep(3)
             else:
                 logger.log("Torrent Add Failed: " + str(row[2]), message_type="error")
 

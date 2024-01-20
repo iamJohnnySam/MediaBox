@@ -104,3 +104,4 @@ db_baby = SQLConnector(settings.database_user, settings.database_password, 'baby
 db_finance = SQLConnector(settings.database_user, settings.database_password, 'transactions')
 db_entertainment = SQLConnector(settings.database_user, settings.database_password, 'entertainment')
 db_administration = SQLConnector(settings.database_user, settings.database_password, 'administration')
+db_news = SQLConnector(settings.database_user, settings.database_password, 'news')

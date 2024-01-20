@@ -3,9 +3,8 @@ from datetime import datetime
 import feedparser
 import global_var
 import logger
-import settings
 from communication import communicator
-from database_manager.sql_connector import SQLConnector
+from database_manager.sql_connector import db_news
 
 
 class NewsReader:
@@ -14,7 +13,6 @@ class NewsReader:
 
     def __init__(self):
         self.id_prefix = "http://www.adaderana.lk/news.php?nid="
-        self.database = SQLConnector(settings.database_user, settings.database_password, 'news')
         logger.log("Object Created")
 
     def run_code(self):
@@ -25,17 +23,17 @@ class NewsReader:
 
     def adaderana_news(self):
         database_table = "adaderana_news"
-        last_news_id = self.database.get_last_id(database_table, "news_id")
+        last_news_id = db_news.get_last_id(database_table, "news_id")
 
         feed = feedparser.parse(global_var.news_adaderana)
 
         for article in feed.entries:
             article_id = int(article.id.replace(self.id_prefix, ""))
             if article_id > last_news_id:
-                if self.database.check_exists(database_table, f"news_id = '{article_id}'") == 0:
+                if db_news.check_exists(database_table, f"news_id = '{article_id}'") == 0:
                     cols = "news_id, title, pub_date, link"
                     val = (article_id, article.title, article.published, article.link)
-                    self.database.insert(database_table, cols, val)
+                    db_news.insert(database_table, cols, val)
 
                     communicator.send_to_group(self.telepot_account,
                                                article.title + " - " + article.link,
@@ -58,11 +56,10 @@ class NewsReader:
 
             cols = "title, link, date"
             val = (article.title, image, article_date)
-            if self.database.check_exists(database_table, f"date = '{article_date}'") == 0:
-                self.database.insert(database_table, cols, val)
+            if db_news.check_exists(database_table, f"date = '{article_date}'") == 0:
+                db_news.insert(database_table, cols, val)
 
                 communicator.send_to_group(self.telepot_account,
                                            image,
                                            self.telepot_chat_group)
                 logger.log(article.title)
-
