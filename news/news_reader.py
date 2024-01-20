@@ -30,7 +30,7 @@ class NewsReader:
         for article in feed.entries:
             article_id = int(article.id.replace(self.id_prefix, ""))
             if article_id > last_news_id:
-                if db_news.check_exists(database_table, f"news_id = '{article_id}'") == 0:
+                if db_news.exists(database_table, f"news_id = '{article_id}'") == 0:
                     cols = "news_id, title, pub_date, link"
                     val = (article_id, article.title, article.published, article.link)
                     db_news.insert(database_table, cols, val)
@@ -56,7 +56,7 @@ class NewsReader:
 
             cols = "title, link, date"
             val = (article.title, image, article_date)
-            if db_news.check_exists(database_table, f"date = '{article_date}'") == 0:
+            if db_news.exists(database_table, f"date = '{article_date}'") == 0:
                 db_news.insert(database_table, cols, val)
 
                 communicator.send_to_group(self.telepot_account,

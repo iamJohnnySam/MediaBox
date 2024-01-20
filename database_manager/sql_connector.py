@@ -43,7 +43,7 @@ class SQLConnector:
         else:
             return result[0]
 
-    def check_exists(self, table, where):
+    def exists(self, table, where):
         self.lock.acquire()
         query = f"SELECT COUNT(1) FROM {table} WHERE {where};"
         self.cursor.execute(query)

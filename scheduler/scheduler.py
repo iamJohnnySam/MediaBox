@@ -66,7 +66,7 @@ def run_scheduler():
     schedule.every().day.at("07:00").do(schedule_handler, func=cctv.run_code)
     logger.log("Schedule Created for CCTV Checker")
 
-    schedule.every().day.at("09:00").do(schedule_handler, func=backup.backup.backup_databases)
+    schedule.every().day.at("09:00").do(schedule_handler, func=backup.backup.cp_databases)
     logger.log("Schedule Created for Database Backup")
 
     while not global_var.stop_all:

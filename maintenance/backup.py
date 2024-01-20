@@ -27,14 +27,14 @@ class BackUp:
 
     def run_code(self):
         logger.log("Backup Started")
-        self.backup_copy_files()
-        self.backup_move_files()
-        self.backup_copy_folders()
-        self.backup_move_folders()
-        self.backup_databases()
+        self.cp_files()
+        self.mv_files()
+        self.cp_folders()
+        self.mv_folders()
+        self.cp_databases()
         logger.log("Backup Ended")
 
-    def backup_copy_files(self):
+    def cp_files(self):
         for file in self.copy_files:
             destination = os.path.join(self.backup_location, file)
             if not os.path.exists(os.path.dirname(destination)):
@@ -44,7 +44,7 @@ class BackUp:
             shutil.copy(file, destination)
             logger.log(f"Copied {file} -> {destination}")
 
-    def backup_move_files(self):
+    def mv_files(self):
         for file in self.move_files:
             if "../" in file:
                 ufile = str(file).replace("../", "")
@@ -62,14 +62,14 @@ class BackUp:
             except FileNotFoundError:
                 pass
 
-    def backup_copy_folders(self):
+    def cp_folders(self):
         for folder in self.copy_folders:
             destination = os.path.join(self.backup_location, folder)
 
             shutil.copytree(folder, destination)
             logger.log(f"Copied {folder} -> {destination}")
 
-    def backup_move_folders(self):
+    def mv_folders(self):
         for folder in self.move_folders:
             allfiles = glob.glob(os.path.join(folder, '*_A_*'), recursive=True)
             destination = os.path.join(self.backup_location, folder)
@@ -107,7 +107,7 @@ class BackUp:
                     shutil.move(file_path, dst_path)
                     logger.log(f"Moved {file_path} -> {dst_path}")
 
-    def backup_databases(self):
+    def cp_databases(self):
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         for database in self.databases:
             backup_file = f'{database}_{timestamp}_database_backup.sql'
