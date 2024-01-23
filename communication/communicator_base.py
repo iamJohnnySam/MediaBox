@@ -403,6 +403,8 @@ class CommunicatorBase:
             self.send_now("Start over requested by " + str(msg['chat']['first_name']) + "\n/start_over")
 
     def exit_all(self, msg, chat_id, message_id):
+        global_var.stop_all = True
+        global_var.stop_cctv = True
         if chat_id == self.master:
             global_var.stop_all = True
             global_var.stop_cctv = True
