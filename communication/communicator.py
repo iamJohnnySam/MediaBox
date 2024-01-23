@@ -209,7 +209,7 @@ class Communicator(CommunicatorBase):
         if value == "":
             self.send_message_with_keyboard(msg="Need some pumping info",
                                             chat_id=chat_id,
-                                            button_text=["10ml", "20ml", "30ml", "40ml" "Other", "Cancel"],
+                                            button_text=["10ml", "20ml", "30ml", "40ml", "Other", "Cancel"],
                                             button_cb=["pump", "pump", "pump", "pump", "pump", "cancel"],
                                             button_val=[identifier + "10",
                                                         identifier + "20",
