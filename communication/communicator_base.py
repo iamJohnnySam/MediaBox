@@ -28,36 +28,19 @@ class CommunicatorBase:
         # Waiting user input
         self.waiting_user_input = {}
 
+        # Set up Telepot Account
         telepot_accounts = JSONEditor(global_var.telepot_accounts).read()
         self.bot = telepot.Bot(telepot_accounts[telepot_account]["account"])
-        self.master = db_administration.run_sql(f"SELECT chat_id FROM "
-                                                f"{self.database_allowed_chats} WHERE master = '1'")[0]
+        self.master = telepot.Bot(telepot_accounts[telepot_account]["master"])
 
+        # Get Commands
         self.command_dictionary = JSONEditor(f'{global_var.telepot_commands}telepot_commands_'
                                              f'{self.telepot_account}.json').read()
 
+        # Listen
         MessageLoop(self.bot, {'chat': self.handle,
                                'callback_query': self.handle_callback}).run_as_thread()
         logger.log('Telepot ' + telepot_account + ' listening')
-
-    def send_to_group(self, group, msg, image=False, caption=""):
-        exists = db_administration.exists(self.database_groups, f"group_name = '{group}'") == 0
-
-        if exists:
-            logger.log("Group does not exist", message_type="error")
-            return
-
-        result = db_administration.run_sql(f"SELECT chat_id FROM {self.database_groups} WHERE group_name = '{group}'",
-                                           fetch_all=True)
-        chats = [row[0] for row in result]
-
-        logger.log(str(chats) + " - Group Message: " + msg)
-
-        for chat in chats:
-            if image:
-                self.bot.sendPhoto(chat, photo=open(msg, 'rb'), caption=caption)
-            else:
-                self.bot.sendMessage(chat, msg)
 
     def send_now(self, msg, image=False, chat=None, keyboard=None, reply_to=None, caption=""):
         if msg == "" or msg is None:
@@ -81,6 +64,25 @@ class CommunicatorBase:
         logger.log(str(chat) + " - " + str(message['message_id']) + " - Message: " + str(msg))
 
         return message
+
+    def send_to_group(self, group, msg, image=False, caption=""):
+        exists = db_administration.exists(self.database_groups, f"group_name = '{group}'") == 0
+
+        if exists:
+            logger.log("Group does not exist", message_type="error")
+            return
+
+        result = db_administration.run_sql(f"SELECT chat_id FROM {self.database_groups} WHERE group_name = '{group}'",
+                                           fetch_all=True)
+        chats = [row[0] for row in result]
+
+        logger.log(str(chats) + " - Group Message: " + msg)
+
+        for chat in chats:
+            if image:
+                self.bot.sendPhoto(chat, photo=open(msg, 'rb'), caption=caption)
+            else:
+                self.bot.sendMessage(chat, msg)
 
     def keyboard_button(self, text, callback_command, value="None"):
         # FORMAT
@@ -163,6 +165,23 @@ class CommunicatorBase:
 
             func = getattr(self, function)
             func(msg, chat_id, message_id, value)
+
+        elif command == "/alive":
+            self.send_now(f"{str(chat_id)}\nHello{str(msg['chat']['first_name'])}! I'm Alive and kicking!",
+                          chat=chat_id,
+                          reply_to=message_id)
+
+        elif command == "/time":
+            self.send_now(str(datetime.now()), chat=chat_id, reply_to=message_id)
+
+        elif command == "/start_over":
+            self.start_over(msg, chat_id, message_id)
+
+        elif command == "/exit_all":
+            self.exit_all(msg, chat_id, message_id)
+
+        elif command == "/reboot_pi":
+            self.reboot_pi(msg, chat_id, message_id)
 
         elif command == '/help' or command.lower() == 'help' or command == "/start":
             message = "--- AVAILABLE COMMANDS ---"
@@ -362,18 +381,6 @@ class CommunicatorBase:
         return True
 
     # MAIN FUNCTIONS
-    def alive(self, msg, chat_id, message_id, value):
-        self.send_now(str(chat_id) + "\n" + "Hello " + str(msg['chat']['first_name']) + "! I'm Alive and kicking!",
-                      image=False,
-                      chat=chat_id,
-                      reply_to=message_id)
-
-    def time(self, msg, chat_id, message_id, value):
-        self.send_now(str(datetime.now()),
-                      image=False,
-                      chat=chat_id,
-                      reply_to=message_id)
-
     def save_photo(self, callback_id, query_id, from_id, value):
         message_id = self.update_in_line_buttons(callback_id)
         self.bot.answerCallbackQuery(query_id, text='Image will be saved')
@@ -384,7 +391,7 @@ class CommunicatorBase:
                       chat=from_id,
                       reply_to=message_id)
 
-    def start_over(self, msg, chat_id, message_id, value):
+    def start_over(self, msg, chat_id, message_id):
         if chat_id == self.master:
             global_var.stop_all = True
             global_var.restart = True
@@ -395,7 +402,7 @@ class CommunicatorBase:
                           reply_to=message_id)
             self.send_now("Start over requested by " + str(msg['chat']['first_name']) + "\n/start_over")
 
-    def exit_all(self, msg, chat_id, message_id, value):
+    def exit_all(self, msg, chat_id, message_id):
         if chat_id == self.master:
             global_var.stop_all = True
             global_var.stop_cctv = True
@@ -407,18 +414,18 @@ class CommunicatorBase:
                           reply_to=message_id)
             self.send_now("Start over requested by " + str(msg['chat']['first_name']) + "\n/exit_all")
 
-    def reboot_pi(self, msg, chat_id, message_id, value):
-        if chat_id == self.master:
+    def reboot_pi(self, msg, chat_id, message_id):
+        if chat_id != self.master:
+            self.send_now(f"Reboot Initiated by {str(msg['chat']['first_name'])}."
+                          f"\nCompleting ongoing tasks")
+        else:
             global_var.stop_all = True
             global_var.stop_cctv = True
             global_var.reboot_pi = True
-            self.send_now("Completing ongoing tasks. Please wait.")
-        else:
-            self.send_now("This will reboot the server. Requesting Master User...",
+            self.send_now("The server will reboot in a short while.",
                           image=False,
                           chat=chat_id,
                           reply_to=message_id)
-            self.send_now("Start over requested by " + str(msg['chat']['first_name']) + "\n/reboot_pi")
 
     def cb_cancel(self, callback_id, query_id, from_id, value):
         self.update_in_line_buttons(callback_id)

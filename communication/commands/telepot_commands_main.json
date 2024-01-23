@@ -1,14 +1,4 @@
 {
-  "Administrative": false,
-  "/alive": {
-    "function": "alive",
-    "definition": "Check bot"
-  },
-  "/time": {
-    "function": "time",
-    "definition": "Check bot time"
-  },
-
   "Entertainment Controls": false,
   "/check_shows": {
     "function": "check_shows",
@@ -54,19 +44,5 @@
   "/sms_bill": {
     "function": "sms_bill",
     "definition": "Forward bank SMS"
-  },
-
-  "Server Controls": false,
-  "/start_over": {
-    "function": "start_over",
-    "definition": "Reboot Bot"
-  },
-  "/exit_all": {
-    "function": "exit_all",
-    "definition": "Shut Down Bot"
-  },
-  "/reboot_pi": {
-    "function": "reboot_pi",
-    "definition": "Reboot Server"
   }
 }

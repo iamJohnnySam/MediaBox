@@ -198,6 +198,31 @@ class Communicator(CommunicatorBase):
         else:
             self.cb_feed(None, message_id, chat_id, str(value))
 
+    def mom_pump(self, msg, chat_id, message_id, value, user_input=False, identifier=None):
+        if "ml" in value:
+            value = str(value).replace("ml", "").strip()
+        if not self.check_command_value("amount pumped in ml", value, chat_id, message_id, tx=False, fl=True):
+            return
+
+        identifier = datetime.now().strftime('%Y-%m-%d %H:%M:%S') + " "
+
+        if value == "":
+            self.send_message_with_keyboard(msg="Need some pumping info",
+                                            chat_id=chat_id,
+                                            button_text=["10ml", "20ml", "30ml", "40ml" "Other", "Cancel"],
+                                            button_cb=["pump", "pump", "pump", "pump", "pump", "cancel"],
+                                            button_val=[identifier + "10",
+                                                        identifier + "20",
+                                                        identifier + "30",
+                                                        identifier + "40",
+                                                        "GET",
+                                                        ""],
+                                            arrangement=[4, 2],
+                                            reply_to=message_id
+                                            )
+        else:
+            self.cb_pump(None, message_id, chat_id, str(value))
+
     def baby_diaper(self, msg, chat_id, message_id, value, user_input=False, identifier=None):
         identifier = datetime.now().strftime('%Y-%m-%d %H:%M:%S') + " "
 
@@ -407,8 +432,8 @@ class Communicator(CommunicatorBase):
         columns = 'transaction_by, photo_id'
         val = (from_id, value)
         success, sql_id = db_finance.insert('transaction_lkr', columns, val,
-                                                  get_id=True,
-                                                  id_column='transaction_id')
+                                            get_id=True,
+                                            id_column='transaction_id')
         shutil.move(os.path.join(global_var.telepot_image_dump, value),
                     os.path.join(global_var.finance_images, value))
         self.send_now("How much is the amount?", chat=from_id, reply_to=str(message_id))
@@ -541,6 +566,52 @@ class Communicator(CommunicatorBase):
                                "\nUse /feed_history to see the history."
                                "\n\nUse /feed_trend to see the trend over time"
                                "\nUse /feed_trend_today to see what happened today.")
+
+    def cb_pump(self, callback_id, query_id, from_id, value):
+        if callback_id is not None:
+            message_id = self.update_in_line_buttons(callback_id)
+            try:
+                self.bot.answerCallbackQuery(query_id, text='Got it')
+            except telepot.exception.TelegramError:
+                pass
+            if value == "GET":
+                self.check_command_value("amount pumped in ml", "", from_id, message_id, tx=True, fl=False)
+
+        # FORMAT
+        # ID <SPACE> ml <SPACE> source
+
+        if callback_id is None:
+            if not self.check_command_value("amount pumped in ml", value, from_id, query_id, tx=True, fl=False):
+                return
+            value = datetime.now().strftime('%Y-%m-%d %H:%M:%S') + " " + value
+
+        data = value.split(" ")
+
+        if len(data) == 3:
+            self.send_message_with_keyboard(msg="From which breast did you pump " + data[2] + "ml at " + data[1],
+                                            chat_id=from_id,
+                                            button_text=["Left", "Right", "Both", "Cancel"],
+                                            button_cb=["pump", "pump", "pump", "cancel"],
+                                            button_val=[value + " left",
+                                                        value + " right",
+                                                        value + " both",
+                                                        ""],
+                                            arrangement=[3, 1],
+                                            )
+
+        if len(data) == 4:
+            day_total = 0.0
+            query = f'SELECT amount FROM pump WHERE date = "{data[0]}"'
+            result = list(db_baby.run_sql(query, fetch_all=1))
+            for val in result:
+                day_total = day_total + val[0]
+            day_total = day_total + float(data[2])
+
+            columns = "date, time, amount, breast, user_id"
+            val = (data[0], data[1], float(data[2]), data[3], str(from_id))
+            db_baby.insert('pump', columns, val)
+
+            self.send_now(f'\U0001F37C\nYou pumped {data[2]}ml on {data[0]} at {data[1]} from {data[3]} boob.')
 
     def cb_diaper(self, callback_id, query_id, from_id, value):
         self.update_in_line_buttons(callback_id)

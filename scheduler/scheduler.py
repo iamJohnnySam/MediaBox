@@ -9,6 +9,7 @@ import logger
 from cctv.cctv_checker import CCTVChecker
 from maintenance import backup
 from news.news_reader import NewsReader
+from show import transmission
 from show.show_downloader import ShowDownloader
 
 running_threads = {}
@@ -68,6 +69,9 @@ def run_scheduler():
 
     schedule.every().day.at("09:00").do(schedule_handler, func=backup.backup.cp_databases)
     logger.log("Schedule Created for Database Backup")
+
+    schedule.every().day.at("08:30").do(schedule_handler, func=transmission.torrent_complete_sequence)
+    logger.log("Schedule Created for Download Cleanup")
 
     while not global_var.stop_all:
         schedule.run_pending()

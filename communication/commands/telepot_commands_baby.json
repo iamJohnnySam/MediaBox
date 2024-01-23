@@ -1,13 +1,5 @@
 {
   "Administrative": false,
-  "/alive": {
-    "function": "alive",
-    "definition": "Check bot"
-  },
-  "/time": {
-    "function": "time",
-    "definition": "Check bot time"
-  },
   "/add_me_to_baby": {
     "function": "add_me_to_baby",
     "definition": "Add to baby group"

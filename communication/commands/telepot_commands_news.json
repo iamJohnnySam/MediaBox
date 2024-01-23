@@ -1,13 +1,5 @@
 {
   "Administrative": false,
-  "/alive": {
-    "function": "alive",
-    "definition": "Check bot"
-  },
-  "/time": {
-    "function": "time",
-    "definition": "Check bot time"
-  },
   "/add_me_to_news": {
     "function": "add_me_to_news",
     "definition": "Add to CCTV group"
