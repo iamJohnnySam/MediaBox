@@ -31,7 +31,7 @@ class CommunicatorBase:
         # Set up Telepot Account
         telepot_accounts = JSONEditor(global_var.telepot_accounts).read()
         self.bot = telepot.Bot(telepot_accounts[telepot_account]["account"])
-        self.master = telepot.Bot(telepot_accounts[telepot_account]["master"])
+        self.master = telepot_accounts[telepot_account]["master"]
 
         # Get Commands
         self.command_dictionary = JSONEditor(f'{global_var.telepot_commands}telepot_commands_'
