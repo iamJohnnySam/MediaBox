@@ -611,7 +611,8 @@ class Communicator(CommunicatorBase):
             val = (data[0], data[1], float(data[2]), data[3], str(from_id))
             db_baby.insert('pump', columns, val)
 
-            self.send_now(f'\U0001F37C\nYou pumped {data[2]}ml on {data[0]} at {data[1]} from {data[3]} boob.')
+            self.send_now(f'\U0001F37C\nYou pumped {data[2]}ml on {data[0]} at {data[1]} from {data[3]} boob.',
+                          chat=from_id)
 
     def cb_diaper(self, callback_id, query_id, from_id, value):
         self.update_in_line_buttons(callback_id)
