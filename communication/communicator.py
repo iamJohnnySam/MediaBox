@@ -46,7 +46,7 @@ class Communicator(CommunicatorBase):
         for channel in news.keys():
             news_channels = []
 
-            if type(news_channels[channel]) is bool:
+            if type(news[channel]) is bool:
                 btn_text, btn_cb, btn_value, arr = self.keyboard_extractor(chat_id, "", news_channels, 'subs_news',
                                                                            sql_result=False, command_only=True)
                 self.send_message_with_keyboard(msg=channel, chat_id=chat_id,
