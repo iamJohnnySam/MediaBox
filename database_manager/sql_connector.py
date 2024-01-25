@@ -169,4 +169,4 @@ database_list = db_all.get_databases()
 sql_databases = {}
 for database in database_list:
     sql_databases[database] = SQLConnector(settings.database_user, settings.database_password, database)
-    backup.sql_databases.append(database)
+    backup.databases.append(database)
