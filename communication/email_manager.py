@@ -25,8 +25,8 @@ class EmailManager:
     def log_in(self):
         try:
             self.myEmail.login(self.email, self.password)
-        except imaplib.IMAP4.error:
-            pass
+        except imaplib.IMAP4.error as err:
+            logger.log(f"Mailbox login error - {str(err)}", message_type="debug")
 
     def select_mailbox(self, mailbox=None):
         if mailbox is None:
@@ -34,8 +34,8 @@ class EmailManager:
         try:
             self.myEmail.select(mailbox=mailbox, readonly=False)
             return True
-        except imaplib.IMAP4.error:
-            logger.log("Mailbox select error", message_type="error")
+        except imaplib.IMAP4.error as err:
+            logger.log(f"Mailbox select error - {str(err)}", message_type="error")
             self.connection_err = self.connection_err + 1
             return False
 
@@ -44,8 +44,8 @@ class EmailManager:
             (self.result, self.messages) = self.myEmail.search(None, scan_type)
             self.unread_emails = len(self.messages[0].split(b' '))
             return True, self.unread_emails
-        except imaplib.IMAP4.error:
-            logger.log("Mailbox search error", message_type="error")
+        except imaplib.IMAP4.error as err:
+            logger.log(f"Mailbox search error - {str(err)}", message_type="error")
             return False
 
     def connect(self, mailbox=None):
