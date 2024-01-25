@@ -1,5 +1,6 @@
 import email
 import imaplib
+import traceback
 
 import global_var
 import logger
@@ -27,6 +28,7 @@ class EmailManager:
             self.myEmail.login(self.email, self.password)
         except imaplib.IMAP4.error as err:
             logger.log(f"Mailbox login error - {str(err)}", message_type="debug")
+            logger.log(traceback.format_exc(), message_type="debug")
 
     def select_mailbox(self, mailbox=None):
         if mailbox is None:
@@ -36,6 +38,7 @@ class EmailManager:
             return True
         except imaplib.IMAP4.error as err:
             logger.log(f"Mailbox select error - {str(err)}", message_type="error")
+            logger.log(traceback.format_exc(), message_type="debug")
             self.connection_err = self.connection_err + 1
             return False
 
@@ -46,6 +49,7 @@ class EmailManager:
             return True, self.unread_emails
         except imaplib.IMAP4.error as err:
             logger.log(f"Mailbox search error - {str(err)}", message_type="error")
+            logger.log(traceback.format_exc(), message_type="debug")
             return False
 
     def connect(self, mailbox=None):
