@@ -33,14 +33,16 @@ class NewsReader:
                 logger.log(article, message_type="debug")
 
             # title
-            title = exec(news["title"])
+            title = ""
+            exec("%s = %s" % (title, news["title"]))
             if "'" in str(title):
                 title = title.replace("'", "\"")
             if '"' in title:
                 title = title.replace('"', '\"')
 
             # link
-            link = exec(news["link"])
+            link = ""
+            exec("%s = %s" % (link, news["link"]))
             if "photo_link" in news.keys() and news["photo_link"]:
                 if "link_prefix" in news.keys():
                     idx1 = link.index(news["link_prefix"])
@@ -53,6 +55,10 @@ class NewsReader:
                 else:
                     idx2 = len(link)
                 link = link[idx1 + len_idx1: idx2]
+
+            if title == "" or link == "":
+                logger.log("Error retrieving from source", message_type="error")
+                return
 
             cols = "source, title, link"
             val = (source, title, link)
