@@ -49,7 +49,7 @@ class SQLConnector:
         if self.database is None:
             self.cursor.execute("SHOW DATABASES")
             result = self.cursor.fetchall()
-            return [row[1] for row in result]
+            return [row[0] for row in result]
 
     def check_table_exists(self, table):
         self.lock.acquire()
