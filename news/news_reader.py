@@ -26,24 +26,39 @@ class NewsReader:
 
         logger.log("------- ENDED NEWS READER SCRIPT -------")
 
-    def news_extractor(self, source: str, news: dict):
-        feed = feedparser.parse(news["source"])
+    def news_extractor(self, source: str, news):
+        if type(news) is dict:
+            article_source = news["source"]
+            article_title = news["title"]
+            article_link = news["link"]
+
+            debug = "debug" in news.keys() and news["debug"]
+            photo_link = "photo_link" in news.keys() and news["photo_link"]
+
+        else:
+            article_source = news
+            article_title = "title"
+            article_link = "link"
+            debug = False
+            photo_link = False
+
+        feed = feedparser.parse(article_source)
 
         for article in feed.entries:
 
-            if "debug" in news.keys() and news["debug"]:
+            if debug:
                 logger.log(article, message_type="debug")
 
             # title
-            title = getattr(article, news["title"])
+            title = getattr(article, article_title)
             if "'" in str(title):
                 title = title.replace("'", "\"")
             if '"' in title:
                 title = title.replace('"', '\"')
 
             # link
-            link = getattr(article, news["link"])
-            if "photo_link" in news.keys() and news["photo_link"]:
+            link = getattr(article, article_link)
+            if photo_link:
                 if "link_prefix" in news.keys():
                     idx1 = link.index(news["link_prefix"])
                     len_idx1 = len(news["link_prefix"])

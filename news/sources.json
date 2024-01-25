@@ -19,16 +19,6 @@
     "link_suffix": "\" /></p>",
     "pause": true
   },
-  "Harvard Business Review": {
-    "source": "hbr.org/topic/technology",
-    "title": "title",
-    "link": "link",
-    "debug": true
-  },
-  "Robotics and Automation News": {
-    "source": "https://roboticsandautomationnews.com/feed/",
-    "title": "title",
-    "link": "link",
-    "debug": true
-  }
+  "Robotics and Automation News": "https://roboticsandautomationnews.com/feed/",
+  "Applied Materials": "https://ir.appliedmaterials.com/rss/news-releases.xml"
 }
