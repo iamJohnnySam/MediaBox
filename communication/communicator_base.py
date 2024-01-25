@@ -72,8 +72,9 @@ class CommunicatorBase:
             logger.log("Group does not exist", message_type="error")
             return
 
-        result = sql_databases["administration"].run_sql(f"SELECT chat_id FROM {self.database_groups} WHERE group_name = '{group}'",
-                                                         fetch_all=True)
+        result = sql_databases["administration"].run_sql(
+            f"SELECT chat_id FROM {self.database_groups} WHERE group_name = '{group}'",
+            fetch_all=True)
         chats = [row[0] for row in result]
 
         logger.log(str(chats) + " - Group Message: " + msg)
@@ -118,19 +119,24 @@ class CommunicatorBase:
             return True
 
     def manage_chat_group(self, group, chat_id, add=True, remove=False):
+        message_type = None
         where = f"chat_id = '{chat_id}' AND group_name = '{group}';"
         if not add ^ remove:
-            logger.log("Invalid command", message_type="error")
+            msg = "Invalid command"
+            message_type = "error"
         elif add and sql_databases["administration"].exists(self.database_groups, where) == 0:
             cols = "chat_id, group_name"
             vals = (chat_id, group)
             sql_databases["administration"].insert(self.database_groups, cols, vals)
-            logger.log(f"Added {chat_id} to {group} group")
+            msg = f"Added {chat_id} to {group} group"
         elif remove and sql_databases["administration"].exists(self.database_groups, where) != 0:
             sql_databases["administration"].run_sql(f"DELETE FROM {self.database_groups} WHERE " + where)
-            logger.log(f"Removed {chat_id} from {group} group")
+            msg = f"Removed {chat_id} from {group} group"
         else:
-            logger.log("Nothing to do")
+            msg = "Nothing to do"
+
+        logger.log(msg, message_type)
+        return msg
 
     def handle(self, msg):
         chat_id = msg['chat']['id']

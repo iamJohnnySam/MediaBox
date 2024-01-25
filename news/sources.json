@@ -1,4 +1,5 @@
 {
+  "Local News": false,
   "Ada Derana": {
     "source": "https://www.adaderana.lk/rss.php",
     "title": "title",
@@ -19,7 +20,33 @@
     "link_suffix": "\" /></p>",
     "pause": true
   },
-  "Robotics and Automation News": "https://roboticsandautomationnews.com/feed/",
+  "FT.lk": "https://www.ft.lk/rss/top-story/26",
+  "Colombo Gazette": "https://colombogazette.com/feed/",
+
+  "International News": false,
+  "BBC": "https://feeds.bbci.co.uk/news/rss.xml",
+
+  "Engineering News": false,
+  "Robotics and Automation": "https://roboticsandautomationnews.com/feed/",
+  "Control.com": "https://control.com/rss",
+  "Hackaday": "https://hackaday.com/feed/",
+
+  "Semiconductor News": false,
   "Applied Materials": "https://ir.appliedmaterials.com/rss/news-releases.xml",
-  "FT.lk": "https://www.ft.lk/rss/top-story/26"
+  "Semiconductor Industry Today": "https://semiconductors.einnews.com/rss",
+
+  "Technology News": false,
+  "Futurism": "https://futurism.com/feed",
+
+  "Australia News": false,
+  "ASPI.org.au": "https://www.aspi.org.au/rss/news.rss",
+
+  "Management News": false,
+  "Simon Sinek": "https://simonsinek.com/feed/",
+
+  "Business News": false,
+  "McKinsey": "https://www.mckinsey.com/insights/rss",
+
+  "Gossip": false,
+  "TMZ": "https://www.tmz.com/rss.xml"
 }

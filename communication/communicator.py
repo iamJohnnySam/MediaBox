@@ -41,6 +41,20 @@ class Communicator(CommunicatorBase):
                       chat=chat_id,
                       reply_to=message_id)
 
+    def subscribe_news(self, msg, chat_id, message_id, value, user_input=False, identifier=None):
+        news_channels = JSONEditor(global_var.news_sources).read()
+        for channel in news_channels:
+            news_channels = []
+
+            if type(news_channels[channel]) is bool:
+                btn_text, btn_cb, btn_value, arr = self.keyboard_extractor(chat_id, "", news_channels, 'subs_news',
+                                                                           sql_result=False, command_only=True)
+                self.send_message_with_keyboard(msg=channel, chat_id=chat_id,
+                                                button_text=btn_text, button_cb=btn_cb, button_val=btn_value,
+                                                arrangement=arr)
+            else:
+                news_channels.append(channel)
+
     def find_movie(self, msg, chat_id, message_id, movie, user_input=False, identifier=None):
         if not self.check_command_value("name of movie", movie, chat_id, message_id):
             return
@@ -109,7 +123,7 @@ class Communicator(CommunicatorBase):
             return
 
         sql_databases["entertainment"].insert("requested_shows",
-                                          "name, requested_by, requested_id",
+                                              "name, requested_by, requested_id",
                                               (show, str(msg['chat']['first_name']), chat_id))
         logger.log("TV Show Requested - " + show)
         self.send_now("TV Show Requested - " + show, chat=chat_id, reply_to=message_id)
@@ -653,6 +667,23 @@ class Communicator(CommunicatorBase):
                            "\nUse /diaper_history to see the history."
                            "\n\nUse /diaper_trend to see the trend over time or "
                            "\nUse /diaper_trend_today to see what happened today.")
+
+    def cb_subs_news(self, callback_id, query_id, from_id, value):
+        data = value.split(";")
+
+        if sql_databases["administration"].exists(self.database_groups,
+                                                  f"group_name = 'news_{data[1]}' AND chat_id = '{from_id}'") == 0:
+            self.manage_chat_group('news_{data[1]}', from_id, add=False, remove=True)
+            reply_text = f"You are Unsubscribed from {data[1]}."
+
+        else:
+            self.manage_chat_group('news_{data[1]}', from_id)
+            reply_text = f"You are now Subscribed to {data[1]}."
+
+        try:
+            self.bot.answerCallbackQuery(query_id, text=reply_text)
+        except telepot.exception.TelegramError:
+            pass
 
 
 telepot_lock = threading.Lock()

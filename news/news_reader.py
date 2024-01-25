@@ -20,6 +20,12 @@ class NewsReader:
 
         news_sources = JSONEditor(global_var.news_sources).read()
         for source in news_sources.keys():
+            if type(news_sources[source]) is bool:
+                continue
+
+            if sql_databases["administration"].exists("telepot_groups", f"group_name = 'news_{source}'") == 0:
+                continue
+
             self.news_extractor(source, news_sources[source])
 
         logger.log("------- ENDED NEWS READER SCRIPT -------")

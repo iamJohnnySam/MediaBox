@@ -12,5 +12,9 @@
   "/check_news": {
     "function": "check_news",
     "definition": "Check latest cctv"
+  },
+  "/subscribe_news": {
+    "function": "subscribe_news",
+    "definition": "Subscribe to News Channels"
   }
 }
