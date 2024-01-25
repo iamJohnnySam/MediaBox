@@ -24,17 +24,20 @@ class EmailManager:
         logger.log("Email Manager Object Created - " + email_address)
 
     def log_in(self):
-        try:
-            self.myEmail.login(self.email, self.password)
-        except imaplib.IMAP4.error as err:
-            logger.log(f"Mailbox login error - {str(err)}", message_type="debug")
-            logger.log(traceback.format_exc(), message_type="debug")
+        if self.myEmail.state != "AUTH":
+            try:
+                self.myEmail.login(self.email, self.password)
+                logger.log("Login Success")
+            except imaplib.IMAP4.error as err:
+                logger.log(f"Mailbox login error - {str(err)}", message_type="error")
+                logger.log(traceback.format_exc(), message_type="debug")
 
     def select_mailbox(self, mailbox=None):
         if mailbox is None:
             mailbox = self.mb
         try:
             self.myEmail.select(mailbox=mailbox, readonly=False)
+            logger.log("Mailbox Select Success")
             return True
         except imaplib.IMAP4.error as err:
             logger.log(f"Mailbox select error - {str(err)}", message_type="error")
@@ -46,6 +49,7 @@ class EmailManager:
         try:
             (self.result, self.messages) = self.myEmail.search(None, scan_type)
             self.unread_emails = len(self.messages[0].split(b' '))
+            logger.log("Check Mail Success")
             return True, self.unread_emails
         except imaplib.IMAP4.error as err:
             logger.log(f"Mailbox search error - {str(err)}", message_type="error")
