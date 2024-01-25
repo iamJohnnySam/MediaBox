@@ -1,33 +1,33 @@
 {
   "Ada Derana": {
     "source": "https://www.adaderana.lk/rss.php",
-    "title": "article.title",
-    "link": "article.link",
+    "title": "title",
+    "link": "link",
     "id_prefix": "http://www.adaderana.lk/news.php?nid="
   },
   "Daily Mirror": {
     "source": "https://www.dailymirror.lk/rss/cartoon_of_the_day/167",
-    "title": "article.title",
-    "link": "article.link"
+    "title": "title",
+    "link": "link"
   },
   "Daily Mirror Cartoon": {
     "source": "https://www.dailymirror.lk/rss/caption_story/110",
-    "title": "article.title",
-    "link": "article.summary",
+    "title": "title",
+    "link": "summary",
     "photo_link": true,
     "link_prefix": "<img src=\"",
     "link_suffix": "\" /></p>"
   },
   "Harvard Business Review": {
     "source": "hbr.org/topic/technology",
-    "title": "article.title",
-    "link": "article.link",
+    "title": "title",
+    "link": "link",
     "debug": true
   },
   "Robotics and Automation News": {
     "source": "https://roboticsandautomationnews.com/feed/",
-    "title": "article.title",
-    "link": "article.link",
+    "title": "title",
+    "link": "link",
     "debug": true
   }
 }
