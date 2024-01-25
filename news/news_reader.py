@@ -73,8 +73,10 @@ class NewsReader:
         for article in feed.entries:
             if "'" in article.title:
                 title = str(article.title).replace("'", "\"")
+                logger.log(title)
             elif '"' in article.title:
                 title = str(article.title).replace('"', '\"')
+                logger.log(title)
             else:
                 title = str(article.title)
 
