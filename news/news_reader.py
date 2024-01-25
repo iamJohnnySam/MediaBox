@@ -33,7 +33,7 @@ class NewsReader:
             debug = "debug" in news.keys() and news["debug"]
             photo_link = "photo_link" in news.keys() and news["photo_link"]
 
-            if "pause" in news[source].keys() and news[source]["pause"]:
+            if "pause" in news.keys() and news["pause"]:
                 return
 
         else:
