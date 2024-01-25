@@ -665,7 +665,7 @@ class Communicator(CommunicatorBase):
         self.send_to_group("baby",
                            emoji + "\n" +
                            data[2] + " diaper recorded on " + data[0] + " at " + data[1] +
-                           ". \nYour baby has had " + str(day_total) + " nappy/diaper changes today\n" +
+                           ".\nYour baby has had " + str(day_total) + " nappy/diaper changes today.\n" +
                            "Use /diaper to submit a new entry or"
                            "\nUse /diaper_history to see the history."
                            "\n\nUse /diaper_trend to see the trend over time or "

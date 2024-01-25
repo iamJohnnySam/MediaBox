@@ -259,6 +259,10 @@ class CommunicatorBase:
         query_id, from_id, query_data = telepot.glance(msg, flavor='callback_query')
         logger.log('Callback Query: ' + " " + str(query_id) + " " + str(from_id) + " " + str(query_data))
 
+        if str(from_id) in self.waiting_user_input.keys():
+            logger.log("Unable to continue. Waiting user input.")
+            return
+
         callback_id = str(query_data).split(",")[0]
         command = str(query_data).split(",")[1]
 

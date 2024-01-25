@@ -30,6 +30,7 @@
   "Robotics and Automation": "https://roboticsandautomationnews.com/feed/",
   "Control.com": "https://control.com/rss",
   "Hackaday": "https://hackaday.com/feed/",
+  "GE Research": "https://www.ge.com/news/subscribe/2228/rss.xml",
 
   "Semiconductor News": false,
   "Applied Materials": "https://ir.appliedmaterials.com/rss/news-releases.xml",
@@ -37,6 +38,7 @@
 
   "Technology News": false,
   "Futurism": "https://futurism.com/feed",
+  "Engadget": "https://www.engadget.com/tag/rss/",
 
   "Australia News": false,
   "ASPI.org.au": "https://www.aspi.org.au/rss/news.rss",
