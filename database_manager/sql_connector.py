@@ -4,26 +4,63 @@ import mysql.connector
 
 import logger
 import settings
+from maintenance.backup import backup
 
 
 # http://192.168.1.32/phpmyadmin
 
 class SQLConnector:
 
-    def __init__(self, user, password, database, host="localhost"):
-        self.my_db = mysql.connector.connect(
-            host=host,
-            user=user,
-            password=password,
-            database=database
-        )
+    def __init__(self, user, password, database=None, host="localhost"):
+        self.user = user
+        self.password = password
         self.database = database
+        self.host = host
+
+        if database is None:
+            self.my_db = mysql.connector.connect(
+                host=self.host,
+                user=self.user,
+                password=self.password,
+                buffered=True
+            )
+        else:
+            self.my_db = mysql.connector.connect(
+                host=self.host,
+                user=self.user,
+                password=self.password,
+                database=self.database
+            )
         self.cursor = self.my_db.cursor()
+
         self.lock = threading.Lock()
+
+    def reconnect(self):
+        del self.my_db
+        self.my_db = mysql.connector.connect(
+            host=self.host,
+            user=self.user,
+            password=self.password,
+            database=self.database
+        )
+        self.cursor = self.my_db.cursor()
+
+    def get_databases(self):
+        if self.database is None:
+            self.cursor.execute("SHOW DATABASES")
+            result = self.cursor.fetchall()
+            return [row[1] for row in result]
 
     def check_table_exists(self, table):
         self.lock.acquire()
-        self.cursor.execute("SHOW TABLES")
+
+        try:
+            self.cursor.execute("SHOW TABLES")
+        except mysql.connector.Error as err:
+            logger.log(f'SQL Error: {str(err)}')
+            self.reconnect()
+            self.cursor.execute("SHOW TABLES")
+
         self.lock.release()
 
         if table not in self.cursor:
@@ -34,7 +71,14 @@ class SQLConnector:
     def get_last_id(self, table, id_column):
         self.lock.acquire()
         query = f'SELECT {id_column} FROM {table} ORDER BY {id_column} DESC LIMIT 1;'
-        self.cursor.execute(query)
+
+        try:
+            self.cursor.execute(query)
+        except mysql.connector.Error as err:
+            logger.log(f'SQL Error: {str(err)}')
+            self.reconnect()
+            self.cursor.execute(query)
+
         result = self.cursor.fetchone()
         self.lock.release()
 
@@ -46,7 +90,14 @@ class SQLConnector:
     def exists(self, table, where):
         self.lock.acquire()
         query = f"SELECT COUNT(1) FROM {table} WHERE {where};"
-        self.cursor.execute(query)
+
+        try:
+            self.cursor.execute(query)
+        except mysql.connector.Error as err:
+            logger.log(f'SQL Error: {str(err)}')
+            self.reconnect()
+            self.cursor.execute(query)
+
         result = self.cursor.fetchone()
         self.lock.release()
 
@@ -55,7 +106,12 @@ class SQLConnector:
 
     def run_sql(self, query, fetch_all=False):
         self.lock.acquire()
-        self.cursor.execute(query)
+        try:
+            self.cursor.execute(query)
+        except mysql.connector.Error as err:
+            logger.log(f'SQL Error: {str(err)}')
+            self.reconnect()
+            self.cursor.execute(query)
 
         logger.log(query)
 
@@ -85,7 +141,14 @@ class SQLConnector:
             placeholder = placeholder + ", %s"
 
         sql = "INSERT INTO " + table + " (" + columns + ") VALUES (" + placeholder + ")"
-        self.cursor.execute(sql, val)
+
+        try:
+            self.cursor.execute(sql, val)
+        except mysql.connector.Error as err:
+            logger.log(f'SQL Error: {str(err)}')
+            self.reconnect()
+            self.cursor.execute(sql, val)
+
         logger.log(f'SQL > {sql} \tID > {self.cursor.lastrowid}')
         self.my_db.commit()
 
@@ -100,8 +163,10 @@ class SQLConnector:
         return True, self.cursor.lastrowid
 
 
-db_baby = SQLConnector(settings.database_user, settings.database_password, 'baby')
-db_finance = SQLConnector(settings.database_user, settings.database_password, 'transactions')
-db_entertainment = SQLConnector(settings.database_user, settings.database_password, 'entertainment')
-db_administration = SQLConnector(settings.database_user, settings.database_password, 'administration')
-db_news = SQLConnector(settings.database_user, settings.database_password, 'news')
+db_all = SQLConnector(settings.database_user, settings.database_password)
+database_list = db_all.get_databases()
+
+sql_databases = {}
+for database in database_list:
+    sql_databases[database] = SQLConnector(settings.database_user, settings.database_password, database)
+    backup.sql_databases.append(database)

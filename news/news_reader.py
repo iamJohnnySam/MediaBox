@@ -4,7 +4,7 @@ import feedparser
 import global_var
 import logger
 from communication import communicator
-from database_manager.sql_connector import db_news
+from database_manager.sql_connector import sql_databases
 
 
 class NewsReader:
@@ -23,17 +23,17 @@ class NewsReader:
 
     def adaderana_news(self):
         database_table = "adaderana_news"
-        last_news_id = db_news.get_last_id(database_table, "news_id")
+        last_news_id = sql_databases["news"].get_last_id(database_table, "news_id")
 
         feed = feedparser.parse(global_var.news_adaderana)
 
         for article in feed.entries:
             article_id = int(article.id.replace(self.id_prefix, ""))
             if article_id > last_news_id:
-                if db_news.exists(database_table, f"news_id = '{article_id}'") == 0:
+                if sql_databases["news"].exists(database_table, f"news_id = '{article_id}'") == 0:
                     cols = "news_id, title, pub_date, link"
                     val = (article_id, article.title, article.published, article.link)
-                    db_news.insert(database_table, cols, val)
+                    sql_databases["news"].insert(database_table, cols, val)
 
                     communicator.send_to_group(self.telepot_account,
                                                article.title + " - " + article.link,
@@ -56,8 +56,8 @@ class NewsReader:
 
             cols = "title, link, date"
             val = (article.title, image, article_date)
-            if db_news.exists(database_table, f"date = '{article_date}'") == 0:
-                db_news.insert(database_table, cols, val)
+            if sql_databases["news"].exists(database_table, f"date = '{article_date}'") == 0:
+                sql_databases["news"].insert(database_table, cols, val)
 
                 communicator.send_to_group(self.telepot_account,
                                            image,

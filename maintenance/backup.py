@@ -124,12 +124,6 @@ class BackUp:
 
 backup = BackUp('/mnt/MediaBox/MediaBox/Backup')
 
-backup.databases.append('transactions')
-backup.databases.append('entertainment')
-backup.databases.append('administration')
-backup.databases.append('news')
-backup.databases.append('baby')
-
 backup.move_folders.append('log/')
 backup.move_png_files.append('charts/')
 backup.copy_files.append('settings.py')

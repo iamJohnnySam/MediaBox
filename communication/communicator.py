@@ -10,7 +10,7 @@ import logger
 from charts.grapher import grapher_simple_trend, grapher_category, grapher_bar_trend, grapher_weight_trend
 from communication.communicator_base import CommunicatorBase
 from database_manager.json_editor import JSONEditor
-from database_manager.sql_connector import db_finance, db_entertainment, db_baby
+from database_manager.sql_connector import sql_databases
 from show import transmission
 from show.movie_finder import get_movies_by_name, get_movie_details
 
@@ -76,14 +76,14 @@ class Communicator(CommunicatorBase):
         if user_input and identifier is not None:
             sql_id = identifier
             query = f'UPDATE transaction_lkr SET amount = "{amount}" WHERE transaction_id = "{sql_id}"'
-            db_finance.run_sql(query)
+            sql_databases["finance"].run_sql(query)
 
         else:
             columns = 'transaction_by, amount'
             val = (chat_id, amount)
-            success, sql_id = db_finance.insert('transaction_lkr', columns, val,
-                                                get_id=True,
-                                                id_column='transaction_id')
+            success, sql_id = sql_databases["finance"].insert('transaction_lkr', columns, val,
+                                                              get_id=True,
+                                                              id_column='transaction_id')
 
         prefix = str(sql_id) + ";"
 
@@ -108,9 +108,9 @@ class Communicator(CommunicatorBase):
         if not self.check_command_value("name of TV show", show, chat_id, message_id):
             return
 
-        db_entertainment.insert("requested_shows",
-                                "name, requested_by, requested_id",
-                                (show, str(msg['chat']['first_name']), chat_id))
+        sql_databases["entertainment"].insert("requested_shows",
+                                          "name, requested_by, requested_id",
+                                              (show, str(msg['chat']['first_name']), chat_id))
         logger.log("TV Show Requested - " + show)
         self.send_now("TV Show Requested - " + show, chat=chat_id, reply_to=message_id)
         self.send_now("TV Show Requested - " + show)
@@ -123,11 +123,11 @@ class Communicator(CommunicatorBase):
         key = datetime.now().strftime('%Y/%m/%d')
 
         query = 'SELECT date, weight FROM weight ORDER BY weight_id DESC LIMIT 1;'
-        last_entry = db_baby.run_sql(query=query)
+        last_entry = sql_databases["baby"].run_sql(query=query)
 
         columns = "date, weight, added_by"
         val = (key, weight, str(chat_id))
-        db_baby.insert('weight', columns, val)
+        sql_databases["baby"].insert('weight', columns, val)
 
         send_string = "\U0001F6BC \U0001F3C6 \n" + \
                       "Baby Weight Added - " + value + "kg. \nThat's a weight gain of " + \
@@ -240,7 +240,7 @@ class Communicator(CommunicatorBase):
 
     def baby_feed_history(self, msg, chat_id, message_id, value, user_input=False, identifier=None):
         query = 'SELECT date, source, amount FROM feed ORDER BY timestamp'
-        result = list(db_baby.run_sql(query, fetch_all=1))
+        result = list(sql_databases["baby"].run_sql(query, fetch_all=1))
 
         pic = grapher_category(graph_list=result,
                                x_name="Date",
@@ -249,7 +249,7 @@ class Communicator(CommunicatorBase):
 
         today = datetime.now().strftime('%Y-%m-%d')
         query = f'SELECT source, amount FROM feed WHERE date = "{today}"'
-        result = list(db_baby.run_sql(query, fetch_all=1))
+        result = list(sql_databases["baby"].run_sql(query, fetch_all=1))
 
         caption = None
         if result is not None:
@@ -278,7 +278,7 @@ class Communicator(CommunicatorBase):
 
     def baby_diaper_history(self, msg, chat_id, message_id, value, user_input=False, identifier=None):
         query = 'SELECT date, what, count FROM diaper ORDER BY timestamp'
-        result = list(db_baby.run_sql(query, fetch_all=1))
+        result = list(sql_databases["baby"].run_sql(query, fetch_all=1))
 
         pic = grapher_category(graph_list=result,
                                x_name="Date",
@@ -287,7 +287,7 @@ class Communicator(CommunicatorBase):
 
         today = datetime.now().strftime('%Y-%m-%d')
         query = f'SELECT what, count FROM diaper WHERE date = "{today}"'
-        result = list(db_baby.run_sql(query, fetch_all=1))
+        result = list(sql_databases["baby"].run_sql(query, fetch_all=1))
 
         caption = None
         if result is not None:
@@ -316,7 +316,7 @@ class Communicator(CommunicatorBase):
 
     def baby_feed_trend(self, msg, chat_id, message_id, value, user_input=False, identifier=None):
         query = 'SELECT time, amount, date FROM feed ORDER BY timestamp'
-        result = list(db_baby.run_sql(query, fetch_all=1))
+        result = list(sql_databases["baby"].run_sql(query, fetch_all=1))
 
         pic = grapher_bar_trend(graph_list=result,
                                 x_name="Time of Day (round to nearest hour)",
@@ -330,7 +330,7 @@ class Communicator(CommunicatorBase):
 
     def baby_diaper_trend(self, msg, chat_id, message_id, value, user_input=False, identifier=None):
         query = 'SELECT time, count, date, what FROM diaper ORDER BY timestamp'
-        result = list(db_baby.run_sql(query, fetch_all=1))
+        result = list(sql_databases["baby"].run_sql(query, fetch_all=1))
 
         pic = grapher_bar_trend(graph_list=result,
                                 x_name="Time of Day (round to nearest hour)",
@@ -345,7 +345,7 @@ class Communicator(CommunicatorBase):
     def baby_feed_trend_today(self, msg, chat_id, message_id, value, user_input=False, identifier=None):
         query = f'SELECT time, amount, date FROM feed WHERE date = "{datetime.now().strftime("%Y-%m-%d")}" ' \
                 f'ORDER BY timestamp'
-        result = list(db_baby.run_sql(query, fetch_all=1))
+        result = list(sql_databases["baby"].run_sql(query, fetch_all=1))
 
         pic = grapher_bar_trend(graph_list=result,
                                 x_name="Time of Day (round to nearest hour)",
@@ -355,7 +355,7 @@ class Communicator(CommunicatorBase):
 
         query = f'SELECT time, amount, source FROM feed WHERE date = "{datetime.now().strftime("%Y-%m-%d")}" ' \
                 f'ORDER BY timestamp'
-        result = list(db_baby.run_sql(query, fetch_all=1))
+        result = list(sql_databases["baby"].run_sql(query, fetch_all=1))
 
         caption = "Record:"
         for row in result:
@@ -374,7 +374,7 @@ class Communicator(CommunicatorBase):
     def baby_diaper_trend_today(self, msg, chat_id, message_id, value, user_input=False, identifier=None):
         query = f'SELECT time, count, date, what FROM diaper WHERE date = "{datetime.now().strftime("%Y-%m-%d")}" ' \
                 f'ORDER BY timestamp'
-        result = list(db_baby.run_sql(query, fetch_all=1))
+        result = list(sql_databases["baby"].run_sql(query, fetch_all=1))
 
         pic = grapher_bar_trend(graph_list=result,
                                 x_name="Time of Day (round to nearest hour)",
@@ -397,7 +397,7 @@ class Communicator(CommunicatorBase):
 
     def baby_weight_trend(self, msg, chat_id, message_id, value, caption=None, user_input=False, identifier=None):
         query = 'SELECT date, weight FROM weight ORDER BY timestamp'
-        result = list(db_baby.run_sql(query, fetch_all=1))
+        result = list(sql_databases["baby"].run_sql(query, fetch_all=1))
 
         if caption is None:
             caption = "\U0001F37C \U0001F3C6 \nBaby Weight trend. Add new weight using /weight command"
@@ -431,9 +431,9 @@ class Communicator(CommunicatorBase):
 
         columns = 'transaction_by, photo_id'
         val = (from_id, value)
-        success, sql_id = db_finance.insert('transaction_lkr', columns, val,
-                                            get_id=True,
-                                            id_column='transaction_id')
+        success, sql_id = sql_databases["finance"].insert('transaction_lkr', columns, val,
+                                                          get_id=True,
+                                                          id_column='transaction_id')
         shutil.move(os.path.join(global_var.telepot_image_dump, value),
                     os.path.join(global_var.finance_images, value))
         self.send_now("How much is the amount?", chat=from_id, reply_to=str(message_id))
@@ -455,16 +455,16 @@ class Communicator(CommunicatorBase):
         data = value.split(";")
         if data[2].lower() == "delete":
             query = f'DELETE FROM transaction_lkr WHERE transaction_id = "{data[0]}"'
-            db_finance.run_sql(query, fetch_all=True)
+            sql_databases["finance"].run_sql(query, fetch_all=True)
             return
 
         if data[1] == "1":
             query = f'UPDATE transaction_lkr SET type = "{data[2]}" WHERE transaction_id = "{data[0]}"'
-            db_finance.run_sql(query)
+            sql_databases["finance"].run_sql(query)
 
             d = datetime.now().strftime("%Y-%m-%d")
             query = f'UPDATE transaction_lkr SET date = "{d}" WHERE transaction_id = "{data[0]}"'
-            db_finance.run_sql(query)
+            sql_databases["finance"].run_sql(query)
 
             if data[2] == "invest":
                 in_out = "income"
@@ -472,7 +472,7 @@ class Communicator(CommunicatorBase):
                 in_out = data[2]
 
             query = f'SELECT DISTINCT type FROM categories WHERE in_out = "{in_out}"'
-            result = list(db_finance.run_sql(query, fetch_all=True))
+            result = list(sql_databases["finance"].run_sql(query, fetch_all=True))
 
             button_text, button_cb, button_value, arrangement = self.keyboard_extractor(data[0], "2", result, 'finance')
             button_text.append("Delete")
@@ -490,7 +490,7 @@ class Communicator(CommunicatorBase):
                                             )
         elif data[1] == "2":
             query = f'SELECT DISTINCT category FROM categories WHERE type = "{data[2]}"'
-            result = list(db_finance.run_sql(query, fetch_all=True))
+            result = list(sql_databases["finance"].run_sql(query, fetch_all=True))
 
             button_text, button_cb, button_value, arrangement = self.keyboard_extractor(data[0], "3", result, 'finance')
             button_text.append("Delete")
@@ -508,9 +508,9 @@ class Communicator(CommunicatorBase):
                                             )
         elif data[1] == "3":
             query = f'SELECT category_id FROM categories WHERE category = "{data[2]}"'
-            cat_id = list(db_finance.run_sql(query))[0]
+            cat_id = list(sql_databases["finance"].run_sql(query))[0]
             query = f'UPDATE transaction_lkr SET category_id = "{cat_id}" WHERE transaction_id = "{data[0]}"'
-            db_finance.run_sql(query, fetch_all=True)
+            sql_databases["finance"].run_sql(query, fetch_all=True)
             logger.log(f'Updated Transaction - {data[0]}')
             self.send_now(f'[{data[0]}] Transaction successfully updated', chat=from_id)
 
@@ -549,14 +549,14 @@ class Communicator(CommunicatorBase):
         if len(data) == 4:
             day_total = 0.0
             query = f'SELECT amount FROM feed WHERE date = "{data[0]}"'
-            result = list(db_baby.run_sql(query, fetch_all=1))
+            result = list(sql_databases["baby"].run_sql(query, fetch_all=1))
             for val in result:
                 day_total = day_total + val[0]
             day_total = day_total + float(data[2])
 
             columns = "date, time, amount, source, added_by"
             val = (data[0], data[1], float(data[2]), data[3], str(from_id))
-            db_baby.insert('feed', columns, val)
+            sql_databases["baby"].insert('feed', columns, val)
 
             self.send_to_group("baby",
                                f'\U0001F37C '
@@ -602,14 +602,14 @@ class Communicator(CommunicatorBase):
         if len(data) == 4:
             day_total = 0.0
             query = f'SELECT amount FROM pump WHERE date = "{data[0]}"'
-            result = list(db_baby.run_sql(query, fetch_all=1))
+            result = list(sql_databases["baby"].run_sql(query, fetch_all=1))
             for val in result:
                 day_total = day_total + val[0]
             day_total = day_total + float(data[2])
 
             columns = "date, time, amount, breast, user_id"
             val = (data[0], data[1], float(data[2]), data[3], str(from_id))
-            db_baby.insert('pump', columns, val)
+            sql_databases["baby"].insert('pump', columns, val)
 
             self.send_now(f'\U0001F37C\nYou pumped {data[2]}ml on {data[0]} at {data[1]} from {data[3]} boob.',
                           chat=from_id)
@@ -627,13 +627,13 @@ class Communicator(CommunicatorBase):
 
         if data[2] == "pp":
             val = (data[0], data[1], "poo", 1, str(from_id))
-            db_baby.insert('diaper', columns, val)
+            sql_databases["baby"].insert('diaper', columns, val)
             val = (data[0], data[1], "pee", 1, str(from_id))
-            db_baby.insert('diaper', columns, val)
+            sql_databases["baby"].insert('diaper', columns, val)
             emoji = '\U0001F6BC \U0001F4A6 \U0001F4A9 '
         else:
             val = (data[0], data[1], data[2], 1, str(from_id))
-            db_baby.insert('diaper', columns, val)
+            sql_databases["baby"].insert('diaper', columns, val)
             if data[2] == "pee":
                 emoji = '\U0001F6BC \U0001F4A6 '
             else:
@@ -641,7 +641,7 @@ class Communicator(CommunicatorBase):
 
         day_total = 0
         query = f'SELECT count FROM diaper WHERE date = "{data[0]}"'
-        result = list(db_baby.run_sql(query, fetch_all=1))
+        result = list(sql_databases["baby"].run_sql(query, fetch_all=1))
         for val in result:
             day_total = day_total + val[0]
 

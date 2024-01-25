@@ -14,21 +14,21 @@ class Transmission:
         torrent_list = self.client.get_torrents()
         self.active_torrents = {}
         for torrent in torrent_list:
-            success, torrent_id = self.add_torrent_to_list(torrent)
+            success, torrent_name = self.add_torrent_to_list(torrent)
             if not success:
                 logger.log("Torrent Listing Error", message_type="error")
 
     def add_torrent(self, path, paused=False):
         torrent = self.client.add_torrent(path, paused=paused)
-        success, torrent_id = self.add_torrent_to_list(torrent)
-        return success, torrent_id
+        success, torrent_name = self.add_torrent_to_list(torrent)
+        return success, torrent_name
 
     def add_torrent_to_list(self, torrent):
         torrent_id = torrent.id
         if torrent_id not in self.active_torrents.keys():
             self.active_torrents[torrent_id] = torrent
             logger.log(f'Torrent Added - {torrent.name}')
-            return True, torrent_id
+            return True, torrent.name
         else:
             return False, ""
 
@@ -45,8 +45,8 @@ client = Transmission()
 
 
 def download(link, paused=False):
-    success, torrent_id = client.add_torrent(link, paused)
-    return success, torrent_id
+    success, torrent_name = client.add_torrent(link, paused)
+    return success, torrent_name
 
 
 def list_all():

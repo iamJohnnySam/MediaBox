@@ -12,6 +12,7 @@ class EmailManager:
     current_message = "1"
 
     def __init__(self, email_address, password, mb):
+        self.mail_connect_error = False
         self.msg = None
         self.unread_emails = 0
         self.connection_err = 0

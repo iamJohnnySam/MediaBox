@@ -3,7 +3,7 @@ import time
 import global_var
 import logger
 from communication import communicator
-from database_manager.sql_connector import db_entertainment
+from database_manager.sql_connector import sql_databases
 from show import transmission
 
 
@@ -39,7 +39,7 @@ class ShowDownloader:
                     f'FROM tv_show ' \
                     f'WHERE episode_name="{episode_name}" AND name="{x.tv_show_name}";'
 
-            show_exists = db_entertainment.run_sql(query=query)
+            show_exists = sql_databases["entertainment"].run_sql(query=query)
 
             if show_exists[0] == 0:
                 found = False
@@ -61,7 +61,7 @@ class ShowDownloader:
             if success:
                 columns = "name, episode_id, episode_name, magnet, quality, torrent_name"
                 val = (row[4], row[0], row[1], row[2], str(row[3]), str(torrent_id))
-                db_entertainment.insert('tv_show', columns, val)
+                sql_databases["entertainment"].insert('tv_show', columns, val)
                 logger.log(torrent_id)
 
                 message = f'{str(row[1])} added at {str(row[3])} torrent id = {str(torrent_id)}'

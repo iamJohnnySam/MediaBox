@@ -11,7 +11,7 @@ from telepot.namedtuple import InlineKeyboardButton, InlineKeyboardMarkup
 import global_var
 import logger
 from database_manager.json_editor import JSONEditor
-from database_manager.sql_connector import db_administration
+from database_manager.sql_connector import sql_databases
 
 
 class CommunicatorBase:
@@ -66,14 +66,14 @@ class CommunicatorBase:
         return message
 
     def send_to_group(self, group, msg, image=False, caption=""):
-        exists = db_administration.exists(self.database_groups, f"group_name = '{group}'") == 0
+        exists = sql_databases["administration"].exists(self.database_groups, f"group_name = '{group}'") == 0
 
         if exists:
             logger.log("Group does not exist", message_type="error")
             return
 
-        result = db_administration.run_sql(f"SELECT chat_id FROM {self.database_groups} WHERE group_name = '{group}'",
-                                           fetch_all=True)
+        result = sql_databases["administration"].run_sql(f"SELECT chat_id FROM {self.database_groups} WHERE group_name = '{group}'",
+                                                         fetch_all=True)
         chats = [row[0] for row in result]
 
         logger.log(str(chats) + " - Group Message: " + msg)
@@ -108,7 +108,7 @@ class CommunicatorBase:
 
     def check_sender(self, chat_id, msg):
         sender_name = str(msg['chat']['first_name'])
-        if db_administration.exists(self.database_allowed_chats, f"chat_id = '{chat_id}'") == 0:
+        if sql_databases["administration"].exists(self.database_allowed_chats, f"chat_id = '{chat_id}'") == 0:
             self.bot.sendMessage(chat_id, "Hello " + sender_name + "! You're not allowed to be here")
             self.send_now(f"Unauthorised Chat access: {sender_name}, chat_id: {chat_id}")
             logger.log(f"Unauthorised Chat access: {sender_name}, chat_id: {chat_id}",
@@ -121,13 +121,13 @@ class CommunicatorBase:
         where = f"chat_id = '{chat_id}' AND group_name = '{group}';"
         if not add ^ remove:
             logger.log("Invalid command", message_type="error")
-        elif add and db_administration.exists(self.database_groups, where) == 0:
+        elif add and sql_databases["administration"].exists(self.database_groups, where) == 0:
             cols = "chat_id, group_name"
             vals = (chat_id, group)
-            db_administration.insert(self.database_groups, cols, vals)
+            sql_databases["administration"].insert(self.database_groups, cols, vals)
             logger.log(f"Added {chat_id} to {group} group")
-        elif remove and db_administration.exists(self.database_groups, where) != 0:
-            db_administration.run_sql(f"DELETE FROM {self.database_groups} WHERE " + where)
+        elif remove and sql_databases["administration"].exists(self.database_groups, where) != 0:
+            sql_databases["administration"].run_sql(f"DELETE FROM {self.database_groups} WHERE " + where)
             logger.log(f"Removed {chat_id} from {group} group")
         else:
             logger.log("Nothing to do")
