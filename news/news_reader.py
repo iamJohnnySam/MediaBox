@@ -19,6 +19,7 @@ class NewsReader:
         logger.log("-------STARTED NEWS READER SCRIPT-------")
         self.adaderana_news()
         self.dailymirror_cartoon()
+        self.dailymirror_caption()
         logger.log("-------ENDED NEWS READER SCRIPT-------")
 
     def adaderana_news(self):
@@ -61,5 +62,23 @@ class NewsReader:
 
                 communicator.send_to_group(self.telepot_account,
                                            image,
+                                           self.telepot_chat_group)
+                logger.log(article.title)
+
+    def dailymirror_caption(self):
+        database_table = "dailymirror_caption"
+
+        feed = feedparser.parse(global_var.news_caption)
+
+        for article in feed.entries:
+            article_date = datetime.strptime(article.title[-10:], "%d-%m-%Y")
+
+            cols = "title, link, date"
+            val = (article.title, article.link, article_date)
+            if sql_databases["news"].exists(database_table, f"date = '{article_date}'") == 0:
+                sql_databases["news"].insert(database_table, cols, val)
+
+                communicator.send_to_group(self.telepot_account,
+                                           article.title + " - " + article.link,
                                            self.telepot_chat_group)
                 logger.log(article.title)
