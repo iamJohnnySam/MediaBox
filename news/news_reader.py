@@ -20,8 +20,6 @@ class NewsReader:
 
         news_sources = JSONEditor(global_var.news_sources).read()
         for source in news_sources.keys():
-            if "pause" in news_sources[source].keys() and news_sources[source]["pause"]:
-                continue
             self.news_extractor(source, news_sources[source])
 
         logger.log("------- ENDED NEWS READER SCRIPT -------")
@@ -34,6 +32,9 @@ class NewsReader:
 
             debug = "debug" in news.keys() and news["debug"]
             photo_link = "photo_link" in news.keys() and news["photo_link"]
+
+            if "pause" in news[source].keys() and news[source]["pause"]:
+                return
 
         else:
             article_source = news
