@@ -16,7 +16,8 @@
     "link": "summary",
     "photo_link": true,
     "link_prefix": "<img src=\"",
-    "link_suffix": "\" /></p>"
+    "link_suffix": "\" /></p>",
+    "pause": true
   },
   "Harvard Business Review": {
     "source": "hbr.org/topic/technology",
