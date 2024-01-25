@@ -71,10 +71,16 @@ class NewsReader:
         feed = feedparser.parse(global_var.news_caption)
 
         for article in feed.entries:
+            if "'" in article.title:
+                title = str(article.title).replace("'", "\'")
+            elif '"' in article.title:
+                title = str(article.title).replace('"', '\"')
+            else:
+                title = str(article.title)
 
             cols = "title, link"
             val = (article.title, article.link)
-            if sql_databases["news"].exists(database_table, f"title = '{article.title}'") == 0:
+            if sql_databases["news"].exists(database_table, f"title = '{title}'") == 0:
                 sql_databases["news"].insert(database_table, cols, val)
 
                 communicator.send_to_group(self.telepot_account,
