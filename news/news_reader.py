@@ -71,11 +71,10 @@ class NewsReader:
         feed = feedparser.parse(global_var.news_caption)
 
         for article in feed.entries:
-            article_date = datetime.strptime(article.title[-10:], "%d-%m-%Y")
 
-            cols = "title, link, date"
-            val = (article.title, article.link, article_date)
-            if sql_databases["news"].exists(database_table, f"date = '{article_date}'") == 0:
+            cols = "title, link"
+            val = (article.title, article.link)
+            if sql_databases["news"].exists(database_table, f"title = '{article.title}'") == 0:
                 sql_databases["news"].insert(database_table, cols, val)
 
                 communicator.send_to_group(self.telepot_account,
