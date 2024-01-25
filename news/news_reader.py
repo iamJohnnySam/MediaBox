@@ -49,7 +49,7 @@ class NewsReader:
                     idx1 = 0
                     len_idx1 = 0
                 if "link_suffix" in news.keys():
-                    idx2 = link.index("link_suffix")
+                    idx2 = link.index(news["link_suffix"])
                 else:
                     idx2 = len(link)
                 link = link[idx1 + len_idx1: idx2]
