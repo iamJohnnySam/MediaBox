@@ -5,14 +5,17 @@ import string
 
 import global_var
 import logger
+from communication import communicator
 
 
 class RefactorFolder:
 
     def __init__(self, path):
         self.path = path
+        self.send_string = ""
 
     def clean_torrent_downloads(self):
+        self.send_string = "New additions to MediaBox:"
         files, directories = self.get_file_and_directory(self.path)
         if len(files) == 0 and len(directories) == 0:
             logger.log("Nothing to refactor")
@@ -48,6 +51,10 @@ class RefactorFolder:
                            message_type="error")
 
             self.remove_directory(directory_path)
+
+        communicator.send_to_group("main",
+                                   self.send_string,
+                                   group="show")
 
     def torrent_step_1(self, path, directory):
         directory_path = os.path.join(path, directory)
@@ -91,11 +98,15 @@ class RefactorFolder:
                 self.move_file(os.path.join(directory, file),
                                base_loc,
                                file_name)
+                self.send_string = self.send_string + "\n" + file_name
+
             elif movie and not tv_show:
                 base_loc = os.path.join(global_var.torrent_movies, base_name)
                 self.move_file(os.path.join(directory, file),
                                base_loc,
                                file_name)
+                self.send_string = self.send_string + "\n" + file_name
+
             else:
                 base_loc = os.path.join(global_var.torrent_unknown, base_name)
                 self.move_file(os.path.join(directory, file),
