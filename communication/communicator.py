@@ -674,8 +674,8 @@ class Communicator(CommunicatorBase):
     def cb_subs_news(self, callback_id, query_id, from_id, value):
         data = value.split(";")
 
-        if sql_databases["administration"].exists(self.database_groups,
-                                                  f"group_name = 'news_{data[1]}' AND chat_id = '{from_id}'") == 0:
+        if not sql_databases["administration"].exists(self.database_groups,
+                                                      f"group_name = 'news_{data[1]}' AND chat_id = '{from_id}'") == 0:
             self.manage_chat_group('news_{data[1]}', from_id, add=False, remove=True)
             reply_text = f"You are Unsubscribed from {data[1]}."
 
