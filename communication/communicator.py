@@ -43,15 +43,16 @@ class Communicator(CommunicatorBase):
 
     def subscribe_news(self, msg, chat_id, message_id, value, user_input=False, identifier=None):
         news = JSONEditor(global_var.news_sources).read()
+        news_channels = []
         for channel in news.keys():
-            news_channels = []
-
             if type(news[channel]) is bool:
                 btn_text, btn_cb, btn_value, arr = self.keyboard_extractor(chat_id, "", news_channels, 'subs_news',
                                                                            sql_result=False, command_only=True)
                 self.send_message_with_keyboard(msg=channel, chat_id=chat_id,
                                                 button_text=btn_text, button_cb=btn_cb, button_val=btn_value,
                                                 arrangement=arr)
+                news_channels = []
+
             else:
                 news_channels.append(channel)
 
