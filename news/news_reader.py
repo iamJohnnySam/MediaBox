@@ -79,7 +79,7 @@ class NewsReader:
                 title = str(article.title)
 
             cols = "title, link"
-            val = (article.title, article.link)
+            val = (title, article.link)
             if sql_databases["news"].exists(database_table, f"title = '{title}'") == 0:
                 sql_databases["news"].insert(database_table, cols, val)
 
