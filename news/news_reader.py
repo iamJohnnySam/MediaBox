@@ -20,7 +20,7 @@ class NewsReader:
 
         news_sources = JSONEditor(global_var.news_sources).read()
         for source in news_sources.keys():
-            if "pause" in source.keys() and source["pause"]:
+            if "pause" in news_sources[source].keys() and news_sources[source]["pause"]:
                 continue
             self.news_extractor(source, news_sources[source])
 
@@ -61,5 +61,5 @@ class NewsReader:
             if sql_databases["news"].exists(self.database_table, f"title = '{title}' AND source = '{source}'") == 0:
                 sql_databases["news"].insert(self.database_table, cols, val)
 
-                communicator.send_to_group(self.telepot_account, f'{source} > {title} - {link}', f'news_{source}')
+                communicator.send_to_group(self.telepot_account, f'{title} - {link}', f'news_{source}')
                 logger.log(f'{source} > {title}')
