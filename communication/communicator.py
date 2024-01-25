@@ -42,8 +42,8 @@ class Communicator(CommunicatorBase):
                       reply_to=message_id)
 
     def subscribe_news(self, msg, chat_id, message_id, value, user_input=False, identifier=None):
-        news_channels = JSONEditor(global_var.news_sources).read()
-        for channel in news_channels.keys():
+        news = JSONEditor(global_var.news_sources).read()
+        for channel in news.keys():
             news_channels = []
 
             if type(news_channels[channel]) is bool:
