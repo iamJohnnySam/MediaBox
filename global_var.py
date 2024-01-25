@@ -19,9 +19,7 @@ backup.backup.copy_folders.append(telepot_callback_database)
 
 feed_link = "https://showrss.info/user/275495.rss?magnets=true&namespaces=true&name=clean&quality=null&re=null"
 
-news_adaderana = "https://www.adaderana.lk/rss.php"
-news_cartoon = "https://www.dailymirror.lk/rss/cartoon_of_the_day/167"
-news_caption = "https://www.dailymirror.lk/rss/caption_story/110"
+news_sources = 'news/sources.json'
 
 cctv_download = "cctv/CCTVImages"
 cctv_save = "/mnt/MediaBox/MediaBox/CCTVSaved"
