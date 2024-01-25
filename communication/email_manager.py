@@ -31,6 +31,8 @@ class EmailManager:
             except imaplib.IMAP4.error as err:
                 logger.log(f"Mailbox login error - {str(err)}", message_type="error")
                 logger.log(traceback.format_exc(), message_type="debug")
+                return False
+        return True
 
     def select_mailbox(self, mailbox=None):
         if mailbox is None:
@@ -57,7 +59,13 @@ class EmailManager:
             return False
 
     def connect(self, mailbox=None):
-        self.log_in()
+        a = self.log_in()
+        if not a:
+            self.result = "Not OK"
+            logger.log("Login Error", message_type="error")
+            self.mail_connect_error = True
+            return
+
         b = self.select_mailbox(mailbox)
         c = self.check_email()
 
