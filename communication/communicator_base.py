@@ -119,7 +119,7 @@ class CommunicatorBase:
             return True
 
     def manage_chat_group(self, group, chat_id, add=True, remove=False):
-        message_type = None
+        message_type = "info"
         where = f"chat_id = '{chat_id}' AND group_name = '{group}';"
         if not add ^ remove:
             msg = "Invalid command"

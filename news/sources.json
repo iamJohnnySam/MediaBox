@@ -48,5 +48,7 @@
   "McKinsey": "https://www.mckinsey.com/insights/rss",
 
   "Gossip": false,
-  "TMZ": "https://www.tmz.com/rss.xml"
+  "TMZ": "https://www.tmz.com/rss.xml",
+
+  "End": false
 }
