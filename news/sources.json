@@ -25,6 +25,7 @@
 
   "International News": false,
   "BBC": "https://feeds.bbci.co.uk/news/rss.xml",
+  "Daily Mail": "https://www.dailymail.co.uk/news/index.rss",
 
   "Engineering News": false,
   "Robotics and Automation": "https://roboticsandautomationnews.com/feed/",
@@ -51,6 +52,7 @@
 
   "Gossip": false,
   "TMZ": "https://www.tmz.com/rss.xml",
+  "Daily Mail ShowBiz": "https://www.dailymail.co.uk/tvshowbiz/index.rss",
 
   "End": false
 }
