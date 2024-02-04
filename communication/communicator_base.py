@@ -12,6 +12,7 @@ import logger
 from communication.message import Message
 from database_manager.json_editor import JSONEditor
 from database_manager.sql_connector import sql_databases
+from show import transmission
 
 
 class CommunicatorBase:
@@ -139,6 +140,12 @@ class CommunicatorBase:
         if msg.command in self.command_dictionary.keys():
             function = self.command_dictionary[msg.command]["function"]
             msg.function = function
+
+            if 'steps' in self.command_dictionary[msg.command].keys():
+                msg.steps = self.command_dictionary[msg.command]['steps']
+            if 'database' in self.command_dictionary[msg.command].keys():
+                msg.database = self.command_dictionary[msg.command]['database']
+
             logger.log(str(msg.chat_id) + ' - Calling Function: ' + function)
             func = getattr(self, function)
             func(msg)
@@ -215,16 +222,57 @@ class CommunicatorBase:
 
     def handle_callback(self, query):
         try:
-            msg_id = int(str(query['data']).split(",")[0])
+            q = str(query['data']).split(";")
         except ValueError:
             logger.log("Value error in callback " + str(query), message_type="error")
             return
 
-        if msg_id == 0:
+        logger.log('Callback Query: ' + str(query['data']))
+
+        if q[3] == "X":
+            save_loc = os.path.join(global_var.telepot_callback_database, f"{q[0]}_cb.json")
+            query = JSONEditor(save_loc).read()[f'{q[0]};{q[1]};{q[2]}']
+            logger.log("Recovered Query: " + query)
+
+        try:
+            q = str(query['data']).split(";")
+            msg_id = int(q[0])
+            cb_id = int(q[1])
+            step = q[3]
+            value = q[4]
+        except ValueError:
+            logger.log("Value error in callback " + str(query), message_type="error")
+            return
+
+        if step.lower() in ["echo", "torrent", "cancel"]:
+            self.quick_cb(query, step.lower(), value)
+
+        else:
             pass
 
+    def quick_cb(self, query: dict, command: str, value: str):
+        reply_to = query['inline_message_id']
+        chat = query['from']['id']
+
+        if command == "echo":
+            self.send_now(send_string=value, reply_to=reply_to, chat=chat)
+
+        elif command == "torrent":
+            success, torrent_id = transmission.download(value)
+            if success:
+                self.bot.editMessageReplyMarkup(reply_to, reply_markup=None)
+                self.send_now("Movie will be added to queue", reply_to=reply_to, chat=chat)
+
+        elif command == "cancel":
+            self.bot.editMessageReplyMarkup(reply_to, reply_markup=None)
+
+        self.bot.answerCallbackQuery(query['id'], text='Handled')
+
+
+    def todo(self):
+        # todo
+
         query_id, from_id, query_data = telepot.glance(query, flavor='callback_query')
-        logger.log('Callback Query: ' + " " + str(query_id) + " " + str(from_id) + " " + str(query_data))
 
         if str(from_id) in self.waiting_user_input.keys():
             logger.log("Unable to continue. Waiting user input.")
@@ -265,33 +313,28 @@ class CommunicatorBase:
         return message['message_id']
 
     def send_with_keyboard(self, send_string: str, msg: Message,
-                           button_text: list, button_cb: list, button_val: list, arrangement: list,
+                           button_text: list, button_val: list, arrangement: list,
                            group: str = None,
                            image: bool = False, photo: str = ""):
 
-        if button_text is None or button_cb is None or button_val is None or arrangement is None:
-            logger.log("Incomplete Buttons", message_type="error")
-            return
-
-        if len(button_text) == 0 or len(button_text) != len(button_cb) or len(button_text) != len(button_val):
+        if len(button_text) == 0 or len(button_text) != len(button_val):
             logger.log("Keyboard Generation error: " + str(send_string), message_type="error")
             logger.log("Button Text Length " + str(len(button_text)), message_type="error")
-            logger.log("Button CB Length " + str(len(button_cb)), message_type="error")
             logger.log("Button Value Length " + str(len(button_val)), message_type="error")
             return
 
         button_ids = []
         buttons = []
         for i in range(len(button_text)):
-            # FORMAT = msg_id, cb_id, btn_text, cb_function, value
-            button_prefix = f"{str(msg.msg_id)},{str(msg.cb_id)},{button_text[i]}"
-            button_data = f"{button_prefix},{button_cb[i].lower()},{button_val[i]}"
+            # FORMAT = msg_id; cb_id; btn_text; step_num; value
+            button_prefix = f"{str(msg.msg_id)};{str(msg.cb_id)};{button_text[i]}"
+            button_data = f"{button_prefix};{button_val[i]}"
 
             if len(button_data) >= 60:
                 telepot_cb = {button_prefix: button_data}
                 save_loc = os.path.join(global_var.telepot_callback_database, f"{str(msg.msg_id)}_cb.json")
                 JSONEditor(save_loc).add_level1(telepot_cb)
-                button_data = f"{button_prefix},X"
+                button_data = f"{button_prefix};X"
 
             buttons.append(InlineKeyboardButton(text=str(button_text[i]), callback_data=button_data))
             logger.log(f'Keyboard button created > {button_data}')

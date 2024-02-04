@@ -43,7 +43,7 @@ class Communicator(CommunicatorBase):
                     btn_text, btn_cb, btn_value, arr = self.keyboard_extractor(msg.chat_id, "", news_channels,
                                                                                'subs_news',
                                                                                sql_result=False, command_only=True)
-                    self.send_with_keyboard(msg=prev_channel, chat_id=msg.chat_id,
+                    self.send_with_keyboard(send_string=prev_channel, msg=msg,
                                             button_text=btn_text, button_cb=btn_cb, button_val=btn_value,
                                             arrangement=arr)
                 prev_channel = channel
@@ -55,7 +55,6 @@ class Communicator(CommunicatorBase):
         if not self.check_command_value(msg, inquiry="name of movie"):
             return
 
-        self.send_now(f"Searching movie: {msg.value}.", msg=msg)
         movie_feed = get_movies_by_name(msg.value)
 
         for movie_name in movie_feed.entries:
@@ -64,10 +63,9 @@ class Communicator(CommunicatorBase):
             self.send_with_keyboard(send_string=title,
                                     msg=msg,
                                     photo=image,
-                                    button_text=["Visit Page", "Download"],
-                                    button_cb=["echo", "download"],
-                                    button_val=[link, torrent],
-                                    arrangement=[2])
+                                    button_text=["Visit Page", "Download", "Cancel"],
+                                    button_val=[f"echo;{link}", f"torrent;{torrent}", "cancel"],
+                                    arrangement=[3])
 
     def finance(self, msg: Message):
         if msg.value == "":
@@ -444,12 +442,7 @@ class Communicator(CommunicatorBase):
 
     # -------------- CALLBACK FUNCTIONS --------------
 
-    def cb_download(self, callback_id, query_id, from_id, value):
-        success, torrent_id = transmission.download(value)
-        if success:
-            self.update_in_line_buttons(callback_id)
-            self.send_now("Movie will be added to queue", chat=from_id)
-        self.bot.answerCallbackQuery(query_id, text='Downloaded')
+
 
     def cb_finance(self, callback_id, query_id, from_id, value):
         message_id = self.update_in_line_buttons(callback_id)

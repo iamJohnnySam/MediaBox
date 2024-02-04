@@ -9,12 +9,14 @@ from database_manager.sql_connector import sql_databases
 
 
 class Message:
-    database = "administration"
-    database_chats = "telepot_allowed_chats"
-    database_groups = "telepot_groups"
-    database_msg = "telepot_messages"
+    tp_db = "administration"
+    tp_chats = "telepot_allowed_chats"
+    tp_groups = "telepot_groups"
+    tp_msg = "telepot_messages"
 
     def __init__(self, tp_account: str, message: dict):
+        self._database: dict = {}
+        self._steps: dict = {}
         self._function: str = ""
         self._value: str = ""
         self._command: str = ""
@@ -98,8 +100,24 @@ class Message:
         self._function = func
         self.file()
 
+    @property
+    def steps(self):
+        return self._steps
+
+    @steps.setter
+    def steps(self, steps: dict):
+        self._steps = steps
+
+    @property
+    def database(self):
+        return self._database
+
+    @database.setter
+    def database(self, db: dict):
+        self._database = db
+
     def check_sender(self):
-        if sql_databases[self.database].exists(self.database_chats, f"chat_id = '{self.chat_id}'") == 0:
+        if sql_databases[self.tp_db].exists(self.tp_chats, f"chat_id = '{self.chat_id}'") == 0:
             return False
         else:
             return True
@@ -160,7 +178,7 @@ class Message:
             photo_id = None if self.photo_id == "" else self.photo_id
             vals = (self._telepot_account, self.chat_id, self.message_id, func, photo_id)
 
-            success, self._msg_id = sql_databases[self.database].insert(self.database_msg, cols, vals)
+            success, self._msg_id = sql_databases[self.tp_db].insert(self.tp_msg, cols, vals)
             logger.log(f"Filed Message: {self.msg_id}")
 
             self.filed = True

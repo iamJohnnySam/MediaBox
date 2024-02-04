@@ -6,7 +6,7 @@
   },
   "/find_movie": {
     "function": "find_movie",
-    "definition": "Type name of Movie after command"
+    "definition": "Find a movie to download"
   },
   "/request_tv_show": {
     "function": "request_tv_show",
