@@ -9,22 +9,44 @@ from database_manager.sql_connector import sql_databases
 
 
 class Message:
-    database_allowed_chats = "telepot_allowed_chats"
+    database = "administration"
+    database_chats = "telepot_allowed_chats"
     database_groups = "telepot_groups"
+    database_msg = "telepot_messages"
 
-    def __init__(self, tp_account, message):
+    def __init__(self, tp_account: str, message: dict):
+        self._function: str = ""
         self._value: str = ""
         self._command: str = ""
-        self.message = message
-        self.telepot_account = tp_account
+        self.message: dict = message
+        self._telepot_account: str = tp_account
+
+        self.filed: bool = False
+        self._msg_id: int = 0
+        self._cb_id: int = 0
+
+        self.replies = {}
 
     @property
     def chat_id(self):
         return self.message['chat']['id']
 
     @property
+    def telepot_account(self):
+        return self._telepot_account
+
+    @property
     def message_id(self):
         return self.message['message_id']
+
+    @property
+    def msg_id(self):
+        return self._msg_id
+
+    @property
+    def cb_id(self):
+        self._cb_id = self._cb_id + 1
+        return self._cb_id
 
     @property
     def f_name(self):
@@ -40,7 +62,10 @@ class Message:
 
     @property
     def photo_id(self):
-        return self.message['photo'][-1]['file_id']
+        if 'photo' in self.message.keys():
+            return self.message['photo'][-1]['file_id']
+        else:
+            return ""
 
     @property
     def photo_name(self):
@@ -64,8 +89,17 @@ class Message:
             self.get_command_value()
         return self._value
 
+    @property
+    def function(self):
+        return self._function
+
+    @function.setter
+    def function(self, func: str):
+        self._function = func
+        self.file()
+
     def check_sender(self):
-        if sql_databases["administration"].exists(self.database_allowed_chats, f"chat_id = '{self.chat_id}'") == 0:
+        if sql_databases[self.database].exists(self.database_chats, f"chat_id = '{self.chat_id}'") == 0:
             return False
         else:
             return True
@@ -76,7 +110,7 @@ class Message:
             self._value = self.text.replace(self._command, "").strip()
         else:
             self._value = self.text
-        logger.log(str(self.telepot_account) + "\t" + str(self.chat_id) + " - " + str(self._command))
+        logger.log(str(self._telepot_account) + "\t" + str(self.chat_id) + " - " + str(self._command))
 
     def store_photo(self):
         foo = Image.open(self.photo_loc)
@@ -117,3 +151,19 @@ class Message:
                 return False
 
         return True
+
+    def file(self):
+        if not self.filed:
+            cols = "account, chat_id, message_id, function, photo"
+
+            func = None if self.function == "" else self.function
+            photo_id = None if self.photo_id == "" else self.photo_id
+            vals = (self._telepot_account, self.chat_id, self.message_id, func, photo_id)
+
+            success, self._msg_id = sql_databases[self.database].insert(self.database_msg, cols, vals)
+            logger.log(f"Filed Message: {self.msg_id}")
+
+            self.filed = True
+
+    def add_reply(self, reply_id):
+        self.replies[] = reply_id

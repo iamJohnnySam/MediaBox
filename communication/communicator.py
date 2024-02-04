@@ -16,9 +16,6 @@ from show import transmission
 from show.movie_finder import get_movies_by_name, get_movie_details
 
 
-# os.environ['_BARD_API_KEY'] = settings.bard
-
-
 class Communicator(CommunicatorBase):
 
     def __init__(self, telepot_account):
@@ -26,15 +23,15 @@ class Communicator(CommunicatorBase):
 
     def check_shows(self, msg: Message):
         global_var.check_shows = True
-        self.send_now("Request Initiated - TV Show Check", chat=msg.chat_id, reply_to=msg.message_id)
+        self.send_now("Request Initiated - TV Show Check", msg=msg)
 
     def check_news(self, msg: Message):
         global_var.check_news = True
-        self.send_now("Request Initiated - News Check", chat=msg.chat_id, reply_to=msg.message_id)
+        self.send_now("Request Initiated - News Check", msg=msg)
 
     def check_cctv(self, msg: Message):
         global_var.check_cctv = True
-        self.send_now("Request Initiated - CCTV Check", chat=msg.chat_id, reply_to=msg.message_id)
+        self.send_now("Request Initiated - CCTV Check", msg=msg)
 
     def subscribe_news(self, msg: Message):
         news = JSONEditor(global_var.news_sources).read()
@@ -46,9 +43,9 @@ class Communicator(CommunicatorBase):
                     btn_text, btn_cb, btn_value, arr = self.keyboard_extractor(msg.chat_id, "", news_channels,
                                                                                'subs_news',
                                                                                sql_result=False, command_only=True)
-                    self.send_message_with_keyboard(msg=prev_channel, chat_id=msg.chat_id,
-                                                    button_text=btn_text, button_cb=btn_cb, button_val=btn_value,
-                                                    arrangement=arr)
+                    self.send_with_keyboard(msg=prev_channel, chat_id=msg.chat_id,
+                                            button_text=btn_text, button_cb=btn_cb, button_val=btn_value,
+                                            arrangement=arr)
                 prev_channel = channel
                 news_channels = []
             else:
@@ -58,19 +55,19 @@ class Communicator(CommunicatorBase):
         if not self.check_command_value(msg, inquiry="name of movie"):
             return
 
-        self.send_now(f"Searching movie: {msg.value} for chat_id: {msg.chat_id}.")
+        self.send_now(f"Searching movie: {msg.value}.", msg=msg)
         movie_feed = get_movies_by_name(msg.value)
 
         for movie_name in movie_feed.entries:
             title, image, link, torrent = get_movie_details(movie_name)
 
-            self.send_message_with_keyboard(msg=title,
-                                            chat_id=msg.chat_id,
-                                            button_text=["See Image", "Visit Page", "Cancel", "Download"],
-                                            button_cb=["echo", "echo", "cancel", "download"],
-                                            button_val=[image, link, "", torrent],
-                                            arrangement=[3, 1],
-                                            reply_to=None)
+            self.send_with_keyboard(send_string=title,
+                                    msg=msg,
+                                    photo=image,
+                                    button_text=["Visit Page", "Download"],
+                                    button_cb=["echo", "download"],
+                                    button_val=[link, torrent],
+                                    arrangement=[2])
 
     def finance(self, msg: Message):
         if msg.value == "":
@@ -99,17 +96,17 @@ class Communicator(CommunicatorBase):
 
         prefix = str(sql_id) + ";"
 
-        self.send_message_with_keyboard(msg=f'[{sql_id}] Is LKR {msg.value} an income or expense?',
-                                        chat_id=msg.chat_id,
-                                        button_text=["Income", "Expense", "Invest", "Delete"],
-                                        button_cb=["finance", "finance", "finance", "finance"],
-                                        button_val=[prefix + "1;income",
+        self.send_with_keyboard(msg=f'[{sql_id}] Is LKR {msg.value} an income or expense?',
+                                chat_id=msg.chat_id,
+                                button_text=["Income", "Expense", "Invest", "Delete"],
+                                button_cb=["finance", "finance", "finance", "finance"],
+                                button_val=[prefix + "1;income",
                                                     prefix + "1;expense",
                                                     prefix + "1;invest",
                                                     prefix + "1;delete"],
-                                        arrangement=[3, 1],
-                                        reply_to=msg.message_id
-                                        )
+                                arrangement=[3, 1],
+                                reply_to=msg.message_id
+                                )
 
     def sms_bill(self, msg: Message):
         if not self.check_command_value(msg, inquiry="sms received from bank"):
@@ -191,18 +188,18 @@ class Communicator(CommunicatorBase):
         identifier = datetime.now().strftime('%Y-%m-%d %H:%M:%S') + " "
 
         if msg.value == "":
-            self.send_message_with_keyboard(msg="Need some feeding info",
-                                            chat_id=msg.chat_id,
-                                            button_text=["30ml", "60ml", "90ml", "Other", "Cancel"],
-                                            button_cb=["feed", "feed", "feed", "feed", "cancel"],
-                                            button_val=[identifier + "30",
+            self.send_with_keyboard(msg="Need some feeding info",
+                                    chat_id=msg.chat_id,
+                                    button_text=["30ml", "60ml", "90ml", "Other", "Cancel"],
+                                    button_cb=["feed", "feed", "feed", "feed", "cancel"],
+                                    button_val=[identifier + "30",
                                                         identifier + "60",
                                                         identifier + "90",
                                                         "GET",
                                                         ""],
-                                            arrangement=[4, 1],
-                                            reply_to=msg.message_id
-                                            )
+                                    arrangement=[4, 1],
+                                    reply_to=msg.message_id
+                                    )
         else:
             self.cb_feed(None, msg.message_id, msg.chat_id, str(msg.value))
 
@@ -213,36 +210,36 @@ class Communicator(CommunicatorBase):
         identifier = datetime.now().strftime('%Y-%m-%d %H:%M:%S') + " "
 
         if msg.value == "":
-            self.send_message_with_keyboard(msg="Need some pumping info",
-                                            chat_id=msg.chat_id,
-                                            button_text=["10ml", "20ml", "30ml", "40ml", "Other", "Cancel"],
-                                            button_cb=["pump", "pump", "pump", "pump", "pump", "cancel"],
-                                            button_val=[identifier + "10",
+            self.send_with_keyboard(msg="Need some pumping info",
+                                    chat_id=msg.chat_id,
+                                    button_text=["10ml", "20ml", "30ml", "40ml", "Other", "Cancel"],
+                                    button_cb=["pump", "pump", "pump", "pump", "pump", "cancel"],
+                                    button_val=[identifier + "10",
                                                         identifier + "20",
                                                         identifier + "30",
                                                         identifier + "40",
                                                         "GET",
                                                         ""],
-                                            arrangement=[4, 2],
-                                            reply_to=msg.message_id
-                                            )
+                                    arrangement=[4, 2],
+                                    reply_to=msg.message_id
+                                    )
         else:
             self.cb_pump(None, msg.message_id, msg.chat_id, str(msg.value))
 
     def baby_diaper(self, msg: Message):
         identifier = datetime.now().strftime('%Y-%m-%d %H:%M:%S') + " "
 
-        self.send_message_with_keyboard(msg="Need some diaper info",
-                                        chat_id=msg.chat_id,
-                                        button_text=["Pee", "Poo", "Poo & Pee", "Cancel"],
-                                        button_cb=["diaper", "diaper", "diaper", "cancel"],
-                                        button_val=[identifier + "pee",
+        self.send_with_keyboard(msg="Need some diaper info",
+                                chat_id=msg.chat_id,
+                                button_text=["Pee", "Poo", "Poo & Pee", "Cancel"],
+                                button_cb=["diaper", "diaper", "diaper", "cancel"],
+                                button_val=[identifier + "pee",
                                                     identifier + "poo",
                                                     identifier + "pp",
                                                     ""],
-                                        arrangement=[3, 1],
-                                        reply_to=msg.message_id
-                                        )
+                                arrangement=[3, 1],
+                                reply_to=msg.message_id
+                                )
 
     def baby_feed_history(self, msg: Message):
         query = 'SELECT date, source, amount FROM feed ORDER BY timestamp'
@@ -486,14 +483,14 @@ class Communicator(CommunicatorBase):
             button_value.append(f'{data[0]};2;Delete')
             arrangement.append(1)
 
-            self.send_message_with_keyboard(msg=f'[{data[0]}] What type of {data[2]} was it?',
-                                            chat_id=from_id,
-                                            button_text=button_text,
-                                            button_cb=button_cb,
-                                            button_val=button_value,
-                                            arrangement=arrangement,
-                                            reply_to=message_id
-                                            )
+            self.send_with_keyboard(msg=f'[{data[0]}] What type of {data[2]} was it?',
+                                    chat_id=from_id,
+                                    button_text=button_text,
+                                    button_cb=button_cb,
+                                    button_val=button_value,
+                                    arrangement=arrangement,
+                                    reply_to=message_id
+                                    )
         elif data[1] == "2":
             query = f'SELECT DISTINCT category FROM categories WHERE type = "{data[2]}"'
             result = list(sql_databases["finance"].run_sql(query, fetch_all=True))
@@ -504,14 +501,14 @@ class Communicator(CommunicatorBase):
             button_value.append(f'{data[0]};3;Delete')
             arrangement.append(1)
 
-            self.send_message_with_keyboard(msg=f'[{data[0]}] What is the category of {data[2]}',
-                                            chat_id=from_id,
-                                            button_text=button_text,
-                                            button_cb=button_cb,
-                                            button_val=button_value,
-                                            arrangement=arrangement,
-                                            reply_to=message_id
-                                            )
+            self.send_with_keyboard(msg=f'[{data[0]}] What is the category of {data[2]}',
+                                    chat_id=from_id,
+                                    button_text=button_text,
+                                    button_cb=button_cb,
+                                    button_val=button_value,
+                                    arrangement=arrangement,
+                                    reply_to=message_id
+                                    )
         elif data[1] == "3":
             query = f'SELECT category_id FROM categories WHERE category = "{data[2]}"'
             cat_id = list(sql_databases["finance"].run_sql(query))[0]
@@ -541,16 +538,16 @@ class Communicator(CommunicatorBase):
         data = value.split(" ")
 
         if len(data) == 3:
-            self.send_message_with_keyboard(msg="How did you feed " + data[2] + "ml at " + data[1],
-                                            chat_id=from_id,
-                                            button_text=["Breast", "Express", "Formula", "Cancel"],
-                                            button_cb=["feed", "feed", "feed", "cancel"],
-                                            button_val=[value + " breast",
+            self.send_with_keyboard(msg="How did you feed " + data[2] + "ml at " + data[1],
+                                    chat_id=from_id,
+                                    button_text=["Breast", "Express", "Formula", "Cancel"],
+                                    button_cb=["feed", "feed", "feed", "cancel"],
+                                    button_val=[value + " breast",
                                                         value + " expressed",
                                                         value + " formula",
                                                         ""],
-                                            arrangement=[3, 1],
-                                            )
+                                    arrangement=[3, 1],
+                                    )
 
         if len(data) == 4:
             day_total = 0.0
@@ -594,16 +591,16 @@ class Communicator(CommunicatorBase):
         data = value.split(" ")
 
         if len(data) == 3:
-            self.send_message_with_keyboard(msg="From which breast did you pump " + data[2] + "ml at " + data[1],
-                                            chat_id=from_id,
-                                            button_text=["Left", "Right", "Both", "Cancel"],
-                                            button_cb=["pump", "pump", "pump", "cancel"],
-                                            button_val=[value + " left",
+            self.send_with_keyboard(msg="From which breast did you pump " + data[2] + "ml at " + data[1],
+                                    chat_id=from_id,
+                                    button_text=["Left", "Right", "Both", "Cancel"],
+                                    button_cb=["pump", "pump", "pump", "cancel"],
+                                    button_val=[value + " left",
                                                         value + " right",
                                                         value + " both",
                                                         ""],
-                                            arrangement=[3, 1],
-                                            )
+                                    arrangement=[3, 1],
+                                    )
 
         if len(data) == 4:
             day_total = 0.0

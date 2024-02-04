@@ -11,13 +11,13 @@ from maintenance.backup import backup
 
 class SQLConnector:
 
-    def __init__(self, user, password, database=None, host="localhost"):
+    def __init__(self, user, password, db=None, host="localhost"):
         self.user = user
         self.password = password
-        self.database = database
+        self.database = db
         self.host = host
 
-        if database is None:
+        if db is None:
             self.my_db = mysql.connector.connect(
                 host=self.host,
                 user=self.user,

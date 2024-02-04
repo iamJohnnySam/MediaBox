@@ -1,5 +1,6 @@
 import inspect
 import math
+import os
 from datetime import datetime
 
 import telepot
@@ -19,12 +20,9 @@ class CommunicatorBase:
     def __init__(self, telepot_account):
         self.telepot_account = telepot_account
 
-        # Callback
-        self.current_callback_id = 0
-        self.callback_id_prefix = telepot_account + "_" + datetime.now().strftime("%y%m%d%H%M") + "_"
-
         # Waiting user input
         self.waiting_user_input = {}
+        self.messages = {}
 
         # Set up Telepot Account
         telepot_accounts = JSONEditor(global_var.telepot_accounts).read()
@@ -40,64 +38,60 @@ class CommunicatorBase:
                                'callback_query': self.handle_callback}).run_as_thread()
         logger.log('Telepot ' + telepot_account + ' listening')
 
-    def send_now(self, msg, image=False, chat=None, keyboard=None, reply_to=None, caption=""):
-        if msg == "" or msg is None:
+    def send_now(self, send_string: str, msg: Message = None, chat=None, reply_to=None,
+                 keyboard=None,
+                 group: str = None,
+                 image: bool = False, photo: str = ""):
+
+        if send_string == "" or send_string is None:
             logger.log("NO MESSAGE", message_type="error")
             return
 
-        if chat is None:
-            chat = self.master
+        if msg is None and chat is None and group is None:
+            chats = [self.master]
 
-        if image:
-            message = self.bot.sendPhoto(chat,
-                                         photo=open(str(msg), 'rb'),
-                                         reply_to_message_id=reply_to,
-                                         caption=caption)
-        elif keyboard is not None:
-            self.current_callback_id = self.current_callback_id + 1
-            message = self.bot.sendMessage(chat, str(msg), reply_markup=keyboard, reply_to_message_id=reply_to)
+        elif group is not None:
+            exists = sql_databases["administration"].exists(self.database_groups, f"group_name = '{group}'") == 0
+            if exists:
+                logger.log("Group does not exist", message_type="error")
+                return
+
+            result = sql_databases["administration"].run_sql(
+                f"SELECT chat_id FROM {self.database_groups} WHERE group_name = '{group}'",
+                fetch_all=True)
+            chats = [row[0] for row in result]
+
+        elif msg is not None and chat is None:
+            chats = [msg.chat_id]
+
         else:
-            message = self.bot.sendMessage(chat, str(msg), reply_to_message_id=reply_to)
-
-        logger.log(str(chat) + " - " + str(message['message_id']) + " - Message: " + str(msg))
-
-        return message
-
-    def send_to_group(self, group, msg, image=False, caption=""):
-        exists = sql_databases["administration"].exists(self.database_groups, f"group_name = '{group}'") == 0
-
-        if exists:
-            logger.log("Group does not exist", message_type="error")
             return
 
-        result = sql_databases["administration"].run_sql(
-            f"SELECT chat_id FROM {self.database_groups} WHERE group_name = '{group}'",
-            fetch_all=True)
-        chats = [row[0] for row in result]
+        if group is None and reply_to is None and msg is not None:
+            if msg.telepot_account == self.telepot_account:
+                reply_to = msg.msg_id
 
-        logger.log(str(chats) + " - Group Message: " + msg)
-
+        replies = []
         for chat in chats:
             if image:
-                self.bot.sendPhoto(chat, photo=open(msg, 'rb'), caption=caption)
+                message = self.bot.sendPhoto(chat,
+                                             photo=open(str(photo), 'rb'),
+                                             reply_to_message_id=reply_to,
+                                             caption=send_string,
+                                             reply_markup=keyboard)
+                replies.append(message)
             else:
-                self.bot.sendMessage(chat, msg)
+                message = self.bot.sendMessage(chat, str(send_string),
+                                               reply_to_message_id=reply_to,
+                                               reply_markup=keyboard)
+                replies.append(message)
 
-    def keyboard_button(self, text, callback_command, value="None"):
-        # FORMAT
-        # Full   = Account _ %y%m%d%H%M _ CB-ID _ buttonText , DATA
-        # DATA   = functionCall, Value
+            logger.log(str(chat) + " - " + str(message['message_id']) + " - Message: " + str(send_string))
 
-        data_id = self.callback_id_prefix + str(self.current_callback_id) + "_" + text
-        data = data_id + "," + str(callback_command).lower() + "," + str(value)
-
-        if len(data) >= 60:
-            telepot_callbacks = {data_id: str(callback_command) + "," + str(value)}
-            JSONEditor(global_var.telepot_callback_database +
-                       self.callback_id_prefix + 'telepot_callback_database.json').add_level1(telepot_callbacks)
-            data = data_id + ",X"
-
-        return data_id, InlineKeyboardButton(text=str(text), callback_data=data)
+        if len(replies) == 1:
+            return replies[0]
+        else:
+            return replies
 
     def link_msg_to_buttons(self, message, buttons):
         for button in buttons:
@@ -142,13 +136,9 @@ class CommunicatorBase:
                        message_type="warn")
 
     def handle_text(self, msg):
-        if msg.chat_id in self.waiting_user_input:
-            self.received_user_input(msg)
-            return
-
-        # If command is in command list
         if msg.command in self.command_dictionary.keys():
             function = self.command_dictionary[msg.command]["function"]
+            msg.function = function
             logger.log(str(msg.chat_id) + ' - Calling Function: ' + function)
             func = getattr(self, function)
             func(msg)
@@ -188,8 +178,11 @@ class CommunicatorBase:
 
             self.send_now(message, chat=msg.chat_id)
 
-        elif "/" in msg.command:
+        elif msg.command.startswith("/"):
             self.send_now("Sorry, that command is not known to me...", chat=msg.chat_id)
+
+        elif msg.chat_id in self.waiting_user_input:
+            self.received_user_input(msg)
 
         else:
             self.send_now("Chatbot Disabled. Type /help to find more information", chat=msg.chat_id)
@@ -211,17 +204,26 @@ class CommunicatorBase:
                                                                                     'run_command',
                                                                                     sql_result=False,
                                                                                     command_only=True)
-        self.send_message_with_keyboard(msg="Which function to call?",
-                                        chat_id=msg.chat_id,
-                                        button_text=button_text,
-                                        button_cb=button_cb,
-                                        button_val=button_value,
-                                        arrangement=arrangement,
-                                        reply_to=msg.message_id
-                                        )
+        self.send_with_keyboard(msg="Which function to call?",
+                                chat_id=msg.chat_id,
+                                button_text=button_text,
+                                button_cb=button_cb,
+                                button_val=button_value,
+                                arrangement=arrangement,
+                                reply_to=msg.message_id
+                                )
 
-    def handle_callback(self, msg):
-        query_id, from_id, query_data = telepot.glance(msg, flavor='callback_query')
+    def handle_callback(self, query):
+        try:
+            msg_id = int(str(query['data']).split(",")[0])
+        except ValueError:
+            logger.log("Value error in callback " + str(query), message_type="error")
+            return
+
+        if msg_id == 0:
+            pass
+
+        query_id, from_id, query_data = telepot.glance(query, flavor='callback_query')
         logger.log('Callback Query: ' + " " + str(query_id) + " " + str(from_id) + " " + str(query_data))
 
         if str(from_id) in self.waiting_user_input.keys():
@@ -262,10 +264,17 @@ class CommunicatorBase:
         self.bot.editMessageReplyMarkup(message_id, reply_markup=keyboard)
         return message['message_id']
 
-    def send_message_with_keyboard(self, msg, chat_id, button_text, button_cb, button_val,
-                                   arrangement, reply_to=None):
+    def send_with_keyboard(self, send_string: str, msg: Message,
+                           button_text: list, button_cb: list, button_val: list, arrangement: list,
+                           group: str = None,
+                           image: bool = False, photo: str = ""):
+
+        if button_text is None or button_cb is None or button_val is None or arrangement is None:
+            logger.log("Incomplete Buttons", message_type="error")
+            return
+
         if len(button_text) == 0 or len(button_text) != len(button_cb) or len(button_text) != len(button_val):
-            logger.log("Keyboard Generation error: " + str(msg), message_type="error")
+            logger.log("Keyboard Generation error: " + str(send_string), message_type="error")
             logger.log("Button Text Length " + str(len(button_text)), message_type="error")
             logger.log("Button CB Length " + str(len(button_cb)), message_type="error")
             logger.log("Button Value Length " + str(len(button_val)), message_type="error")
@@ -273,29 +282,32 @@ class CommunicatorBase:
 
         button_ids = []
         buttons = []
-
         for i in range(len(button_text)):
-            key_id, key_button = self.keyboard_button(button_text[i], button_cb[i], button_val[i])
-            buttons.append(key_button)
-            button_ids.append(key_id)
-            logger.log(f'Keyboard button created > {button_text[i]}, {button_cb[i]}, {button_val[i]}')
+            # FORMAT = msg_id, cb_id, btn_text, cb_function, value
+            button_prefix = f"{str(msg.msg_id)},{str(msg.cb_id)},{button_text[i]}"
+            button_data = f"{button_prefix},{button_cb[i].lower()},{button_val[i]}"
+
+            if len(button_data) >= 60:
+                telepot_cb = {button_prefix: button_data}
+                save_loc = os.path.join(global_var.telepot_callback_database, f"{str(msg.msg_id)}_cb.json")
+                JSONEditor(save_loc).add_level1(telepot_cb)
+                button_data = f"{button_prefix},X"
+
+            buttons.append(InlineKeyboardButton(text=str(button_text[i]), callback_data=button_data))
+            logger.log(f'Keyboard button created > {button_data}')
 
         keyboard_markup = []
         c = 0
-
         for i in range(len(arrangement)):
             keyboard_row = []
             for j in range(arrangement[i]):
                 keyboard_row.append(buttons[c])
                 c = c + 1
             keyboard_markup.append(keyboard_row)
-
         keyboard = InlineKeyboardMarkup(inline_keyboard=keyboard_markup)
 
-        message = self.send_now(msg,
-                                chat=chat_id,
-                                keyboard=keyboard,
-                                reply_to=reply_to)
+        message = self.send_now(send_string=send_string, msg=msg, keyboard=keyboard,
+                                group=group, image=image, photo=photo)
 
         self.link_msg_to_buttons(message, button_ids)
 
