@@ -55,7 +55,7 @@ class Communicator(CommunicatorBase):
                 news_channels.append(channel)
 
     def find_movie(self, msg: Message):
-        if not self.check_command_value("name of movie", msg.value, msg.chat_id, msg.message_id):
+        if not self.check_command_value(msg, inquiry="name of movie"):
             return
 
         self.send_now(f"Searching movie: {msg.value} for chat_id: {msg.chat_id}.")
@@ -112,12 +112,12 @@ class Communicator(CommunicatorBase):
                                         )
 
     def sms_bill(self, msg: Message):
-        if not self.check_command_value("sms received from bank", msg.value, msg.chat_id, msg.message_id):
+        if not self.check_command_value(msg, inquiry="sms received from bank"):
             return
         pass
 
     def request_tv_show(self, msg: Message):
-        if not self.check_command_value("name of TV show", msg.value, msg.chat_id, msg.message_id):
+        if not self.check_command_value(msg, inquiry="name of TV show"):
             return
 
         sql_databases["entertainment"].insert("requested_shows",
@@ -128,7 +128,7 @@ class Communicator(CommunicatorBase):
         self.send_now("TV Show Requested - " + msg.value)
 
     def baby_weight(self, msg: Message):
-        if not self.check_command_value("weight of the baby in kg", msg.value, msg.chat_id, msg.message_id, fl=True):
+        if not self.check_command_value(msg, replace="kg", inquiry="weight of baby in kg", check_float=True):
             return
         weight = float(msg.value)
 
@@ -185,10 +185,7 @@ class Communicator(CommunicatorBase):
                       reply_to=msg.message_id)
 
     def baby_feed(self, msg: Message):
-        if "ml" in msg.value:
-            value = str(msg.value).replace("ml", "").strip()
-        if not self.check_command_value("amount consumed in ml", msg.value, msg.chat_id, msg.message_id,
-                                        tx=False, fl=True):
+        if not self.check_command_value(msg, replace="ml", check_float=True):
             return
 
         identifier = datetime.now().strftime('%Y-%m-%d %H:%M:%S') + " "
@@ -210,10 +207,7 @@ class Communicator(CommunicatorBase):
             self.cb_feed(None, msg.message_id, msg.chat_id, str(msg.value))
 
     def mom_pump(self, msg: Message):
-        if "ml" in msg.value:
-            value = str(msg.value).replace("ml", "").strip()
-        if not self.check_command_value("amount pumped in ml", msg.value, msg.chat_id, msg.message_id,
-                                        tx=False, fl=True):
+        if not self.check_command_value(msg, replace="ml", check_float=True):
             return
 
         identifier = datetime.now().strftime('%Y-%m-%d %H:%M:%S') + " "

@@ -336,24 +336,25 @@ class CommunicatorBase:
         else:
             func(msg, user_input=True, identifier=arg)
 
-    def check_command_value(self, inquiry, value, chat_id, message_id, tx=True, fl=False):
+    def check_command_value(self, msg: Message, index: int = 0, replace: str = "", inquiry: str = "",
+                            check_int: bool = False,
+                            check_float: bool = False):
         current_frame = inspect.currentframe()
         call_frame = inspect.getouterframes(current_frame, 2)
 
-        if value == "" and tx:
-            self.send_now(f'Please send the {inquiry}', chat=chat_id, reply_to=message_id)
-            self.get_user_input(chat_id, call_frame[1][3], None)
+        if msg.check_value(index=index, replace_str=replace, check_int=check_int, check_float=check_float):
+            return True
+        else:
+            if inquiry != "":
+                send_string = f'Please send the {inquiry}.'
+            elif replace != "":
+                send_string = f'Please send the amount in {replace}.'
+            else:
+                send_string = f'Please send the value.'
+
+            self.send_now(send_string, chat=msg.chat_id, reply_to=msg.message_id)
+            self.get_user_input(msg.chat_id, call_frame[1][3], None)
             return False
-
-        if fl and value != "":
-            try:
-                x = float(value)
-            except ValueError:
-                self.send_now(f'Please send the {inquiry} USING DIGITS ONLY', chat=chat_id, reply_to=message_id)
-                self.get_user_input(chat_id, call_frame[1][3], None)
-                return False
-
-        return True
 
     # MAIN FUNCTIONS
     def save_photo(self, callback_id, query_id, from_id, value):

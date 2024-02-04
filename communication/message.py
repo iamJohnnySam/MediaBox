@@ -88,3 +88,32 @@ class Message:
 
         foo.save(self.photo_loc, optimize=True, quality=95)
         logger.log(f'Received Photo > {self.photo_name}, File size > {foo.size}')
+
+    def check_value(self, index: int = 0, replace_str: str = "",
+                    check_int: bool = False,
+                    check_float: bool = False):
+        try:
+            val = self.value.split(" ")[index] if " " in self.value else self.value
+        except IndexError:
+            logger.log(f"{self.value} has no index {index}")
+            return False
+
+        if replace_str != "" and replace_str in val:
+            val = val.replace(replace_str, "").strip()
+
+        if val == "":
+            return False
+
+        if check_int:
+            try:
+                int(val)
+            except ValueError:
+                return False
+
+        if check_float:
+            try:
+                float(val)
+            except ValueError:
+                return False
+
+        return True
