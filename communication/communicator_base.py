@@ -1,21 +1,19 @@
 import inspect
 import math
-import os.path
 from datetime import datetime
 
 import telepot
-from PIL import Image
 from telepot.loop import MessageLoop
 from telepot.namedtuple import InlineKeyboardButton, InlineKeyboardMarkup
 
 import global_var
 import logger
+from communication.message import Message
 from database_manager.json_editor import JSONEditor
 from database_manager.sql_connector import sql_databases
 
 
 class CommunicatorBase:
-    database_allowed_chats = "telepot_allowed_chats"
     database_groups = "telepot_groups"
 
     def __init__(self, telepot_account):
@@ -107,17 +105,6 @@ class CommunicatorBase:
             JSONEditor(global_var.telepot_callback_database +
                        self.callback_id_prefix + 'telepot_button_link.json').add_level1(button_dict)
 
-    def check_sender(self, chat_id, msg):
-        sender_name = str(msg['chat']['first_name'])
-        if sql_databases["administration"].exists(self.database_allowed_chats, f"chat_id = '{chat_id}'") == 0:
-            self.bot.sendMessage(chat_id, "Hello " + sender_name + "! You're not allowed to be here")
-            self.send_now(f"Unauthorised Chat access: {sender_name}, chat_id: {chat_id}")
-            logger.log(f"Unauthorised Chat access: {sender_name}, chat_id: {chat_id}",
-                       message_type="warn")
-            return False
-        else:
-            return True
-
     def manage_chat_group(self, group, chat_id, add=True, remove=False):
         message_type = "info"
         where = f"chat_id = '{chat_id}' AND group_name = '{group}';"
@@ -139,57 +126,59 @@ class CommunicatorBase:
         return msg
 
     def handle(self, msg):
-        chat_id = msg['chat']['id']
-        message_id = msg['message_id']
+        message = Message(self.telepot_account, msg)
 
-        if self.check_sender(chat_id, msg):
+        if message.check_sender():
             if 'text' in msg.keys():
-                self.handle_text(msg, chat_id, message_id)
+                self.handle_text(message)
             elif 'photo' in msg.keys():
-                self.handle_photo(msg, chat_id, message_id)
+                self.handle_photo(message)
             else:
                 logger.log("Unknown Chat type", message_type="error")
+        else:
+            self.bot.sendMessage(message.chat_id, "Hello " + message.f_name + "! You're not allowed to be here")
+            self.send_now(f"Unauthorised Chat access: {message.f_name}, chat_id: {message.chat_id}")
+            logger.log(f"Unauthorised Chat access: {message.f_name}, chat_id: {message.chat_id}",
+                       message_type="warn")
 
-    def handle_text(self, msg, chat_id, message_id):
-        if chat_id in self.waiting_user_input:
-            self.received_user_input(msg, chat_id, message_id)
+    def handle_text(self, msg):
+        if msg.chat_id in self.waiting_user_input:
+            self.received_user_input(msg)
             return
-
-        try:
-            command = str(msg['text']).split(" ")[0]
-        except KeyError:
-            logger.log('Telepot Key Error: ' + str(msg), message_type="error")
-            return
-
-        logger.log(str(self.telepot_account) + "\t" + str(chat_id) + " - " + str(command))
 
         # If command is in command list
-        if command in self.command_dictionary.keys():
-            function = self.command_dictionary[command]["function"]
-            logger.log(str(chat_id) + ' - Calling Function: ' + function)
-            value = str(msg['text']).replace(str(msg['text']).split(" ")[0], "").strip()
-
+        if msg.command in self.command_dictionary.keys():
+            function = self.command_dictionary[msg.command]["function"]
+            logger.log(str(msg.chat_id) + ' - Calling Function: ' + function)
             func = getattr(self, function)
-            func(msg, chat_id, message_id, value)
+            func(msg)
 
-        elif command == "/alive":
-            self.send_now(f"{str(chat_id)}\nHello{str(msg['chat']['first_name'])}! I'm Alive and kicking!",
-                          chat=chat_id,
-                          reply_to=message_id)
+        elif msg.command == "/alive":
+            self.send_now(f"{str(msg.chat_id)}\nHello{msg.f_name}! I'm Alive and kicking!",
+                          chat=msg.chat_id,
+                          reply_to=msg.message_id)
 
-        elif command == "/time":
-            self.send_now(str(datetime.now()), chat=chat_id, reply_to=message_id)
+        elif msg.command == "/time":
+            self.send_now(str(datetime.now()), chat=msg.chat_id, reply_to=msg.message_id)
 
-        elif command == "/start_over":
-            self.start_over(msg, chat_id, message_id)
+        elif msg.command == "/start_over" or msg.command == "/exit_all" or msg.command == "/reboot_pi":
+            if msg.chat_id == self.master:
+                global_var.stop_all = True
+                global_var.stop_cctv = True
 
-        elif command == "/exit_all":
-            self.exit_all(msg, chat_id, message_id)
+                if msg.command == "/start_over":
+                    global_var.restart = True
+                elif msg.command == "/reboot_pi":
+                    global_var.reboot_pi = True
 
-        elif command == "/reboot_pi":
-            self.reboot_pi(msg, chat_id, message_id)
+                self.send_now("Completing ongoing tasks. Please wait.")
 
-        elif command == '/help' or command.lower() == 'help' or command == "/start":
+            else:
+                self.send_now("This is a server command. Requesting admin...", chat=msg.chat_id,
+                              reply_to=msg.message_id)
+                self.send_now(f"{msg.command} requested by {msg.f_name}.")
+
+        elif msg.command in ['/help', 'help', '/start', 'start', 'hi', 'hello']:
             message = "--- AVAILABLE COMMANDS ---"
             for command in self.command_dictionary.keys():
                 if command.startswith('/'):
@@ -197,62 +186,38 @@ class CommunicatorBase:
                 else:
                     message = message + "\n\n" + command
 
-            self.send_now(message,
-                          image=False,
-                          chat=chat_id)
+            self.send_now(message, chat=msg.chat_id)
 
-        elif "/" in command:
-            self.send_now("Sorry, that command is not known to me...",
-                          image=False,
-                          chat=chat_id)
+        elif "/" in msg.command:
+            self.send_now("Sorry, that command is not known to me...", chat=msg.chat_id)
+
         else:
-            # self.send_now(Bard().get_answer(msg)['content']
-            self.send_now("Chatbot Disabled. Type /help to find more information",
-                          image=False,
-                          chat=chat_id)
+            self.send_now("Chatbot Disabled. Type /help to find more information", chat=msg.chat_id)
 
-    def handle_photo(self, msg, chat_id, message_id):
-        file_name = f'{chat_id}-{message_id}-{datetime.now().strftime("%y%m%d%H%M%S")}.png'
-        if not os.path.exists(global_var.telepot_image_dump):
-            os.makedirs(global_var.telepot_image_dump)
-        file_path = os.path.join(global_var.telepot_image_dump, file_name)
+    def handle_photo(self, msg):
         try:
-            self.bot.download_file(msg['photo'][-1]['file_id'], file_path)
+            self.bot.download_file(msg.photo_id, msg.photo_loc)
         except PermissionError:
             logger.log("Permission Error")
             self.send_now("PERMISSION ERROR")
-
-        foo = Image.open(file_path)
-        w, h = foo.size
-        if w > h:
-            new_w = 1024
-            new_h = int(h * new_w / w)
-        else:
-            new_h = 1024
-            new_w = int(w * new_h / h)
-
-        foo = foo.resize((new_w, new_h))
-        foo.save(file_path, optimize=True, quality=95)
-
-        logger.log(f'Received Photo > {file_name}, File size > {foo.size}')
 
         button_text = ["save_photo"]
         for key in self.command_dictionary.keys():
             if type(self.command_dictionary[key]) is dict and "photo" in self.command_dictionary[key].keys():
                 button_text.append(f'{self.command_dictionary[key]["function"]}_photo')
 
-        button_text, button_cb, button_value, arrangement = self.keyboard_extractor(file_name, None,
+        button_text, button_cb, button_value, arrangement = self.keyboard_extractor(msg.photo_name, None,
                                                                                     button_text,
                                                                                     'run_command',
                                                                                     sql_result=False,
                                                                                     command_only=True)
         self.send_message_with_keyboard(msg="Which function to call?",
-                                        chat_id=chat_id,
+                                        chat_id=msg.chat_id,
                                         button_text=button_text,
                                         button_cb=button_cb,
                                         button_val=button_value,
                                         arrangement=arrangement,
-                                        reply_to=message_id
+                                        reply_to=msg.message_id
                                         )
 
     def handle_callback(self, msg):
@@ -357,19 +322,19 @@ class CommunicatorBase:
         self.waiting_user_input[user_id] = {"callback": callback,
                                             "argument": argument}
 
-    def received_user_input(self, msg, chat_id, message_id):
-        cb = self.waiting_user_input[chat_id]["callback"]
-        arg = self.waiting_user_input[chat_id]["argument"]
-        del self.waiting_user_input[chat_id]
+    def received_user_input(self, msg):
+        cb = self.waiting_user_input[msg.chat_id]["callback"]
+        arg = self.waiting_user_input[msg.chat_id]["argument"]
+        del self.waiting_user_input[msg.chat_id]
 
         message = str(msg['text'])
 
         logger.log(f'Calling function: {cb} with arguments {arg} and {message}.')
         func = getattr(self, cb)
         if "cb_" in cb:
-            func(None, message_id, chat_id, message)
+            func(None, msg.message_id, msg.chat_id, message)
         else:
-            func(msg, chat_id, message_id, message, user_input=True, identifier=arg)
+            func(msg, user_input=True, identifier=arg)
 
     def check_command_value(self, inquiry, value, chat_id, message_id, tx=True, fl=False):
         current_frame = inspect.currentframe()
@@ -400,42 +365,6 @@ class CommunicatorBase:
                       image=False,
                       chat=from_id,
                       reply_to=message_id)
-
-    def start_over(self, msg, chat_id, message_id):
-        if chat_id == self.master:
-            global_var.stop_all = True
-            global_var.restart = True
-        else:
-            self.send_now("This will reboot the program. Requesting Master User...",
-                          image=False,
-                          chat=chat_id,
-                          reply_to=message_id)
-            self.send_now("Start over requested by " + str(msg['chat']['first_name']) + "\n/start_over")
-
-    def exit_all(self, msg, chat_id, message_id):
-        if chat_id == self.master:
-            global_var.stop_all = True
-            global_var.stop_cctv = True
-            self.send_now("Completing ongoing tasks. Please wait.")
-        else:
-            self.send_now("This will shut down the program. Requesting Master User...",
-                          image=False,
-                          chat=chat_id,
-                          reply_to=message_id)
-            self.send_now("Start over requested by " + str(msg['chat']['first_name']) + "\n/exit_all")
-
-    def reboot_pi(self, msg, chat_id, message_id):
-        if chat_id != self.master:
-            self.send_now(f"Reboot Initiated by {str(msg['chat']['first_name'])}."
-                          f"\nCompleting ongoing tasks")
-        else:
-            global_var.stop_all = True
-            global_var.stop_cctv = True
-            global_var.reboot_pi = True
-            self.send_now("The server will reboot in a short while.",
-                          image=False,
-                          chat=chat_id,
-                          reply_to=message_id)
 
     def cb_cancel(self, callback_id, query_id, from_id, value):
         self.update_in_line_buttons(callback_id)
