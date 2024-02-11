@@ -1,4 +1,8 @@
 import json
+import os
+from datetime import datetime
+
+from PIL import Image
 
 import global_var
 import logger
@@ -81,6 +85,23 @@ class Message:
         return self._value
 
     @property
+    def photo_id(self):
+        if 'photo' in self._message.keys():
+            return self._message['photo'][-1]['file_id']
+        else:
+            return ""
+
+    @property
+    def photo_name(self):
+        return f'{self.chat_id}-{self.message_id}-{datetime.now().strftime("%y%m%d%H%M%S")}.png'
+
+    @property
+    def photo_loc(self):
+        if not os.path.exists(global_var.telepot_image_dump):
+            os.makedirs(global_var.telepot_image_dump)
+        return os.path.join(global_var.telepot_image_dump, self.photo_name)
+
+    @property
     def check_sender(self):
         if self.admin_db.exists(global_var.tbl_chats, f"chat_id = '{self.chat_id}'") == 0:
             return False
@@ -145,6 +166,46 @@ class Message:
             self.admin_db.run_sql(f"UPDATE {global_var.tbl_messages} SET complete = '1' "
                                   f"WHERE msg_id = '{str(self._db_id)}'")
             logger.log(f"({self._db_id}): Message Completed")
+
+    def store_photo(self):
+        foo = Image.open(self.photo_loc)
+        w, h = foo.size
+        if w > h and w > 1024:
+            foo = foo.resize((1024, int(h * 1024 / w)))
+        elif h > w and h > 1024:
+            foo = foo.resize((int(w * 1024 / h), 1024))
+
+        foo.save(self.photo_loc, optimize=True, quality=95)
+        logger.log(f'Received Photo > {self.photo_name}, File size > {foo.size}')
+
+    def check_value(self, index: int = 0, replace_str: str = "",
+                    check_int: bool = False,
+                    check_float: bool = False):
+        try:
+            val = self.value.split(" ")[index] if " " in self.value else self.value
+        except IndexError:
+            logger.log(f"{self.value} has no index {index}")
+            return False
+
+        if replace_str != "" and replace_str in val:
+            val = val.replace(replace_str, "").strip()
+
+        if val == "":
+            return False
+
+        if check_int:
+            try:
+                int(val)
+            except ValueError:
+                return False
+
+        if check_float:
+            try:
+                float(val)
+            except ValueError:\
+                return False
+
+        return True
 
     def collect(self, value: str, index: int):
         if not self.stored_message:
