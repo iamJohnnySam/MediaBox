@@ -37,3 +37,9 @@ torrent_download = '/mnt/MediaBox/Downloads'
 torrent_movies = '/mnt/MediaBox/Movies'
 torrent_tv_shows = '/mnt/MediaBox/TVShows'
 torrent_unknown = '/mnt/MediaBox/Unknown'
+
+# Databases
+db_admin = "administration"
+tbl_chats = "telepot_allowed_chats"
+tbl_groups = "telepot_groups"
+tbl_messages = "telepot_messages"

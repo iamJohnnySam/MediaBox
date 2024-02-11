@@ -8,7 +8,7 @@ import telepot
 import global_var
 import logger
 from charts.grapher import grapher_simple_trend, grapher_category, grapher_bar_trend, grapher_weight_trend
-from communication.communicator_base import CommunicatorBase
+from communication.message_handler import MessageHandler
 from communication.message import Message
 from database_manager.json_editor import JSONEditor
 from database_manager.sql_connector import sql_databases
@@ -16,22 +16,16 @@ from show import transmission
 from show.movie_finder import get_movies_by_name, get_movie_details
 
 
-class Communicator(CommunicatorBase):
+class Communicator(MessageHandler):
 
     def __init__(self, telepot_account):
         super().__init__(telepot_account)
 
-    def check_shows(self, msg: Message):
-        global_var.check_shows = True
-        self.send_now("Request Initiated - TV Show Check", msg=msg)
 
-    def check_news(self, msg: Message):
-        global_var.check_news = True
-        self.send_now("Request Initiated - News Check", msg=msg)
 
-    def check_cctv(self, msg: Message):
-        global_var.check_cctv = True
-        self.send_now("Request Initiated - CCTV Check", msg=msg)
+
+
+
 
     def subscribe_news(self, msg: Message):
         news = JSONEditor(global_var.news_sources).read()
@@ -111,16 +105,7 @@ class Communicator(CommunicatorBase):
             return
         pass
 
-    def request_tv_show(self, msg: Message):
-        if not self.check_command_value(msg, inquiry="name of TV show"):
-            return
 
-        sql_databases["entertainment"].insert("requested_shows",
-                                              "name, requested_by, requested_id",
-                                              (msg.value, msg.f_name, msg.chat_id))
-        logger.log("TV Show Requested - " + msg.value)
-        self.send_now("TV Show Requested - " + msg.value, chat=msg.chat_id, reply_to=msg.message_id)
-        self.send_now("TV Show Requested - " + msg.value)
 
     def baby_weight(self, msg: Message):
         if not self.check_command_value(msg, replace="kg", inquiry="weight of baby in kg", check_float=True):
@@ -666,37 +651,3 @@ class Communicator(CommunicatorBase):
             self.bot.answerCallbackQuery(query_id, text=reply_text)
         except telepot.exception.TelegramError:
             pass
-
-
-telepot_lock = threading.Lock()
-
-telepot_channels = {}
-for account in JSONEditor('communication/telepot_accounts.json').read().keys():
-    telepot_channels[account] = Communicator(account)
-
-
-def send_message(telepot_account, chat_id, msg, image=False, keyboard=None, reply_to=None, caption=""):
-    telepot_lock.acquire()
-    msg_id = telepot_channels[telepot_account].send_now(msg, image, chat_id,
-                                                        caption=caption,
-                                                        reply_to=reply_to,
-                                                        keyboard=keyboard)
-    telepot_lock.release()
-    return msg_id
-
-
-def send_to_master(telepot_account, msg, image=False, keyboard=None, reply_to=None, caption=""):
-    telepot_lock.acquire()
-    msg_id = telepot_channels[telepot_account].send_now(msg, image,
-                                                        caption=caption,
-                                                        reply_to=reply_to,
-                                                        keyboard=keyboard)
-    telepot_lock.release()
-    return msg_id
-
-
-def send_to_group(telepot_account, msg, group, image=False, caption=""):
-    telepot_lock.acquire()
-    telepot_channels[telepot_account].send_to_group(group, msg, image,
-                                                    caption=caption)
-    telepot_lock.release()

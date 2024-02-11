@@ -15,10 +15,6 @@ from show.show_downloader import ShowDownloader
 running_threads = {}
 schedule_on_hold = {}
 
-my_shows = ShowDownloader()
-cctv = CCTVChecker()
-news_read = NewsReader()
-
 
 def schedule_handler(func):
     name = func.__qualname__

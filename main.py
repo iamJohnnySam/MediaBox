@@ -9,6 +9,7 @@ import global_var
 from communication import communicator
 from maintenance import start_up, backup
 from scheduler import scheduler
+from tasker import task_manager
 from web import web_app
 
 if platform.machine() == 'armv7l':
@@ -18,13 +19,18 @@ if platform.machine() == 'armv7l':
     t_scheduler = threading.Thread(target=scheduler.run_scheduler)
     t_scheduler.start()
     logger.log("Thread Started: Scheduler")
+    # todo combine in tasker manager
+
+    t_task = threading.Thread(target=task_manager.run_task_manager)
+    t_task.start()
+    logger.log("Thread Started: Task Manager")
 
     t_webapp = threading.Thread(target=web_app.run_webapp, daemon=True)
     t_webapp.start()
     logger.log("Thread Started: Web app")
 
     # t_scheduler.join()
-    while t_scheduler.is_alive():
+    while t_scheduler.is_alive() and t_task.is_alive():
         scheduler.check_running_threads()
         time.sleep(10)
 

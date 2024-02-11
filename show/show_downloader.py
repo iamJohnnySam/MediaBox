@@ -6,6 +6,7 @@ from communication import communicator
 from database_manager.sql_connector import sql_databases
 from show import transmission
 
+# todo add threading lock
 
 def quality_extract(topic):
     if " 720p" in topic:
