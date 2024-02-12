@@ -5,6 +5,7 @@ import logger
 from cctv.cctv_checker import CCTVChecker
 from communication.channels import channels
 from communication.message import Message
+from database_manager.sql_connector import sql_databases
 from news.news_reader import NewsReader
 from show.show_downloader import ShowDownloader
 
@@ -55,6 +56,26 @@ class Task:
             self.channel.send_now(f"/reboot_pi requested by {msg.f_name}.")
         msg.complete()
 
+    def no_function(self, msg: Message):
+        button_text = ["save_photo"]
+        for key in self.command_dictionary.keys():
+            if type(self.command_dictionary[key]) is dict and "photo" in self.command_dictionary[key].keys():
+                button_text.append(f'{self.command_dictionary[key]["function"]}_photo')
+
+        button_text, button_cb, button_value, arrangement = self.keyboard_extractor(msg.photo_name, None,
+                                                                                    button_text,
+                                                                                    'run_command',
+                                                                                    sql_result=False,
+                                                                                    command_only=True)
+        self.send_with_keyboard(msg="Which function to call?",
+                                chat_id=msg.chat_id,
+                                button_text=button_text,
+                                button_cb=button_cb,
+                                button_val=button_value,
+                                arrangement=arrangement,
+                                reply_to=msg.message_id
+                                )
+
     def check_shows(self, msg: Message):
         ShowDownloader(msg).run_code()
         msg.complete()
@@ -77,6 +98,8 @@ class Task:
         logger.log("TV Show Requested - " + msg.value)
         self.send_now("TV Show Requested - " + msg.value, chat=msg.chat_id, reply_to=msg.message_id)
         self.send_now("TV Show Requested - " + msg.value)
+
+
 
 
 

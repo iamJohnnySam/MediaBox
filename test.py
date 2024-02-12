@@ -26,33 +26,6 @@ def manage_chat_group(self, group, chat_id, add=True, remove=False):
     return msg
 
 
-def handle_photo(self, msg):
-    try:
-        self.bot.download_file(msg.photo_id, msg.photo_loc)
-    except PermissionError:
-        logger.log("Permission Error")
-        self.send_now("PERMISSION ERROR")
-
-    button_text = ["save_photo"]
-    for key in self.command_dictionary.keys():
-        if type(self.command_dictionary[key]) is dict and "photo" in self.command_dictionary[key].keys():
-            button_text.append(f'{self.command_dictionary[key]["function"]}_photo')
-
-    button_text, button_cb, button_value, arrangement = self.keyboard_extractor(msg.photo_name, None,
-                                                                                button_text,
-                                                                                'run_command',
-                                                                                sql_result=False,
-                                                                                command_only=True)
-    self.send_with_keyboard(msg="Which function to call?",
-                            chat_id=msg.chat_id,
-                            button_text=button_text,
-                            button_cb=button_cb,
-                            button_val=button_value,
-                            arrangement=arrangement,
-                            reply_to=msg.message_id
-                            )
-
-
 def quick_cb(self, query: dict, command: str, value: str):
     reply_to = query['inline_message_id']
     chat = query['from']['id']

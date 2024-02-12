@@ -1,9 +1,6 @@
 from maintenance import backup
 
 ready_to_run = False
-check_shows = False
-check_cctv = False
-check_news = False
 stop_all = False
 restart = False
 reboot_pi = False

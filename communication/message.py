@@ -12,20 +12,24 @@ from database_manager.sql_connector import sql_databases
 
 class Message:
     def __init__(self, message_handler=None, message=None, db_id=None):
+        self.admin_db = sql_databases[global_var.db_admin]
+
         if (message_handler is None or message is None) and db_id is None:
-            logger.log("Error Creating Message Object", message_type="error")
-            return
+            raise SyntaxError("Error Creating Message Object")
         elif message_handler is None or message is None:
-            # todo get from db
-            pass
+            query = f"SELECT account, message, function FROM {global_var.tbl_messages} " \
+                    f"WHERE msg_id ='{str(self._db_id)}'"
+            result = self.admin_db.run_sql(query)
+            if len(result) == 0:
+                raise LookupError
+            self._message_handler, self._message, self._function = int(result[0])
         else:
             self._message_handler = message_handler
             self._message: dict = message
             self._db_id = db_id
+            self._function = ""
 
         self._value = ""
-        self._function = ""
-        self.admin_db = sql_databases[global_var.db_admin]
 
     @property
     def msg_id(self):
@@ -54,7 +58,7 @@ class Message:
         try:
             return str(self._message['text'])
         except KeyError:
-            logger.log('No Text Key: ' + str(self._message), message_type="error")
+            logger.log('No Text Key: ' + str(self._message), message_type="warn")
             return ""
 
     @property
@@ -87,7 +91,9 @@ class Message:
     @property
     def photo_id(self):
         if 'photo' in self._message.keys():
-            return self._message['photo'][-1]['file_id']
+            p_id = self._message['photo'][-1]['file_id']
+            self.update_db('photo', p_id, force=True)
+            return p_id
         else:
             return ""
 
@@ -121,9 +127,7 @@ class Message:
 
     @collection.setter
     def collection(self, collect):
-        if self.stored_message:
-            query = f"UPDATE {global_var.tbl_messages} SET collection = '{collect}' WHERE msg_id = '{str(self._db_id)}'"
-            self.admin_db.run_sql(query)
+        self.update_db('collection', collect, force=True)
 
     @property
     def stored_message(self):
@@ -161,10 +165,17 @@ class Message:
                                            val=(self._message_handler, json.dumps(self._message), self._function))
         logger.log(f"({self._db_id}): Message Stored")
 
+    def update_db(self, field: str, item, force=False):
+        if force and not self.stored_message:
+            self.store_message()
+
+        if self.stored_message:
+            query = f"UPDATE {global_var.tbl_messages} SET {field} = '{item}' WHERE msg_id = '{str(self._db_id)}'"
+            self.admin_db.run_sql(query)
+
     def complete(self):
         if self.stored_message:
-            self.admin_db.run_sql(f"UPDATE {global_var.tbl_messages} SET complete = '1' "
-                                  f"WHERE msg_id = '{str(self._db_id)}'")
+            self.update_db('complete', True)
             logger.log(f"({self._db_id}): Message Completed")
 
     def store_photo(self):
@@ -202,7 +213,7 @@ class Message:
         if check_float:
             try:
                 float(val)
-            except ValueError:\
+            except ValueError:
                 return False
 
         return True
@@ -236,11 +247,9 @@ class Message:
     def add_reply(self, cb: int, replies):
         d = self.replies
         d[str(cb)] = replies
-        query = f"UPDATE {global_var.tbl_messages} SET replies = '{json.dumps(d)}' WHERE msg_id = '{str(self._db_id)}'"
-        self.admin_db.run_sql(query)
+        self.update_db('replies', json.dumps(d))
 
     def add_callback(self, cb: int, value):
         d = self.callbacks
         d[str(cb)] = value
-        query = f"UPDATE {global_var.tbl_messages} SET callbacks = '{json.dumps(d)}' WHERE msg_id = '{str(self._db_id)}'"
-        self.admin_db.run_sql(query)
+        self.update_db('callbacks', json.dumps(d))

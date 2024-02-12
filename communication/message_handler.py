@@ -108,8 +108,19 @@ class MessageHandler:
         else:
             logger.log("Unknown Chat type", message_type="error")
 
+    def handle_photo(self, msg):
+        try:
+            self.bot.download_file(msg.photo_id, msg.photo_loc)
+        except PermissionError:
+            logger.log("Permission Error")
+            self.send_now("PERMISSION ERROR")
+
     def handle_text(self, msg):
-        if msg.first_word in self.command_dictionary.keys():
+        if msg.content == "":
+            msg.function = "no_function"
+            self.task_q.put(msg)
+
+        elif msg.first_word in self.command_dictionary.keys():
             function = self.command_dictionary[msg.first_word]["function"]
             msg.function = function
             self.task_q.put(msg)
@@ -118,7 +129,7 @@ class MessageHandler:
             msg.function = msg.first_word.replace("/", "").strip()
             self.task_q.put(msg)
 
-        elif msg.first_word == 'cancel':
+        elif msg.first_word in ['/cancel', 'cancel']:
             # todo cancel procedure. Remove from waiting list and trigger fail command
             pass
 
@@ -157,18 +168,18 @@ class MessageHandler:
         try:
             q = str(query['data']).split(";")
             msg_id = int(q[0])
-            cb_id = int(q[1])
-            step = q[3]
-            value = q[4]
         except ValueError:
             logger.log("Value error in callback " + str(query), message_type="error")
             return
 
-        if step.lower() in ["echo", "torrent", "cancel"]:
-            self.quick_cb(query, step.lower(), value)
+        try:
+            msg = Message(db_id=msg_id)
+        except LookupError:
+            logger.log("Message not found", message_type="error")
+            # todo reply to callback as fail
+            return
 
-        else:
-            pass
+        self.task_q.put(msg)
 
     def send_with_keyboard(self, send_string: str, msg: Message,
                            button_text: list, button_val: list, arrangement: list,
