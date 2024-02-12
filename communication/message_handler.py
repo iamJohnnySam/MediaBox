@@ -35,61 +35,6 @@ class MessageHandler:
                                'callback_query': self.handle_callback}).run_as_thread()
         logger.log('Telepot ' + telepot_account + ' listening')
 
-    def send_now(self, send_string: str, msg: Message = None, chat=None, reply_to=None,
-                 keyboard=None,
-                 group: str = None,
-                 image: bool = False, photo: str = ""):
-
-        # Check Message
-        if send_string == "" or send_string is None:
-            logger.log("No message", message_type="error")
-            return
-
-        # Check Chat ID
-        if msg is None and chat is None and group is None:
-            chats = [self.master]
-        elif group is not None:
-            if sql_databases[global_var.db_admin].exists(global_var.tbl_groups, f"group_name = '{group}'") == 0:
-                logger.log("Group does not exist", message_type="error")
-                return
-            query = f"SELECT chat_id FROM {global_var.tbl_groups} WHERE group_name = '{group}'"
-            result = sql_databases["administration"].run_sql(query, fetch_all=True)
-            chats = [row[0] for row in result]
-        elif msg is not None and chat is None:
-            chats = [msg.chat_id]
-        else:
-            logger.log("Chat ID conditions are not met correctly", message_type="error")
-            return
-
-        # Check Reply to
-        if group is None and reply_to is None and msg is not None:
-            if msg.telepot_account == self.telepot_account:
-                reply_to = msg.message_id
-            else:
-                logger.log("Telepot account not matching.", message_type="error")
-        elif group is not None and reply_to is not None:
-            logger.log("Unable to reply for a group message. Reply reference will be removed.", message_type="warn")
-            reply_to = None
-
-        replies = []
-        for chat in chats:
-            if image:
-                message = self.bot.sendPhoto(chat,
-                                             photo=open(str(photo), 'rb'),
-                                             reply_to_message_id=reply_to,
-                                             caption=send_string,
-                                             reply_markup=keyboard)
-                replies.append(message)
-            else:
-                message = self.bot.sendMessage(chat, str(send_string),
-                                               reply_to_message_id=reply_to,
-                                               reply_markup=keyboard)
-                replies.append(message)
-
-            logger.log(str(chat) + " - " + str(message['message_id']) + " - Message: " + str(send_string))
-
-        return replies
-
     def handle(self, msg):
         message = Message(self.telepot_account, msg)
 
@@ -181,6 +126,62 @@ class MessageHandler:
 
         self.task_q.put(msg)
 
+
+    def send_now(self, send_string: str, msg: Message = None, chat=None, reply_to=None,
+                 keyboard=None,
+                 group: str = None,
+                 image: bool = False, photo: str = ""):
+
+        # Check Message
+        if send_string == "" or send_string is None:
+            logger.log("No message", message_type="error")
+            return
+
+        # Check Chat ID
+        if msg is None and chat is None and group is None:
+            chats = [self.master]
+        elif group is not None:
+            if sql_databases[global_var.db_admin].exists(global_var.tbl_groups, f"group_name = '{group}'") == 0:
+                logger.log("Group does not exist", message_type="error")
+                return
+            query = f"SELECT chat_id FROM {global_var.tbl_groups} WHERE group_name = '{group}'"
+            result = sql_databases["administration"].run_sql(query, fetch_all=True)
+            chats = [row[0] for row in result]
+        elif msg is not None and chat is None:
+            chats = [msg.chat_id]
+        else:
+            logger.log("Chat ID conditions are not met correctly", message_type="error")
+            return
+
+        # Check Reply to
+        if group is None and reply_to is None and msg is not None:
+            if msg.telepot_account == self.telepot_account:
+                reply_to = msg.message_id
+            else:
+                logger.log("Telepot account not matching.", message_type="error")
+        elif group is not None and reply_to is not None:
+            logger.log("Unable to reply for a group message. Reply reference will be removed.", message_type="warn")
+            reply_to = None
+
+        replies = []
+        for chat in chats:
+            if image:
+                message = self.bot.sendPhoto(chat,
+                                             photo=open(str(photo), 'rb'),
+                                             reply_to_message_id=reply_to,
+                                             caption=send_string,
+                                             reply_markup=keyboard)
+                replies.append(message)
+            else:
+                message = self.bot.sendMessage(chat, str(send_string),
+                                               reply_to_message_id=reply_to,
+                                               reply_markup=keyboard)
+                replies.append(message)
+
+            logger.log(str(chat) + " - " + str(message['message_id']) + " - Message: " + str(send_string))
+
+        return replies
+
     def send_with_keyboard(self, send_string: str, msg: Message,
                            button_text: list, button_val: list, arrangement: list,
                            group: str = None,
@@ -223,3 +224,8 @@ class MessageHandler:
                                 group=group, image=image, photo=photo)
 
         msg.add_reply(cb_id, replies)
+
+    def get_value(self, msg: Message, inquiry="value"):
+        # todo get value
+        pass
+

@@ -45,21 +45,7 @@ class Communicator(MessageHandler):
             else:
                 news_channels.append(channel)
 
-    def find_movie(self, msg: Message):
-        if not self.check_command_value(msg, inquiry="name of movie"):
-            return
 
-        movie_feed = get_movies_by_name(msg.value)
-
-        for movie_name in movie_feed.entries:
-            title, image, link, torrent = get_movie_details(movie_name)
-
-            self.send_with_keyboard(send_string=title,
-                                    msg=msg,
-                                    photo=image,
-                                    button_text=["Visit Page", "Download", "Cancel"],
-                                    button_val=[f"echo;{link}", f"torrent;{torrent}", "cancel"],
-                                    arrangement=[3])
 
     def finance(self, msg: Message):
         if msg.value == "":
