@@ -40,3 +40,6 @@ db_admin = "administration"
 tbl_chats = "telepot_allowed_chats"
 tbl_groups = "telepot_groups"
 tbl_messages = "telepot_messages"
+
+db_news = "news"
+tbl_news = "news_articles"

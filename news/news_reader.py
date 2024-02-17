@@ -1,19 +1,25 @@
-from datetime import datetime
-
 import feedparser
 import global_var
 import logger
 from communication import communicator
+from communication.message import Message
 from database_manager.json_editor import JSONEditor
 from database_manager.sql_connector import sql_databases
 
 
 class NewsReader:
 
-    def __init__(self):
-        self.database_table = "news_articles"
-        self.telepot_account = "news"
-        logger.log("Object Created")
+    def __init__(self, msg: Message):
+        self.msg = msg
+        logger.log(f"{self.msg.msg_id}, News Object Created")
+
+    def start(self):
+        logger.log(f"{self.msg.msg_id}, News request started")
+        if self.msg.value == "all":
+            self.msg.collect("all", 0)
+
+    def resume(self):
+        logger.log(f"{self.msg.msg_id}, News request resumed")
 
     def run_code(self):
         logger.log("------- STARTED NEWS READER SCRIPT -------")
@@ -80,8 +86,9 @@ class NewsReader:
 
             cols = "source, title, link"
             val = (source, title, link)
-            if sql_databases["news"].exists(self.database_table, f"title = '{title}' AND source = '{source}'") == 0:
-                sql_databases["news"].insert(self.database_table, cols, val)
+            if sql_databases[global_var.db_news].exists(global_var.tbl_news,
+                                                        f"title = '{title}' AND source = '{source}'") == 0:
+                sql_databases[global_var.db_news].insert(global_var.tbl_news, cols, val)
 
                 communicator.send_to_group(self.telepot_account, f'{title} - {link}', f'news_{source}')
                 logger.log(f'{source} > {title}')
