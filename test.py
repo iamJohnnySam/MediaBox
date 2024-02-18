@@ -77,7 +77,7 @@ def todo(self):
         func(callback_id, query_id, from_id, value)
     except (ValueError, SyntaxError) as error:
         self.bot.answerCallbackQuery(query_id, text='Unhandled')
-        logger.log("Unhandled Callback: " + str(error), message_type="error")
+        logger.log("Unhandled Callback: " + str(error), log_type="error")
 
 
 def update_in_line_buttons(self, button_id, keyboard=None):

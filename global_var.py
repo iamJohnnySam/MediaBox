@@ -4,12 +4,14 @@ ready_to_run = False
 stop_all = False
 restart = False
 reboot_pi = False
+log_type = "debug"
 
 media_path = "/mnt/MediaBox"
 
 telepot_accounts = 'communication/telepot_accounts.json'
 telepot_commands = 'communication/commands/'
 telepot_callback_database = 'database/telepot/'
+main_telepot_account = "main"
 backup.backup.copy_files.append(telepot_accounts)
 backup.backup.copy_folders.append(telepot_commands)
 backup.backup.copy_folders.append(telepot_callback_database)
@@ -39,7 +41,19 @@ torrent_unknown = '/mnt/MediaBox/Unknown'
 db_admin = "administration"
 tbl_chats = "telepot_allowed_chats"
 tbl_groups = "telepot_groups"
-tbl_messages = "telepot_messages"
+tbl_jobs = "jobs"
 
 db_news = "news"
 tbl_news = "news_articles"
+
+date_formats = ["%Y/%m/%d", "%d/%m/%Y", "%Y/%b/%d", "%d/%b/%Y",
+                "%m/%d", "%d/%m", "%b/%d", "%d/%b",
+                "%Y-%m-%d", "%d-%m-%Y", "%Y-%b-%d", "%d-%b-%Y", "%m-%d-%y", "%b-%d-%y",
+                "%m-%d", "%d-%m", "%b-%d", "%d-%b",
+                "%Y,%m,%d", "%d,%m,%Y", "%Y,%b,%d", "%d,%b,%Y",
+                "%m,%d", "%d,%m", "%b,%d", "%d,%b"]
+
+time_formats = ["%H:%M:%S", "%H:%M",
+                "%H-%M-%S", "%H-%M"]
+
+

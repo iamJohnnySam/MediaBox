@@ -2,24 +2,40 @@ import feedparser
 import global_var
 import logger
 from communication import communicator
-from communication.message import Message
+from module.job import Job
 from database_manager.json_editor import JSONEditor
 from database_manager.sql_connector import sql_databases
 
 
 class NewsReader:
 
-    def __init__(self, msg: Message):
+    def __init__(self, msg: Job):
         self.msg = msg
-        logger.log(f"{self.msg.msg_id}, News Object Created")
+        logger.log(f"{self.msg.job_id}, News Object Created")
 
     def start(self):
-        logger.log(f"{self.msg.msg_id}, News request started")
+        logger.log(f"{self.msg.job_id}, News request started")
         if self.msg.value == "all":
             self.msg.collect("all", 0)
 
     def resume(self):
-        logger.log(f"{self.msg.msg_id}, News request resumed")
+        logger.log(f"{self.msg.job_id}, News request resumed")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     def run_code(self):
         logger.log("------- STARTED NEWS READER SCRIPT -------")
@@ -60,7 +76,7 @@ class NewsReader:
         for article in feed.entries:
 
             if debug:
-                logger.log(article, message_type="debug")
+                logger.log(article, log_type="debug")
 
             # title
             title = getattr(article, article_title)

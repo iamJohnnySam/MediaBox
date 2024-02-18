@@ -4,7 +4,7 @@ import global_var
 import logger
 from cctv.cctv_checker import CCTVChecker
 from communication.channels import channels
-from communication.message import Message
+from module.job import Job
 from database_manager.sql_connector import sql_databases
 from news.news_reader import NewsReader
 from show.movie_finder import MovieFinder
@@ -19,7 +19,7 @@ class Task:
 
 
 
-    def handle_message(self, msg: Message):
+    def handle_message(self, msg: Job):
         # todo if not called back then start() else resume()
         if msg.called_back:
            pass
@@ -28,47 +28,9 @@ class Task:
 
 
 
-    def alive(self, msg: Message):
-        self.channel.send_now(f"{str(msg.chat_id)}\nHello{msg.f_name}! I'm Alive and kicking!", msg=msg)
-        msg.complete()
 
-    def time(self, msg: Message):
-        self.channel.send_now(str(datetime.now()), msg=msg)
-        msg.complete()
 
-    def start_over(self, msg: Message):
-        if msg.is_master:
-            global_var.stop_all = True
-            global_var.stop_cctv = True
-            global_var.restart = True
-            self.channel.send_now("Completing ongoing tasks before restart. Please wait.", msg=msg)
-        else:
-            self.channel.send_now("This is a server command. Requesting admin...", msg=msg)
-            self.channel.send_now(f"/start_over requested by {msg.f_name}.")
-        msg.complete()
-
-    def exit_all(self, msg: Message):
-        if msg.is_master:
-            global_var.stop_all = True
-            global_var.stop_cctv = True
-            self.channel.send_now("Completing ongoing tasks before exit. Please wait.", msg=msg)
-        else:
-            self.channel.send_now("This is a server command. Requesting admin...", msg=msg)
-            self.channel.send_now(f"/exit_all requested by {msg.f_name}.")
-        msg.complete()
-
-    def reboot_pi(self, msg: Message):
-        if msg.is_master:
-            global_var.stop_all = True
-            global_var.stop_cctv = True
-            global_var.reboot_pi = True
-            self.channel.send_now("Completing ongoing tasks before reboot. Please wait.", msg=msg)
-        else:
-            self.channel.send_now("This is a server command. Requesting admin...", msg=msg)
-            self.channel.send_now(f"/reboot_pi requested by {msg.f_name}.")
-        msg.complete()
-
-    def no_function(self, msg: Message):
+    def no_function(self, msg: Job):
         button_text = ["save_photo"]
         for key in self.command_dictionary.keys():
             if type(self.command_dictionary[key]) is dict and "photo" in self.command_dictionary[key].keys():
@@ -88,22 +50,22 @@ class Task:
                                 reply_to=msg.message_id
                                 )
 
-    def check_shows(self, msg: Message):
+    def check_shows(self, msg: Job):
         ShowDownloader(msg).run_code()
         msg.complete()
 
-    def check_news(self, msg: Message):
+    def check_news(self, msg: Job):
         NewsReader(msg).run_code()
         msg.complete()
 
-    def check_cctv(self, msg: Message):
+    def check_cctv(self, msg: Job):
         CCTVChecker(msg).run_code()
         msg.complete()
 
-    def find_movie(self, msg: Message):
+    def find_movie(self, msg: Job):
         MovieFinder(msg).find_movie()
 
-    def request_tv_show(self, msg: Message):
+    def request_tv_show(self, msg: Job):
         if not self.check_command_value(msg, inquiry="name of TV show"):
             return
 

@@ -3,43 +3,55 @@ import logging
 import os
 from datetime import date, datetime
 
+import global_var
+
 today_date = str(date.today())
 
 
-def log(msg, message_type="info"):
+def log(job_id, msg, log_type="debug"):
     message_types = ["info", "error", "warn", "debug"]
-    if message_type not in message_types:
-        raise ValueError("Invalid Error type: " + message_type)
+    if log_type not in message_types:
+        raise ValueError("Invalid Error type: " + log_type)
 
     message = str(msg)
 
     stack = inspect.stack()
     caller_frame = stack[1][0]
     if 'self' not in caller_frame.f_locals:
-        caller_name = caller_frame.f_code.co_name
+        caller = caller_frame.f_code.co_name
     else:
         the_class = caller_frame.f_locals["self"].__class__.__name__
-        the_method = caller_frame.f_code.co_name
-        caller_name = f"{the_class} > {the_method}"
+        caller = f"{the_class}"
 
     if today_date != str(date.today()):
         logging.basicConfig(filename='log/log-' + today_date + '.log', level=logging.DEBUG)
 
-    if message_type == "warn":
+    print_message = False
+    if log_type == "warn":
+        log_type = "WRN"
         logging.warning(message)
-        m_type = "WRN"
-    elif message_type == "error":
-        m_type = "ERR"
+        if global_var.log_type in ["debug", "info", "warn"]:
+            print_message = True
+    elif log_type == "error":
+        log_type = "ERR"
         logging.error(message)
-    elif message_type == "debug":
+        if global_var.log_type in ["debug", "info", "warn", "error"]:
+            print_message = True
+    elif log_type == "debug":
         logging.debug(message)
-        m_type = "DBG"
+        log_type = "DBG"
+        if global_var.log_type in ["debug"]:
+            print_message = True
     else:
         logging.info(message)
-        m_type = "INF"
+        log_type = "INF"
+        if global_var.log_type in ["debug", "info"]:
+            print_message = True
 
-    for segment in message.split("\n"):
-        print(f'{m_type},{datetime.now().strftime("%H:%M:%S")},{caller_name.ljust(25)},>,{segment}')
+    if print_message:
+        for segment in message.split("\n"):
+            print(f'{log_type},{datetime.now().strftime("%m-%d %H:%M:%S")},{caller.ljust(10)},>,'
+                  f'{str(job_id)},>,{segment}')
 
 
 if not os.path.exists('log/'):
@@ -48,4 +60,4 @@ if not os.path.exists('log/'):
 try:
     logging.basicConfig(filename='log/log-' + today_date + '.log', level=logging.DEBUG)
 except PermissionError:
-    log("PERMISSION ERROR", message_type="error")
+    log(0, "PERMISSION ERROR", log_type="error")

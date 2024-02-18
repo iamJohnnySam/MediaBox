@@ -41,14 +41,14 @@ class RefactorFolder:
                         self.torrent_step_2(sub_sub_directories, sub_directory_path, sub_last_loc)
                     else:
                         logger.log(f'Folder Refactor Error - {sub_directory_path}, Base location - {sub_last_loc}',
-                                   message_type="error")
+                                   log_type="error")
                     self.remove_directory(sub_directory_path)
 
             elif last_loc is not None:
                 self.torrent_step_2(sub_directories, directory_path, last_loc)
             else:
                 logger.log(f'Folder Refactor Error - {directory_path}, Base location - {last_loc}',
-                           message_type="error")
+                           log_type="error")
 
             self.remove_directory(directory_path)
 
@@ -233,4 +233,4 @@ class RefactorFolder:
             except OSError as e:
                 logger.log(f"Error: {str(e)}")
         else:
-            logger.log(f"Cannot Delete '{path}'. Not empty!", message_type="warn")
+            logger.log(f"Cannot Delete '{path}'. Not empty!", log_type="warn")

@@ -71,7 +71,7 @@ class ShowDownloader:
                                            group=self.telepot_chat_group)
                 logger.log(message)
             else:
-                logger.log("Torrent Add Failed: " + str(row[2]), message_type="error")
+                logger.log("Torrent Add Failed: " + str(row[2]), log_type="error")
 
         communicator.send_to_master(self.telepot_account, "TV Show Check Completed")
         logger.log("-------ENDED TV SHOW CHECK SCRIPT-------")

@@ -29,8 +29,8 @@ class EmailManager:
                 self.myEmail.login(self.email, self.password)
                 logger.log("Login Success")
             except imaplib.IMAP4.error as err:
-                logger.log(f"Mailbox login error - {str(err)}", message_type="error")
-                logger.log(traceback.format_exc(), message_type="debug")
+                logger.log(f"Mailbox login error - {str(err)}", log_type="error")
+                logger.log(traceback.format_exc(), log_type="debug")
                 return False
         return True
 
@@ -42,8 +42,8 @@ class EmailManager:
             logger.log("Mailbox Select Success")
             return True
         except imaplib.IMAP4.error as err:
-            logger.log(f"Mailbox select error - {str(err)}", message_type="error")
-            logger.log(traceback.format_exc(), message_type="debug")
+            logger.log(f"Mailbox select error - {str(err)}", log_type="error")
+            logger.log(traceback.format_exc(), log_type="debug")
             self.connection_err = self.connection_err + 1
             return False
 
@@ -54,15 +54,15 @@ class EmailManager:
             logger.log("Check Mail Success")
             return True, self.unread_emails
         except imaplib.IMAP4.error as err:
-            logger.log(f"Mailbox search error - {str(err)}", message_type="error")
-            logger.log(traceback.format_exc(), message_type="debug")
+            logger.log(f"Mailbox search error - {str(err)}", log_type="error")
+            logger.log(traceback.format_exc(), log_type="debug")
             return False
 
     def connect(self, mailbox=None):
         a = self.log_in()
         if not a:
             self.result = "Not OK"
-            logger.log("Login Error", message_type="error")
+            logger.log("Login Error", log_type="error")
             self.mail_connect_error = True
             return
 
@@ -71,7 +71,7 @@ class EmailManager:
 
         if not (b and c):
             self.result = "Not OK"
-            logger.log("Email Error", message_type="error")
+            logger.log("Email Error", log_type="error")
             self.mail_connect_error = True
 
     def email_close(self):
@@ -102,7 +102,7 @@ class EmailManager:
             self.myEmail.store(self.current_message, '+FLAGS', '\\Deleted')
             self.myEmail.expunge()
         except imaplib.IMAP4.error:
-            logger.log("1 message skipped delete", message_type="warn")
+            logger.log("1 message skipped delete", log_type="warn")
             self.connection_err = self.connection_err + 1
 
     def delete_all_emails(self, mailbox="Sent"):

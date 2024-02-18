@@ -2,18 +2,18 @@ import feedparser
 
 import logger
 from communication.channels import channels
-from communication.message import Message
+from module.job import Job
 
 
 class MovieFinder:
-    def __init__(self, message: Message):
+    def __init__(self, message: Job):
         self.msg = message
         self.retries = 2
         self.channel = channels[self.msg.telepot_account]
 
     def start(self):
         if not self.msg.check_value():
-            self.channel.get_value(msg=self.msg, inquiry="name of movie")
+            self.channel.get_value_from_user(msg=self.msg, inquiry="name of movie")
             return
 
         movie = self.msg.value.lower()
@@ -33,7 +33,7 @@ class MovieFinder:
         while not movie_feed:
             if self.retries == 0:
                 break
-            logger.log("Retrying searching " + search_string, message_type="warn")
+            logger.log("Retrying searching " + search_string, log_type="warn")
             movie_feed = feedparser.parse(search_string)
             self.retries = self.retries - 1
 

@@ -7,7 +7,7 @@ from telepot.namedtuple import InlineKeyboardButton, InlineKeyboardMarkup
 
 import global_var
 import logger
-from communication.message import Message
+from module.job import Job
 from database_manager.json_editor import JSONEditor
 from database_manager.sql_connector import sql_databases
 
@@ -36,13 +36,13 @@ class MessageHandler:
         logger.log('Telepot ' + telepot_account + ' listening')
 
     def handle(self, msg):
-        message = Message(self.telepot_account, msg)
+        message = Job(self.telepot_account, msg)
 
         if not message.check_sender():
             self.bot.sendMessage(message.chat_id, "Hello " + message.f_name + "! You're not allowed to be here")
             string = f"Unauthorised Chat access: {message.f_name}, chat_id: {message.chat_id}"
             self.send_now(string)
-            logger.log(string, message_type="warn")
+            logger.log(string, log_type="warn")
             return
 
         if 'photo' in msg.keys():
@@ -51,7 +51,7 @@ class MessageHandler:
         if 'text' in msg.keys():
             self.handle_text(message)
         else:
-            logger.log("Unknown Chat type", message_type="error")
+            logger.log("Unknown Chat type", log_type="error")
 
     def handle_photo(self, msg):
         try:
@@ -100,7 +100,7 @@ class MessageHandler:
         try:
             q = str(query['data']).split(";")
         except ValueError:
-            logger.log("Value error in callback " + str(query), message_type="error")
+            logger.log("Value error in callback " + str(query), log_type="error")
             return
 
         logger.log('Callback Query: ' + str(query['data']))
@@ -114,27 +114,26 @@ class MessageHandler:
             q = str(query['data']).split(";")
             msg_id = int(q[0])
         except ValueError:
-            logger.log("Value error in callback " + str(query), message_type="error")
+            logger.log("Value error in callback " + str(query), log_type="error")
             return
 
         try:
-            msg = Message(db_id=msg_id)
+            msg = Job(job_id=msg_id)
         except LookupError:
-            logger.log("Message not found", message_type="error")
+            logger.log("Message not found", log_type="error")
             # todo reply to callback as fail
             return
 
         self.task_q.put(msg)
 
-
-    def send_now(self, send_string: str, msg: Message = None, chat=None, reply_to=None,
+    def send_now(self, send_string: str, msg: Job = None, chat=None, reply_to=None,
                  keyboard=None,
                  group: str = None,
                  image: bool = False, photo: str = ""):
 
         # Check Message
         if send_string == "" or send_string is None:
-            logger.log("No message", message_type="error")
+            logger.log("No message", log_type="error")
             return
 
         # Check Chat ID
@@ -142,7 +141,7 @@ class MessageHandler:
             chats = [self.master]
         elif group is not None:
             if sql_databases[global_var.db_admin].exists(global_var.tbl_groups, f"group_name = '{group}'") == 0:
-                logger.log("Group does not exist", message_type="error")
+                logger.log("Group does not exist", log_type="error")
                 return
             query = f"SELECT chat_id FROM {global_var.tbl_groups} WHERE group_name = '{group}'"
             result = sql_databases["administration"].run_sql(query, fetch_all=True)
@@ -150,7 +149,7 @@ class MessageHandler:
         elif msg is not None and chat is None:
             chats = [msg.chat_id]
         else:
-            logger.log("Chat ID conditions are not met correctly", message_type="error")
+            logger.log("Chat ID conditions are not met correctly", log_type="error")
             return
 
         # Check Reply to
@@ -158,9 +157,9 @@ class MessageHandler:
             if msg.telepot_account == self.telepot_account:
                 reply_to = msg.message_id
             else:
-                logger.log("Telepot account not matching.", message_type="error")
+                logger.log("Telepot account not matching.", log_type="error")
         elif group is not None and reply_to is not None:
-            logger.log("Unable to reply for a group message. Reply reference will be removed.", message_type="warn")
+            logger.log("Unable to reply for a group message. Reply reference will be removed.", log_type="warn")
             reply_to = None
 
         replies = []
@@ -182,15 +181,15 @@ class MessageHandler:
 
         return replies
 
-    def send_with_keyboard(self, send_string: str, msg: Message,
+    def send_with_keyboard(self, send_string: str, msg: Job,
                            button_text: list, button_val: list, arrangement: list,
                            group: str = None,
                            image: bool = False, photo: str = ""):
 
         if len(button_text) == 0 or len(button_text) != len(button_val):
-            logger.log("Keyboard Generation error: " + str(send_string), message_type="error")
-            logger.log("Button Text Length " + str(len(button_text)), message_type="error")
-            logger.log("Button Value Length " + str(len(button_val)), message_type="error")
+            logger.log("Keyboard Generation error: " + str(send_string), log_type="error")
+            logger.log("Button Text Length " + str(len(button_text)), log_type="error")
+            logger.log("Button Value Length " + str(len(button_val)), log_type="error")
             return
 
         buttons = []
@@ -198,12 +197,12 @@ class MessageHandler:
 
         for i in range(len(button_text)):
             # FORMAT = msg_id; cb_id; btn_text; (step; value)
-            button_prefix = f"{str(msg.msg_id)};{str(cb_id)};{button_text[i]}"
+            button_prefix = f"{str(msg.job_id)};{str(cb_id)};{button_text[i]}"
             button_data = f"{button_prefix};{button_val[i]}"
 
             if len(button_data) >= 60:
                 telepot_cb = {button_prefix: button_data}
-                save_loc = os.path.join(global_var.telepot_callback_database, f"{str(msg.msg_id)}_cb.json")
+                save_loc = os.path.join(global_var.telepot_callback_database, f"{str(msg.job_id)}_cb.json")
                 JSONEditor(save_loc).add_level1(telepot_cb)
                 button_data = f"{button_prefix};X"
 
@@ -225,7 +224,6 @@ class MessageHandler:
 
         msg.add_reply(cb_id, replies)
 
-    def get_value(self, msg: Message, inquiry="value"):
+    def get_value_from_user(self, msg: Job, inquiry="value"):
         # todo get value
         pass
-

@@ -20,7 +20,7 @@ def schedule_handler(func):
     name = func.__qualname__
     function = name.split(".")[0]
     if function in running_threads.keys():
-        logger.log("BUSY. Cannot Start thread for " + function, message_type="warn")
+        logger.log("BUSY. Cannot Start thread for " + function, log_type="warn")
         if name not in schedule_on_hold.keys():
             schedule_on_hold[name] = schedule.every(1).minutes.do(schedule_handler, func=func)
 

@@ -16,7 +16,7 @@ class Transmission:
         for torrent in torrent_list:
             success, torrent_name = self.add_torrent_to_list(torrent)
             if not success:
-                logger.log("Torrent Listing Error", message_type="error")
+                logger.log("Torrent Listing Error", log_type="error")
 
     def add_torrent(self, path, paused=False):
         torrent = self.client.add_torrent(path, paused=paused)
