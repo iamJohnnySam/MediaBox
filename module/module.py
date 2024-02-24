@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 
 import global_var
-import logger
+from logging import logger
 from job import Job
 from exceptions.custom_exceptions import *
 

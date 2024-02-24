@@ -3,7 +3,7 @@ import imaplib
 import traceback
 
 import global_var
-import logger
+from logging import logger
 
 
 class EmailManager:

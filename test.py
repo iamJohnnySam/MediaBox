@@ -181,8 +181,8 @@ def cb_run_command(self, callback_id, query_id, from_id, value):
     func(callback_id, query_id, from_id, result[0])
 
 
-if 'steps' in self.command_dictionary[msg.command].keys():
-    msg.steps = self.command_dictionary[msg.command]['steps']
-if 'database' in self.command_dictionary[msg.command].keys():
-    msg.database = self.command_dictionary[msg.command]['database']
+if 'steps' in self.commands[msg.command].keys():
+    msg.steps = self.commands[msg.command]['steps']
+if 'database' in self.commands[msg.command].keys():
+    msg.database = self.commands[msg.command]['database']
 

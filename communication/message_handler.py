@@ -1,37 +1,31 @@
 import os
-from queue import Queue
 
 import telepot
 from telepot.loop import MessageLoop
 from telepot.namedtuple import InlineKeyboardButton, InlineKeyboardMarkup
 
 import global_var
-import logger
+from logging import logger
 from module.job import Job
 from database_manager.json_editor import JSONEditor
 from database_manager.sql_connector import sql_databases
+from tasker import task_queue
 
 
 class Messenger:
 
-    def __init__(self, telepot_account: str, task_q: Queue):
+    def __init__(self, telepot_account: str, telepot_key: str, telepot_master: int):
         self.telepot_account = telepot_account
-        self.task_q = task_q
+        self.master = telepot_master
 
         # Waiting user input
         self.waiting_user_input = {}
 
-        # Set up Telepot Account
-        telepot_accounts = JSONEditor(global_var.telepot_accounts).read()
-        self.bot = telepot.Bot(telepot_accounts[telepot_account]["account"])
-        self.master = telepot_accounts[telepot_account]["master"]
-
         # Get Commands
-        # todo replace with sql table
-        self.command_dictionary = JSONEditor(f'{global_var.telepot_commands}telepot_commands_'
-                                             f'{self.telepot_account}.json').read()
+        self.commands = JSONEditor(global_var.telepot_commands).read()
 
         # Listen
+        self.bot = telepot.Bot(telepot_key)
         MessageLoop(self.bot, {'chat': self.handle,
                                'callback_query': self.handle_callback}).run_as_thread()
         logger.log(job_id=0, msg=f'Telepot {telepot_account} listening')
@@ -44,6 +38,7 @@ class Messenger:
             string = f"Unauthorised Chat access: {message.f_name}, chat_id: {message.chat_id}"
             self.send_now(string)
             logger.log(job_id=message.job_id, msg=string, log_type="warn")
+            message.complete()
             return
 
         if 'photo' in msg.keys():
@@ -63,14 +58,25 @@ class Messenger:
 
     def handle_text(self, msg: Job):
         if msg.function == "no_function":
-            self.task_q.put(msg)
+            task_queue.add_job(msg)
+            logger.log(job_id=msg.job_id, msg="No function call detected")
 
         elif msg.function == "cancel":
             # todo cancel procedure. Remove from waiting list and trigger fail command
             pass
 
-        elif msg.function in self.command_dictionary.keys():
-            self.task_q.put(msg)
+        elif msg.function in self.commands.keys():
+            if type(self.commands[msg.function]) is bool:
+                self.send_now("That's not a command", job=msg)
+                logger.log(job_id=msg.job_id, msg="Invalid command", log_type="warn")
+                msg.complete()
+                return
+            elif self.telepot_account != "main" and self.telepot_account not in self.commands[msg.function].keys():
+                self.send_now("That command does not work on this chatbot", job=msg)
+                logger.log(job_id=msg.job_id, msg="Invalid command for chatbot", log_type="warn")
+                msg.complete()
+                return
+            task_queue.add_job(msg)
 
         elif msg.function == "chat":
             if msg.chat_id in self.waiting_user_input:
@@ -78,11 +84,10 @@ class Messenger:
                 self.received_user_input(msg)
 
             else:
-                self.send_now("Chatbot Disabled. Type /help to find more information", chat=msg.chat_id)
+                self.send_now("Chatbot Disabled. Type /help to find more information", job=msg)
 
         else:
-            self.send_now("Sorry, that command is not known to me...", chat=msg.chat_id)
-
+            self.send_now("Sorry, that command is not known to me...", job=msg)
 
     def handle_callback(self, query):
         try:
@@ -114,7 +119,7 @@ class Messenger:
 
         self.task_q.put(msg)
 
-    def send_now(self, send_string: str, msg: Job = None, chat=None, reply_to=None,
+    def send_now(self, send_string: str, job: Job = None, chat=None, reply_to=None,
                  keyboard=None,
                  group: str = None,
                  image: bool = False, photo: str = ""):
@@ -125,7 +130,7 @@ class Messenger:
             return
 
         # Check Chat ID
-        if msg is None and chat is None and group is None:
+        if job is None and chat is None and group is None:
             chats = [self.master]
         elif group is not None:
             if sql_databases[global_var.db_admin].exists(global_var.tbl_groups, f"group_name = '{group}'") == 0:
@@ -134,16 +139,16 @@ class Messenger:
             query = f"SELECT chat_id FROM {global_var.tbl_groups} WHERE group_name = '{group}'"
             result = sql_databases["administration"].run_sql(query, fetch_all=True)
             chats = [row[0] for row in result]
-        elif msg is not None and chat is None:
-            chats = [msg.chat_id]
+        elif job is not None and chat is None:
+            chats = [job.chat_id]
         else:
             logger.log("Chat ID conditions are not met correctly", log_type="error")
             return
 
         # Check Reply to
-        if group is None and reply_to is None and msg is not None:
-            if msg.telepot_account == self.telepot_account:
-                reply_to = msg.message_id
+        if group is None and reply_to is None and job is not None:
+            if job.telepot_account == self.telepot_account:
+                reply_to = job.message_id
             else:
                 logger.log("Telepot account not matching.", log_type="error")
         elif group is not None and reply_to is not None:
@@ -207,7 +212,7 @@ class Messenger:
             keyboard_markup.append(keyboard_row)
         keyboard = InlineKeyboardMarkup(inline_keyboard=keyboard_markup)
 
-        replies = self.send_now(send_string=send_string, msg=msg, keyboard=keyboard,
+        replies = self.send_now(send_string=send_string, job=msg, keyboard=keyboard,
                                 group=group, image=image, photo=photo)
 
         msg.add_reply(cb_id, replies)

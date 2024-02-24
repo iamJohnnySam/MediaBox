@@ -5,8 +5,7 @@ from datetime import datetime
 import telepot
 
 import global_var
-import logger
-from charts.grapher import grapher_simple_trend, grapher_category, grapher_bar_trend, grapher_weight_trend
+from logging import logger
 from communication.message_handler import Messenger
 from module.job import Job
 from database_manager.json_editor import JSONEditor

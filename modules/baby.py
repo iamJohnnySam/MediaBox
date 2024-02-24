@@ -1,6 +1,6 @@
 from datetime import datetime
 
-import logger
+from logging import logger
 from charts.grapher import grapher_simple_trend, grapher_weight_trend, grapher_category, grapher_bar_trend
 from exceptions.custom_exceptions import *
 from module.job import Job

@@ -3,7 +3,7 @@ import matplotlib.dates as mdates
 from matplotlib import image
 from matplotlib import pyplot as plt
 
-import logger
+from logging import logger
 
 
 def convert_to_time(val):

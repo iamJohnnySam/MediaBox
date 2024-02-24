@@ -4,11 +4,19 @@ import os
 from datetime import date, datetime
 
 import global_var
+from database_manager.json_editor import JSONEditor
 
 today_date = str(date.today())
 
 
-def log(job_id, msg, log_type="debug"):
+def log(job_id, msg="", log_type="debug", error_code=0, error=""):
+    if error_code == 0 and msg == "":
+        raise ValueError("Invalid Parameters for logging")
+
+    if error_code != 0:
+        errors = JSONEditor(global_var.error_codes).read()
+
+
     message_types = ["info", "error", "warn", "debug"]
     if log_type not in message_types:
         raise ValueError("Invalid Error type: " + log_type)

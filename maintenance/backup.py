@@ -3,7 +3,7 @@ import os
 import shutil
 from datetime import datetime
 
-import logger
+from logging import logger
 import settings
 
 

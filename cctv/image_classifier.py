@@ -4,7 +4,7 @@ import tflite_runtime.interpreter as tflite
 import numpy as np
 
 import global_var
-import logger
+from logging import logger
 from PIL import Image
 import os
 import shutil

@@ -4,7 +4,7 @@ import os
 import global_var
 import settings
 from communication import communicator
-import logger
+from logging import logger
 from cctv.image_classifier import ImageClassifier
 from communication.email_manager import EmailManager
 

@@ -1,7 +1,4 @@
-from datetime import datetime
-
-import global_var
-import logger
+from logging import logger
 from cctv.cctv_checker import CCTVChecker
 from communication.channels import channels
 from module.job import Job

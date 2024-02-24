@@ -1,7 +1,7 @@
 from transmission_rpc import Client
 
 import global_var
-import logger
+from logging import logger
 from maintenance.folder_refactor import RefactorFolder
 
 

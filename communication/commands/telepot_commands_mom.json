@@ -1,7 +1,0 @@
-{
-  "Maternity": false,
-  "/pump": {
-    "function": "mom_pump",
-    "definition": "Pumped Now"
-  }
-}

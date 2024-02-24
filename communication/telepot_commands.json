@@ -1,0 +1,150 @@
+{
+  "Entertainment Controls": false,
+  "check_shows": {
+    "function": "check_shows",
+    "definition": "Check new TV shows"
+  },
+  "find_movie": {
+    "function": "find_movie",
+    "definition": "Find a movie to download"
+  },
+  "request_tv_show": {
+    "function": "request_tv_show",
+    "definition": "Type name of TV Show after command"
+  },
+
+  "News Controls": false,
+  "check_news": {
+    "function": "check_news",
+    "definition": "Get latest News",
+    "news": true
+  },
+  "subscribe_news": {
+    "function": "subscribe_news",
+    "definition": "Subscribe to News Channels",
+    "news": true
+  },
+  "add_me_to_news": {
+    "function": "add_me_to_news",
+    "definition": "Add to CCTV group",
+    "news": true
+  },
+  "remove_me_from_news": {
+    "function": "remove_me_from_news",
+    "definition": "Remove from CCTV group",
+    "news": true
+  },
+
+  "CCTV Controls": false,
+  "check_cctv": {
+    "function": "check_cctv",
+    "definition": "Check latest cctv",
+    "cctv": true
+  },
+  "add_me_to_cctv": {
+    "function": "add_me_to_cctv",
+    "definition": "Add to CCTV group",
+    "cctv": true
+  },
+  "remove_me_from_cctv": {
+    "function": "remove_me_from_cctv",
+    "definition": "Remove from CCTV group",
+    "cctv": true
+  },
+
+  "Torrent Controls": false,
+  "list_torrents": {
+    "function": "list_torrents",
+    "definition": "List Torrents"
+  },
+  "clean_downloads": {
+    "function": "clean_up_downloads",
+    "definition": "Re-arrange torrent downloads"
+  },
+
+  "Finance Controls": false,
+  "finance": {
+    "function": "finance",
+    "definition": "Add Transactions",
+    "photo": 1
+  },
+  "sms_bill": {
+    "function": "sms_bill",
+    "definition": "Forward bank SMS"
+  },
+
+  "Baby": false,
+  "add_me_to_baby": {
+    "function": "add_me_to_baby",
+    "definition": "Add to baby group",
+    "baby": true
+  },
+  "remove_me_from_baby": {
+    "function": "remove_me_from_baby",
+    "definition": "Remove from baby group",
+    "baby": true
+  },
+
+  "Baby Feed Tracking": false,
+  "feed": {
+    "function": "baby_feed",
+    "definition": "Add Feeding Information",
+    "baby": true
+  },
+  "feed_history": {
+    "function": "baby_feed_history",
+    "definition": "Graph it",
+    "baby": true
+  },
+  "feed_trend": {
+    "function": "baby_feed_trend",
+    "definition": "Feeding trend by time",
+    "baby": true
+  },
+  "feed_trend_today": {
+    "function": "baby_feed_trend_today",
+    "definition": "Feeding trend today",
+    "baby": true
+  },
+
+  "Baby Diaper Tracking": false,
+  "diaper": {
+    "function": "baby_diaper",
+    "definition": "Add Diaper Information",
+    "baby": true
+  },
+  "diaper_history": {
+    "function": "baby_diaper_history",
+    "definition": "Graph it",
+    "baby": true
+  },
+  "diaper_trend": {
+    "function": "baby_diaper_trend",
+    "definition": "Diaper trend by time",
+    "baby": true
+  },
+  "diaper_trend_today": {
+    "function": "baby_diaper_trend_today",
+    "definition": "Diaper trend today",
+    "baby": true
+  },
+
+  "Baby Weight Tracking": false,
+  "weight": {
+    "function": "baby_weight",
+    "definition": "Add Weight",
+    "baby": true
+  },
+  "weight_trend": {
+    "function": "baby_weight_trend",
+    "definition": "Weight Trend",
+    "baby": true
+  },
+
+  "Maternity": false,
+  "pump": {
+    "function": "mom_pump",
+    "definition": "Pumped Now",
+    "mom": true
+  }
+}

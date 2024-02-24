@@ -1,11 +1,10 @@
 import json
 import os
-from datetime import datetime
 
 from PIL import Image
 
 import global_var
-import logger
+from logging import logger
 from database_manager.json_editor import JSONEditor
 from database_manager.sql_connector import sql_databases
 from exceptions.custom_exceptions import *

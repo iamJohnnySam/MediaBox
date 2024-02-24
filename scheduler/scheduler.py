@@ -5,12 +5,9 @@ import time
 import schedule
 
 import global_var
-import logger
-from cctv.cctv_checker import CCTVChecker
+from logging import logger
 from maintenance import backup
-from news.news_reader import NewsReader
 from show import transmission
-from show.show_downloader import ShowDownloader
 
 running_threads = {}
 schedule_on_hold = {}

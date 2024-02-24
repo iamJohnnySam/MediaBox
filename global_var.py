@@ -4,12 +4,14 @@ ready_to_run = False
 stop_all = False
 restart = False
 reboot_pi = False
+
 log_type = "debug"
+error_codes = "logging/error_codes.json"
 
 media_path = "/mnt/MediaBox"
 
 telepot_accounts = 'communication/telepot_accounts.json'
-telepot_commands = 'communication/commands/'
+telepot_commands = 'communication/telepot_commands.json'
 telepot_callback_database = 'database/telepot/'
 main_telepot_account = "main"
 backup.backup.copy_files.append(telepot_accounts)

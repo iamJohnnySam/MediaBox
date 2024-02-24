@@ -1,7 +1,7 @@
 import json
 import os
 
-import logger
+from logging import logger
 
 
 class JSONEditor:

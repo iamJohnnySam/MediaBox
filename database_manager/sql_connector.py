@@ -2,7 +2,7 @@ import threading
 
 import mysql.connector
 
-import logger
+from logging import logger
 import settings
 from maintenance.backup import backup
 
