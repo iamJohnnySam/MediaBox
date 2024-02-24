@@ -12,11 +12,21 @@ from exceptions.custom_exceptions import *
 
 
 class Job:
-    def __init__(self, message_handler: str = global_var.main_telepot_account,
+    def __init__(self, telepot_account: str = global_var.main_telepot_account,
                  message: dict = None,
                  job_id: int = 0):
 
-        self.admin_db = sql_databases[global_var.db_admin]
+        self._db = sql_databases[global_var.db_admin]
+        self._telepot_account = telepot_account
+        self._master = JSONEditor(global_var.telepot_accounts).read()[self.telepot_account]["master"]
+
+        # Important Variables
+        # todo link them to parameters when done
+        self._chat_id = None
+        self._reply_to = None
+        self._username = None
+        self._function = None
+        self._collection = []
 
         # todo check other params
         manual_params = False
@@ -26,107 +36,90 @@ class Job:
 
         elif message is not None and job_id == 0 and not manual_params:
             self._job_id: int = 0
-            self.breakdown_message()
+            self.breakdown_message(message)
 
         elif message is None and job_id != 0 and not manual_params:
             query = f"SELECT account, message, function FROM {global_var.tbl_jobs} " \
                     f"WHERE job_id ='{str(self._job_id)}'"
-            result = self.admin_db.run_sql(query)
+            result = self._db.run_sql(query)
             if len(result) == 0:
                 raise LookupError
-            self._message_handler, self._message, self._function = int(result[0])
+            self._telepot_account, self._message, self._function = int(result[0])
 
         elif message is None and job_id == 0 and manual_params:
             # todo
+
+            # todo get username from sql
             pass
 
         else:
-            raise ImpossibleException("Error creating job")
+            raise InvalidParameterException("Error creating job")
 
-        self._value = ""
-        self._called_back = False
+    def breakdown_message(self, msg: dict):
+        self._chat_id = msg['chat']['id']
+        self._reply_to = msg['message_id']
+        self._username = msg['chat']['first_name']
 
-    def breakdown_message(self):
+        if 'text' in msg.keys():
+            content = self._message['text']
+
+            first_word: str = content.split(" ")[0].lower()
+            if first_word.startswith("/"):
+                self._function = first_word.replace("/", "")
+                value = content.replace(first_word, "").strip()
+                self._collection = value.split(" ")
+
+            else:
+                words = len(content.split(" "))
+                if first_word in ['cancel'] and words == 1:
+                    self._function = 'cancel'
+                elif first_word in ['help', 'hi', 'hello'] and words == 1:
+                    self._function = 'help'
+                else:
+                    self._function = "chat"
+                value = content
+                self._collection = [value]
+
+        else:
+            self._function = "no_function"
+            value = ""
+            self._collection = []
+
+        logger.log(job_id=self._job_id, msg=f"Function: {self._function}, Value: {value}")
+
+    def breakdown_callback(self):
+        # todo
         pass
 
+    # Job Properties
     @property
     def job_id(self) -> int:
-        """Returns the Job ID if message is stored on the database. Else it will store it and return Job ID"""
-        if self._job_id is None:
-            self.store_message()
         return self._job_id
 
     @property
     def telepot_account(self):
-        """Returns the telepot account name from which the initial message originated"""
-        return self._message_handler
+        return self._telepot_account
 
     @property
     def chat_id(self) -> int:
-        """Returns the chat ID of the initial message"""
-        return self._message['chat']['id']
+        return self._chat_id
 
     @property
     def message_id(self) -> int:
-        """Returns the message ID of the initial message"""
-        return self._message['message_id']
+        return self._reply_to
 
     @property
     def f_name(self) -> str:
-        """Returns the first name of the person who sent the initial message"""
-        return str(self._message['chat']['first_name'])
-
-    @property
-    def content(self):
-        """Returns the raw content of the initial message."""
-        try:
-            return str(self._message['text'])
-        except KeyError:
-            logger.log('No Text Key: ' + str(self._message), log_type="warn")
-            return ""
-
-    @property
-    def first_word(self):
-        """Returns the first word of the content. Used to find the command"""
-        return self.breakdown_content()
-
-    @property
-    def called_back(self):
-        """Returns True if the message was called back. Returns False if the message is a new message."""
-        return self._called_back
-
-    @property
-    def cb_id(self):
-        """Returns the next available callback ID to use when generating a keyboard. Everytime this value is referred
-        a new callback ID is generated."""
-        query = f"SELECT cb_id FROM {global_var.tbl_jobs} WHERE job_id ='{str(self._job_id)}'"
-        cb = int(self.admin_db.run_sql(query)[0])
-        cb = cb + 1
-        self.update_db('cb_id', str(cb), force=True)
-        return cb
+        return self._username
 
     @property
     def function(self):
-        """Returns the set function of the message. If function is not set, a blank string is returned"""
         return self._function
 
     @function.setter
     def function(self, func):
-        """Use to set the function for the message"""
         self._function = func
-        if self.stored_message:
-            self.update_db('function', self._function)
-
-    @property
-    def value(self):
-        if self._value == "":
-            self.breakdown_content()
-        return self._value
-
-    @property
-    def first_value(self):
-        """Returns the first value of the content"""
-        return self.value.split(" ")[0] if " " in self.value else self.value
+        self.update_db('function', self._function)
 
     @property
     def photo_id(self):
@@ -140,7 +133,7 @@ class Job:
     @property
     def photo_name(self):
         """Returns the photo name associated with this message"""
-        return f'{self.chat_id}-{self.message_id}-{self.generated_time}.png'
+        return f'{self._job_id}.png'
 
     @property
     def photo_loc(self):
@@ -149,19 +142,81 @@ class Job:
             os.makedirs(global_var.telepot_image_dump)
         return os.path.join(global_var.telepot_image_dump, self.photo_name)
 
+    # Checks
     @property
-    def check_sender(self):
-        """Returns True if the sender is an authorized sender"""
-        if self.admin_db.exists(global_var.tbl_chats, f"chat_id = '{self.chat_id}'") == 0:
+    def is_authorised(self):
+        if self._db.exists(global_var.tbl_chats, f"chat_id = '{self.chat_id}'") == 0:
             return False
         else:
             return True
 
     @property
+    def is_master(self):
+        return self._master == self.chat_id
+
+    @property
+    def is_stored(self):
+        return self._job_id != 0
+
+
+
+
+    # Functions
+    def complete(self):
+        if self.is_stored:
+            self.update_db('complete', True)
+            logger.log(job_id=self._job_id, msg="Message Completed")
+
+
+    def update_db(self, field: str, item, force=False):
+        if force and not self.stored_message:
+            self.store_message()
+
+        if self.stored_message:
+            query = f"UPDATE {global_var.tbl_jobs} SET {field} = '{item}' WHERE job_id = '{str(self._job_id)}'"
+            self._db.run_sql(query)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    @property
+    def cb_id(self):
+        """Returns the next available callback ID to use when generating a keyboard. Everytime this value is referred
+        a new callback ID is generated."""
+        query = f"SELECT cb_id FROM {global_var.tbl_jobs} WHERE job_id ='{str(self._job_id)}'"
+        cb = int(self._db.run_sql(query)[0])
+        cb = cb + 1
+        self.update_db('cb_id', str(cb), force=True)
+        return cb
+
+
+
+
+    @property
+    def first_value(self):
+        """Returns the first value of the content"""
+        return self.value.split(" ")[0] if " " in self.value else self.value
+
+    @property
     def collection(self) -> list:
         if self.stored_message:
             query = f"SELECT collection FROM {global_var.tbl_jobs} WHERE job_id ='{str(self._job_id)}'"
-            result = self.admin_db.run_sql(query)
+            result = self._db.run_sql(query)
             collect = result[0].split(";")
         else:
             collect = []
@@ -173,56 +228,24 @@ class Job:
         self.update_db('collection', collect, force=True)
 
     @property
-    def stored_message(self):
-        return self._job_id is not None
-
-    @property
-    def is_master(self):
-        master = JSONEditor(global_var.telepot_accounts).read()[self.telepot_account]["master"]
-        return master == self.chat_id
-
-    @property
     def replies(self):
         query = f"SELECT replies FROM {global_var.tbl_jobs} WHERE job_id ='{str(self._job_id)}'"
-        return json.loads(self.admin_db.run_sql(query)[0])
+        return json.loads(self._db.run_sql(query)[0])
 
     @property
     def callbacks(self):
         query = f"SELECT callbacks FROM {global_var.tbl_jobs} WHERE job_id ='{str(self._job_id)}'"
-        return json.loads(self.admin_db.run_sql(query)[0])
-
-    def breakdown_content(self):
-        """Breaks down the content of the initial message and returns the first word while saving the value. If the
-        first word started with '/' then the value will be taken from the second word onward. If not the entire message
-        will be taken as the value."""
-        f = self.content.split(" ")[0].lower()
-        if f.startswith("/"):
-            self._value = self.content.replace(f, "").strip()
-        else:
-            self._value = self.content
-        logger.log(f"{str(self._message_handler)}\t{str(self.chat_id)} - {f}.")
-        return f
+        return json.loads(self._db.run_sql(query)[0])
 
     def store_message(self):
         if self._function == "":
             logger.log("Message to be stored without function", log_type="warn")
-        self._job_id = self.admin_db.insert(table=global_var.tbl_jobs,
-                                            columns="account, message, function",
-                                            val=(self._message_handler, json.dumps(self._message), self._function))
+        self._job_id = self._db.insert(table=global_var.tbl_jobs,
+                                       columns="account, message, function",
+                                       val=(self._telepot_account, json.dumps(self._message), self._function))
         logger.log(f"({self._job_id}): Message Stored")
 
-    def update_db(self, field: str, item, force=False):
-        if force and not self.stored_message:
-            self.store_message()
 
-        if self.stored_message:
-            query = f"UPDATE {global_var.tbl_jobs} SET {field} = '{item}' WHERE job_id = '{str(self._job_id)}'"
-            self.admin_db.run_sql(query)
-
-    def complete(self):
-        if self.stored_message:
-            self.update_db('complete', True)
-            logger.log(f"({self._job_id}): Message Completed")
 
     def store_photo(self):
         foo = Image.open(self.photo_loc)

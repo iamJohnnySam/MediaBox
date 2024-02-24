@@ -12,7 +12,7 @@ from database_manager.json_editor import JSONEditor
 from database_manager.sql_connector import sql_databases
 
 
-class MessageHandler:
+class Messenger:
 
     def __init__(self, telepot_account: str, task_q: Queue):
         self.telepot_account = telepot_account
@@ -27,22 +27,23 @@ class MessageHandler:
         self.master = telepot_accounts[telepot_account]["master"]
 
         # Get Commands
+        # todo replace with sql table
         self.command_dictionary = JSONEditor(f'{global_var.telepot_commands}telepot_commands_'
                                              f'{self.telepot_account}.json').read()
 
         # Listen
         MessageLoop(self.bot, {'chat': self.handle,
                                'callback_query': self.handle_callback}).run_as_thread()
-        logger.log('Telepot ' + telepot_account + ' listening')
+        logger.log(job_id=0, msg=f'Telepot {telepot_account} listening')
 
     def handle(self, msg):
         message = Job(self.telepot_account, msg)
 
-        if not message.check_sender():
+        if not message.is_authorised():
             self.bot.sendMessage(message.chat_id, "Hello " + message.f_name + "! You're not allowed to be here")
             string = f"Unauthorised Chat access: {message.f_name}, chat_id: {message.chat_id}"
             self.send_now(string)
-            logger.log(string, log_type="warn")
+            logger.log(job_id=message.job_id, msg=string, log_type="warn")
             return
 
         if 'photo' in msg.keys():
@@ -51,50 +52,37 @@ class MessageHandler:
         if 'text' in msg.keys():
             self.handle_text(message)
         else:
-            logger.log("Unknown Chat type", log_type="error")
+            logger.log(job_id=message.job_id, msg="Unknown Chat type", log_type="error")
 
-    def handle_photo(self, msg):
+    def handle_photo(self, msg: Job):
         try:
             self.bot.download_file(msg.photo_id, msg.photo_loc)
         except PermissionError:
-            logger.log("Permission Error")
+            logger.log(job_id=msg.job_id, msg="Permission Error")
             self.send_now("PERMISSION ERROR")
 
-    def handle_text(self, msg):
-        if msg.content == "":
-            msg.function = "no_function"
+    def handle_text(self, msg: Job):
+        if msg.function == "no_function":
             self.task_q.put(msg)
 
-        elif msg.first_word in self.command_dictionary.keys():
-            function = self.command_dictionary[msg.first_word]["function"]
-            msg.function = function
-            self.task_q.put(msg)
-
-        elif msg.first_word in ['/alive', '/time', '/start_over', '/exit_all', '/reboot_pi']:
-            msg.function = msg.first_word.replace("/", "").strip()
-            self.task_q.put(msg)
-
-        elif msg.first_word in ['/cancel', 'cancel']:
+        elif msg.function == "cancel":
             # todo cancel procedure. Remove from waiting list and trigger fail command
             pass
 
-        elif msg.first_word in ['/help', 'help', '/start', 'start', 'hi', 'hello']:
-            message = "--- AVAILABLE COMMANDS ---"
-            for command in self.command_dictionary.keys():
-                if command.startswith('/'):
-                    message = message + "\n" + command + " - " + self.command_dictionary[command]["definition"]
-                else:
-                    message = message + "\n\n" + command
-            self.send_now(message, chat=msg.chat_id)
+        elif msg.function in self.command_dictionary.keys():
+            self.task_q.put(msg)
 
-        elif msg.first_word.startswith("/"):
-            self.send_now("Sorry, that command is not known to me...", chat=msg.chat_id)
+        elif msg.function == "chat":
+            if msg.chat_id in self.waiting_user_input:
+                # todo
+                self.received_user_input(msg)
 
-        elif msg.chat_id in self.waiting_user_input:
-            self.received_user_input(msg)
+            else:
+                self.send_now("Chatbot Disabled. Type /help to find more information", chat=msg.chat_id)
 
         else:
-            self.send_now("Chatbot Disabled. Type /help to find more information", chat=msg.chat_id)
+            self.send_now("Sorry, that command is not known to me...", chat=msg.chat_id)
+
 
     def handle_callback(self, query):
         try:

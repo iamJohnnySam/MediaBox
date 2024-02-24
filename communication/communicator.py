@@ -7,14 +7,14 @@ import telepot
 import global_var
 import logger
 from charts.grapher import grapher_simple_trend, grapher_category, grapher_bar_trend, grapher_weight_trend
-from communication.message_handler import MessageHandler
+from communication.message_handler import Messenger
 from module.job import Job
 from database_manager.json_editor import JSONEditor
 from database_manager.sql_connector import sql_databases
 from show import transmission
 
 
-class Communicator(MessageHandler):
+class Communicator(Messenger):
 
     def __init__(self, telepot_account):
         super().__init__(telepot_account)

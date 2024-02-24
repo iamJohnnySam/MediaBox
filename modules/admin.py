@@ -1,6 +1,7 @@
 from datetime import datetime
 
 import global_var
+from database_manager.json_editor import JSONEditor
 from module.job import Job
 from module.module import Module
 
@@ -16,6 +17,20 @@ class Admin(Module):
     def time(self):
         self.send_message(message=str(datetime.now()))
         self._job.complete()
+
+    def help(self):
+        message = "--- AVAILABLE COMMANDS ---"
+
+        # todo replace with sql table
+        command_dictionary = JSONEditor(f'{global_var.telepot_commands}telepot_commands_'
+                                        f'{self._job.telepot_account}.json').read()
+
+        for command in command_dictionary.keys():
+            if command.startswith('/'):
+                message = message + "\n" + command + " - " + command_dictionary[command]["definition"]
+            else:
+                message = message + "\n\n" + command
+        self.send_message(message=message)
 
     def start_over(self):
         if self._job.is_master:
