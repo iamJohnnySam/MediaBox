@@ -122,6 +122,8 @@ class Messenger:
             # todo reply to callback as fail
             return
 
+        # todo add value to collection
+
         task_queue.add_job(msg)
 
     def send_now(self, send_string: str, job: Job = None, chat=None, reply_to=None,
@@ -180,7 +182,8 @@ class Messenger:
                                                reply_markup=keyboard)
                 replies.append(message)
 
-            logger.log(str(chat) + " - " + str(message['message_id']) + " - Message: " + str(send_string))
+            logger.log(job_id=job_id,
+                       msg=str(chat) + " - " + str(message['message_id']) + " - Message: " + str(send_string))
 
         return replies
 
@@ -190,9 +193,9 @@ class Messenger:
                            image: bool = False, photo: str = ""):
 
         if len(button_text) == 0 or len(button_text) != len(button_val):
-            logger.log("Keyboard Generation error: " + str(send_string), log_type="error")
-            logger.log("Button Text Length " + str(len(button_text)), log_type="error")
-            logger.log("Button Value Length " + str(len(button_val)), log_type="error")
+            logger.log(job_id=msg.job_id, error_code=20011)
+            logger.log(job_id=msg.job_id, msg="Button Text Length " + str(len(button_text)))
+            logger.log(job_id=msg.job_id, msg="Button Value Length " + str(len(button_val)))
             return
 
         buttons = []
@@ -210,7 +213,7 @@ class Messenger:
                 button_data = f"{button_prefix};X"
 
             buttons.append(InlineKeyboardButton(text=str(button_text[i]), callback_data=button_data))
-            logger.log(f'Keyboard button created > {button_data}')
+            logger.log(job_id=msg.job_id, msg=f'Keyboard button created > {button_data}')
 
         keyboard_markup = []
         c = 0

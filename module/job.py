@@ -4,7 +4,7 @@ import os
 from PIL import Image
 
 import global_var
-from logging import logger
+from record import logger
 from database_manager.json_editor import JSONEditor
 from database_manager.sql_connector import sql_databases
 from exceptions.custom_exceptions import *
@@ -17,27 +17,28 @@ class Job:
 
         self._db = sql_databases[global_var.db_admin]
         self._telepot_account = telepot_account
-        self._master = JSONEditor(global_var.telepot_accounts).read()[self.telepot_account]["master"]
 
         # Important Variables
         # todo link them to parameters when done
-        self._chat_id = None
-        self._reply_to = None
-        self._username = None
-        self._function = None
-        self._collection = []
+        self._chat_id: int = 0
+        self._reply_to: int = 0
+        self._username: str = ""
+        self._class: str = ""
+        self._function: str = ""
+        self._collection: [str] = []
 
         # todo check other params
         manual_params = False
 
         if message is None and job_id == 0 and not manual_params:
+            logger.log(job_id=job_id, error_code=40001)
             raise InvalidParameterException("Not enough parameters to create a job")
 
-        elif message is not None and job_id == 0 and not manual_params:
+        elif message is not None:
             self._job_id: int = 0
             self.breakdown_message(message)
 
-        elif message is None and job_id != 0 and not manual_params:
+        elif job_id != 0:
             query = f"SELECT account, message, function FROM {global_var.tbl_jobs} " \
                     f"WHERE job_id ='{str(self._job_id)}'"
             result = self._db.run_sql(query)
@@ -45,13 +46,14 @@ class Job:
                 raise LookupError
             self._telepot_account, self._message, self._function = int(result[0])
 
-        elif message is None and job_id == 0 and manual_params:
+        elif manual_params:
             # todo
 
             # todo get username from sql
             pass
 
         else:
+            logger.log(job_id, error_code=40002)
             raise InvalidParameterException("Error creating job")
 
     def breakdown_message(self, msg: dict):
@@ -92,6 +94,10 @@ class Job:
 
     # Job Properties
     @property
+    def master(self):
+        return JSONEditor(global_var.telepot_accounts).read()[self.telepot_account]["master"]
+
+    @property
     def job_id(self) -> int:
         return self._job_id
 
@@ -121,6 +127,21 @@ class Job:
         self.update_db('function', self._function)
 
     @property
+    def collection(self) -> list:
+        if self.is_stored:
+            query = f"SELECT collection FROM {global_var.tbl_jobs} WHERE job_id ='{str(self._job_id)}'"
+            result = self._db.run_sql(query)
+            collect = result[0].split(";")
+        else:
+            collect = self._collection
+        return collect
+
+    @collection.setter
+    def collection(self, collect):
+        self._collection = collect
+        self.update_db('collection', collect, force=True)
+
+    @property
     def photo_id(self):
         """Returns the photo ID of the initial message and automatically stores the message on the database"""
         if 'photo' in self._message.keys():
@@ -141,6 +162,17 @@ class Job:
             os.makedirs(global_var.telepot_image_dump)
         return os.path.join(global_var.telepot_image_dump, self.photo_name)
 
+    @property
+    def cb_id(self):
+        """Returns the next available callback ID to use when generating a keyboard. Everytime this value is referred
+        a new callback ID is generated."""
+        self.store_message()
+        query = f"SELECT cb_id FROM {global_var.tbl_jobs} WHERE job_id ='{str(self._job_id)}'"
+        cb = int(self._db.run_sql(query)[0])
+        cb = cb + 1
+        self.update_db('cb_id', str(cb), force=True)
+        return cb
+
     # Checks
     @property
     def is_authorised(self):
@@ -151,14 +183,11 @@ class Job:
 
     @property
     def is_master(self):
-        return self._master == self.chat_id
+        return self.master == self.chat_id
 
     @property
     def is_stored(self):
         return self._job_id != 0
-
-
-
 
     # Functions
     def complete(self):
@@ -166,65 +195,13 @@ class Job:
             self.update_db('complete', True)
             logger.log(job_id=self._job_id, msg="Message Completed")
 
-
     def update_db(self, field: str, item, force=False):
-        if force and not self.stored_message:
+        if force and not self.is_stored:
             self.store_message()
 
-        if self.stored_message:
+        if self.is_stored:
             query = f"UPDATE {global_var.tbl_jobs} SET {field} = '{item}' WHERE job_id = '{str(self._job_id)}'"
             self._db.run_sql(query)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    @property
-    def cb_id(self):
-        """Returns the next available callback ID to use when generating a keyboard. Everytime this value is referred
-        a new callback ID is generated."""
-        query = f"SELECT cb_id FROM {global_var.tbl_jobs} WHERE job_id ='{str(self._job_id)}'"
-        cb = int(self._db.run_sql(query)[0])
-        cb = cb + 1
-        self.update_db('cb_id', str(cb), force=True)
-        return cb
-
-
-
-
-    @property
-    def first_value(self):
-        """Returns the first value of the content"""
-        return self.value.split(" ")[0] if " " in self.value else self.value
-
-    @property
-    def collection(self) -> list:
-        if self.stored_message:
-            query = f"SELECT collection FROM {global_var.tbl_jobs} WHERE job_id ='{str(self._job_id)}'"
-            result = self._db.run_sql(query)
-            collect = result[0].split(";")
-        else:
-            collect = []
-
-        return collect
-
-    @collection.setter
-    def collection(self, collect):
-        self.update_db('collection', collect, force=True)
 
     @property
     def replies(self):
@@ -238,13 +215,11 @@ class Job:
 
     def store_message(self):
         if self._function == "":
-            logger.log("Message to be stored without function", log_type="warn")
+            logger.log(job_id=self.job_id, msg="Message to be stored without function", log_type="warn")
         self._job_id = self._db.insert(table=global_var.tbl_jobs,
                                        columns="account, message, function",
                                        val=(self._telepot_account, json.dumps(self._message), self._function))
-        logger.log(f"({self._job_id}): Message Stored")
-
-
+        logger.log(job_id=self.job_id, msg=f"({self._job_id}): Message Stored")
 
     def store_photo(self):
         foo = Image.open(self.photo_loc)
@@ -255,10 +230,10 @@ class Job:
             foo = foo.resize((int(w * 1024 / h), 1024))
 
         foo.save(self.photo_loc, optimize=True, quality=95)
-        logger.log(f'Received Photo > {self.photo_name}, File size > {foo.size}')
+        logger.log(job_id=self.job_id, msg=f'Received Photo > {self.photo_name}, File size > {foo.size}')
 
     def collect(self, value: str, index: int):
-        if not self.stored_message:
+        if not self.is_stored:
             self.store_message()
             collection = []
         else:
@@ -266,12 +241,13 @@ class Job:
 
         if index < len(collection):
             collection[index] = value
-            logger.log(f"({self._job_id}): Replaced with {value} at index {index}.")
+            logger.log(job_id=self.job_id, msg=f"({self._job_id}): Replaced with {value} at index {index}.")
         elif index == len(collection):
             collection.append(value)
-            logger.log(f"({self._job_id}): Added {value} at index {index}.")
+            logger.log(job_id=self.job_id, msg=f"({self._job_id}): Added {value} at index {index}.")
         else:
-            logger.log(f"({self._job_id}): Cannot Collect {value} at index {index} on collection: {collection}.",
+            logger.log(job_id=self.job_id,
+                       msg=f"({self._job_id}): Cannot Collect {value} at index {index} on collection: {collection}.",
                        log_type="error")
             return False
 
@@ -292,4 +268,3 @@ class Job:
         d = self.callbacks
         d[str(cb)] = value
         self.update_db('callbacks', json.dumps(d))
-        self._called_back = True
