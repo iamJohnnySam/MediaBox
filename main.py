@@ -4,7 +4,7 @@ import sys
 import threading
 import time
 
-from logging import logger
+from record import logger
 import global_var
 from communication import communicator
 from maintenance import start_up, backup

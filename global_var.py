@@ -6,7 +6,7 @@ restart = False
 reboot_pi = False
 
 log_type = "debug"
-error_codes = "logging/error_codes.json"
+error_codes = "record/error_codes.json"
 
 media_path = "/mnt/MediaBox"
 

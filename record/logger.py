@@ -9,13 +9,20 @@ from database_manager.json_editor import JSONEditor
 today_date = str(date.today())
 
 
-def log(job_id, msg="", log_type="debug", error_code=0, error=""):
+def log(job_id: int, msg: str = "", log_type: str = "debug", error_code: int = 0, error: str = ""):
     if error_code == 0 and msg == "":
-        raise ValueError("Invalid Parameters for logging")
+        raise ValueError("Invalid Parameters for record")
 
-    if error_code != 0:
-        errors = JSONEditor(global_var.error_codes).read()
-
+    elif error_code != 0 and msg == "":
+        errors: dict = JSONEditor(global_var.error_codes).read()
+        if str(error_code) in errors.keys():
+            msg = errors[str(error_code)]
+            if log_type == "debug":
+                log_type = "error"
+            elif log_type == "debug" and str(error_code).startswith("3"):
+                log_type = "info"
+        else:
+            raise LookupError("Error code not found")
 
     message_types = ["info", "error", "warn", "debug"]
     if log_type not in message_types:
@@ -55,6 +62,9 @@ def log(job_id, msg="", log_type="debug", error_code=0, error=""):
         log_type = "INF"
         if global_var.log_type in ["debug", "info"]:
             print_message = True
+
+    if error != "":
+        logging.error(error)
 
     if print_message:
         for segment in message.split("\n"):

@@ -5,7 +5,7 @@ from telepot.loop import MessageLoop
 from telepot.namedtuple import InlineKeyboardButton, InlineKeyboardMarkup
 
 import global_var
-from logging import logger
+from record import logger
 from module.job import Job
 from database_manager.json_editor import JSONEditor
 from database_manager.sql_connector import sql_databases
@@ -47,19 +47,19 @@ class Messenger:
         if 'text' in msg.keys():
             self.handle_text(message)
         else:
-            logger.log(job_id=message.job_id, msg="Unknown Chat type", log_type="error")
+            logger.log(job_id=message.job_id, error_code=20001)
 
     def handle_photo(self, msg: Job):
         try:
             self.bot.download_file(msg.photo_id, msg.photo_loc)
-        except PermissionError:
-            logger.log(job_id=msg.job_id, msg="Permission Error")
+        except PermissionError as e:
+            logger.log(job_id=msg.job_id, error_code=10001, error=str(e))
             self.send_now("PERMISSION ERROR")
 
     def handle_text(self, msg: Job):
         if msg.function == "no_function":
             task_queue.add_job(msg)
-            logger.log(job_id=msg.job_id, msg="No function call detected")
+            logger.log(job_id=msg.job_id, error_code=30001)
 
         elif msg.function == "cancel":
             # todo cancel procedure. Remove from waiting list and trigger fail command
@@ -68,12 +68,12 @@ class Messenger:
         elif msg.function in self.commands.keys():
             if type(self.commands[msg.function]) is bool:
                 self.send_now("That's not a command", job=msg)
-                logger.log(job_id=msg.job_id, msg="Invalid command", log_type="warn")
+                logger.log(job_id=msg.job_id, error_code=30002)
                 msg.complete()
                 return
             elif self.telepot_account != "main" and self.telepot_account not in self.commands[msg.function].keys():
                 self.send_now("That command does not work on this chatbot", job=msg)
-                logger.log(job_id=msg.job_id, msg="Invalid command for chatbot", log_type="warn")
+                logger.log(job_id=msg.job_id, error_code=30003)
                 msg.complete()
                 return
             task_queue.add_job(msg)
@@ -92,41 +92,51 @@ class Messenger:
     def handle_callback(self, query):
         try:
             q = str(query['data']).split(";")
-        except ValueError:
-            logger.log("Value error in callback " + str(query), log_type="error")
+        except ValueError as e:
+            logger.log(job_id=0, error_code=20002, error=str(e))
             return
 
-        logger.log('Callback Query: ' + str(query['data']))
+        try:
+            msg_id = int(q[0])
+        except ValueError as e:
+            logger.log(job_id=0, error_code=20004, error=str(e))
+            return
+
+        logger.log(job_id=msg_id, msg='Callback Query: ' + str(query['data']))
 
         if q[3] == "X":
             save_loc = os.path.join(global_var.telepot_callback_database, f"{q[0]}_cb.json")
             query = JSONEditor(save_loc).read()[f'{q[0]};{q[1]};{q[2]}']
-            logger.log("Recovered Query: " + query)
+            logger.log(job_id=msg_id, msg="Recovered Query: " + query)
 
-        try:
-            q = str(query['data']).split(";")
-            msg_id = int(q[0])
-        except ValueError:
-            logger.log("Value error in callback " + str(query), log_type="error")
-            return
+            try:
+                q = str(query['data']).split(";")
+            except ValueError as e:
+                logger.log(job_id=msg_id, error_code=20003, error=str(e))
+                return
 
         try:
             msg = Job(job_id=msg_id)
-        except LookupError:
-            logger.log("Message not found", log_type="error")
+        except LookupError as e:
+            logger.log(job_id=msg_id, error_code=20005, error=str(e))
             # todo reply to callback as fail
             return
 
-        self.task_q.put(msg)
+        task_queue.add_job(msg)
 
     def send_now(self, send_string: str, job: Job = None, chat=None, reply_to=None,
                  keyboard=None,
                  group: str = None,
                  image: bool = False, photo: str = ""):
 
+        if job is not None:
+            job_id = job.job_id
+        else:
+            job_id = 0
+
         # Check Message
         if send_string == "" or send_string is None:
-            logger.log("No message", log_type="error")
+            logger.log(job_id=job_id, error_code=20006)
             return
 
         # Check Chat ID
@@ -134,7 +144,7 @@ class Messenger:
             chats = [self.master]
         elif group is not None:
             if sql_databases[global_var.db_admin].exists(global_var.tbl_groups, f"group_name = '{group}'") == 0:
-                logger.log("Group does not exist", log_type="error")
+                logger.log(job_id=job_id, error_code=20007)
                 return
             query = f"SELECT chat_id FROM {global_var.tbl_groups} WHERE group_name = '{group}'"
             result = sql_databases["administration"].run_sql(query, fetch_all=True)
@@ -142,7 +152,7 @@ class Messenger:
         elif job is not None and chat is None:
             chats = [job.chat_id]
         else:
-            logger.log("Chat ID conditions are not met correctly", log_type="error")
+            logger.log(job_id=job_id, error_code=20008)
             return
 
         # Check Reply to
@@ -150,9 +160,9 @@ class Messenger:
             if job.telepot_account == self.telepot_account:
                 reply_to = job.message_id
             else:
-                logger.log("Telepot account not matching.", log_type="error")
+                logger.log(job_id=job_id, error_code=20009)
         elif group is not None and reply_to is not None:
-            logger.log("Unable to reply for a group message. Reply reference will be removed.", log_type="warn")
+            logger.log(job_id=job_id, error_code=20010)
             reply_to = None
 
         replies = []

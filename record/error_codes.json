@@ -1,0 +1,22 @@
+{
+  "10000": "Program Errors",
+  "10001": "File access Permission Error",
+
+  "20000": "Telepot Errors",
+  "20001": "Unknown Chat Type",
+  "20002": "Error breaking down callback data using split",
+  "20003": "Error breaking down recovered callback data using split",
+  "20004": "Error converting job ID to string in callback data",
+  "20005": "Unable to create Job frm callback",
+  "20006": "No message to send",
+  "20007": "Group does not exist",
+  "20008": "Chat ID conditions are not met correctly",
+  "20009": "Telepot account not matching with job ID to reply.",
+  "20010": "Unable to reply for a group message. Reply reference will be removed.",
+
+  "30000": "Telepot User Errors",
+  "30001": "No function call detected",
+  "30002": "Invalid Command. Command not in list.",
+  "30003": "Invalid Command. Command not recognized for chatbot",
+
+}
