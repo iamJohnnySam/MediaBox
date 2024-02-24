@@ -1,9 +1,9 @@
 from datetime import datetime, timedelta
 
 import global_var
-from logging import logger
-from job import Job
-from exceptions.custom_exceptions import *
+from record import logger
+from job_handling.job import Job
+from record.custom_exceptions import *
 
 
 class Module:

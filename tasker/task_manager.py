@@ -1,7 +1,7 @@
 import time
 
 import global_var
-from tasker import task_queue
+from job_handling import task_queue
 
 
 def run_task_manager():

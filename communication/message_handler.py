@@ -6,10 +6,10 @@ from telepot.namedtuple import InlineKeyboardButton, InlineKeyboardMarkup
 
 import global_var
 from record import logger
-from module.job import Job
+from job_handling.job import Job
 from database_manager.json_editor import JSONEditor
 from database_manager.sql_connector import sql_databases
-from tasker import task_queue
+from job_handling import task_queue
 
 
 class Messenger:

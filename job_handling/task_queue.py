@@ -1,7 +1,7 @@
 import threading
 from queue import Queue
 
-from module.job import Job
+from modules.base_module import Job
 
 job_q = Queue(maxsize=0)
 lock = threading.Lock()

@@ -7,7 +7,7 @@ import global_var
 from record import logger
 from database_manager.json_editor import JSONEditor
 from database_manager.sql_connector import sql_databases
-from exceptions.custom_exceptions import *
+from record.custom_exceptions import *
 
 
 class Job:

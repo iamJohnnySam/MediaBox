@@ -2,8 +2,8 @@ from datetime import datetime
 
 import global_var
 from database_manager.json_editor import JSONEditor
-from module.job import Job
-from module.module import Module
+from job_handling.job import Job
+from modules.base_module import Module
 
 
 class Admin(Module):
