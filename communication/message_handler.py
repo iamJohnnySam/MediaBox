@@ -50,11 +50,13 @@ class Messenger:
             logger.log(job_id=message.job_id, error_code=20001)
 
     def handle_photo(self, msg: Job):
-        try:
-            self.bot.download_file(msg.photo_id, msg.photo_loc)
-        except PermissionError as e:
-            logger.log(job_id=msg.job_id, error_code=10001, error=str(e))
-            self.send_now("PERMISSION ERROR")
+        for pic in range(msg.photo_ids):
+            try:
+                self.bot.download_file(msg.photo_ids[pic], msg.photo_loc[pic])
+            except PermissionError as e:
+                logger.log(job_id=msg.job_id, error_code=10001, error=str(e))
+                self.send_now("PERMISSION ERROR")
+        msg.store_photos()
 
     def handle_text(self, msg: Job):
         if msg.function == "no_function":
@@ -165,6 +167,8 @@ class Messenger:
                 logger.log(job_id=job_id, error_code=20009)
         elif group is not None and reply_to is not None:
             logger.log(job_id=job_id, error_code=20010)
+            reply_to = None
+        if reply_to == 0:
             reply_to = None
 
         replies = []

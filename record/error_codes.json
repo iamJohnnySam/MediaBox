@@ -22,6 +22,7 @@
 
   "40000": "Job Errors",
   "40001": "Insufficient parameters to create a job",
-  "40002": "Conditions not met to create job"
-
+  "40002": "Conditions not met to create job",
+  "40003": "Unable to find the job to create a job",
+  "40004": "Cannot collect. Index exceeds collection length."
 }

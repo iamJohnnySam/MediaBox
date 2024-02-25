@@ -16,7 +16,7 @@ def log(job_id: int, msg: str = "", log_type: str = "debug", error_code: int = 0
     elif error_code != 0 and msg == "":
         errors: dict = JSONEditor(global_var.error_codes).read()
         if str(error_code) in errors.keys():
-            msg = errors[str(error_code)]
+            msg = f"{str(error_code)},{errors[str(error_code)]}"
             if log_type == "debug":
                 log_type = "error"
             elif log_type == "debug" and str(error_code).startswith("3"):
