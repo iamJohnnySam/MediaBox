@@ -1,8 +1,8 @@
 import feedparser
 
-from logging import logger
+from record import logger
 from communication.channels import channels
-from module.job import Job
+from job_handling.job import Job
 
 
 class MovieFinder:
@@ -49,7 +49,7 @@ class MovieFinder:
             title, image, link, torrent = get_movie_details(movie_name)
 
             self.channel.send_with_keyboard(send_string=title,
-                                            msg=self.msg,
+                                            job=self.msg,
                                             photo=image,
                                             button_text=["Visit Page", "Download", "Cancel"],
                                             button_val=[f"echo;{link}", f"torrent;{torrent}", "cancel"],

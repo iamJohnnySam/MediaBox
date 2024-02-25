@@ -2,13 +2,12 @@ import os
 
 import telepot
 from telepot.loop import MessageLoop
-from telepot.namedtuple import InlineKeyboardButton, InlineKeyboardMarkup
 
 import global_var
+from communication.message import Message
 from record import logger
 from job_handling.job import Job
 from database_manager.json_editor import JSONEditor
-from database_manager.sql_connector import sql_databases
 from job_handling import task_queue
 
 
@@ -36,7 +35,7 @@ class Messenger:
         if not message.is_authorised():
             self.bot.sendMessage(message.chat_id, "Hello " + message.f_name + "! You're not allowed to be here")
             string = f"Unauthorised Chat access: {message.f_name}, chat_id: {message.chat_id}"
-            self.send_now(string)
+            self.send_now(Message(string))
             logger.log(job_id=message.job_id, msg=string, log_type="warn")
             message.complete()
             return
@@ -55,7 +54,7 @@ class Messenger:
                 self.bot.download_file(msg.photo_ids[pic], msg.photo_loc[pic])
             except PermissionError as e:
                 logger.log(job_id=msg.job_id, error_code=10001, error=str(e))
-                self.send_now("PERMISSION ERROR")
+                self.send_now(Message("PERMISSION ERROR"))
         msg.store_photos()
 
     def handle_text(self, msg: Job):
@@ -69,27 +68,27 @@ class Messenger:
 
         elif msg.function in self.commands.keys():
             if type(self.commands[msg.function]) is bool:
-                self.send_now("That's not a command", job=msg)
+                self.send_now(Message("That's not a command", job=msg))
                 logger.log(job_id=msg.job_id, error_code=30002)
                 msg.complete()
                 return
             elif self.telepot_account != "main" and self.telepot_account not in self.commands[msg.function].keys():
-                self.send_now("That command does not work on this chatbot", job=msg)
+                self.send_now(Message("That command does not work on this chatbot", job=msg))
                 logger.log(job_id=msg.job_id, error_code=30003)
                 msg.complete()
                 return
             task_queue.add_job(msg)
 
         elif msg.function == "chat":
-            if msg.chat_id in self.waiting_user_input:
+            if msg.chat_id in self.waiting_user_input.keys():
                 # todo
                 self.received_user_input(msg)
 
             else:
-                self.send_now("Chatbot Disabled. Type /help to find more information", job=msg)
+                self.send_now(Message("Chatbot Disabled. Type /help to find more information", job=msg))
 
         else:
-            self.send_now("Sorry, that command is not known to me...", job=msg)
+            self.send_now(Message("Sorry, that command is not known to me...", job=msg))
 
     def handle_callback(self, query):
         try:
@@ -128,111 +127,28 @@ class Messenger:
 
         task_queue.add_job(msg)
 
-    def send_now(self, send_string: str, job: Job = None, chat=None, reply_to=None,
-                 keyboard=None,
-                 group: str = None,
-                 image: bool = False, photo: str = ""):
-
-        if job is not None:
-            job_id = job.job_id
-        else:
-            job_id = 0
-
-        # Check Message
-        if send_string == "" or send_string is None:
-            logger.log(job_id=job_id, error_code=20006)
-            return
-
-        # Check Chat ID
-        if job is None and chat is None and group is None:
-            chats = [self.master]
-        elif group is not None:
-            if sql_databases[global_var.db_admin].exists(global_var.tbl_groups, f"group_name = '{group}'") == 0:
-                logger.log(job_id=job_id, error_code=20007)
-                return
-            query = f"SELECT chat_id FROM {global_var.tbl_groups} WHERE group_name = '{group}'"
-            result = sql_databases["administration"].run_sql(query, fetch_all=True)
-            chats = [row[0] for row in result]
-        elif job is not None and chat is None:
-            chats = [job.chat_id]
-        else:
-            logger.log(job_id=job_id, error_code=20008)
-            return
-
-        # Check Reply to
-        if group is None and reply_to is None and job is not None:
-            if job.telepot_account == self.telepot_account:
-                reply_to = job.message_id
-            else:
-                logger.log(job_id=job_id, error_code=20009)
-        elif group is not None and reply_to is not None:
-            logger.log(job_id=job_id, error_code=20010)
-            reply_to = None
-        if reply_to == 0:
-            reply_to = None
+    def send_now(self, message: Message):
+        message.this_telepot_account = self.telepot_account
 
         replies = []
-        for chat in chats:
-            if image:
-                message = self.bot.sendPhoto(chat,
-                                             photo=open(str(photo), 'rb'),
-                                             reply_to_message_id=reply_to,
-                                             caption=send_string,
-                                             reply_markup=keyboard)
-                replies.append(message)
+        for chat in message.chats:
+            if message.photo != "":
+                reply = self.bot.sendPhoto(chat,
+                                           photo=open(str(message.photo), 'rb'),
+                                           reply_to_message_id=message.reply_to,
+                                           caption=message.send_string,
+                                           reply_markup=message.keyboard)
+                replies.append(reply)
             else:
-                message = self.bot.sendMessage(chat, str(send_string),
-                                               reply_to_message_id=reply_to,
-                                               reply_markup=keyboard)
-                replies.append(message)
+                reply = self.bot.sendMessage(chat, str(message.send_string),
+                                             reply_to_message_id=message.reply_to,
+                                             reply_markup=message.keyboard)
+                replies.append(reply)
 
-            logger.log(job_id=job_id,
-                       msg=str(chat) + " - " + str(message['message_id']) + " - Message: " + str(send_string))
+            logger.log(job_id=message.job_id,
+                       msg=str(chat) + " - " + str(reply['message_id']) + " - Message: " + str(message.send_string))
 
-        return replies
-
-    def send_with_keyboard(self, send_string: str, msg: Job,
-                           button_text: list, button_val: list, arrangement: list,
-                           group: str = None,
-                           image: bool = False, photo: str = ""):
-
-        if len(button_text) == 0 or len(button_text) != len(button_val):
-            logger.log(job_id=msg.job_id, error_code=20011)
-            logger.log(job_id=msg.job_id, msg="Button Text Length " + str(len(button_text)))
-            logger.log(job_id=msg.job_id, msg="Button Value Length " + str(len(button_val)))
-            return
-
-        buttons = []
-        cb_id = msg.cb_id
-
-        for i in range(len(button_text)):
-            # FORMAT = msg_id; cb_id; btn_text; (step; value)
-            button_prefix = f"{str(msg.job_id)};{str(cb_id)};{button_text[i]}"
-            button_data = f"{button_prefix};{button_val[i]}"
-
-            if len(button_data) >= 60:
-                telepot_cb = {button_prefix: button_data}
-                save_loc = os.path.join(global_var.telepot_callback_database, f"{str(msg.job_id)}_cb.json")
-                JSONEditor(save_loc).add_level1(telepot_cb)
-                button_data = f"{button_prefix};X"
-
-            buttons.append(InlineKeyboardButton(text=str(button_text[i]), callback_data=button_data))
-            logger.log(job_id=msg.job_id, msg=f'Keyboard button created > {button_data}')
-
-        keyboard_markup = []
-        c = 0
-        for i in range(len(arrangement)):
-            keyboard_row = []
-            for j in range(arrangement[i]):
-                keyboard_row.append(buttons[c])
-                c = c + 1
-            keyboard_markup.append(keyboard_row)
-        keyboard = InlineKeyboardMarkup(inline_keyboard=keyboard_markup)
-
-        replies = self.send_now(send_string=send_string, job=msg, keyboard=keyboard,
-                                group=group, image=image, photo=photo)
-
-        msg.add_reply(cb_id, replies)
+        message.job.add_reply(replies)
 
     def get_value_from_user(self, msg: Job, inquiry="value"):
         # todo get value

@@ -29,6 +29,7 @@ class Job:
         else:
             self._collection: [str] = collection
         self._photo_ids: [str] = []
+        self._current_callback = 0
 
         manual_params = function != ""
 
@@ -182,6 +183,7 @@ class Job:
         cb = int(self._db.run_sql(query)[0])
         cb = cb + 1
         self.update_db('cb_id', str(cb), force=True)
+        self._current_callback = cb
         return cb
 
     # Checks
@@ -277,9 +279,9 @@ class Job:
 
         self.update_db("collection", self._collection)
 
-    def add_reply(self, cb: int, replies):
+    def add_reply(self, replies):
         d = self.replies
-        d[str(cb)] = replies
+        d[str(self._current_callback)] = replies
         self.update_db('replies', json.dumps(d))
 
     def add_callback(self, cb: int, value):

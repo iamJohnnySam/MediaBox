@@ -10,7 +10,7 @@ from communication.message_handler import Messenger
 from module.job import Job
 from database_manager.json_editor import JSONEditor
 from database_manager.sql_connector import sql_databases
-from show import transmission
+from modules import transmission
 
 
 class Communicator(Messenger):
@@ -34,7 +34,7 @@ class Communicator(Messenger):
                     btn_text, btn_cb, btn_value, arr = self.keyboard_extractor(msg.chat_id, "", news_channels,
                                                                                'subs_news',
                                                                                sql_result=False, command_only=True)
-                    self.send_with_keyboard(send_string=prev_channel, msg=msg,
+                    self.send_with_keyboard(send_string=prev_channel, job=msg,
                                             button_text=btn_text, button_cb=btn_cb, button_val=btn_value,
                                             arrangement=arr)
                 prev_channel = channel
@@ -71,7 +71,7 @@ class Communicator(Messenger):
 
         prefix = str(sql_id) + ";"
 
-        self.send_with_keyboard(msg=f'[{sql_id}] Is LKR {msg.value} an income or expense?',
+        self.send_with_keyboard(job=f'[{sql_id}] Is LKR {msg.value} an income or expense?',
                                 chat_id=msg.chat_id,
                                 button_text=["Income", "Expense", "Invest", "Delete"],
                                 button_cb=["finance", "finance", "finance", "finance"],
@@ -207,7 +207,7 @@ class Communicator(Messenger):
             button_value.append(f'{data[0]};2;Delete')
             arrangement.append(1)
 
-            self.send_with_keyboard(msg=f'[{data[0]}] What type of {data[2]} was it?',
+            self.send_with_keyboard(job=f'[{data[0]}] What type of {data[2]} was it?',
                                     chat_id=from_id,
                                     button_text=button_text,
                                     button_cb=button_cb,
@@ -225,7 +225,7 @@ class Communicator(Messenger):
             button_value.append(f'{data[0]};3;Delete')
             arrangement.append(1)
 
-            self.send_with_keyboard(msg=f'[{data[0]}] What is the category of {data[2]}',
+            self.send_with_keyboard(job=f'[{data[0]}] What is the category of {data[2]}',
                                     chat_id=from_id,
                                     button_text=button_text,
                                     button_cb=button_cb,

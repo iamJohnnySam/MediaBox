@@ -7,7 +7,7 @@ import schedule
 import global_var
 from logging import logger
 from maintenance import backup
-from show import transmission
+from modules import transmission
 
 running_threads = {}
 schedule_on_hold = {}

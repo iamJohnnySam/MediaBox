@@ -1,6 +1,9 @@
 from datetime import datetime, timedelta
 
 import global_var
+from communication.channels import channels
+from communication.message import Message
+from job_handling import task_queue
 from record import logger
 from job_handling.job import Job
 from record.custom_exceptions import *
@@ -11,23 +14,14 @@ class Module:
         self._job = job
         logger.log(self._job.job_id, f"Module Created")
 
-    def execute(self):
-        pass
-
-    def send_message(self, message, group=None, image=None, admin=False):
-        # todo write message sending script
-        pass
-
-    def send_admin(self, message):
-        self.send_message(message=message, admin=True)
-
     def check_value(self, index: int = 0, replace_str: str = "",
                     check_int: bool = False, check_float: bool = False,
                     check_date: bool = False,
                     check_time: bool = False,
                     check_list=None,
                     default: str = "",
-                    option_list=None) -> (bool, str):
+                    option_list=None,
+                    description: str = "") -> (bool, str):
 
         if sum([check_int, check_float, check_date, check_date]) > 1:
             raise InvalidParameterException("Contradicting check items are selected")
@@ -122,7 +116,37 @@ class Module:
 
         # If anything failed
         if not success:
-            # todo handle message and send options_list as keyboard and prompt user to input a value
-            pass
+            self._job.store_message()
+            get_manual = check_int or check_float or check_date or check_time
+
+            if option_list:
+                if description != "":
+                    send_val = "Please select the " + description + "."
+                else:
+                    send_val = "Please select from the list below."
+            else:
+                if replace_str != "":
+                    send_val = f"Please enter the amount in {replace_str}"
+                else:
+                    send_val = "Please enter the amount"
+                if description != "":
+                    send_val = send_val + " for the " + description + "."
+
+            if option_list:
+                msg = Message(send_string=send_val, job=self._job)
+                msg.keyboard_extractor(index=index, options=option_list, add_cancel=True, add_other=get_manual)
+                self.send_message(message=msg)
+            else:
+                self.send_message(message=Message(send_string=send_val, job=self._job), get_input=True)
 
         return success, value
+
+    def send_message(self, message: Message, get_input=False):
+        if get_input and self._job.chat_id in channels[self._job.telepot_account].waiting_user_input.keys():
+            task_queue.add_message(message)
+        else:
+            channels[self._job.telepot_account].send_now(message=message)
+
+    def send_admin(self, message: Message):
+        message.send_to_master()
+        self.send_message(message=message)

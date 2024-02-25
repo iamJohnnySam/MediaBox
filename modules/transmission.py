@@ -1,12 +1,15 @@
 from transmission_rpc import Client
 
 import global_var
-from logging import logger
+from job_handling.job import Job
+from modules.base_module import Module
+from record import logger
 from maintenance.folder_refactor import RefactorFolder
 
 
-class Transmission:
-    def __init__(self):
+class Transmission(Module):
+    def __init__(self, job: Job):
+        super().__init__(job)
         self.client = Client()
         self.active_torrents = {}
 
@@ -16,7 +19,7 @@ class Transmission:
         for torrent in torrent_list:
             success, torrent_name = self.add_torrent_to_list(torrent)
             if not success:
-                logger.log("Torrent Listing Error", log_type="error")
+                logger.log(job_id=self._job.job_id, error_code=50001)
 
     def add_torrent(self, path, paused=False):
         torrent = self.client.add_torrent(path, paused=paused)
@@ -27,7 +30,7 @@ class Transmission:
         torrent_id = torrent.id
         if torrent_id not in self.active_torrents.keys():
             self.active_torrents[torrent_id] = torrent
-            logger.log(f'Torrent Added - {torrent.name}')
+            logger.log(job_id=self._job.job_id, msg=f'Torrent Added - {torrent.name}')
             return True, torrent.name
         else:
             return False, ""
@@ -38,7 +41,8 @@ class Transmission:
             if self.active_torrents[torrent_number].percent_done == 1:
                 torrent_id = self.active_torrents[torrent_number].id
                 self.client.remove_torrent(torrent_id)
-                logger.log(f'Torrent deleted - {self.active_torrents[torrent_number].name}')
+                logger.log(job_id=self._job.job_id,
+                           msg=f'Torrent deleted - {self.active_torrents[torrent_number].name}')
 
 
 client = Transmission()

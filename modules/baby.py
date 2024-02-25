@@ -17,17 +17,21 @@ class Baby(Module):
 
     def feed(self):
         amount_list = ["30ml", "60ml", "90ml", "120ml"]
-        success, amount = self.check_value(index=0, replace_str="ml", check_float=True, option_list=amount_list)
+        success, amount = self.check_value(index=0, replace_str="ml", check_float=True, option_list=amount_list,
+                                           description="amount consumed")
         if not success:
             return
         source_types = ["Breast", "Express", "Formula"]
-        success, source = self.check_value(index=1, check_list=source_types, default="Formula")
+        success, source = self.check_value(index=1, check_list=source_types, default="Formula",
+                                           description="source")
         if not success:
             return
-        success, date = self.check_value(index=2, check_date=True, default=datetime.today().strftime('%Y-%m-%d'))
+        success, date = self.check_value(index=2, check_date=True, default=datetime.today().strftime('%Y-%m-%d'),
+                                         description="date")
         if not success:
             return
-        success, time = self.check_value(index=3, check_time=True, default=datetime.now().strftime('%H:%M:%S'))
+        success, time = self.check_value(index=3, check_time=True, default=datetime.now().strftime('%H:%M:%S'),
+                                         description="time")
         if not success:
             return
 
@@ -54,7 +58,7 @@ class Baby(Module):
         if not success:
             return
         source_types = ["Left", "Right", "Both"]
-        success, source = self.check_value(index=1, check_list=source_types)
+        success, source = self.check_value(index=1, check_list=source_types, description="extracted boob")
         if not success:
             return
         success, date = self.check_value(index=2, check_date=True, default=datetime.today().strftime('%Y-%m-%d'))
@@ -81,7 +85,7 @@ class Baby(Module):
 
     def diaper(self):
         source_types = ["Pee", "Poo", "PooPee"]
-        success, source = self.check_value(index=0, check_list=source_types)
+        success, source = self.check_value(index=0, check_list=source_types, description="type")
         if not success:
             return
         success, date = self.check_value(index=1, check_date=True, default=datetime.today().strftime('%Y-%m-%d'))
@@ -117,7 +121,7 @@ class Baby(Module):
         self._job.complete()
 
     def weight(self):
-        success, weight = self.check_value(index=0, replace_str="kg", check_float=True)
+        success, weight = self.check_value(index=0, replace_str="kg", check_float=True, description="weight")
         if not success:
             return
         success, date = self.check_value(index=1, check_date=True, default=datetime.today().strftime('%Y-%m-%d'))

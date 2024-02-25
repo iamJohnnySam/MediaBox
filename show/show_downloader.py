@@ -3,7 +3,8 @@ import global_var
 from logging import logger
 from communication import communicator
 from database_manager.sql_connector import sql_databases
-from show import transmission
+from modules import transmission
+
 
 # todo add threading lock
 
