@@ -1,6 +1,5 @@
 from maintenance import backup
 
-ready_to_run = False
 stop_all = False
 restart = False
 reboot_pi = False

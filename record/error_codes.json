@@ -14,6 +14,7 @@
   "20009": "Telepot account not matching with job ID to reply.",
   "20010": "Unable to reply for a group message. Reply reference will be removed.",
   "20011": "Keyboard generation error",
+  "20012": "Unable to start channel. Requested channel does not exist.",
 
   "30000": "Telepot User Errors",
   "30001": "No function call detected",

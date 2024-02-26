@@ -3,9 +3,9 @@ from cctv.cctv_checker import CCTVChecker
 from communication.channels import channels
 from module.job import Job
 from database_manager.sql_connector import sql_databases
-from news.news_reader import NewsReader
-from show.movie_finder import MovieFinder
-from show.show_downloader import ShowDownloader
+from modules.news_reader import NewsReader
+from modules.movie_finder import MovieFinder
+from modules.show_downloader import ShowDownloader
 
 
 class Task:
