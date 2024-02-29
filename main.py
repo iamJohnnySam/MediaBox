@@ -4,46 +4,45 @@ import sys
 import threading
 import time
 
+from communication.channels import channels
 from record import logger
 import global_var
 from communication import communicator
 from maintenance import start_up, backup
-from scheduler import scheduler
-from tasker import task_manager
+from tasker import task_manager, schedule_manager
 from web import web_app
 
 if platform.machine() == 'armv7l':
-    logger.log("Program Started of Raspberry Pi in Full Mode")
-    global_var.ready_to_run = True
-
-    t_scheduler = threading.Thread(target=scheduler.run_scheduler)
-    t_scheduler.start()
-    logger.log("Thread Started: Scheduler")
-    # todo combine in tasker manager
-
-    t_task = threading.Thread(target=task_manager.run_task_manager)
-    t_task.start()
-    logger.log("Thread Started: Task Manager")
-
-    t_webapp = threading.Thread(target=web_app.run_webapp, daemon=True)
-    t_webapp.start()
-    logger.log("Thread Started: Web app")
-
-    # t_scheduler.join()
-    while t_scheduler.is_alive() and t_task.is_alive():
-        scheduler.check_running_threads()
-        time.sleep(10)
-
+    logger.log(msg="Program Started of Raspberry Pi in Operation Mode")
+    operation_mode = True
 else:
-    logger.log("Code Running in Partial Mode on: " + platform.machine())
+    logger.log(msg="Code Running in Testing mode on: " + platform.machine())
+    operation_mode = False
 
-    if True:
-        t_webapp = threading.Thread(target=web_app.run_webapp)
-        t_webapp.start()
-        logger.log("Thread Started: Web app")
+if operation_mode:
+    channels.begin_communication('all')
 
-    t_webapp.join()
+"""Starting Task Manager as a Thread"""
+t_task = threading.Thread(target=task_manager.run_task_manager)
+t_task.start()
+logger.log(msg="Thread Started: Task Manager")
 
+"""Starting Web Server as a Thread
+Daemon Thread = True. If task manager fails program will reboot"""
+t_webapp = threading.Thread(target=web_app.run_webapp, daemon=True)
+t_webapp.start()
+logger.log(msg="Thread Started: Web app")
+
+if operation_mode:
+    t_schedule = threading.Thread(target=schedule_manager.run_schedule_manager)
+
+    t_task.join()
+    global_var.stop_all = True
+
+if operation_mode:
+    t_schedule.join()
+
+# todo manual backup task
 backup.backup.run_code()
 
 # ------ EXIT CONDITIONS -----------
@@ -52,9 +51,9 @@ if not global_var.stop_all:
     time.sleep(60)
 
 if (not global_var.stop_all) or global_var.restart:
-    logger.log("argv was " + str(sys.argv))
-    logger.log("sys.executable was " + str(sys.executable))
-    logger.log("Restarting application now...")
+    logger.log(msg="argv was " + str(sys.argv))
+    logger.log(msg="sys.executable was " + str(sys.executable))
+    logger.log(msg="Restarting application now...")
     start_up.keep_gap()
     start_up.print_logo()
 
@@ -63,8 +62,8 @@ if (not global_var.stop_all) or global_var.restart:
 
 else:
     communicator.send_to_master("main", "Exiting...")
-    logger.log("CLEAN EXIT")
+    logger.log(msg="CLEAN EXIT")
 
     if global_var.reboot_pi:
-        logger.log("Rebooting Pi now...")
+        logger.log(msg="Rebooting Pi now...")
         os.system("sudo reboot")

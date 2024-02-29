@@ -9,7 +9,7 @@ from database_manager.json_editor import JSONEditor
 today_date = str(date.today())
 
 
-def log(job_id: int, msg: str = "", log_type: str = "debug", error_code: int = 0, error: str = ""):
+def log(job_id: int = 0, msg: str = "", log_type: str = "debug", error_code: int = 0, error: str = ""):
     if error_code == 0 and msg == "":
         raise ValueError("Invalid Parameters for record")
 

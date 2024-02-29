@@ -5,7 +5,7 @@ import time
 import schedule
 
 import global_var
-from logging import logger
+from record import logger
 from maintenance import backup
 from modules import transmission
 
