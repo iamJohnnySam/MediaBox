@@ -1,43 +1,32 @@
 import os
-import platform
 import sys
 import threading
 import time
 
-from communication import channels
-from tools import logger
+from communication import channels, communicator
+from tools import logger, start_up
 import global_var
-from communication import communicator
-from maintenance import start_up
-from modules import backup
 from tasker import task_manager, schedule_manager
 from web import web_app
 
-if platform.machine() == 'armv7l':
-    logger.log(msg="Program Started of Raspberry Pi in Operation Mode")
-    operation_mode = True
-else:
-    logger.log(msg="Code Running in Testing mode on: " + platform.machine())
-    operation_mode = False
-
-if operation_mode:
+if global_var.operation_mode:
+    logger.log(msg="Program Started on Raspberry Pi in Operation Mode")
     channels.init_channel('all')
 else:
+    logger.log(msg="Code Running in Testing mode on: " + global_var.platform)
     channels.init_channel('spark')
 
-"""Starting Task Manager as a Thread"""
 t_task = threading.Thread(target=task_manager.run_task_manager)
 t_task.start()
 logger.log(msg="Thread Started: Task Manager")
 
-"""Starting Web Server as a Thread
-Daemon Thread = True. If task manager fails program will reboot"""
+t_schedule = threading.Thread(target=schedule_manager.run_schedule_manager)
+t_schedule.start()
+logger.log(msg="Thread Started: Schedule Manager")
+
 t_webapp = threading.Thread(target=web_app.run_webapp, daemon=True)
 t_webapp.start()
 logger.log(msg="Thread Started: Web app")
-
-t_schedule = threading.Thread(target=schedule_manager.run_schedule_manager)
-t_schedule.start()
 
 t_task.join()
 global_var.stop_all = True

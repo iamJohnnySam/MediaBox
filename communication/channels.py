@@ -9,15 +9,16 @@ channels = {}
 
 def init_channel(channel):
     telepot_accounts: dict = JSONEditor(global_var.telepot_accounts).read()
-    logger.log(msg=f"Found telepot accounts > {str(telepot_accounts)}")
 
     if channel == 'all':
+        logger.log(msg=f"Starting all Telepot channels")
         for account in telepot_accounts.keys():
             channels[account] = Messenger(account,
                                           telepot_accounts[account]["account"],
                                           telepot_accounts[account]["master"])
 
     elif channel in telepot_accounts.keys():
+        logger.log(msg=f"Starting Telepot Channel - {channel}")
         channels[channel] = Messenger(channel,
                                       telepot_accounts[channel]["account"],
                                       telepot_accounts[channel]["master"])

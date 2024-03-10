@@ -1,3 +1,8 @@
+import platform
+
+operation_mode = True if platform.machine() == 'armv7l' else False
+platform = platform.machine()
+
 stop_all = False
 restart = False
 reboot_pi = False
