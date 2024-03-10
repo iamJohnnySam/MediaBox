@@ -4,9 +4,9 @@ import os
 from PIL import Image
 
 import global_var
-from record import logger
+from tools import logger
 from database_manager.sql_connector import sql_databases
-from record.custom_exceptions import *
+from tools.custom_exceptions import *
 
 
 class Job:

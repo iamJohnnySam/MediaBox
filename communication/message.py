@@ -7,8 +7,8 @@ import global_var
 from database_manager.json_editor import JSONEditor
 from database_manager.sql_connector import sql_databases
 from job_handling.job import Job
-from record import logger
-from record.custom_exceptions import InvalidParameterException
+from tools import logger
+from tools.custom_exceptions import InvalidParameterException
 
 
 class Message:

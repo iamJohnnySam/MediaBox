@@ -5,7 +5,7 @@ from telepot.loop import MessageLoop
 
 import global_var
 from communication.message import Message
-from record import logger
+from tools import logger
 from job_handling.job import Job
 from database_manager.json_editor import JSONEditor
 from job_handling import task_queue

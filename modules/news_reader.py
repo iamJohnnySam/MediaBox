@@ -1,8 +1,8 @@
 import feedparser
 import global_var
-from logging import logger
+from tools import logger
 from communication import communicator
-from module.job import Job
+from job_handling.job import Job
 from database_manager.json_editor import JSONEditor
 from database_manager.sql_connector import sql_databases
 

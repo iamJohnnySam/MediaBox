@@ -4,9 +4,9 @@ import global_var
 from communication.channels import channels
 from communication.message import Message
 from job_handling import task_queue
-from record import logger
+from tools import logger
 from job_handling.job import Job
-from record.custom_exceptions import *
+from tools.custom_exceptions import *
 
 
 class Module:

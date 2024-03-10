@@ -1,13 +1,13 @@
 import global_var
 from communication.message_handler import Messenger
 from database_manager.json_editor import JSONEditor
-from record import logger
-from record.custom_exceptions import InvalidParameterException
+from tools import logger
+from tools.custom_exceptions import InvalidParameterException
 
 channels = {}
 
 
-def begin_communication(channel):
+def init_channel(channel):
     telepot_accounts: dict = JSONEditor(global_var.telepot_accounts).read()
     logger.log(msg=f"Found telepot accounts > {str(telepot_accounts)}")
 

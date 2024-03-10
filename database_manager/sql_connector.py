@@ -2,9 +2,8 @@ import threading
 
 import mysql.connector
 
-from logging import logger
+from tools import logger
 import settings
-from maintenance.backup import backup
 
 
 # http://192.168.1.32/phpmyadmin
@@ -171,4 +170,5 @@ for database in database_list:
     if database == 'information_schema':
         continue
     sql_databases[database] = SQLConnector(settings.database_user, settings.database_password, database)
-    backup.databases.append(database)
+    # todo create SQL backup
+    # backup.databases.append(database)

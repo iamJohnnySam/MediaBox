@@ -3,13 +3,16 @@ import os
 import shutil
 from datetime import datetime
 
-from logging import logger
+from job_handling.job import Job
+from modules.base_module import Module
+from tools import logger
 import settings
 
 
-class BackUp:
+class BackUp(Module):
 
-    def __init__(self, loc):
+    def __init__(self, job: Job, loc):
+        super().__init__(job)
         self.backup_location = os.path.join(loc, datetime.now().strftime("%Y%m%d%H%M%S"))
         self.common_backup_location = loc
         if not os.path.exists(self.backup_location):
@@ -122,9 +125,9 @@ class BackUp:
             logger.log(f'BackUp {database} database > {backup_file_path}.')
 
 
-backup = BackUp('/mnt/MediaBox/MediaBox/Backup')
+# backup = BackUp('/mnt/MediaBox/MediaBox/Backup')
 
-backup.move_folders.append('log/')
-backup.move_png_files.append('charts/')
-backup.copy_files.append('settings.py')
-backup.move_files.append('../nohup.out')
+# backup.move_folders.append('log/')
+# backup.move_png_files.append('charts/')
+# backup.copy_files.append('settings.py')
+# backup.move_files.append('../nohup.out')

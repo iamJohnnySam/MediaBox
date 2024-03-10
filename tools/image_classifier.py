@@ -1,10 +1,9 @@
 from datetime import datetime
 import random
-import tflite_runtime.interpreter as tflite
 import numpy as np
 
 import global_var
-from record import logger
+from tools import logger
 from PIL import Image
 import os
 import shutil
@@ -12,6 +11,8 @@ import shutil
 
 class ImageClassifier:
     def __init__(self, nn_path, nn_name="A00", save_random=0.75, threshold=0.6):
+        import tflite_runtime.interpreter as tflite
+
         self.output_data = None
         # self.model = tf.lite.Interpreter(model_path=nn_path)
         self.model = tflite.Interpreter(model_path=nn_path)

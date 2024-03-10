@@ -1,5 +1,3 @@
-from maintenance import backup
-
 stop_all = False
 restart = False
 reboot_pi = False
@@ -13,9 +11,11 @@ telepot_accounts = 'communication/telepot_accounts.json'
 telepot_commands = 'communication/telepot_commands.json'
 telepot_callback_database = 'database/telepot/'
 main_telepot_account = "main"
-backup.backup.copy_files.append(telepot_accounts)
-backup.backup.copy_folders.append(telepot_commands)
-backup.backup.copy_folders.append(telepot_callback_database)
+
+# todo move to task creation
+# backup.backup.copy_files.append(telepot_accounts)
+# backup.backup.copy_folders.append(telepot_commands)
+# backup.backup.copy_folders.append(telepot_callback_database)
 
 feed_link = "https://showrss.info/user/275495.rss?magnets=true&namespaces=true&name=clean&quality=null&re=null"
 
@@ -28,10 +28,12 @@ cctv_model1 = "cctv/nn_models/modelA01.tflite"
 cctv_model2 = "cctv/nn_models/modelA02.tflite"
 
 telepot_image_dump = 'communication/chat_images'
-backup.backup.move_folders.append(telepot_image_dump)
+# todo move to task creation
+# backup.backup.move_folders.append(telepot_image_dump)
 
 finance_images = 'database/finance_images'
-backup.backup.move_folders_common.append(finance_images)
+# todo move to task creation
+# backup.backup.move_folders_common.append(finance_images)
 
 torrent_download = '/mnt/MediaBox/Downloads'
 torrent_movies = '/mnt/MediaBox/Movies'

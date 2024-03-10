@@ -2,7 +2,7 @@ import threading
 import time
 
 import global_var
-from record import logger
+from tools import logger
 from tasker import scheduler
 
 

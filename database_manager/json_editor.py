@@ -1,7 +1,7 @@
 import json
 import os
 
-from logging import logger
+from tools import logger
 
 
 class JSONEditor:
@@ -32,11 +32,11 @@ class JSONEditor:
 
     def read(self):
         with open(self.file, 'r') as file:
-            logger.log("Loaded - " + str(self.file))
+            logger.log(msg="Loaded - " + str(self.file))
             return json.load(file)
 
     def delete(self, keep_keys):
-        logger.log("-------DATABASE CLEANUP STARTED-------")
+        logger.log(msg="-------DATABASE CLEANUP STARTED-------")
 
         with open(self.file, 'r+') as file:
             data = json.load(file)

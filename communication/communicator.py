@@ -5,9 +5,9 @@ from datetime import datetime
 import telepot
 
 import global_var
-from logging import logger
+from job_handling.job import Job
+from tools import logger
 from communication.message_handler import Messenger
-from module.job import Job
 from database_manager.json_editor import JSONEditor
 from database_manager.sql_connector import sql_databases
 from modules import transmission

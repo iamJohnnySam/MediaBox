@@ -1,6 +1,6 @@
 import feedparser
 import global_var
-from logging import logger
+from tools import logger
 from communication import communicator
 from database_manager.sql_connector import sql_databases
 from modules import transmission

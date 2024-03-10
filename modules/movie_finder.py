@@ -1,6 +1,6 @@
 import feedparser
 
-from record import logger
+from tools import logger
 from communication.channels import channels
 from job_handling.job import Job
 

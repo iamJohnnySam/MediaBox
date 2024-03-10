@@ -5,9 +5,8 @@ import time
 import schedule
 
 import global_var
-from record import logger
-from maintenance import backup
-from modules import transmission
+from tools import logger
+from modules import transmission, backup
 
 running_threads = {}
 schedule_on_hold = {}

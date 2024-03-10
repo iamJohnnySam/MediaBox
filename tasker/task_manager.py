@@ -2,6 +2,7 @@ import time
 
 import global_var
 from job_handling import task_queue
+from job_handling.job import Job
 
 
 def run_task_manager():
@@ -15,8 +16,7 @@ def run_task_manager():
         time.sleep(1)
 
 
-from logging import logger
-from module.job import Job
+from tools import logger
 from tasker.task import Task
 
 

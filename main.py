@@ -4,11 +4,12 @@ import sys
 import threading
 import time
 
-from communication.channels import channels
-from record import logger
+from communication import channels
+from tools import logger
 import global_var
 from communication import communicator
-from maintenance import start_up, backup
+from maintenance import start_up
+from modules import backup
 from tasker import task_manager, schedule_manager
 from web import web_app
 
@@ -20,7 +21,9 @@ else:
     operation_mode = False
 
 if operation_mode:
-    channels.begin_communication('all')
+    channels.init_channel('all')
+else:
+    channels.init_channel('spark')
 
 """Starting Task Manager as a Thread"""
 t_task = threading.Thread(target=task_manager.run_task_manager)
@@ -33,17 +36,16 @@ t_webapp = threading.Thread(target=web_app.run_webapp, daemon=True)
 t_webapp.start()
 logger.log(msg="Thread Started: Web app")
 
-if operation_mode:
-    t_schedule = threading.Thread(target=schedule_manager.run_schedule_manager)
+t_schedule = threading.Thread(target=schedule_manager.run_schedule_manager)
+t_schedule.start()
 
-    t_task.join()
-    global_var.stop_all = True
+t_task.join()
+global_var.stop_all = True
 
-if operation_mode:
-    t_schedule.join()
+t_schedule.join()
 
 # todo manual backup task
-backup.backup.run_code()
+# backup.backup.run_code()
 
 # ------ EXIT CONDITIONS -----------
 if not global_var.stop_all:

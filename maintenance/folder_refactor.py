@@ -4,7 +4,7 @@ import shutil
 import string
 
 import global_var
-from logging import logger
+from tools import logger
 from communication import communicator
 
 
