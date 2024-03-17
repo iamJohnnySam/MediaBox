@@ -29,6 +29,8 @@ class Messenger:
                                'callback_query': self.handle_callback}).run_as_thread()
         logger.log(msg=f'Telepot {telepot_account} listening')
 
+        # todo command to shutdown the bot
+
     def handle(self, msg):
         try:
             content = msg['text']

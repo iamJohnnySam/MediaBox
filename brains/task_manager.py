@@ -1,15 +1,15 @@
 import time
 
-import global_variables
+from global_variables import ready_to_run, stop_all
 from brains import task_queue
 from brains.job import Job
 
 
 def run_task_manager():
-    while not global_var.ready_to_run:
+    while not ready_to_run:
         time.sleep(5)
 
-    while not global_var.stop_all:
+    while not stop_all:
         if task_queue.msg_q.empty():
             # todo tasker handler
             pass
