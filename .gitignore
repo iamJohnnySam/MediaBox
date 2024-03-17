@@ -1,7 +1,12 @@
 /passwords.py
-*.json
-*.sql
 /log
-/ai_models/cctv
-tensorflow-2.5.0-cp37-none-linux_armv7l.whl
+
+*.json
+!database/telepot_commands.json
+!database/transmission_settings.json
+!database/sources.json
+
+*.sql
+*.tflite
+*.whl
 *.xml
