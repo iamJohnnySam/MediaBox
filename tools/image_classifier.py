@@ -2,7 +2,7 @@ from datetime import datetime
 import random
 import numpy as np
 
-import global_var
+import global_variables
 from tools import logger
 from PIL import Image
 import os

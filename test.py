@@ -1,7 +1,7 @@
 def link_msg_to_buttons(self, message, buttons):
     for button in buttons:
         button_dict = {button: message}
-        JSONEditor(global_var.telepot_callback_database +
+        JSONEditor(global_var.loc_telepot_callback +
                    self.callback_id_prefix + 'telepot_button_link.json').add_level1(button_dict)
 
 
@@ -59,7 +59,7 @@ def todo(self):
 
     if command == "X":
         comm = callback_id.split("_")[0] + "_" + callback_id.split("_")[1] + "_"
-        telepot_callbacks = JSONEditor(global_var.telepot_callback_database
+        telepot_callbacks = JSONEditor(global_var.loc_telepot_callback
                                        + comm + 'telepot_callback_database.json').read()
 
         query_data = telepot_callbacks[callback_id]
@@ -82,7 +82,7 @@ def todo(self):
 
 def update_in_line_buttons(self, button_id, keyboard=None):
     comm = button_id.split("_")[0] + "_" + button_id.split("_")[1] + "_"
-    message = JSONEditor(global_var.telepot_callback_database
+    message = JSONEditor(global_var.loc_telepot_callback
                          + comm + 'telepot_button_link.json').read()[button_id]
     logger.log("Buttons to remove from message id " + str(message['message_id']))
     message_id = telepot.message_identifier(message)

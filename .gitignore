@@ -1,7 +1,7 @@
-/settings.py
+/passwords.py
 *.json
 *.sql
 /log
-/cctv/nn_models
+/ai_models/cctv
 tensorflow-2.5.0-cp37-none-linux_armv7l.whl
 *.xml

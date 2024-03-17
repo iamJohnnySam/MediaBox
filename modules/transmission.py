@@ -1,10 +1,8 @@
 from transmission_rpc import Client
 
-import global_var
-from job_handling.job import Job
+from brains.job import Job
 from modules.base_module import Module
 from tools import logger
-from maintenance.folder_refactor import RefactorFolder
 
 
 class Transmission(Module):

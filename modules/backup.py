@@ -3,10 +3,10 @@ import os
 import shutil
 from datetime import datetime
 
-from job_handling.job import Job
+from brains.job import Job
 from modules.base_module import Module
 from tools import logger
-import settings
+import passwords
 
 
 class BackUp(Module):
@@ -129,5 +129,5 @@ class BackUp(Module):
 
 # backup.move_folders.append('log/')
 # backup.move_png_files.append('charts/')
-# backup.copy_files.append('settings.py')
+# backup.copy_files.append('passwords.py')
 # backup.move_files.append('../nohup.out')

@@ -2,7 +2,7 @@ import feedparser
 
 from tools import logger
 from communication.channels import channels
-from job_handling.job import Job
+from brains.job import Job
 
 
 class MovieFinder:

@@ -1,4 +1,14 @@
 {
+  "Admin Controls": false,
+  "alive": {
+    "definition": "Is Bot online?",
+    "all_bots": true
+  },
+  "time": {
+    "definition": "Bot current time",
+    "all_bots": true
+  },
+
   "Entertainment Controls": false,
   "check_shows": {
     "function": "check_shows",

@@ -3,20 +3,20 @@ import os
 
 from PIL import Image
 
-import global_var
+from refs import main_channel, db_admin, tbl_jobs, tbl_chats, telepot_image_dump
 from tools import logger
 from database_manager.sql_connector import sql_databases
 from tools.custom_exceptions import *
 
 
 class Job:
-    def __init__(self, telepot_account: str = global_var.main_telepot_account,
+    def __init__(self, telepot_account: str = main_channel,
                  message: dict = None,
                  job_id: int = 0,
                  chat_id: int = 0, username: str = "", reply_to: int = 0, function: str = "",
                  collection=None):
 
-        self._db = sql_databases[global_var.db_admin]
+        self._db = sql_databases[db_admin]
         self._telepot_account = telepot_account
 
         # Important Variables
@@ -44,7 +44,7 @@ class Job:
         elif job_id != 0:
             self._job_id = job_id
             query = f"SELECT account, chat_id, reply_to, username, class, function, collection, photo " \
-                    f"FROM {global_var.tbl_jobs} WHERE job_id ='{str(self._job_id)}'"
+                    f"FROM {tbl_jobs} WHERE job_id ='{str(self._job_id)}'"
             result = self._db.run_sql(query)
             if len(result) == 0:
                 logger.log(job_id=job_id, error_code=40003)
@@ -108,7 +108,7 @@ class Job:
     # Job Properties
     @property
     def master(self):
-        query = f"SELECT chat_id FROM {global_var.tbl_chats} WHERE master = 1"
+        query = f"SELECT chat_id FROM {tbl_chats} WHERE master = 1"
         result = self._db.run_sql(query)[0]
         return result
 
@@ -144,7 +144,7 @@ class Job:
     @property
     def collection(self) -> list:
         if self.is_stored:
-            query = f"SELECT collection FROM {global_var.tbl_jobs} WHERE job_id ='{str(self._job_id)}'"
+            query = f"SELECT collection FROM {tbl_jobs} WHERE job_id ='{str(self._job_id)}'"
             result = self._db.run_sql(query)
             collect = result[0].split(";")
         else:
@@ -170,16 +170,16 @@ class Job:
     @property
     def photo_loc(self):
         """Returns the full path in which the photo is saved"""
-        if not os.path.exists(global_var.telepot_image_dump):
-            os.makedirs(global_var.telepot_image_dump)
-        return [os.path.join(global_var.telepot_image_dump, x) for x in self.photo_names]
+        if not os.path.exists(telepot_image_dump):
+            os.makedirs(telepot_image_dump)
+        return [os.path.join(telepot_image_dump, x) for x in self.photo_names]
 
     @property
     def cb_id(self):
         """Returns the next available callback ID to use when generating a keyboard. Everytime this value is referred
         a new callback ID is generated."""
         self.store_message()
-        query = f"SELECT cb_id FROM {global_var.tbl_jobs} WHERE job_id ='{str(self._job_id)}'"
+        query = f"SELECT cb_id FROM {tbl_jobs} WHERE job_id ='{str(self._job_id)}'"
         cb = int(self._db.run_sql(query)[0])
         cb = cb + 1
         self.update_db('cb_id', str(cb), force=True)
@@ -189,7 +189,7 @@ class Job:
     # Checks
     @property
     def is_authorised(self):
-        if self._db.exists(global_var.tbl_chats, f"chat_id = '{self.chat_id}'") == 0:
+        if self._db.exists(tbl_chats, f"chat_id = '{self.chat_id}'") == 0:
             return False
         else:
             return True
@@ -220,21 +220,21 @@ class Job:
             self.store_message()
 
         if self.is_stored:
-            query = f"UPDATE {global_var.tbl_jobs} SET {field} = '{item}' WHERE job_id = '{str(self._job_id)}'"
+            query = f"UPDATE {tbl_jobs} SET {field} = '{item}' WHERE job_id = '{str(self._job_id)}'"
             self._db.run_sql(query)
 
     def get_master_details(self) -> (int, str):
-        query = f"SELECT chat_id, chat_name FROM {global_var.tbl_chats} WHERE master = 1"
+        query = f"SELECT chat_id, chat_name FROM {tbl_chats} WHERE master = 1"
         return self._db.run_sql(query)
 
     @property
     def replies(self):
-        query = f"SELECT replies FROM {global_var.tbl_jobs} WHERE job_id ='{str(self._job_id)}'"
+        query = f"SELECT replies FROM {tbl_jobs} WHERE job_id ='{str(self._job_id)}'"
         return json.loads(self._db.run_sql(query)[0])
 
     @property
     def callbacks(self):
-        query = f"SELECT callbacks FROM {global_var.tbl_jobs} WHERE job_id ='{str(self._job_id)}'"
+        query = f"SELECT callbacks FROM {tbl_jobs} WHERE job_id ='{str(self._job_id)}'"
         return json.loads(self._db.run_sql(query)[0])
 
     def store_message(self):
@@ -242,7 +242,7 @@ class Job:
             if self._function == "":
                 logger.log(job_id=self.job_id, msg="Message to be stored without function", log_type="warn")
 
-            self._job_id = self._db.insert(table=global_var.tbl_jobs,
+            self._job_id = self._db.insert(table=tbl_jobs,
                                            columns="account, chat_id, reply_to, username, function, collection",
                                            val=(self._telepot_account, self._chat_id, self._reply_to, self._username,
                                                 self._function))
@@ -264,7 +264,7 @@ class Job:
 
     def collect(self, value: str, index: int):
         if self.is_stored:
-            query = f"SELECT collection FROM {global_var.tbl_jobs} WHERE job_id ='{str(self._job_id)}'"
+            query = f"SELECT collection FROM {tbl_jobs} WHERE job_id ='{str(self._job_id)}'"
             self._collection = self._db.run_sql(query)[0].split(";")
 
         if index < len(self._collection):
@@ -280,9 +280,10 @@ class Job:
         self.update_db("collection", self._collection)
 
     def add_reply(self, replies):
-        d = self.replies
-        d[str(self._current_callback)] = replies
-        self.update_db('replies', json.dumps(d))
+        if self.is_stored:
+            d = self.replies
+            d[str(self._current_callback)] = replies
+            self.update_db('replies', json.dumps(d))
 
     def add_callback(self, cb: int, value):
         d = self.callbacks

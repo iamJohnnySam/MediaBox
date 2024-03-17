@@ -3,7 +3,7 @@ import re
 import shutil
 import string
 
-import global_var
+import global_variables
 from tools import logger
 from communication import communicator
 

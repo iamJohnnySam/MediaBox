@@ -1,4 +1,4 @@
-import global_var
+from refs import db_telepot_accounts
 from communication.message_handler import Messenger
 from database_manager.json_editor import JSONEditor
 from tools import logger
@@ -8,7 +8,7 @@ channels = {}
 
 
 def init_channel(channel):
-    telepot_accounts: dict = JSONEditor(global_var.telepot_accounts).read()
+    telepot_accounts: dict = JSONEditor(db_telepot_accounts).read()
 
     if channel == 'all':
         logger.log(msg=f"Starting all Telepot channels")

@@ -1,8 +1,8 @@
 import time
 
-import global_var
-from job_handling import task_queue
-from job_handling.job import Job
+import global_variables
+from brains import task_queue
+from brains.job import Job
 
 
 def run_task_manager():
@@ -17,7 +17,7 @@ def run_task_manager():
 
 
 from tools import logger
-from tasker.task import Task
+from brains.temp_task import Task
 
 
 class TaskMessage(Task):

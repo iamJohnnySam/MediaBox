@@ -3,7 +3,7 @@ from datetime import datetime
 from tools import logger
 from tools.grapher import grapher_simple_trend, grapher_weight_trend, grapher_category, grapher_bar_trend
 from tools.custom_exceptions import *
-from job_handling.job import Job
+from brains.job import Job
 from database_manager.sql_connector import sql_databases
 from modules.base_module import Module
 

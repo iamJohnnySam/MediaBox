@@ -3,25 +3,25 @@ import os
 import telepot
 from telepot.loop import MessageLoop
 
-import global_var
+from refs import db_telepot_commands, loc_telepot_callback, main_channel
 from communication.message import Message
 from tools import logger
-from job_handling.job import Job
+from brains.job import Job
 from database_manager.json_editor import JSONEditor
-from job_handling import task_queue
+from brains import task_queue
 
 
 class Messenger:
 
     def __init__(self, telepot_account: str, telepot_key: str, telepot_master: int):
-        self.telepot_account = telepot_account
+        self.channel = telepot_account
         self.master = telepot_master
 
         # Waiting user input
         self.waiting_user_input = {}
 
         # Get Commands
-        self.commands = JSONEditor(global_var.telepot_commands).read()
+        self.commands = JSONEditor(db_telepot_commands).read()
 
         # Listen
         self.bot = telepot.Bot(telepot_key)
@@ -30,9 +30,14 @@ class Messenger:
         logger.log(msg=f'Telepot {telepot_account} listening')
 
     def handle(self, msg):
-        message = Job(self.telepot_account, msg)
+        try:
+            content = msg['text']
+        except ValueError:
+            content = "### No Message ###"
+        logger.log(msg=f"INCOMING: {msg['chat']['id']}, Message: {content}", log_type="info")
+        message = Job(self.channel, msg)
 
-        if not message.is_authorised():
+        if not message.is_authorised:
             self.bot.sendMessage(message.chat_id, "Hello " + message.f_name + "! You're not allowed to be here")
             string = f"Unauthorised Chat access: {message.f_name}, chat_id: {message.chat_id}"
             self.send_now(Message(string))
@@ -72,12 +77,19 @@ class Messenger:
                 logger.log(job_id=msg.job_id, error_code=30002)
                 msg.complete()
                 return
-            elif self.telepot_account != "main" and self.telepot_account not in self.commands[msg.function].keys():
+            elif self.channel != main_channel and type(self.commands[msg.function]) is not str and not (self.channel in self.commands[msg.function].keys() or "all_bots" in self.commands[msg.function].keys()):
                 self.send_now(Message("That command does not work on this chatbot", job=msg))
                 logger.log(job_id=msg.job_id, error_code=30003)
                 msg.complete()
                 return
+
+            if "function" in self.commands[msg.function].keys():
+                old_func = msg.function
+                msg.function = self.commands[msg.function]["function"]
+                logger.log(job_id=msg.job_id, msg=f"Function updated from {old_func} to {msg.function}")
+
             task_queue.add_job(msg)
+            logger.log(job_id=msg.job_id, msg=f"Message function verified and added {msg.function} to queue.")
 
         elif msg.function == "chat":
             if msg.chat_id in self.waiting_user_input.keys():
@@ -106,7 +118,7 @@ class Messenger:
         logger.log(job_id=msg_id, msg='Callback Query: ' + str(query['data']))
 
         if q[3] == "X":
-            save_loc = os.path.join(global_var.telepot_callback_database, f"{q[0]}_cb.json")
+            save_loc = os.path.join(loc_telepot_callback, f"{q[0]}_cb.json")
             query = JSONEditor(save_loc).read()[f'{q[0]};{q[1]};{q[2]}']
             logger.log(job_id=msg_id, msg="Recovered Query: " + query)
 
@@ -128,7 +140,7 @@ class Messenger:
         task_queue.add_job(msg)
 
     def send_now(self, message: Message):
-        message.this_telepot_account = self.telepot_account
+        message.this_telepot_account = self.channel
 
         replies = []
         for chat in message.chats:
@@ -146,7 +158,7 @@ class Messenger:
                 replies.append(reply)
 
             logger.log(job_id=message.job_id,
-                       msg=str(chat) + " - " + str(reply['message_id']) + " - Message: " + str(message.send_string))
+                       msg=f"OUTGOING: {chat}, ID: {reply['message_id']}, Message: {message.send_string}")
 
         message.job.add_reply(replies)
 

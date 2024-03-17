@@ -3,7 +3,7 @@ import threading
 import mysql.connector
 
 from tools import logger
-import settings
+from passwords import database_user, database_password
 
 
 # http://192.168.1.32/phpmyadmin
@@ -93,14 +93,14 @@ class SQLConnector:
         try:
             self.cursor.execute(query)
         except mysql.connector.Error as err:
-            logger.log(f'SQL Error: {str(err)}')
+            logger.log(msg=f'SQL Error: {str(err)}')
             self.reconnect()
             self.cursor.execute(query)
 
         result = self.cursor.fetchone()
         self.lock.release()
 
-        logger.log(f'SQL > {query} | Result > {result}')
+        logger.log(msg=f'SQL > {query} | Result > {result}')
         return result[0]
 
     def run_sql(self, query, fetch_all=False):
@@ -108,7 +108,7 @@ class SQLConnector:
         try:
             self.cursor.execute(query)
         except mysql.connector.Error as err:
-            logger.log(f'SQL Error: {str(err)}')
+            logger.log(msg=f'SQL Error: {str(err)}')
             self.reconnect()
             self.cursor.execute(query)
 
@@ -162,13 +162,13 @@ class SQLConnector:
         return True, self.cursor.lastrowid
 
 
-db_all = SQLConnector(settings.database_user, settings.database_password)
+db_all = SQLConnector(database_user, database_password)
 database_list = db_all.get_databases()
 
 sql_databases = {}
 for database in database_list:
     if database == 'information_schema':
         continue
-    sql_databases[database] = SQLConnector(settings.database_user, settings.database_password, database)
+    sql_databases[database] = SQLConnector(database_user, database_password, database)
     # todo create SQL backup
     # backup.databases.append(database)

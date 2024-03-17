@@ -1,11 +1,11 @@
 from datetime import datetime, timedelta
 
-import global_var
+import global_variables
 from communication.channels import channels
 from communication.message import Message
-from job_handling import task_queue
+from brains import task_queue
 from tools import logger
-from job_handling.job import Job
+from brains.job import Job
 from tools.custom_exceptions import *
 
 

@@ -3,10 +3,11 @@ import sys
 import threading
 import time
 
+import refs
 from communication import channels, communicator
 from tools import logger, start_up
-import global_var
-from tasker import task_manager, schedule_manager
+import global_variables
+from brains import schedule_manager, task_manager
 from web import web_app
 
 if global_var.operation_mode:
@@ -14,7 +15,7 @@ if global_var.operation_mode:
     channels.init_channel('all')
 else:
     logger.log(msg="Code Running in Testing mode on: " + global_var.platform)
-    channels.init_channel('spark')
+    channels.init_channel(refs.main_channel)
 
 t_task = threading.Thread(target=task_manager.run_task_manager)
 t_task.start()
@@ -27,6 +28,8 @@ logger.log(msg="Thread Started: Schedule Manager")
 t_webapp = threading.Thread(target=web_app.run_webapp, daemon=True)
 t_webapp.start()
 logger.log(msg="Thread Started: Web app")
+
+global_var.ready_to_run = True
 
 t_task.join()
 global_var.stop_all = True

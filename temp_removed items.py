@@ -1,7 +1,7 @@
 def link_msg_to_buttons(self, message, buttons):
     for button in buttons:
         button_dict = {button: message}
-        JSONEditor(global_var.telepot_callback_database +
+        JSONEditor(global_variables.telepot_callback_database +
                    self.callback_id_prefix + 'telepot_button_link.json').add_level1(button_dict)
 
 
@@ -86,7 +86,7 @@ def todo(self):
 
     if command == "X":
         comm = callback_id.split("_")[0] + "_" + callback_id.split("_")[1] + "_"
-        telepot_callbacks = JSONEditor(global_var.telepot_callback_database
+        telepot_callbacks = JSONEditor(global_variables.telepot_callback_database
                                        + comm + 'telepot_callback_database.json').read()
 
         query_data = telepot_callbacks[callback_id]
@@ -109,7 +109,7 @@ def todo(self):
 
 def update_in_line_buttons(self, button_id, keyboard=None):
     comm = button_id.split("_")[0] + "_" + button_id.split("_")[1] + "_"
-    message = JSONEditor(global_var.telepot_callback_database
+    message = JSONEditor(global_variables.telepot_callback_database
                          + comm + 'telepot_button_link.json').read()[button_id]
     logger.log("Buttons to remove from message id " + str(message['message_id']))
     message_id = telepot.message_identifier(message)
@@ -136,7 +136,7 @@ def send_with_keyboard(self, send_string: str, msg: Message,
 
         if len(button_data) >= 60:
             telepot_cb = {button_prefix: button_data}
-            save_loc = os.path.join(global_var.telepot_callback_database, f"{str(msg.msg_id)}_cb.json")
+            save_loc = os.path.join(global_variables.telepot_callback_database, f"{str(msg.msg_id)}_cb.json")
             JSONEditor(save_loc).add_level1(telepot_cb)
             button_data = f"{button_prefix};X"
 
@@ -240,7 +240,7 @@ from datetime import datetime
 
 from PIL import Image
 
-import global_var
+import global_variables
 import logger
 from database_manager.sql_connector import sql_databases
 

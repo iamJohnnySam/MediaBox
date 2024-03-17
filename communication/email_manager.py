@@ -2,7 +2,7 @@ import email
 import imaplib
 import traceback
 
-import global_var
+import global_variables
 from tools import logger
 
 

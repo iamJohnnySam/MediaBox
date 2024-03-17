@@ -4,8 +4,8 @@ from datetime import datetime
 
 import telepot
 
-import global_var
-from job_handling.job import Job
+import global_variables
+from brains.job import Job
 from tools import logger
 from communication.message_handler import Messenger
 from database_manager.json_editor import JSONEditor
@@ -112,7 +112,7 @@ class Communicator(Messenger):
         self.baby_weight_trend(msg, caption=send_string)
 
     def add_me_to_cctv(self, msg: Job):
-        self.manage_chat_group("cctv", msg.chat_id)
+        self.manage_chat_group("ai_models", msg.chat_id)
         self.send_now("Done", chat=msg.chat_id, reply_to=msg.message_id)
 
     def add_me_to_news(self, msg: Job):
@@ -124,7 +124,7 @@ class Communicator(Messenger):
         self.send_now("Done", chat=msg.chat_id, reply_to=msg.message_id)
 
     def remove_me_from_cctv(self, msg: Job):
-        self.manage_chat_group("cctv", msg.chat_id, add=False, remove=True)
+        self.manage_chat_group("ai_models", msg.chat_id, add=False, remove=True)
         self.send_now("Done", chat=msg.chat_id, reply_to=msg.message_id)
 
     def remove_me_from_news(self, msg: Job):

@@ -3,10 +3,10 @@ import os
 
 from telepot.namedtuple import InlineKeyboardButton, InlineKeyboardMarkup
 
-import global_var
+from refs import db_admin, tbl_chats, tbl_groups, loc_telepot_callback
 from database_manager.json_editor import JSONEditor
 from database_manager.sql_connector import sql_databases
-from job_handling.job import Job
+from brains.job import Job
 from tools import logger
 from tools.custom_exceptions import InvalidParameterException
 
@@ -17,7 +17,7 @@ class Message:
                  group: str = None,
                  photo: str = ""):
 
-        self._db = sql_databases[global_var.db_admin]
+        self._db = sql_databases[db_admin]
 
         if job is not None:
             self.job_id = job.job_id
@@ -40,7 +40,7 @@ class Message:
 
     @property
     def master(self):
-        query = f"SELECT chat_id FROM {global_var.tbl_chats} WHERE master = 1"
+        query = f"SELECT chat_id FROM {tbl_chats} WHERE master = 1"
         result = self._db.run_sql(query)[0]
         return result
 
@@ -49,10 +49,10 @@ class Message:
         if self.job is None and self._chat is None and self.group is None:
             chats = [self.master]
         elif self.group is not None:
-            if sql_databases[global_var.db_admin].exists(global_var.tbl_groups, f"group_name = '{self.group}'") == 0:
+            if sql_databases[db_admin].exists(tbl_groups, f"group_name = '{self.group}'") == 0:
                 logger.log(job_id=self.job_id, error_code=20007)
                 raise ValueError
-            query = f"SELECT chat_id FROM {global_var.tbl_groups} WHERE group_name = '{self.group}'"
+            query = f"SELECT chat_id FROM {tbl_groups} WHERE group_name = '{self.group}'"
             result = sql_databases["administration"].run_sql(query, fetch_all=True)
             chats = [row[0] for row in result]
         elif self.job is not None and self._chat is None:
@@ -102,7 +102,7 @@ class Message:
 
             if len(button_data) >= 60:
                 telepot_cb = {button_prefix: button_data}
-                save_loc = os.path.join(global_var.telepot_callback_database, f"{str(self.job_id)}_cb.json")
+                save_loc = os.path.join(loc_telepot_callback, f"{str(self.job_id)}_cb.json")
                 JSONEditor(save_loc).add_level1(telepot_cb)
                 button_data = f"{button_prefix};X"
 

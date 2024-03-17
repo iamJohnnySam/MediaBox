@@ -4,7 +4,7 @@ import logging
 import os
 from datetime import date, datetime
 
-import global_var
+from refs import log_level, error_codes
 
 today_date = str(date.today())
 
@@ -14,7 +14,7 @@ def log(job_id: int = 0, msg: str = "", log_type: str = "debug", error_code: int
         raise ValueError("Invalid Parameters for record")
 
     elif error_code != 0 and msg == "":
-        with open(global_var.error_codes, 'r') as file:
+        with open(error_codes, 'r') as file:
             errors: dict = json.load(file)
 
         if str(error_code) in errors.keys():
@@ -47,22 +47,22 @@ def log(job_id: int = 0, msg: str = "", log_type: str = "debug", error_code: int
     if log_type == "warn":
         log_type = "WRN"
         logging.warning(message)
-        if global_var.log_type in ["debug", "info", "warn"]:
+        if log_level in ["debug", "info", "warn"]:
             print_message = True
     elif log_type == "error":
         log_type = "ERR"
         logging.error(message)
-        if global_var.log_type in ["debug", "info", "warn", "error"]:
+        if log_level in ["debug", "info", "warn", "error"]:
             print_message = True
     elif log_type == "debug":
         logging.debug(message)
         log_type = "DBG"
-        if global_var.log_type in ["debug"]:
+        if log_level in ["debug"]:
             print_message = True
     else:
         logging.info(message)
         log_type = "INF"
-        if global_var.log_type in ["debug", "info"]:
+        if log_level in ["debug", "info"]:
             print_message = True
 
     if error != "":
@@ -70,7 +70,7 @@ def log(job_id: int = 0, msg: str = "", log_type: str = "debug", error_code: int
 
     if print_message:
         for segment in message.split("\n"):
-            print(f'{log_type},{datetime.now().strftime("%m-%d %H:%M:%S")},{caller.ljust(15)},>,'
+            print(f'{log_type},{datetime.now().strftime("%m-%d %H:%M:%S")},{caller.ljust(15)},'
                   f'{str(job_id)},>,{segment}')
 
 

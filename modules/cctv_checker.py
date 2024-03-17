@@ -1,8 +1,8 @@
 import datetime
 import time
 import os
-import global_var
-import settings
+import global_variables
+import passwords
 from communication import communicator
 from tools import logger
 from tools.image_classifier import ImageClassifier
@@ -12,8 +12,8 @@ from communication.email_manager import EmailManager
 class CCTVChecker:
     last_detect_A02 = None
     last_detect_A01 = None
-    telepot_account = "cctv"
-    telepot_chat_group = "cctv"
+    telepot_account = "ai_models"
+    telepot_chat_group = "ai_models"
 
     def __init__(self):
         self.outlook = None

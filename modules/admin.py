@@ -1,8 +1,8 @@
 from datetime import datetime
 
-import global_var
+import global_variables
 from database_manager.json_editor import JSONEditor
-from job_handling.job import Job
+from brains.job import Job
 from modules.base_module import Module
 
 

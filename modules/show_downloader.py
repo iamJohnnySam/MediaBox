@@ -1,5 +1,5 @@
 import feedparser
-import global_var
+import global_variables
 from tools import logger
 from communication import communicator
 from database_manager.sql_connector import sql_databases
