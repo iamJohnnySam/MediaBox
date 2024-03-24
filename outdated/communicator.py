@@ -111,29 +111,7 @@ class Communicator(Messenger):
         logger.log(send_string)
         self.baby_weight_trend(msg, caption=send_string)
 
-    def add_me_to_cctv(self, msg: Job):
-        self.manage_chat_group("ai_models", msg.chat_id)
-        self.send_now("Done", chat=msg.chat_id, reply_to=msg.message_id)
 
-    def add_me_to_news(self, msg: Job):
-        self.manage_chat_group("news", msg.chat_id)
-        self.send_now("Done", chat=msg.chat_id, reply_to=msg.message_id)
-
-    def add_me_to_baby(self, msg: Job):
-        self.manage_chat_group("modules", msg.chat_id)
-        self.send_now("Done", chat=msg.chat_id, reply_to=msg.message_id)
-
-    def remove_me_from_cctv(self, msg: Job):
-        self.manage_chat_group("ai_models", msg.chat_id, add=False, remove=True)
-        self.send_now("Done", chat=msg.chat_id, reply_to=msg.message_id)
-
-    def remove_me_from_news(self, msg: Job):
-        self.manage_chat_group("news", msg.chat_id, add=False, remove=True)
-        self.send_now("Done", chat=msg.chat_id, reply_to=msg.message_id)
-
-    def remove_me_from_baby(self, msg: Job):
-        self.manage_chat_group("modules", msg.chat_id, add=False, remove=True)
-        self.send_now("Done", chat=msg.chat_id, reply_to=msg.message_id)
 
     def list_torrents(self, msg: Job):
         torrent_list = transmission.list_all()

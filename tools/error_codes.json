@@ -1,6 +1,7 @@
 {
   "10000": "Program Errors",
   "10001": "File access Permission Error",
+  "10002": "SQL Error",
 
   "20000": "Telepot Errors",
   "20001": "Unknown Chat Type",
@@ -15,6 +16,8 @@
   "20010": "Unable to reply for a group message. Reply reference will be removed.",
   "20011": "Keyboard generation error",
   "20012": "Unable to start channel. Requested channel does not exist.",
+  "20013": "Invalid data type. Expected a Message.",
+  "20014": "Callback data incomplete.",
 
   "30000": "Telepot User Errors",
   "30001": "No function call detected",
@@ -26,8 +29,10 @@
   "40002": "Conditions not met to create job",
   "40003": "Unable to find the job to create a job",
   "40004": "Cannot collect. Index exceeds collection length.",
+  "40005": "Function not found in Task Manager list",
 
   "50000": "Module Errors",
   "50001": "Torrent Listing Error",
-  "50002": "Invalid Keyboard creation error"
+  "50002": "Invalid Keyboard creation error",
+  "50003": "SQL Error. No rows were affected."
 }

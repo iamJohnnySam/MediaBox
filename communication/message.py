@@ -103,7 +103,7 @@ class Message:
             if len(button_data) >= 60:
                 telepot_cb = {button_prefix: button_data}
                 save_loc = os.path.join(loc_telepot_callback, f"{str(self.job_id)}_cb.json")
-                JSONEditor(save_loc).add_level1(telepot_cb)
+                JSONEditor(save_loc).add_level1(telepot_cb, job_id=self.job_id)
                 button_data = f"{button_prefix};X"
 
             buttons.append(InlineKeyboardButton(text=str(button_text[i]), callback_data=button_data))
@@ -120,7 +120,7 @@ class Message:
         self.keyboard = InlineKeyboardMarkup(inline_keyboard=keyboard_markup)
 
     def keyboard_extractor(self, index, options, bpr: int = 3, add_cancel: bool = False, add_other: bool = False):
-        button_text = [row[0] for row in options]
+        button_text = options
 
         button_value = []
         for text in button_text:
@@ -138,7 +138,7 @@ class Message:
 
         if add_cancel:
             button_text.append("Cancel")
-            button_value.append("cancel")
+            button_value.append(f'{index};/CANCEL')
             arrangement.append(1)
 
         logger.log(job_id=self.job.job_id, msg="Keyboard extracted > " + str(arrangement))

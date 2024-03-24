@@ -11,8 +11,8 @@ cctv_model1 = "ai_models/cctv/modelA01.tflite"
 cctv_model2 = "ai_models/cctv/modelA02.tflite"
 
 # telepot
-db_telepot_accounts = 'communication/telepot_accounts.json'
-db_telepot_commands = 'communication/telepot_commands.json'
+db_telepot_accounts = 'database/telepot_accounts.json'
+db_telepot_commands = 'database/telepot_commands.json'
 loc_telepot_callback = 'database/telepot/'
 telepot_image_dump = 'communication/chat_images'
 finance_images = 'database/finance_images'

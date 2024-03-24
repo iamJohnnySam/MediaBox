@@ -3,16 +3,26 @@ from datetime import datetime, timedelta
 import global_variables
 from communication.channels import channels
 from communication.message import Message
-from brains import task_queue
-from tools import logger
+from brains import message_queue
 from brains.job import Job
 from tools.custom_exceptions import *
+from tools.logger import log
 
 
 class Module:
     def __init__(self, job: Job):
         self._job = job
-        logger.log(self._job.job_id, f"Module Created")
+        log(self._job.job_id, f"Module Created")
+
+    def check_index(self) -> int:
+        val = len(self._job.collection)
+        log(self._job.job_id, f"Collection has {val} units.")
+        return val
+
+    def get_index(self, index) -> str:
+        val = self._job.collection[index]
+        log(self._job.job_id, f"Return from collection {val} from index {index}.")
+        return val
 
     def check_value(self, index: int = 0, replace_str: str = "",
                     check_int: bool = False, check_float: bool = False,
@@ -23,7 +33,7 @@ class Module:
                     option_list=None,
                     description: str = "") -> (bool, str):
 
-        if sum([check_int, check_float, check_date, check_date]) > 1:
+        if sum([check_int, check_float, check_date, check_time]) > 1:
             raise InvalidParameterException("Contradicting check items are selected")
 
         success = True
@@ -34,26 +44,27 @@ class Module:
         if len(self._job.collection) <= index:
             if default != "":
                 value = default
-                logger.log(self._job.job_id, f"Index not available. Default used")
+                self._job.collect(default, index)
+                log(self._job.job_id, f"Index not available. Default used")
             else:
                 success = False
                 value = ""
-                logger.log(self._job.job_id, f"Index not available and no default")
+                log(self._job.job_id, f"Index not available and no default")
         else:
             try:
                 value = self._job.collection[index]
             except ValueError:
                 success = False
                 value = ""
-                logger.log(self._job.job_id, f"Unexpected index fail", log_type="warn")
+                log(self._job.job_id, f"Unexpected index fail", log_type="warn")
 
         if success and value == "":
             if default != "":
                 value = default
-                logger.log(self._job.job_id, f"No message available. Default used")
+                log(self._job.job_id, f"No message available. Default used")
             else:
                 success = False
-                logger.log(self._job.job_id, f"No message available and no default")
+                log(self._job.job_id, f"No message available and no default")
 
         if success and not check_time and not check_date and " " in value:
             value = value.split(" ")[0].strip()
@@ -66,19 +77,19 @@ class Module:
                 int(value)
             except ValueError:
                 success = False
-                logger.log(self._job.job_id, f"Unable to convert to int")
+                log(self._job.job_id, f"Unable to convert to int")
 
         if success and check_float:
             try:
                 float(value)
             except ValueError:
                 success = False
-                logger.log(self._job.job_id, f"Unable to convert to float")
+                log(self._job.job_id, f"Unable to convert to float")
 
         if success and check_list is not None:
             if value not in check_list:
                 success = False
-                logger.log(self._job.job_id, f"Expected item not in list")
+                log(self._job.job_id, f"Expected item not in list")
 
         if success and check_date and value.lower() == "yesterday":
             value = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
@@ -87,7 +98,7 @@ class Module:
             value = (datetime.now() + timedelta(days=1)).strftime('%Y-%m-%d')
 
         if success and check_date:
-            date_formats = global_var.date_formats
+            date_formats = global_variables.date_formats
             for date_format in date_formats:
                 try:
                     date_obj = datetime.strptime(value, date_format)
@@ -95,57 +106,63 @@ class Module:
                         date_obj = date_obj.replace(year=datetime.now().year)
                     value = date_obj.strftime('%Y-%m-%d')
                     success = True
-                    logger.log(self._job.job_id, f"Date format accepted {str(value)} for {date_format}")
+                    log(self._job.job_id, f"Date format accepted {str(value)} for {date_format}")
                     break
                 except ValueError:
                     success = False
-                    logger.log(self._job.job_id, f"Date format mismatch {str(value)} for {date_format}")
+                    log(self._job.job_id, f"Date format mismatch {str(value)} for {date_format}")
 
         if success and check_time:
-            time_formats = global_var.time_formats
+            time_formats = global_variables.time_formats
             for time_format in time_formats:
                 try:
                     time_obj = datetime.strptime(value, time_format).time()
                     value = time_obj.strftime("%H:%M:%S")
                     success = True
-                    logger.log(self._job.job_id, f"Time format accepted {str(value)} for {time_format}")
+                    log(self._job.job_id, f"Time format accepted {str(value)} for {time_format}")
                     break
                 except ValueError:
                     success = False
-                    logger.log(self._job.job_id, f"Time format mismatch {str(value)} for {time_format}")
+                    log(self._job.job_id, f"Time format mismatch {str(value)} for {time_format}")
 
         # If anything failed
         if not success:
             self._job.store_message()
             get_manual = check_int or check_float or check_date or check_time
 
-            if option_list:
-                if description != "":
-                    send_val = "Please select the " + description + "."
-                else:
-                    send_val = "Please select from the list below."
-            else:
-                if replace_str != "":
-                    send_val = f"Please enter the amount in {replace_str}"
-                else:
-                    send_val = "Please enter the amount"
-                if description != "":
-                    send_val = send_val + " for the " + description + "."
+            send_val = f"Please enter the {description if description!='' else 'value'}" \
+                       f"{' in ' if replace_str != '' else ''}{replace_str}" \
+                       f"{' from the options below' if option_list else ''}."
 
             if option_list:
                 msg = Message(send_string=send_val, job=self._job)
                 msg.keyboard_extractor(index=index, options=option_list, add_cancel=True, add_other=get_manual)
                 self.send_message(message=msg)
             else:
-                self.send_message(message=Message(send_string=send_val, job=self._job), get_input=True)
+                self.send_message(message=Message(send_string=send_val, job=self._job), get_input=True, index=index)
 
         return success, value
 
-    def send_message(self, message: Message, get_input=False):
-        if get_input and self._job.chat_id in channels[self._job.telepot_account].waiting_user_input.keys():
-            task_queue.add_message(message)
+    def send_message(self, message: Message, get_input=False, index=0):
+        in_queue = channels[self._job.telepot_account].waiting_user_input.keys()
+
+        message.job = self._job
+        message.job_id = self._job.job_id
+
+        if get_input and self._job.chat_id in in_queue:
+            log(job_id=self._job.job_id, msg="Chats in Queue: " + str(in_queue))
+            message_queue.add_message(message)
+            log(job_id=self._job.job_id, msg="Message added to Queue.")
         else:
             channels[self._job.telepot_account].send_now(message=message)
+
+            if get_input:
+                channels[self._job.telepot_account].get_user_input(job=self._job, index=index)
+
+    def close_all_callbacks(self):
+        replies = self._job.replies
+        for reply in replies.keys():
+            channels[self._job.telepot_account].update_keyboard(self._job, replies[reply])
 
     def send_admin(self, message: Message):
         message.send_to_master()

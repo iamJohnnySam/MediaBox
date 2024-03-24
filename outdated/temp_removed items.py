@@ -5,25 +5,7 @@ def link_msg_to_buttons(self, message, buttons):
                    self.callback_id_prefix + 'telepot_button_link.json').add_level1(button_dict)
 
 
-def manage_chat_group(self, group, chat_id, add=True, remove=False):
-    message_type = "info"
-    where = f"chat_id = '{chat_id}' AND group_name = '{group}';"
-    if not add ^ remove:
-        msg = "Invalid command"
-        message_type = "error"
-    elif add and sql_databases["administration"].exists(self.database_groups, where) == 0:
-        cols = "chat_id, group_name"
-        vals = (chat_id, group)
-        sql_databases["administration"].insert(self.database_groups, cols, vals)
-        msg = f"Added {chat_id} to {group} group"
-    elif remove and sql_databases["administration"].exists(self.database_groups, where) != 0:
-        sql_databases["administration"].run_sql(f"DELETE FROM {self.database_groups} WHERE " + where)
-        msg = f"Removed {chat_id} from {group} group"
-    else:
-        msg = "Nothing to do"
 
-    logger.log(msg, message_type)
-    return msg
 
 
 def handle_photo(self, msg):
@@ -63,7 +45,7 @@ def quick_cb(self, query: dict, command: str, value: str):
     elif command == "torrent":
         success, torrent_id = transmission.download(value)
         if success:
-            self.bot.editMessageReplyMarkup(reply_to, reply_markup=None)
+
             self.send_now("Movie will be added to queue", reply_to=reply_to, chat=chat)
 
     elif command == "cancel":

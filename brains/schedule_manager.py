@@ -44,17 +44,17 @@ def run_schedule_manager():
     schedule.every().day.at("08:30").do(schedule_handler, func=transmission.torrent_complete_sequence)
     logger.log("Schedule Created for Download Cleanup")'''
 
-    while t_scheduler.is_alive() and not global_var.stop_all:
+    while t_scheduler.is_alive() and not global_variables.stop_all:
         check_running_threads()
         time.sleep(10)
 
-    global_var.stop_all = True
+    global_variables.stop_all = True
 
 
 def run_scheduler():
     global run_all_schedules
 
-    while not global_var.stop_all:
+    while not global_variables.stop_all:
 
         if run_all_schedules:
             run_all_schedules = False

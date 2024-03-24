@@ -8,3 +8,7 @@ class InvalidSequenceException(Exception):
 
 class ImpossibleException(Exception):
     pass
+
+
+class UnexpectedOperation(Exception):
+    pass

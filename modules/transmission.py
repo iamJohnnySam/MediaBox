@@ -1,14 +1,16 @@
 from transmission_rpc import Client
 
+import global_variables
 from brains.job import Job
 from modules.base_module import Module
-from tools import logger
+from tools.logger import log
 
 
 class Transmission(Module):
     def __init__(self, job: Job):
         super().__init__(job)
-        self.client = Client()
+        if global_variables.operation_mode:
+            self.client = Client()
         self.active_torrents = {}
 
     def list_torrents(self):
@@ -17,18 +19,22 @@ class Transmission(Module):
         for torrent in torrent_list:
             success, torrent_name = self.add_torrent_to_list(torrent)
             if not success:
-                logger.log(job_id=self._job.job_id, error_code=50001)
+                log(job_id=self._job.job_id, error_code=50001)
 
     def add_torrent(self, path, paused=False):
-        torrent = self.client.add_torrent(path, paused=paused)
-        success, torrent_name = self.add_torrent_to_list(torrent)
-        return success, torrent_name
+        if global_variables.operation_mode:
+            torrent = self.client.add_torrent(path, paused=paused)
+            success, torrent_name = self.add_torrent_to_list(torrent)
+            log(self._job.job_id, msg=f"Torrent Added: {torrent_name}")
+            return success, torrent_name
+        else:
+            return True, "TEST"
 
     def add_torrent_to_list(self, torrent):
         torrent_id = torrent.id
         if torrent_id not in self.active_torrents.keys():
             self.active_torrents[torrent_id] = torrent
-            logger.log(job_id=self._job.job_id, msg=f'Torrent Added - {torrent.name}')
+            log(job_id=self._job.job_id, msg=f'Torrent Added - {torrent.name}')
             return True, torrent.name
         else:
             return False, ""
@@ -39,13 +45,11 @@ class Transmission(Module):
             if self.active_torrents[torrent_number].percent_done == 1:
                 torrent_id = self.active_torrents[torrent_number].id
                 self.client.remove_torrent(torrent_id)
-                logger.log(job_id=self._job.job_id,
-                           msg=f'Torrent deleted - {self.active_torrents[torrent_number].name}')
+                log(job_id=self._job.job_id,
+                    msg=f'Torrent deleted - {self.active_torrents[torrent_number].name}')
 
 # todo add as Task
 # client = Transmission()
-#
-#
 # def download(link, paused=False):
 #     success, torrent_name = client.add_torrent(link, paused)
 #     return success, torrent_name
@@ -68,8 +72,8 @@ class Transmission(Module):
 #
 #
 # def torrent_complete_sequence():
-#     logger.log("Starting Transmission Cleanup")
+#     log("Starting Transmission Cleanup")
 #     client.delete_downloaded()
-#     logger.log("Starting Downloads Refactor")
+#     log("Starting Downloads Refactor")
 #     RefactorFolder(global_var.torrent_download).clean_torrent_downloads()
-#     logger.log("Sequence Complete")
+#     log("Sequence Complete")

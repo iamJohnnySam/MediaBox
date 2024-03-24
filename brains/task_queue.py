@@ -1,32 +1,22 @@
 import threading
 from queue import Queue
 
+from tools.logger import log
+
 job_q = Queue(maxsize=0)
-msg_q = Queue(maxsize=0)
-lock = threading.Lock()
+job_lock = threading.Lock()
 
 
 def add_job(job):
     global job_q
-    with lock:
+    with job_lock:
         job_q.put(job)
+        log(job_id=job.job_id, msg="Job Added to Queue")
 
 
 def get_job():
     global job_q
-    with lock:
+    with job_lock:
         job = job_q.get()
-    return job
-
-
-def add_message(msg):
-    global job_q
-    with lock:
-        job_q.put(msg)
-
-
-def get_message():
-    global job_q
-    with lock:
-        job = job_q.get()
+        log(job_id=job.job_id, msg="Job Removed from Queue")
     return job

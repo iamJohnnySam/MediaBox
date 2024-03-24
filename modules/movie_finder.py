@@ -1,59 +1,67 @@
 import feedparser
 
-from tools import logger
-from communication.channels import channels
+from communication.message import Message
+from modules.base_module import Module
 from brains.job import Job
+from modules.transmission import Transmission
+from tools.logger import log
 
 
-class MovieFinder:
-    def __init__(self, message: Job):
-        self.msg = message
+class MovieFinder(Module):
+    def __init__(self, job: Job):
+        super().__init__(job)
         self.retries = 2
-        self.channel = channels[self.msg.telepot_account]
+        log(self._job.job_id, f"Movie Finder Module Created")
 
-    def start(self):
-        if not self.msg.check_value():
-            self.channel.get_value_from_user(msg=self.msg, inquiry="name of movie")
+    def find_movie(self):
+        if self.check_index() > 1:
+            movie = self.get_index(1)
+            success, torrent_id = Transmission(self._job).add_torrent(movie)
+            if success:
+                self.close_all_callbacks()
+                self._job.complete()
+                self.send_message(Message(f"Movie {torrent_id} added to queue."))
             return
 
-        movie = self.msg.value.lower()
+        success, movie = self.check_value(index=0, description="name of the movie")
+        if not success:
+            return
 
-        first_word = movie.split(" ")[0]
-        if first_word in ["the", "a", "in", "an"]:
-            try:
-                first_word = movie.split(" ")[1]
-            except IndexError:
-                pass
+        movie = movie.lower()
+
+        search_filter: list = movie.split(" ")
+        for word in ["the", "a", "in", "an"]:
+            while word in search_filter:
+                search_filter.remove(word)
+        log(job_id=self._job.job_id, msg=f"Search filter words selected as {str(search_filter)}.")
 
         movie = movie.replace(" ", "%20").replace("/", "")
         search_string = "https://yts.mx/rss/" + movie + "/720p/all/0/en"
-        logger.log("Searching " + search_string)
+        log(self._job.job_id, msg="Searching " + search_string)
         movie_feed = feedparser.parse(search_string)
 
         while not movie_feed:
             if self.retries == 0:
                 break
-            logger.log("Retrying searching " + search_string, log_type="warn")
+            log(self._job.job_id, "Retrying searching " + search_string, log_type="warn")
             movie_feed = feedparser.parse(search_string)
             self.retries = self.retries - 1
 
         movies = []
         for movie in movie_feed.entries:
-            if first_word in movie.title:
+            if all(word in movie.title for word in search_filter):
                 movies.append(movie)
 
         if len(movies) == 0:
-            movies = movie_feed
+            movies = movie_feed.entries
 
-        for movie_name in movies:
-            title, image, link, torrent = get_movie_details(movie_name)
-
-            self.channel.send_with_keyboard(send_string=title,
-                                            job=self.msg,
-                                            photo=image,
-                                            button_text=["Visit Page", "Download", "Cancel"],
-                                            button_val=[f"echo;{link}", f"torrent;{torrent}", "cancel"],
-                                            arrangement=[3])
+        for movie_entry in movies:
+            title, image, link, torrent = get_movie_details(movie_entry)
+            send_movie = Message(f"{title}\n{image}", job=self._job)
+            send_movie.add_keyboard(button_text=["Download"],
+                                    button_val=[f"1;{torrent}"],
+                                    arrangement=[1])
+            self.send_message(send_movie)
 
 
 def get_movie_details(movie):

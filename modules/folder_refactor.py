@@ -3,9 +3,8 @@ import re
 import shutil
 import string
 
-import global_variables
 from tools import logger
-from communication import communicator
+from outdated import communicator
 
 
 class RefactorFolder:

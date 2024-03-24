@@ -1,12 +1,14 @@
+import asyncio
 import json
 import os
 
+import telepot
 from PIL import Image
 
 from refs import main_channel, db_admin, tbl_jobs, tbl_chats, telepot_image_dump
-from tools import logger
 from database_manager.sql_connector import sql_databases
 from tools.custom_exceptions import *
+from tools.logger import log
 
 
 class Job:
@@ -31,10 +33,12 @@ class Job:
         self._photo_ids: [str] = []
         self._current_callback = 0
 
+        self.user_input = ""
+
         manual_params = function != ""
 
         if message is None and job_id == 0 and not manual_params:
-            logger.log(job_id=job_id, error_code=40001)
+            log(job_id=job_id, error_code=40001)
             raise InvalidParameterException("Not enough parameters to create a job")
 
         elif message is not None:
@@ -43,20 +47,7 @@ class Job:
 
         elif job_id != 0:
             self._job_id = job_id
-            query = f"SELECT account, chat_id, reply_to, username, class, function, collection, photo " \
-                    f"FROM {tbl_jobs} WHERE job_id ='{str(self._job_id)}'"
-            result = self._db.run_sql(query)
-            if len(result) == 0:
-                logger.log(job_id=job_id, error_code=40003)
-                raise LookupError
-
-            self._telepot_account: str = result[0]
-            self._chat_id: int = int(result[1])
-            self._reply_to: int = int(result[2]) if result[3] is not None else 0
-            self._username: str = result[3] if result[3] is not None else "User"
-            self._function: str = result[5] if result[5] is not None else ""
-            self._collection: [str] = list(result[6].split(';')) if result[6] is not None else []
-            self._photo_ids = result[7].split(";")
+            self.get_job(self._job_id)
 
         elif manual_params:
             if chat_id == 0:
@@ -65,8 +56,26 @@ class Job:
                 self._username = "User"
 
         else:
-            logger.log(job_id, error_code=40002)
+            log(job_id, error_code=40002)
             raise InvalidParameterException("Error creating job")
+
+    def get_job(self, job_id):
+        query = f"SELECT account, chat_id, reply_to, username, function, collection, photo " \
+                f"FROM {tbl_jobs} WHERE job_id ='{str(self._job_id)}'"
+        result = self._db.run_sql(query, job_id=self.job_id)
+        if len(result) == 0:
+            log(job_id=job_id, error_code=40003)
+            raise LookupError
+
+        self._telepot_account: str = result[0]
+        self._chat_id: int = int(result[1])
+        self._reply_to: int = int(result[2]) if result[3] is not None else 0
+        self._username: str = result[3] if result[3] is not None else "User"
+        self._function: str = result[4] if result[4] is not None else ""
+        self._collection: [str] = list(result[5].split(';')) if result[5] is not None else []
+        self._photo_ids = [] if result[6] is None else result[6].split(";")
+
+        log(self._job_id, f"Job ({self._function}) recovered from job_id with collection: {self._collection}")
 
     def breakdown_message(self, msg: dict):
         self._chat_id = msg['chat']['id']
@@ -80,10 +89,15 @@ class Job:
 
         if 'text' in msg.keys():
             content = msg['text']
+            self.user_input = content
 
             first_word: str = content.split(" ")[0].lower()
             if first_word.startswith("/"):
                 self._function = first_word.replace("/", "")
+
+                if self._function == "start":
+                    self._function = "help"
+
                 value = content.replace(first_word, "").strip()
                 self._collection = value.split(" ")
 
@@ -103,18 +117,23 @@ class Job:
             value = ""
             self._collection = []
 
-        logger.log(job_id=self._job_id, msg=f"Function: {self._function}, Value: {value}")
+        log(job_id=self._job_id, msg=f"Function: {self._function}, Value: {value}")
 
     # Job Properties
     @property
     def master(self):
         query = f"SELECT chat_id FROM {tbl_chats} WHERE master = 1"
-        result = self._db.run_sql(query)[0]
+        result = self._db.run_sql(query, job_id=self.job_id)[0]
         return result
 
     @property
     def job_id(self) -> int:
         return self._job_id
+
+    @job_id.setter
+    def job_id(self, in_job_id):
+        self._job_id = in_job_id
+        self.get_job(self._job_id)
 
     @property
     def telepot_account(self):
@@ -143,16 +162,16 @@ class Job:
 
     @property
     def collection(self) -> list:
-        if self.is_stored:
+        if self.is_stored and self._collection == []:
             query = f"SELECT collection FROM {tbl_jobs} WHERE job_id ='{str(self._job_id)}'"
-            result = self._db.run_sql(query)
+            result = self._db.run_sql(query, job_id=self.job_id)
             collect = result[0].split(";")
         else:
             collect = self._collection
         return collect
 
     @collection.setter
-    def collection(self, collect):
+    def collection(self, collect: list):
         self._collection = collect
         self.update_db('collection', collect)
 
@@ -180,7 +199,7 @@ class Job:
         a new callback ID is generated."""
         self.store_message()
         query = f"SELECT cb_id FROM {tbl_jobs} WHERE job_id ='{str(self._job_id)}'"
-        cb = int(self._db.run_sql(query)[0])
+        cb = int(self._db.run_sql(query, job_id=self.job_id)[0])
         cb = cb + 1
         self.update_db('cb_id', str(cb), force=True)
         self._current_callback = cb
@@ -210,7 +229,7 @@ class Job:
     def complete(self):
         if self.is_stored:
             self.update_db('complete', True)
-            logger.log(job_id=self._job_id, msg="Message Completed")
+            log(job_id=self._job_id, msg="Message Completed")
 
     def update_db(self, field: str, item, force=False):
         if type(item) is list:
@@ -220,35 +239,44 @@ class Job:
             self.store_message()
 
         if self.is_stored:
-            query = f"UPDATE {tbl_jobs} SET {field} = '{item}' WHERE job_id = '{str(self._job_id)}'"
-            self._db.run_sql(query)
+            query = f"UPDATE {tbl_jobs} SET {field} = '{item}' WHERE job_id = '{self._job_id}'"
+            self._db.run_sql(query, job_id=self.job_id)
 
     def get_master_details(self) -> (int, str):
         query = f"SELECT chat_id, chat_name FROM {tbl_chats} WHERE master = 1"
-        return self._db.run_sql(query)
+        return self._db.run_sql(query, job_id=self.job_id)
 
     @property
     def replies(self):
         query = f"SELECT replies FROM {tbl_jobs} WHERE job_id ='{str(self._job_id)}'"
-        return json.loads(self._db.run_sql(query)[0])
+        reps = self._db.run_sql(query, job_id=self.job_id)[0]
+        if reps is None:
+            return {}
+        else:
+            return json.loads(reps)
 
     @property
     def callbacks(self):
         query = f"SELECT callbacks FROM {tbl_jobs} WHERE job_id ='{str(self._job_id)}'"
-        return json.loads(self._db.run_sql(query)[0])
+        return json.loads(self._db.run_sql(query, job_id=self.job_id)[0])
 
     def store_message(self):
         if not self.is_stored:
             if self._function == "":
-                logger.log(job_id=self.job_id, msg="Message to be stored without function", log_type="warn")
+                log(job_id=self.job_id, msg="Message to be stored without function", log_type="warn")
 
-            self._job_id = self._db.insert(table=tbl_jobs,
-                                           columns="account, chat_id, reply_to, username, function, collection",
-                                           val=(self._telepot_account, self._chat_id, self._reply_to, self._username,
-                                                self._function))
-            self.update_db("collection", self._collection)
-            self.update_db("photo", self._photo_ids)
-            logger.log(job_id=self.job_id, msg="Message Stored")
+            success, self._job_id = self._db.insert(table=tbl_jobs,
+                                                    columns="account, chat_id, reply_to, username, function",
+                                                    val=(self._telepot_account, self._chat_id, self._reply_to,
+                                                         self._username,
+                                                         self._function))
+
+            if self._collection:
+                self.update_db("collection", self._collection)
+
+            if self._photo_ids:
+                self.update_db("photo", self._photo_ids)
+            log(job_id=self.job_id, msg="Message Stored")
 
     def store_photos(self):
         for pic in self.photo_loc:
@@ -260,21 +288,22 @@ class Job:
                 foo = foo.resize((int(w * 1024 / h), 1024))
 
             foo.save(pic, optimize=True, quality=95)
-            logger.log(job_id=self.job_id, msg=f'Received Photo > {pic}, File size > {foo.size}')
+            log(job_id=self.job_id, msg=f'Received Photo > {pic}, File size > {foo.size}')
 
     def collect(self, value: str, index: int):
-        if self.is_stored:
+        if self.is_stored and self._collection == []:
             query = f"SELECT collection FROM {tbl_jobs} WHERE job_id ='{str(self._job_id)}'"
-            self._collection = self._db.run_sql(query)[0].split(";")
+            result = self._db.run_sql(query, job_id=self.job_id)[0]
+            self._collection = [] if result is None else result.split(";")
 
         if index < len(self._collection):
             self._collection[index] = value
-            logger.log(job_id=self.job_id, msg=f"({self._job_id}): Replaced with {value} at index {index}.")
+            log(job_id=self.job_id, msg=f"Replaced with {value} at index {index}.")
         elif index == len(self._collection):
             self._collection.append(value)
-            logger.log(job_id=self.job_id, msg=f"({self._job_id}): Added {value} at index {index}.")
+            log(job_id=self.job_id, msg=f"({self._job_id}): Added {value} at index {index}.")
         else:
-            logger.log(job_id=self.job_id, error_code=40004)
+            log(job_id=self.job_id, error_code=40004)
             raise IndexError("Cannot collect")
 
         self.update_db("collection", self._collection)
@@ -282,7 +311,9 @@ class Job:
     def add_reply(self, replies):
         if self.is_stored:
             d = self.replies
-            d[str(self._current_callback)] = replies
+            for reply in replies:
+                d[self._current_callback] = telepot.message_identifier(reply)
+                log(job_id=self.job_id, msg=f"Added reply with callback: {self._current_callback}.")
             self.update_db('replies', json.dumps(d))
 
     def add_callback(self, cb: int, value):

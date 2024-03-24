@@ -19,9 +19,9 @@ reboot_pi = False
 # todo move to task creation
 # backup.backup.move_folders_common.append(finance_images)
 
-date_formats = ["%Y/%m/%d", "%d/%m/%Y", "%Y/%b/%d", "%d/%b/%Y",
+date_formats = ["%Y-%m-%d", "%d-%m-%Y", "%Y-%b-%d", "%d-%b-%Y", "%m-%d-%y", "%b-%d-%y",
+                "%Y/%m/%d", "%d/%m/%Y", "%Y/%b/%d", "%d/%b/%Y",
                 "%m/%d", "%d/%m", "%b/%d", "%d/%b",
-                "%Y-%m-%d", "%d-%m-%Y", "%Y-%b-%d", "%d-%b-%Y", "%m-%d-%y", "%b-%d-%y",
                 "%m-%d", "%d-%m", "%b-%d", "%d-%b",
                 "%Y,%m,%d", "%d,%m,%Y", "%Y,%b,%d", "%d,%b,%Y",
                 "%m,%d", "%d,%m", "%b,%d", "%d,%b"]

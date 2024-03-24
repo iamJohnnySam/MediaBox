@@ -1,9 +1,7 @@
 import datetime
 import time
 import os
-import global_variables
-import passwords
-from communication import communicator
+from outdated import communicator
 from tools import logger
 from tools.image_classifier import ImageClassifier
 from communication.email_manager import EmailManager

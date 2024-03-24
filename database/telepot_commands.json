@@ -8,6 +8,10 @@
     "definition": "Bot current time",
     "all_bots": true
   },
+  "help": {
+    "definition": "List all commands",
+    "all_bots": true
+  },
 
   "Entertainment Controls": false,
   "check_shows": {

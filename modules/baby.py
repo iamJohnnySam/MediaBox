@@ -1,18 +1,19 @@
 from datetime import datetime
 
-from tools import logger
+from communication.message import Message
 from tools.grapher import grapher_simple_trend, grapher_weight_trend, grapher_category, grapher_bar_trend
 from tools.custom_exceptions import *
 from brains.job import Job
 from database_manager.sql_connector import sql_databases
 from modules.base_module import Module
+from tools.logger import log
 
 
 class Baby(Module):
     def __init__(self, job: Job):
         super().__init__(job)
         self._db = sql_databases["baby"]
-        logger.log(self._job.job_id, f"Baby Module Created")
+        log(self._job.job_id, f"Baby Module Created")
         self._group = "baby"
 
     def feed(self):
@@ -46,10 +47,11 @@ class Baby(Module):
         val = (date, time, float(amount), source, str(self._job.chat_id))
         self._db.insert('feed', columns, val)
 
-        self.send_message(message=f'\U0001F37C\nBaby was fed {amount}ml on {date} at {time} with {source}  milk. '
-                                  f'\nYour baby has had ' + "{:10.1f}".format(day_total).strip() +
-                                  "ml of milk\nUse /feed to submit a new entry",
-                          group=self._group)
+        self.send_message(Message(f'\U0001F37C\nBaby was fed {amount}ml on {date} at {time} with {source} milk '
+                                  f'for a total of {"{:10.1f}".format(day_total).strip()}ml today.'
+                                  f'\nUse /feed to submit a new entry',
+                                  job=self._job,
+                                  group=self._group))
         self._job.complete()
 
     def pump(self):
@@ -79,8 +81,8 @@ class Baby(Module):
         val = (date, time, float(amount), source, str(self._job.chat_id))
         self._db.insert('pump', columns, val)
 
-        self.send_message(message=f'\U0001F37C\nYou pumped {amount}ml on {date} at {time} from {source} boob.'
-                                  f'for a total of {day_total} today!')
+        self.send_message(Message(f'\U0001F37C\nYou pumped {amount}ml on {date} at {time} from {source} boob.'
+                                  f'for a total of {day_total} today!', job=self._job))
         self._job.complete()
 
     def diaper(self):
@@ -116,8 +118,9 @@ class Baby(Module):
         for val in result:
             day_total = day_total + val[0]
 
-        self.send_message(message=f"{emoji}\n{source} diaper recorded on {date} at {time}.\nYour baby has had "
-                                  f"{str(day_total)} nappy/diaper changes today.\nUse /diaper to submit a new entry")
+        self.send_message(Message(f"{emoji}\n{source} diaper recorded on {date} at {time}.\nYour baby has had "
+                                  f"{str(day_total)} nappy/diaper changes today.\nUse /diaper to submit a new entry",
+                                  job=self._job))
         self._job.complete()
 
     def weight(self):
@@ -138,11 +141,11 @@ class Baby(Module):
         send_string = "\U0001F6BC \U0001F3C6 \nbaby Weight Added - " + weight + "kg. \nThat's a weight gain of " + \
                       "{:10.2f}".format(weight - last_entry[1]) + "kg since " + str(last_entry[0]) + "."
 
-        logger.log(self._job.job_id, send_string)
-        self.baby_weight_trend(caption=send_string)
+        log(self._job.job_id, send_string)
+        self.weight_trend(caption=send_string)
         self._job.complete()
 
-    def baby_weight_trend(self, caption=None):
+    def weight_trend(self, caption=None):
         query = 'SELECT date, weight FROM weight ORDER BY timestamp'
         result = list(self._db.run_sql(query, fetch_all=1))
 
@@ -154,15 +157,15 @@ class Baby(Module):
                                    y_name="Weight (kg)",
                                    chart_title="Baby Weight Trend - " + datetime.now().strftime('%Y-%m-%d %H:%M'))
 
-        self.send_message(message=caption, group=self._group, image=pic)
+        self.send_message(Message(caption, group=self._group, photo=pic))
 
         pic = grapher_weight_trend(graph_list=result,
                                    chart_title="Baby Weight Trend WHO - " + datetime.now().strftime('%Y-%m-%d %H:%M'))
 
-        self.send_message(message="WHO Chart", group=self._group, image=pic)
+        self.send_message(Message("WHO Chart", group=self._group, photo=pic))
         self._job.complete()
 
-    def baby_feed_history(self):
+    def feed_history(self):
         query = 'SELECT date, source, amount FROM feed ORDER BY timestamp'
         result = list(self._db.run_sql(query, fetch_all=1))
 
@@ -191,10 +194,10 @@ class Baby(Module):
                 caption = caption + f'\n{i} milk = {calc[i]}ml'
             caption = caption + "\nUse /feed to submit a new entry."
 
-        self.send_message(message=caption, group=self._group, image=pic)
+        self.send_message(Message(caption, job=self._job, photo=pic))
         self._job.complete()
 
-    def baby_diaper_history(self):
+    def diaper_history(self):
         query = 'SELECT date, what, count FROM diaper ORDER BY timestamp'
         result = list(self._db.run_sql(query, fetch_all=1))
 
@@ -223,10 +226,10 @@ class Baby(Module):
                 caption = caption + f'\n{i} = {calc[i]} nappies/diapers'
             caption = caption + "\nUse /diaper to submit a new entry."
 
-        self.send_message(message=caption, group=self._group, image=pic)
+        self.send_message(Message(caption, job=self._job, photo=pic))
         self._job.complete()
 
-    def baby_feed_trend(self):
+    def feed_trend(self):
         query = 'SELECT time, amount, date FROM feed ORDER BY timestamp'
         result = list(self._db.run_sql(query, fetch_all=1))
 
@@ -237,9 +240,9 @@ class Baby(Module):
                                 x_time=True)
 
         caption = "Use /feed to submit a new entry."
-        self.send_message(message=caption, group=self._group, image=pic)
+        self.send_message(Message(caption, job=self._job, photo=pic))
 
-    def baby_diaper_trend(self):
+    def diaper_trend(self):
         query = 'SELECT time, count, date, what FROM diaper ORDER BY timestamp'
         result = list(self._db.run_sql(query, fetch_all=1))
 
@@ -249,10 +252,10 @@ class Baby(Module):
                                 chart_title="Diaper Trend - " + datetime.now().strftime('%Y-%m-%d %H:%M'),
                                 x_time=True)
         caption = "Use /diaper to submit a new entry."
-        self.send_message(message=caption, group=self._group, image=pic)
+        self.send_message(Message(caption, job=self._job, photo=pic))
         self._job.complete()
 
-    def baby_feed_trend_today(self):
+    def feed_trend_today(self):
         query = f'SELECT time, amount, date FROM feed WHERE date = "{datetime.now().strftime("%Y-%m-%d")}" ' \
                 f'ORDER BY timestamp'
         result = list(self._db.run_sql(query, fetch_all=1))
@@ -272,10 +275,10 @@ class Baby(Module):
             caption = caption + f"\n{row[0]} - {row[1]} - {row[2]}"
         caption = caption + "\nUse /feed to submit a new entry."
 
-        self.send_message(message=caption, group=self._group, image=pic)
+        self.send_message(Message(caption, job=self._job, photo=pic))
         self._job.complete()
 
-    def baby_diaper_trend_today(self):
+    def diaper_trend_today(self):
         query = f'SELECT time, count, date, what FROM diaper WHERE date = "{datetime.now().strftime("%Y-%m-%d")}" ' \
                 f'ORDER BY timestamp'
         result = list(self._db.run_sql(query, fetch_all=1))
@@ -290,5 +293,5 @@ class Baby(Module):
             caption = caption + f"\n{row[0]} - {row[1]} - {row[3]}"
         caption = caption + "\nUse /diaper to submit a new entry."
 
-        self.send_message(message=caption, group=self._group, image=pic)
+        self.send_message(Message(caption, job=self._job, photo=pic))
         self._job.complete()
