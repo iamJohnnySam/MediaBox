@@ -5,7 +5,7 @@ import time
 
 import refs
 from communication import channels
-from outdated import communicator
+from communication.message import Message
 from tools import logger, start_up
 import global_variables
 from brains import schedule_manager, task_manager
@@ -43,7 +43,7 @@ logger.log(msg="All threads merged")
 
 # ------ EXIT CONDITIONS -----------
 if not global_variables.stop_all:
-    communicator.send_to_master("main", "Crashed.")
+    channels.channels[refs.main_channel].send_now(Message("Crashed."))
     time.sleep(60)
 
 if (not global_variables.stop_all) or global_variables.restart:
@@ -57,7 +57,7 @@ if (not global_variables.stop_all) or global_variables.restart:
     os.execv(sys.executable, ['python'] + sys.argv)
 
 else:
-    communicator.send_to_master("main", "Exiting...")
+    channels.channels[refs.main_channel].send_now(Message("Exiting..."))
     logger.log(msg="CLEAN EXIT")
 
     if global_variables.reboot_pi:

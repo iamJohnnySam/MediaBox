@@ -4,7 +4,7 @@ from database_manager.json_editor import JSONEditor
 from tools import logger
 from tools.custom_exceptions import InvalidParameterException
 
-channels = {}
+channels: dict[str:Messenger] = {}
 
 
 def init_channel(channel):

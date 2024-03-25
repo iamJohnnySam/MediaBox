@@ -45,12 +45,14 @@ class SQLConnector:
         )
         self.cursor = self.my_db.cursor()
 
+    @cache
     def get_databases(self):
         if self.database is None:
             self.cursor.execute("SHOW DATABASES")
             result = self.cursor.fetchall()
             return [row[0] for row in result]
 
+    @cache
     def check_table_exists(self, table, job_id=0):
         lock.acquire()
 
