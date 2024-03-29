@@ -3,6 +3,7 @@ import os
 import shutil
 from datetime import datetime
 
+import global_variables
 from brains.job import Job
 from modules.base_module import Module
 from tools import logger
@@ -15,7 +16,7 @@ class BackUp(Module):
         super().__init__(job)
         self.backup_location = os.path.join(loc, datetime.now().strftime("%Y%m%d%H%M%S"))
         self.common_backup_location = loc
-        if not os.path.exists(self.backup_location):
+        if global_variables.operation_mode and not os.path.exists(self.backup_location):
             os.makedirs(self.backup_location)
 
         self.copy_folders = []
@@ -38,14 +39,15 @@ class BackUp(Module):
         logger.log(self._job.job_id, "Backup Ended")
 
     def cp_files(self):
-        for file in self.copy_files:
-            destination = os.path.join(self.backup_location, file)
-            if not os.path.exists(os.path.dirname(destination)):
-                os.makedirs(os.path.dirname(destination))
-                logger.log(self._job.job_id, f"Directory created > {os.path.dirname(destination)}")
+        if global_variables.operation_mode:
+            for file in self.copy_files:
+                destination = os.path.join(self.backup_location, file)
+                if not os.path.exists(os.path.dirname(destination)):
+                    os.makedirs(os.path.dirname(destination))
+                    logger.log(self._job.job_id, f"Directory created > {os.path.dirname(destination)}")
 
-            shutil.copy(file, destination)
-            logger.log(self._job.job_id, f"Copied {file} -> {destination}")
+                shutil.copy(file, destination)
+                logger.log(self._job.job_id, f"Copied {file} -> {destination}")
 
     def mv_files(self):
         for file in self.move_files:

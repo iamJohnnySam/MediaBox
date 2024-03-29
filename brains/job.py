@@ -21,6 +21,7 @@ class Job:
         self._telepot_account = telepot_account
 
         # Important Variables
+        self._job_id = job_id
         self._chat_id: int = chat_id
         self._reply_to: int = reply_to
         self._username: str = username
@@ -263,7 +264,7 @@ class Job:
 
     def get_master_details(self) -> (int, str):
         query = f"SELECT chat_id, chat_name FROM {tbl_chats} WHERE master = 1"
-        return self._db.run_sql(query, job_id=self.job_id)
+        return self._db.run_sql(query, job_id=self._job_id)
 
     @property
     def replies(self):

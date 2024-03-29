@@ -50,15 +50,15 @@ def run_task(job: Job):
     elif func == "help":
         Admin(job).help()
     elif func == "backup_all":
-        if global_variables.operation_mode:
-            backup = BackUp(job, '/mnt/MediaBox/MediaBox/Backup')
-            backup.move_folders.append('log/')
-            backup.move_png_files.append('charts/')
-            backup.copy_files.append('passwords.py')
-            backup.move_files.append('../nohup.out')
-            backup.run_backup()
-        else:
-            log(job.job_id, "Unable to run back up. Not in Operation Mode", "warn")
+        backup = BackUp(job, '/mnt/MediaBox/MediaBox/Backup')
+        backup.move_folders.append('log/')
+        backup.move_png_files.append('charts/')
+        backup.copy_files.append('passwords.py')
+        backup.move_files.append('../nohup.out')
+        backup.run_backup()
+    elif func == "backup_database":
+        backup = BackUp(job, '/mnt/MediaBox/MediaBox/Backup')
+        backup.cp_databases()
 
     elif func == "check_shows":
         Transmission(job).list_torrents()

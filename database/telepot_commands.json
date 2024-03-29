@@ -13,7 +13,7 @@
     "all_bots": true
   },
   "backup": {
-    "definition": "Back Up Bot Information",
+    "definition": "Back Up Program Information",
     "function": "backup_all"
   },
 
