@@ -1,5 +1,6 @@
 # --- SETTINGS ---
 log_level = "debug"                         # LOGGING LEVEL
+log_print = True
 main_channel = "spark"                      # TELEPOT
 
 

@@ -14,7 +14,7 @@ class MovieFinder(Module):
         log(self._job.job_id, f"Movie Finder Module Created")
 
     def find_movie(self):
-        if self.check_index() > 1:
+        if self._job.called_back and self.check_index() > 1:
             movie = self.get_index(1)
             success, torrent_id = Transmission(self._job).add_torrent(movie)
             if success:
@@ -23,7 +23,7 @@ class MovieFinder(Module):
                 self.send_message(Message(f"Movie {torrent_id} added to queue."))
             return
 
-        success, movie = self.check_value(index=0, description="name of the movie")
+        success, movie = self.check_value(index=-1, description="name of the movie")
         if not success:
             return
 
@@ -49,8 +49,10 @@ class MovieFinder(Module):
 
         movies = []
         for movie in movie_feed.entries:
-            if all(word in movie.title for word in search_filter):
+            log(job_id=self._job.job_id, msg=f"Found movie - {movie.title}")
+            if all(word in str(movie.title).lower() for word in search_filter):
                 movies.append(movie)
+                log(job_id=self._job.job_id, msg=f"Movie matching search criteria - {movie.title}")
 
         if len(movies) == 0:
             movies = movie_feed.entries

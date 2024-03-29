@@ -51,12 +51,23 @@ class Module:
                 value = ""
                 log(self._job.job_id, f"Index not available and no default")
         else:
-            try:
-                value = self._job.collection[index]
-            except ValueError:
-                success = False
-                value = ""
-                log(self._job.job_id, f"Unexpected index fail", log_type="warn")
+            col = self._job.collection
+
+            if index < 0:
+                try:
+                    value = " ".join([str(ele) for ele in col])
+                except IndexError:
+                    success = False
+                    value = ""
+                    log(self._job.job_id, f"Unexpected index fail", log_type="warn")
+            else:
+                try:
+                    value = col[index]
+                    log(self._job.job_id, f"Checking {value} for errors.")
+                except IndexError:
+                    success = False
+                    value = ""
+                    log(self._job.job_id, f"Unexpected index fail", log_type="warn")
 
         if success and value == "":
             if default != "":
@@ -66,8 +77,8 @@ class Module:
                 success = False
                 log(self._job.job_id, f"No message available and no default")
 
-        if success and not check_time and not check_date and " " in value:
-            value = value.split(" ")[0].strip()
+        # if success and not check_time and not check_date and " " in value:
+        #     value = value.split(" ")[0].strip()
 
         if success and replace_str != "" and replace_str in value:
             value = value.replace(replace_str, "").strip()

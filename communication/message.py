@@ -94,6 +94,8 @@ class Message:
 
         buttons = []
         cb_id = self.job.cb_id
+        if self.job_id == 0:
+            self.job_id = self.job.job_id
 
         for i in range(len(button_text)):
             # FORMAT = msg_id; cb_id; btn_text; (step; value)

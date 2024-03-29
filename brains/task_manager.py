@@ -6,9 +6,12 @@ from brains import task_queue
 from brains.job import Job
 from modules.admin import Admin
 from modules.baby import Baby
+from modules.backup import BackUp
 from modules.movie_finder import MovieFinder
 from modules.transmission import Transmission
 from tools.logger import log
+
+running_tasks = {}
 
 
 def run_task_manager():
@@ -20,10 +23,25 @@ def run_task_manager():
     while not global_variables.stop_all:
         while not task_queue.job_q.empty():
             job: Job = task_queue.get_job()
-            threading.Thread(target=run_task, args=(job,)).start()
+
+            check_running_tasks()
+
+            if job.job_id in running_tasks.keys():
+                log(job.job_id, "Waiting for Job to complete to process next task")
+                task_queue.add_job(job)
+                continue
+
+            if job.job_id != 0:
+                running_tasks[job.job_id] = threading.Thread(target=run_task, args=(job,))
+                running_tasks[job.job_id].start()
+            else:
+                threading.Thread(target=run_task, args=(job,)).start()
+
+        time.sleep(1)
 
 
 def run_task(job: Job):
+    job.update_job()
     func = job.function
     if func == "alive":
         Admin(job).alive()
@@ -31,6 +49,16 @@ def run_task(job: Job):
         Admin(job).time()
     elif func == "help":
         Admin(job).help()
+    elif func == "backup_all":
+        if global_variables.operation_mode:
+            backup = BackUp(job, '/mnt/MediaBox/MediaBox/Backup')
+            backup.move_folders.append('log/')
+            backup.move_png_files.append('charts/')
+            backup.copy_files.append('passwords.py')
+            backup.move_files.append('../nohup.out')
+            backup.run_backup()
+        else:
+            log(job.job_id, "Unable to run back up. Not in Operation Mode", "warn")
 
     elif func == "check_shows":
         Transmission(job).list_torrents()
@@ -101,3 +129,9 @@ def run_task(job: Job):
         # func()
 
         time.sleep(1)
+
+
+def check_running_tasks():
+    for thread in list(running_tasks.keys()):
+        if not running_tasks[thread].is_alive():
+            running_tasks.pop(thread, None)

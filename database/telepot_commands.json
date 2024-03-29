@@ -12,6 +12,10 @@
     "definition": "List all commands",
     "all_bots": true
   },
+  "backup": {
+    "definition": "Back Up Bot Information",
+    "function": "backup_all"
+  },
 
   "Entertainment Controls": false,
   "check_shows": {

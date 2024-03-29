@@ -4,6 +4,7 @@ import logging
 import os
 from datetime import date, datetime
 
+import refs
 from refs import log_level, error_codes
 
 today_date = str(date.today())
@@ -13,7 +14,7 @@ def log(job_id: int = 0, msg: str = "", log_type: str = "debug", error_code: int
     if error_code == 0 and msg == "":
         raise ValueError("Invalid Parameters for record")
 
-    elif error_code != 0 and msg == "":
+    elif error_code != 0:
         with open(error_codes, 'r') as file:
             errors: dict = json.load(file)
 
@@ -47,22 +48,22 @@ def log(job_id: int = 0, msg: str = "", log_type: str = "debug", error_code: int
     if log_type == "warn":
         log_type = "WRN"
         logging.warning(message)
-        if log_level in ["debug", "info", "warn"]:
+        if refs.log_print and log_level in ["debug", "info", "warn"]:
             print_message = True
     elif log_type == "error":
         log_type = "ERR"
         logging.error(message)
-        if log_level in ["debug", "info", "warn", "error"]:
+        if refs.log_print and log_level in ["debug", "info", "warn", "error"]:
             print_message = True
     elif log_type == "debug":
         logging.debug(message)
         log_type = "DBG"
-        if log_level in ["debug"]:
+        if refs.log_print and log_level in ["debug"]:
             print_message = True
     else:
         logging.info(message)
         log_type = "INF"
-        if log_level in ["debug", "info"]:
+        if refs.log_print and log_level in ["debug", "info"]:
             print_message = True
 
     if error != "":

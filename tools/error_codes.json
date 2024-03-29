@@ -30,6 +30,8 @@
   "40003": "Unable to find the job to create a job",
   "40004": "Cannot collect. Index exceeds collection length.",
   "40005": "Function not found in Task Manager list",
+  "40006": "Callback ID requested for a job which is not stored!",
+  "40007": "Reply dictionary is not a dictionary",
 
   "50000": "Module Errors",
   "50001": "Torrent Listing Error",
