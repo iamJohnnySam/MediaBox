@@ -31,11 +31,12 @@ class BackUp(Module):
 
     def run_backup(self):
         logger.log(self._job.job_id, "Backup Started")
-        self.cp_files()
-        self.mv_files()
-        self.cp_folders()
-        self.mv_folders()
-        self.cp_databases()
+        if global_variables.operation_mode:
+            self.cp_files()
+            self.mv_files()
+            self.cp_folders()
+            self.mv_folders()
+            self.cp_databases()
         logger.log(self._job.job_id, "Backup Ended")
 
     def cp_files(self):
