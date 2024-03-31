@@ -173,5 +173,21 @@
     "function": "mom_pump",
     "definition": "Pumped Now",
     "mom": true
+  },
+
+  "Bot Admin": false,
+  "shut_down": {
+    "definition": "Shut Down Bot",
+    "function": "raise_exception",
+    "all_bots": true
+  },
+  "start_over": {
+    "definition": "Restart the program"
+  },
+  "exit_all": {
+    "definition": "Exit the program"
+  },
+  "reboot_pi": {
+    "definition": "Restart the Raspberry Pi"
   }
 }

@@ -7,6 +7,7 @@ from database_manager.json_editor import JSONEditor
 from brains.job import Job
 from database_manager.sql_connector import sql_databases
 from modules.base_module import Module
+from tools.custom_exceptions import ControlledException
 from tools.logger import log
 
 
@@ -38,7 +39,7 @@ class Admin(Module):
                 else:
                     definition = command
 
-                if self._job.telepot_account in command_dictionary[command] or self._job.telepot_account == refs.main_channel:
+                if self._job.telepot_account in command_dictionary[command] or self._job.telepot_account == refs.main_channel or "all_bots" in command_dictionary[command]:
                     if add_command != "":
                         message = message + add_command
                         add_command = ""
@@ -53,9 +54,9 @@ class Admin(Module):
             global_variables.stop_all = True
             global_variables.stop_cctv = True
             global_variables.restart = True
-            self.send_message(Message("Completing ongoing tasks before restart. Please wait."))
+            self.send_message(Message("Completing ongoing tasks before restart. Please wait.", job=self._job))
         else:
-            self.send_message(Message("This is a server command. Requesting admin..."))
+            self.send_message(Message("This is a server command. Requesting admin...", job=self._job))
             self.send_admin(Message(f"/start_over requested by {self._job.f_name}."))
         self._job.complete()
 
@@ -63,9 +64,9 @@ class Admin(Module):
         if self._job.is_master:
             global_variables.stop_all = True
             global_variables.stop_cctv = True
-            self.send_message(Message("Completing ongoing tasks before exit. Please wait."))
+            self.send_message(Message("Completing ongoing tasks before exit. Please wait.", job=self._job))
         else:
-            self.send_message(Message("This is a server command. Requesting admin..."))
+            self.send_message(Message("This is a server command. Requesting admin...", job=self._job))
             self.send_admin(Message(f"/exit_all requested by {self._job.f_name}."))
         self._job.complete()
 
@@ -74,13 +75,24 @@ class Admin(Module):
             global_variables.stop_all = True
             global_variables.stop_cctv = True
             global_variables.reboot_pi = True
-            self.send_message(Message("Completing ongoing tasks before reboot. Please wait."))
+            self.send_message(Message("Completing ongoing tasks before reboot. Please wait.", job=self._job))
         else:
-            self.send_message(Message("This is a server command. Requesting admin..."))
+            self.send_message(Message("This is a server command. Requesting admin...", job=self._job))
             self.send_admin(Message(f"/reboot_pi requested by {self._job.f_name}."))
         self._job.complete()
 
-    def add_me_to_cctv(self):
+    def raise_exception(self):
+        if self._job.is_master:
+            self.send_message(Message("Raising Exception to shutdown Bot", job=self._job))
+            self._job.complete()
+            raise ControlledException("Shutdown bot")
+
+        else:
+            self.send_message(Message("This is a server command. Requesting admin...", job=self._job))
+            self.send_admin(Message(f"/reboot_pi requested by {self._job.f_name}."))
+            self._job.complete()
+
+    """def add_me_to_cctv(self):
         self.manage_chat_group("cctv", self._job.chat_id)
         self.send_message(Message("Done", job=self._job))
         self._job.complete()
@@ -129,3 +141,4 @@ class Admin(Module):
 
         log(job_id=self._job.job_id, msg=msg, log_type=message_type)
         return msg
+"""

@@ -13,3 +13,7 @@ class ImpossibleException(Exception):
 class UnexpectedOperation(Exception):
     pass
 
+
+class ControlledException(Exception):
+    pass
+

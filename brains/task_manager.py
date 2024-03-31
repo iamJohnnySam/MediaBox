@@ -137,6 +137,15 @@ def run_task(job: Job):
     elif func == "remove_me_from_baby":
         Subscriptions(job).manage_chat_group("baby", add=False, remove=True)
 
+    elif func == "start_over":
+        Admin(job).start_over()
+    elif func == "exit_all":
+        Admin(job).exit_all()
+    elif func == "reboot_pi":
+        Admin(job).reboot_pi()
+    elif func == "raise_exception":
+        Admin(job).raise_exception()
+
     else:
         log(error_code=40005)
 
