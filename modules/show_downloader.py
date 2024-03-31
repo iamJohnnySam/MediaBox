@@ -1,11 +1,13 @@
 import feedparser
-from tools import logger
-from outdated import communicator
+
+import refs
+from brains.job import Job
+from communication.message import Message
+from modules.base_module import Module
+from modules.transmission import Transmission
 from database_manager.sql_connector import sql_databases
-from modules import transmission
+from tools.logger import log
 
-
-# todo add threading lock
 
 def quality_extract(topic):
     if " 720p" in topic:
@@ -20,16 +22,16 @@ def quality_extract(topic):
     return episode_name, episode_quality
 
 
-class ShowDownloader:
+class ShowDownloader(Module):
     telepot_chat_group = "show"
-    telepot_account = "main"
 
-    def __init__(self):
-        logger.log("Show Downloader Object Created")
+    def __init__(self, job: Job):
+        super().__init__(job)
+        log(self._job.job_id, "Show Downloader Object Created")
 
-    def run_code(self):
-        logger.log("-------STARTED TV SHOW CHECK SCRIPT-------")
-        feed = feedparser.parse(global_var.feed_link)
+    def check_shows(self):
+        log(self._job.job_id, "-------STARTED TV SHOW CHECK SCRIPT-------")
+        feed = feedparser.parse(refs.feed_link)
         show_list = []
 
         for x in feed.entries:
@@ -55,22 +57,22 @@ class ShowDownloader:
                 if not found:
                     show_list.append([x.tv_episode_id, episode_name, x.link, episode_quality, x.tv_show_name])
 
-        for row in show_list:
-            success, torrent_id = transmission.download(row[2])
+        if len(show_list) > 0:
+            torrent = Transmission(self._job)
 
-            if success:
-                columns = "name, episode_id, episode_name, magnet, quality, torrent_name"
-                val = (row[4], row[0], row[1], row[2], str(row[3]), str(torrent_id))
-                sql_databases["entertainment"].insert('tv_show', columns, val)
-                logger.log(torrent_id)
+            for row in show_list:
+                success, torrent_id = torrent.add_torrent(row[2])
 
-                message = f'{str(row[1])} added at {str(row[3])} torrent id = {str(torrent_id)}'
-                communicator.send_to_group(self.telepot_account,
-                                           message,
-                                           group=self.telepot_chat_group)
-                logger.log(message)
-            else:
-                logger.log("Torrent Add Failed: " + str(row[2]), log_type="error")
+                if success:
+                    columns = "name, episode_id, episode_name, magnet, quality, torrent_name"
+                    val = (row[4], row[0], row[1], row[2], str(row[3]), str(torrent_id))
+                    sql_databases["entertainment"].insert('tv_show', columns, val)
+                    log(self._job.job_id, torrent_id)
 
-        communicator.send_to_master(self.telepot_account, "TV Show Check Completed")
-        logger.log("-------ENDED TV SHOW CHECK SCRIPT-------")
+                    message = f'{str(row[1])} added at {str(row[3])} torrent id = {str(torrent_id)}'
+                    self.send_message(Message(message, job=self._job, group=refs.group_tv_show))
+                else:
+                    log(self._job.job_id, "Torrent Add Failed: " + str(row[2]), log_type="error")
+
+        self.send_admin(Message("TV Show Check Completed"))
+        log(self._job.job_id, "-------ENDED TV SHOW CHECK SCRIPT-------")

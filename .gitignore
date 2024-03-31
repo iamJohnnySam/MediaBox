@@ -4,7 +4,7 @@
 *.json
 !database/telepot_commands.json
 !database/transmission_settings.json
-!database/sources.json
+!database/news_sources.json
 
 *.sql
 *.tflite

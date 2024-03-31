@@ -80,7 +80,9 @@ class Messenger:
                 msg.complete()
                 return
 
-            elif self.channel != main_channel and type(self.commands[msg.function]) is not str and not (self.channel in self.commands[msg.function].keys() or "all_bots" in self.commands[msg.function].keys()):
+            elif self.channel != main_channel and type(self.commands[msg.function]) is not str and not (
+                    self.channel in self.commands[msg.function].keys() or "all_bots" in self.commands[
+                msg.function].keys()):
                 self.send_now(Message("That command does not work on this chatbot", job=msg))
                 log(job_id=msg.job_id, error_code=30003)
                 msg.complete()
@@ -188,16 +190,24 @@ class Messenger:
         replies = []
         for chat in message.chats:
             if message.photo != "":
-                reply = self.bot.sendPhoto(chat,
-                                           photo=open(str(message.photo), 'rb'),
-                                           reply_to_message_id=message.reply_to,
-                                           caption=message.send_string,
-                                           reply_markup=message.keyboard)
+                try:
+                    reply = self.bot.sendPhoto(chat,
+                                               photo=open(str(message.photo), 'rb'),
+                                               reply_to_message_id=message.reply_to,
+                                               caption=message.send_string,
+                                               reply_markup=message.keyboard)
+                except telepot.exception.TelegramError as e:
+                    log(message.job_id, error_code=20015, error=str(e))
+                    continue
                 replies.append(reply)
             else:
-                reply = self.bot.sendMessage(chat, str(message.send_string),
-                                             reply_to_message_id=message.reply_to,
-                                             reply_markup=message.keyboard)
+                try:
+                    reply = self.bot.sendMessage(chat, str(message.send_string),
+                                                 reply_to_message_id=message.reply_to,
+                                                 reply_markup=message.keyboard)
+                except telepot.exception.TelegramError as e:
+                    log(message.job_id, error_code=20015, error=str(e))
+                    continue
                 replies.append(reply)
 
             log(job_id=message.job_id,

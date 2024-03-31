@@ -1,57 +1,53 @@
 import feedparser
+
+import refs
+from communication.message import Message
+from modules.base_module import Module
 from tools import logger
-from outdated import communicator
 from brains.job import Job
 from database_manager.json_editor import JSONEditor
 from database_manager.sql_connector import sql_databases
 
 
-class NewsReader:
+class NewsReader(Module):
+    def __init__(self, job: Job):
+        super().__init__(job)
+        logger.log(self._job.job_id, f"Object Created")
+        self.admin_db = sql_databases[refs.db_admin]
+        self.news_db = sql_databases[refs.db_news]
 
-    def __init__(self, msg: Job):
-        self.msg = msg
-        logger.log(f"{self.msg.job_id}, News Object Created")
+    def _get_news_subscriptions(self):
+        query = f"SELECT group_name FROM {refs.tbl_groups} WHERE chat_id = {self._job.chat_id}"
+        result = self.admin_db.run_sql(query, job_id=self._job.job_id, fetch_all=True)
+        subs = [source[0].replace("news_", "") for source in result if source[0].startswith("news_")]
+        logger.log(self._job.job_id, str(subs))
+        return subs
 
-    def start(self):
-        logger.log(f"{self.msg.job_id}, News request started")
-        if self.msg.value == "all":
-            self.msg.collect("all", 0)
+    def get_news_all(self):
+        self._job.collect("all", 0)
+        sources = self._get_news_subscriptions()
+        for source in sources:
+            self._check_news(source)
+        self._job.complete()
 
-    def resume(self):
-        logger.log(f"{self.msg.job_id}, News request resumed")
+    def get_news(self):
+        success, source = self.check_value(index=-1, option_list=self._get_news_subscriptions())
+        if not success:
+            return
+        self._check_news(source)
+        self._job.complete()
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    def run_code(self):
-        logger.log("------- STARTED NEWS READER SCRIPT -------")
-
-        news_sources = JSONEditor(global_var.news_sources).read()
-        for source in news_sources.keys():
-            if type(news_sources[source]) is bool:
-                continue
-
-            if sql_databases["administration"].exists("telepot_groups", f"group_name = 'news_{source}'") == 0:
-                continue
-
-            self.news_extractor(source, news_sources[source])
-
-        logger.log("------- ENDED NEWS READER SCRIPT -------")
+    def _check_news(self, source):
+        news_sources = JSONEditor(refs.news_sources).read()
+        news_sent = self.news_extractor(source, news_sources[source])
+        if not news_sent:
+            self.send_message(Message(job=self._job, send_string=f"No new news articles for {source}."))
+        self._job.collection = []
+        self.check_value(index=-1, option_list=self._get_news_subscriptions())
 
     def news_extractor(self, source: str, news):
+        news_sent = False
+
         if type(news) is dict:
             article_source = news["source"]
             article_title = news["title"]
@@ -62,7 +58,6 @@ class NewsReader:
 
             if "pause" in news.keys() and news["pause"]:
                 return
-
         else:
             article_source = news
             article_title = "title"
@@ -73,7 +68,6 @@ class NewsReader:
         feed = feedparser.parse(article_source)
 
         for article in feed.entries:
-
             if debug:
                 logger.log(article, log_type="debug")
 
@@ -99,11 +93,13 @@ class NewsReader:
                     idx2 = len(link)
                 link = link[idx1 + len_idx1: idx2]
 
-            cols = "source, title, link"
-            val = (source, title, link)
-            if sql_databases[global_var.db_news].exists(global_var.tbl_news,
-                                                        f"title = '{title}' AND source = '{source}'") == 0:
-                sql_databases[global_var.db_news].insert(global_var.tbl_news, cols, val)
+            cols = "source, title, link, user_id"
+            val = (source, title, link, self._job.chat_id)
 
-                communicator.send_to_group(self.telepot_account, f'{title} - {link}', f'news_{source}')
-                logger.log(f'{source} > {title}')
+            if self.news_db.exists(refs.tbl_news, f"title = '{title}' AND source = '{source}'"
+                                                  f" AND user_id = '{self._job.chat_id}'") == 0:
+                self.news_db.insert(refs.tbl_news, cols, val)
+                self.send_message(Message(send_string=f'{title} - {link}', job=self._job))
+                news_sent = True
+
+        return news_sent

@@ -2,12 +2,17 @@ import threading
 import time
 
 import global_variables
+import refs
 from brains import task_queue
 from brains.job import Job
 from modules.admin import Admin
 from modules.baby import Baby
 from modules.backup import BackUp
+from modules.cctv_checker import CCTVChecker
+from modules.folder_refactor import RefactorFolder
 from modules.movie_finder import MovieFinder
+from modules.news_reader import NewsReader
+from modules.show_downloader import ShowDownloader
 from modules.transmission import Transmission
 from tools.logger import log
 
@@ -50,25 +55,27 @@ def run_task(job: Job):
     elif func == "help":
         Admin(job).help()
     elif func == "backup_all":
-        backup = BackUp(job, '/mnt/MediaBox/MediaBox/Backup')
-        backup.move_folders.append('log/')
-        backup.move_png_files.append('charts/')
-        backup.copy_files.append('passwords.py')
-        backup.move_files.append('../nohup.out')
+        backup = BackUp(job, refs.backup_location)
+        backup.move_folders.append(refs.logs_location)
+        backup.move_png_files.append(refs.charts_save_location)
+        backup.copy_files.append(refs.password_file)
+        backup.move_files.append(refs.terminal_output)
         backup.run_backup()
     elif func == "backup_database":
-        backup = BackUp(job, '/mnt/MediaBox/MediaBox/Backup')
+        backup = BackUp(job, refs.backup_location)
         backup.cp_databases()
 
     elif func == "check_shows":
-        Transmission(job).list_torrents()
+        ShowDownloader(job).check_shows()
     elif func == "find_movie":
         MovieFinder(job).find_movie()
     elif func == "request_tv_show":
         pass
 
     elif func == "check_news":
-        pass
+        NewsReader(job).get_news()
+    elif func == "check_news_all":
+        NewsReader(job).get_news_all()
     elif func == "subscribe_news":
         pass
     elif func == "add_me_to_news":
@@ -77,16 +84,25 @@ def run_task(job: Job):
         pass
 
     elif func == "check_cctv":
-        pass
+        cctv = CCTVChecker(job)
+        cctv.download_cctv()
+        cctv.get_last(10)
+        cctv.clean_up()
     elif func == "add_me_to_cctv":
         pass
     elif func == "remove_me_from_cctv":
         pass
 
     elif func == "list_torrents":
-        pass
+        Transmission(job).send_list()
     elif func == "clean_up_downloads":
-        pass
+        log(job.job_id, "Starting Transmission Cleanup")
+        torrent = Transmission(job)
+        torrent.delete_downloaded()
+        torrent.list_torrents()
+        log(job.job_id, "Starting Downloads Refactor")
+        RefactorFolder(job, refs.torrent_download).clean_torrent_downloads()
+        log(job.job_id, "Cleanup sequence Complete")
 
     elif func == "finance":
         pass

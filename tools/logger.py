@@ -10,6 +10,10 @@ from refs import log_level, error_codes
 today_date = str(date.today())
 
 
+def log_file_name():
+    return f'{refs.logs_location}log-{today_date}.log'
+
+
 def log(job_id: int = 0, msg: str = "", log_type: str = "debug", error_code: int = 0, error: str = ""):
     if error_code == 0 and msg == "":
         raise ValueError("Invalid Parameters for record")
@@ -42,7 +46,7 @@ def log(job_id: int = 0, msg: str = "", log_type: str = "debug", error_code: int
         caller = f"{the_class}"
 
     if today_date != str(date.today()):
-        logging.basicConfig(filename='log/log-' + today_date + '.log', level=logging.DEBUG)
+        logging.basicConfig(filename=log_file_name(), level=logging.DEBUG)
 
     print_message = False
     if log_type == "warn":
@@ -75,10 +79,10 @@ def log(job_id: int = 0, msg: str = "", log_type: str = "debug", error_code: int
                   f'{str(job_id)},>,{segment}')
 
 
-if not os.path.exists('log/'):
-    os.makedirs('log/')
+if not os.path.exists(refs.logs_location):
+    os.makedirs(refs.logs_location)
 
 try:
-    logging.basicConfig(filename='log/log-' + today_date + '.log', level=logging.DEBUG)
+    logging.basicConfig(filename=log_file_name(), level=logging.DEBUG)
 except PermissionError:
     log(0, "PERMISSION ERROR", log_type="error")

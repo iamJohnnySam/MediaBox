@@ -48,6 +48,7 @@ class Message:
     def chats(self):
         if self.job is None and self._chat is None and self.group is None:
             chats = [self.master]
+
         elif self.group is not None:
             if sql_databases[db_admin].exists(tbl_groups, f"group_name = '{self.group}'") == 0:
                 logger.log(job_id=self.job_id, error_code=20007)
@@ -55,21 +56,27 @@ class Message:
             query = f"SELECT chat_id FROM {tbl_groups} WHERE group_name = '{self.group}'"
             result = sql_databases["administration"].run_sql(query, fetch_all=True)
             chats = [row[0] for row in result]
-        elif self.job is not None and self._chat is None:
+
+        elif self.job is not None:
             chats = [self.job.chat_id]
+
+        elif self._chat is not None and type(self._chat) == int:
+            chats = [self._chat]
+
         else:
             logger.log(job_id=self.job_id, error_code=20008)
             raise InvalidParameterException
+
         return chats
 
     @property
     def reply_to(self):
         if self.group is None and self._reply_to is None and self.job is not None:
-            if self._this_telepot_account == "" or self.job.telepot_account == self.this_telepot_account:
+            if self._this_telepot_account == "" or self.job.telepot_account == self._this_telepot_account:
                 self._reply_to = self.job.message_id
             else:
+                self._reply_to = None
                 logger.log(job_id=self.job_id, error_code=20009)
-                raise InvalidParameterException
         elif self.group is not None and self._reply_to is not None:
             logger.log(job_id=self.job_id, error_code=20010)
             self._reply_to = None

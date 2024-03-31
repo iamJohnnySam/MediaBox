@@ -154,8 +154,21 @@ class Module:
 
         return success, value
 
-    def send_message(self, message: Message, get_input=False, index=0):
-        in_queue = channels[self._job.telepot_account].waiting_user_input.keys()
+    def send_message(self, message: Message, get_input=False, index=0, channel=None):
+        if channel is not None and channel != self._job.telepot_account:
+            message_temp = message
+            message_temp.group = None
+            self.__send_message(self._job.telepot_account, message_temp, get_input, index)
+            self.__send_message(channel, message, get_input, index)
+        else:
+            self.__send_message(self._job.telepot_account, message, get_input, index)
+
+    def __send_message(self, channel, message: Message, get_input=False, index=0):
+        try:
+            in_queue = channels[channel].waiting_user_input.keys()
+        except KeyError as e:
+            self.channel_error(e)
+            return
 
         message.job = self._job
         message.job_id = self._job.job_id
@@ -165,10 +178,18 @@ class Module:
             message_queue.add_message(message)
             log(job_id=self._job.job_id, msg="Message added to Queue.")
         else:
-            channels[self._job.telepot_account].send_now(message=message)
+            try:
+                channels[self._job.telepot_account].send_now(message=message)
+            except KeyError as e:
+                self.channel_error(e)
+                return
 
             if get_input:
-                channels[self._job.telepot_account].get_user_input(job=self._job, index=index)
+                try:
+                    channels[self._job.telepot_account].get_user_input(job=self._job, index=index)
+                except KeyError as e:
+                    self.channel_error(e)
+                    return
 
     def close_all_callbacks(self):
         replies = self._job.replies
@@ -178,3 +199,11 @@ class Module:
     def send_admin(self, message: Message):
         message.send_to_master()
         self.send_message(message=message)
+
+    def channel_error(self, e):
+        if global_variables.operation_mode:
+            log(job_id=self._job.job_id, error_code=10003, msg=str(e))
+            raise InvalidParameterException
+        else:
+            log(job_id=self._job.job_id, log_type="warn",
+                msg="Unable to send message. Channel may not be available due not in operation mode.")

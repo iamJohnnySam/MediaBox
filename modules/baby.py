@@ -51,7 +51,7 @@ class Baby(Module):
                                   f'for a total of {"{:10.1f}".format(day_total).strip()}ml today.'
                                   f'\nUse /feed to submit a new entry',
                                   job=self._job,
-                                  group=self._group))
+                                  group=self._group), channel="baby")
         self._job.complete()
 
     def pump(self):
@@ -120,7 +120,8 @@ class Baby(Module):
 
         self.send_message(Message(f"{emoji}\n{source} diaper recorded on {date} at {time}.\nYour baby has had "
                                   f"{str(day_total)} nappy/diaper changes today.\nUse /diaper to submit a new entry",
-                                  job=self._job))
+                                  job=self._job,
+                                  group=self._group), channel="baby")
         self._job.complete()
 
     def weight(self):
@@ -157,7 +158,7 @@ class Baby(Module):
                                    y_name="Weight (kg)",
                                    chart_title="Baby Weight Trend - " + datetime.now().strftime('%Y-%m-%d %H:%M'))
 
-        self.send_message(Message(caption, group=self._group, photo=pic))
+        self.send_message(Message(caption, group=self._group, photo=pic), channel="baby")
 
         pic = grapher_weight_trend(graph_list=result,
                                    chart_title="Baby Weight Trend WHO - " + datetime.now().strftime('%Y-%m-%d %H:%M'))

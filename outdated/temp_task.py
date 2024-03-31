@@ -47,16 +47,8 @@ class Task:
                                 reply_to=msg.message_id
                                 )
 
-    def check_shows(self, msg: Job):
-        ShowDownloader(msg).run_code()
-        msg.complete()
-
     def check_news(self, msg: Job):
         NewsReader(msg).run_code()
-        msg.complete()
-
-    def check_cctv(self, msg: Job):
-        CCTVChecker(msg).run_code()
         msg.complete()
 
     def find_movie(self, msg: Job):

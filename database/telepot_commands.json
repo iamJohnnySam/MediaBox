@@ -32,9 +32,14 @@
   },
 
   "News Controls": false,
-  "check_news": {
+  "news": {
     "function": "check_news",
-    "definition": "Get latest News",
+    "definition": "Get latest news",
+    "news": true
+  },
+  "news_all": {
+    "function": "check_news_all",
+    "definition": "Get news from all subscriptions",
     "news": true
   },
   "subscribe_news": {

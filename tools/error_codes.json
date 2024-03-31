@@ -2,6 +2,8 @@
   "10000": "Program Errors",
   "10001": "File access Permission Error",
   "10002": "SQL Error",
+  "10003": "Accessing invalid telepot channel",
+  "10004": "Mailbox login error",
 
   "20000": "Telepot Errors",
   "20001": "Unknown Chat Type",
@@ -18,6 +20,7 @@
   "20012": "Unable to start channel. Requested channel does not exist.",
   "20013": "Invalid data type. Expected a Message.",
   "20014": "Callback data incomplete.",
+  "20015": "Bad Request: chat not found",
 
   "30000": "Telepot User Errors",
   "30001": "No function call detected",
@@ -36,5 +39,6 @@
   "50000": "Module Errors",
   "50001": "Torrent Listing Error",
   "50002": "Invalid Keyboard creation error",
-  "50003": "SQL Error. No rows were affected."
+  "50003": "SQL Error. No rows were affected.",
+  "50004": "Folder Refactor Error"
 }
