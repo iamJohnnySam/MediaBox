@@ -56,12 +56,7 @@ def run_task(job: Job):
     elif func == "help":
         Admin(job).help()
     elif func == "backup_all":
-        backup = BackUp(job, refs.backup_location)
-        backup.move_folders.append(refs.logs_location)
-        backup.move_png_files.append(refs.charts_save_location)
-        backup.copy_files.append(refs.password_file)
-        backup.move_files.append(refs.terminal_output)
-        backup.run_backup()
+        backup_sequence(job)
     elif func == "backup_database":
         backup = BackUp(job, refs.backup_location)
         backup.cp_databases()
@@ -158,3 +153,12 @@ def check_running_tasks():
     for thread in list(running_tasks.keys()):
         if not running_tasks[thread].is_alive():
             running_tasks.pop(thread, None)
+
+
+def backup_sequence(job: Job):
+    backup = BackUp(job, refs.backup_location)
+    backup.move_folders.append(refs.logs_location)
+    backup.move_png_files.append(refs.charts_save_location)
+    backup.copy_files.append(refs.password_file)
+    backup.move_files.append(refs.terminal_output)
+    backup.run_backup()

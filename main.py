@@ -4,6 +4,8 @@ import threading
 import time
 
 import refs
+from brains.job import Job
+from brains.task_manager import backup_sequence
 from communication import channels
 from communication.message import Message
 from tools import logger, start_up
@@ -38,8 +40,7 @@ global_variables.stop_all = True
 t_schedule.join()
 logger.log(msg="All threads merged")
 
-# todo manual backup task
-# backup.backup.run_code()
+backup_sequence(Job(function="backup_all"))
 
 # ------ EXIT CONDITIONS -----------
 if not global_variables.stop_all:
