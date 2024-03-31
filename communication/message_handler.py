@@ -8,6 +8,7 @@ from communication.message import Message
 from brains.job import Job
 from database_manager.json_editor import JSONEditor
 from brains import task_queue
+from tools.custom_exceptions import ControlledException
 from tools.logger import log
 
 
@@ -96,6 +97,11 @@ class Messenger:
                 old_func = msg.function
                 msg.function = self.commands[msg.function]["function"]
                 log(job_id=msg.job_id, msg=f"Function updated from {old_func} to {msg.function}")
+
+                if msg.function == "raise_exception":
+                    log(job_id=msg.job_id, msg=f"Raising Controlled Exception to shutdown the bot")
+                    raise ControlledException("Shutdown bot")
+
             else:
                 # function update not required
                 pass

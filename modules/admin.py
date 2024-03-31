@@ -7,8 +7,6 @@ from database_manager.json_editor import JSONEditor
 from brains.job import Job
 from database_manager.sql_connector import sql_databases
 from modules.base_module import Module
-from tools.custom_exceptions import ControlledException
-from tools.logger import log
 
 
 class Admin(Module):
@@ -81,64 +79,3 @@ class Admin(Module):
             self.send_admin(Message(f"/reboot_pi requested by {self._job.f_name}."))
         self._job.complete()
 
-    def raise_exception(self):
-        if self._job.is_master:
-            self.send_message(Message("Raising Exception to shutdown Bot", job=self._job))
-            self._job.complete()
-            raise ControlledException("Shutdown bot")
-
-        else:
-            self.send_message(Message("This is a server command. Requesting admin...", job=self._job))
-            self.send_admin(Message(f"/reboot_pi requested by {self._job.f_name}."))
-            self._job.complete()
-
-    """def add_me_to_cctv(self):
-        self.manage_chat_group("cctv", self._job.chat_id)
-        self.send_message(Message("Done", job=self._job))
-        self._job.complete()
-
-    def add_me_to_news(self):
-        self.manage_chat_group("news", self._job.chat_id)
-        self.send_message(Message("Done", job=self._job))
-        self._job.complete()
-
-    def add_me_to_baby(self):
-        self.manage_chat_group("modules", self._job.chat_id)
-        self.send_message(Message("Done", job=self._job))
-        self._job.complete()
-
-    def remove_me_from_cctv(self):
-        self.manage_chat_group("cctv", self._job.chat_id, add=False, remove=True)
-        self.send_message(Message("Done", job=self._job))
-        self._job.complete()
-
-    def remove_me_from_news(self):
-        self.manage_chat_group("news", self._job.chat_id, add=False, remove=True)
-        self.send_message(Message("Done", job=self._job))
-        self._job.complete()
-
-    def remove_me_from_baby(self):
-        self.manage_chat_group("modules", self._job.chat_id, add=False, remove=True)
-        self.send_message(Message("Done", job=self._job))
-        self._job.complete()
-
-    def manage_chat_group(self, group, chat_id, add=True, remove=False):
-        message_type = "debug"
-        where = f"chat_id = '{chat_id}' AND group_name = '{group}';"
-        if not add ^ remove:
-            msg = "Invalid command"
-            message_type = "error"
-        elif add and self._db.exists(refs.tbl_groups, where) == 0:
-            cols = "chat_id, group_name"
-            vals = (chat_id, group)
-            self._db.insert(refs.tbl_groups, cols, vals)
-            msg = f"Added {chat_id} to {group} group"
-        elif remove and self._db.exists(refs.tbl_groups, where) != 0:
-            self._db.run_sql(f"DELETE FROM {refs.tbl_groups} WHERE " + where)
-            msg = f"Removed {chat_id} from {group} group"
-        else:
-            msg = "Nothing to do"
-
-        log(job_id=self._job.job_id, msg=msg, log_type=message_type)
-        return msg
-"""

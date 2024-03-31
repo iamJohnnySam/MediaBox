@@ -143,8 +143,6 @@ def run_task(job: Job):
         Admin(job).exit_all()
     elif func == "reboot_pi":
         Admin(job).reboot_pi()
-    elif func == "raise_exception":
-        Admin(job).raise_exception()
 
     else:
         log(error_code=40005)
