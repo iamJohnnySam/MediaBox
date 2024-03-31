@@ -138,7 +138,7 @@ class Module:
                     log(self._job.job_id, f"Time format mismatch {str(value)} for {time_format}")
 
         # If anything failed
-        if not success and not no_recover:
+        if (not success) and (not no_recover):
             self._job.store_message()
             get_manual = check_int or check_float or check_date or check_time
 

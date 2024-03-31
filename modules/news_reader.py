@@ -36,7 +36,6 @@ class NewsReader(Module):
         if not success:
             return
         self._check_news(source)
-        self.check_value(index=-1, option_list=self._get_news_subscriptions())
         self._job.complete()
 
     def _check_news(self, source):
