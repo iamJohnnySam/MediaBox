@@ -54,7 +54,11 @@ tbl_jobs = "jobs"
 db_news = "news"
 tbl_news = "news_articles"
 
-db_finance = "finance"
+db_finance = "transactions"
+
+db_baby = "baby"
+
+db_entertainment = "entertainment"
 
 # Back up
 backup_location = '/mnt/MediaBox/MediaBox/Backup'
