@@ -1,4 +1,6 @@
 # --- SETTINGS ---
+import os
+
 logs_location = 'log/'
 log_level = "debug"                         # LOGGING LEVEL
 log_print = True
@@ -34,6 +36,11 @@ torrent_movies = '/mnt/MediaBox/Movies'
 torrent_tv_shows = '/mnt/MediaBox/TVShows'
 torrent_unknown = '/mnt/MediaBox/Unknown'
 
+# Tools
+charts_save_location = "resource/charts/"
+if not os.path.isdir(charts_save_location):
+    os.makedirs(charts_save_location)
+
 # JSON Databases
 error_codes = "tools/error_codes.json"
 news_sources = 'database/news_sources.json'
@@ -50,7 +57,6 @@ tbl_news = "news_articles"
 # Back up
 backup_location = '/mnt/MediaBox/MediaBox/Backup'
 terminal_output = '../nohup.out'
-charts_save_location = 'charts/'
 password_file = 'passwords.py'
 
 # groups

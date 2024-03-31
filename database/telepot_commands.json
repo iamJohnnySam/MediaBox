@@ -26,10 +26,6 @@
     "function": "find_movie",
     "definition": "Find a movie to download"
   },
-  "request_tv_show": {
-    "function": "request_tv_show",
-    "definition": "Type name of TV Show after command"
-  },
 
   "News Controls": false,
   "news": {

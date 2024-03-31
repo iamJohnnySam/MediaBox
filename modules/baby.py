@@ -139,8 +139,8 @@ class Baby(Module):
         val = (date, weight, str(self._job.chat_id))
         self._db.insert('weight', columns, val)
 
-        send_string = "\U0001F6BC \U0001F3C6 \nbaby Weight Added - " + weight + "kg. \nThat's a weight gain of " + \
-                      "{:10.2f}".format(weight - last_entry[1]) + "kg since " + str(last_entry[0]) + "."
+        send_string = f"\U0001F6BC \U0001F3C6 \nbaby Weight Added - {weight}kg. \n" \
+                      f"That's a weight gain of {(float(weight) - last_entry[1]):10.2f}kg since {last_entry[0]}."
 
         log(self._job.job_id, send_string)
         self.weight_trend(caption=send_string)

@@ -1,8 +1,10 @@
+import os
 from datetime import datetime, timedelta
 import matplotlib.dates as mdates
 from matplotlib import image
 from matplotlib import pyplot as plt
 
+import refs
 from tools.logger import log
 
 
@@ -14,8 +16,12 @@ def convert_to_time(val):
 
 
 def convert_to_date(val):
-    format_string = "%Y/%m/%d"
-    x = datetime.strptime(val, format_string)
+    format_string = "%Y-%m-%d"
+    try:
+        x = datetime.strptime(val, format_string)
+    except ValueError:
+        format_string = "%Y/%m/%d"
+        x = datetime.strptime(val, format_string)
     return x
 
 
@@ -90,7 +96,7 @@ def grapher_category(graph_list, x_name, y_name, chart_title):
     plt.xticks(rotation=75)
     plt.legend(loc="upper right")
 
-    fig_path = "charts/" + chart_title + '.png'
+    fig_path = os.path.join(refs.charts_save_location, chart_title + '.png')
     plt.savefig(fig_path)
 
     return fig_path
@@ -170,7 +176,7 @@ def grapher_bar_trend(graph_list, x_name, y_name, chart_title, x_time=False):
     plt.ylabel(y_name)
     plt.legend(loc="upper right")
 
-    fig_path = "charts/" + chart_title + '.png'
+    fig_path = os.path.join(refs.charts_save_location, chart_title + '.png')
     plt.savefig(fig_path)
 
     return fig_path
@@ -219,7 +225,7 @@ def grapher_trend(graph_list, x_name, y_name, chart_title, size=False):
     plt.ylabel(y_name)
     plt.legend(loc="upper right")
 
-    fig_path = "charts/" + chart_title + '.png'
+    fig_path = os.path.join(refs.charts_save_location, chart_title + '.png')
     plt.savefig(fig_path)
 
     return fig_path
@@ -245,7 +251,7 @@ def grapher_simple_trend(graph_list, x_name, y_name, chart_title):
     plt.xticks(rotation=75)
     plt.legend(loc="upper right")
 
-    fig_path = "charts/" + chart_title + '.png'
+    fig_path = os.path.join(refs.charts_save_location, chart_title + '.png')
     plt.savefig(fig_path)
 
     return fig_path
@@ -271,7 +277,7 @@ def grapher_weight_trend(graph_list, chart_title):
     plt.plot(x, y)
     plt.axis('off')
     plt.imshow(fig1)
-    fig_path = "charts/" + chart_title + '.png'
+    fig_path = os.path.join(refs.charts_save_location, chart_title + '.png')
     plt.savefig(fig_path)
 
     return fig_path

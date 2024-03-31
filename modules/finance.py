@@ -1,7 +1,10 @@
+from brains.job import Job
+from modules.base_module import Module
 
 
-
-
+class Finance(Module):
+    def __init__(self, job: Job):
+        super().__init__(job)
 
     def finance(self, msg: Job):
         if msg.value == "":
@@ -41,38 +44,6 @@
                                 arrangement=[3, 1],
                                 reply_to=msg.message_id
                                 )
-
-    def sms_bill(self, msg: Job):
-        if not self.check_command_value(msg, inquiry="sms received from bank"):
-            return
-        pass
-
-
-
-    def baby_weight(self, msg: Job):
-        if not self.check_command_value(msg, replace="kg", inquiry="weight of modules in kg", check_float=True):
-            return
-        weight = float(msg.value)
-
-        key = datetime.now().strftime('%Y/%m/%d')
-
-        query = 'SELECT date, weight FROM weight ORDER BY weight_id DESC LIMIT 1;'
-        last_entry = sql_databases["modules"].run_sql(query=query)
-
-        columns = "date, weight, added_by"
-        val = (key, weight, str(msg.chat_id))
-        sql_databases["modules"].insert('weight', columns, val)
-
-        send_string = "\U0001F6BC \U0001F3C6 \n" + \
-                      "modules Weight Added - " + msg.value + "kg. \nThat's a weight gain of " + \
-                      "{:10.2f}".format(weight - last_entry[1]) + "kg since " + str(last_entry[0]) + "."
-
-        logger.log(send_string)
-        self.baby_weight_trend(msg, caption=send_string)
-
-
-    # -------------- PHOTO FUNCTIONS --------------
-
     def finance_photo(self, callback_id, query_id, from_id, value):
         message_id = self.update_in_line_buttons(callback_id)
         self.bot.answerCallbackQuery(query_id, text='Got it')
@@ -89,9 +60,6 @@
                     os.path.join(global_var.finance_images, value))
         self.send_now("How much is the amount?", chat=from_id, reply_to=str(message_id))
         self.get_user_input(from_id, "finance", sql_id)
-
-    # -------------- CALLBACK FUNCTIONS --------------
-
 
 
     def cb_finance(self, callback_id, query_id, from_id, value):

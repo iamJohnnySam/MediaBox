@@ -3,6 +3,7 @@ import feedparser
 import refs
 from communication.message import Message
 from modules.base_module import Module
+from modules.subscriptions import Subscriptions
 from tools import logger
 from brains.job import Job
 from database_manager.json_editor import JSONEditor
@@ -129,11 +130,11 @@ class NewsReader(Module):
 
         if not self.admin_db.exists(refs.tbl_groups,
                                     f"group_name = 'news_{source}' AND chat_id = '{self._job.chat_id}'") == 0:
-            self.manage_chat_group(f'news_{data[1]}', from_id, add=False, remove=True)
+            Subscriptions(self._job).manage_chat_group(f'news_{source}', add=False, remove=True)
             reply_text = f"You are Unsubscribed from {source}."
 
         else:
-            self.manage_chat_group(f'news_{data[1]}', from_id)
+            Subscriptions(self._job).manage_chat_group(f'news_{source}')
             reply_text = f"You are now Subscribed to {source}."
 
         self.send_message(Message(reply_text, job=self._job))

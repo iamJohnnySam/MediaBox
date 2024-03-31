@@ -13,6 +13,7 @@ from modules.folder_refactor import RefactorFolder
 from modules.movie_finder import MovieFinder
 from modules.news_reader import NewsReader
 from modules.show_downloader import ShowDownloader
+from modules.subscriptions import Subscriptions
 from modules.transmission import Transmission
 from tools.logger import log
 
@@ -69,8 +70,6 @@ def run_task(job: Job):
         ShowDownloader(job).check_shows()
     elif func == "find_movie":
         MovieFinder(job).find_movie()
-    elif func == "request_tv_show":
-        pass
 
     elif func == "check_news":
         NewsReader(job).get_news()
@@ -79,11 +78,7 @@ def run_task(job: Job):
     elif func == "show_news":
         NewsReader(job).show_news_channels()
     elif func == "subs_news":
-        pass
-    elif func == "add_me_to_news":
-        pass
-    elif func == "remove_me_from_news":
-        pass
+        NewsReader(job).subscribe()
 
     elif func == "check_cctv":
         cctv = CCTVChecker(job)
@@ -95,9 +90,9 @@ def run_task(job: Job):
         cctv.get_last(10)
         cctv.clean_up(refs.sent_mail)
     elif func == "add_me_to_cctv":
-        pass
+        Subscriptions(job).manage_chat_group("cctv")
     elif func == "remove_me_from_cctv":
-        pass
+        Subscriptions(job).manage_chat_group("cctv", add=False, remove=True)
 
     elif func == "list_torrents":
         Transmission(job).send_list()
@@ -115,10 +110,6 @@ def run_task(job: Job):
     elif func == "sms_bill":
         pass
 
-    elif func == "add_me_to_baby":
-        pass
-    elif func == "remove_me_from_baby":
-        pass
     elif func == "baby_feed":
         Baby(job).feed()
     elif func == "baby_feed_history":
@@ -141,12 +132,15 @@ def run_task(job: Job):
         Baby(job).weight_trend()
     elif func == "mom_pump":
         Baby(job).pump()
+    elif func == "add_me_to_baby":
+        Subscriptions(job).manage_chat_group("baby")
+    elif func == "remove_me_from_baby":
+        Subscriptions(job).manage_chat_group("baby", add=False, remove=True)
 
     else:
         log(error_code=40005)
 
         # log(str(task.chat_id) + ' - Calling Function: ' + task.function)
-
         # func = getattr(self, task.function)
         # func()
 
