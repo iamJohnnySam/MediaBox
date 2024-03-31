@@ -27,6 +27,7 @@ class EmailManager:
         log(self.job.job_id, "Email Manager Object Created - " + email_address)
 
     def log_in(self):
+        log(self.job.job_id, f"Current state: {self.myEmail.state}")
         if self.myEmail.state == "NONAUTH":
             try:
                 self.myEmail.login(self.email, self.password)
@@ -34,7 +35,9 @@ class EmailManager:
             except imaplib.IMAP4.error as err:
                 log(self.job.job_id, str(err), error_code=10004)
                 log(self.job.job_id, traceback.format_exc(), log_type="debug")
-                return False
+                log(self.job.job_id, f"Current state: {self.myEmail.state}")
+                raise imaplib.IMAP4.error
+            log(self.job.job_id, f"Current state: {self.myEmail.state}")
         return True
 
     def select_mailbox(self, mailbox=None):
@@ -42,12 +45,16 @@ class EmailManager:
             mailbox = self.mb
         try:
             self.myEmail.select(mailbox=mailbox, readonly=False)
-            log(self.job.job_id, "Mailbox Select Success")
-            return True
         except imaplib.IMAP4.error as err:
             log(self.job.job_id, f"Mailbox select error - {str(err)}", log_type="error")
             log(self.job.job_id, traceback.format_exc(), log_type="debug")
             self.connection_err = self.connection_err + 1
+            return False
+
+        if self.myEmail.state == "SELECTED":
+            log(self.job.job_id, f"Mailbox Select Success: {mailbox}")
+            return True
+        else:
             return False
 
     def check_email(self, scan_type='UnSeen'):
@@ -68,8 +75,9 @@ class EmailManager:
             log(self.job.job_id, "Login Error", log_type="error")
             self.mail_connect_error = True
             return
-
+        log(self.job.job_id, f"Current state: {self.myEmail.state}")
         b = self.select_mailbox(mailbox)
+        log(self.job.job_id, f"Current state: {self.myEmail.state}")
         c = self.check_email()
 
         if not (b and c):
@@ -78,7 +86,13 @@ class EmailManager:
             self.mail_connect_error = True
 
     def email_close(self):
-        self.myEmail.close()
+        log(self.job.job_id, f"Current state: {self.myEmail.state}")
+        if self.myEmail.state == "SELECTED":
+            self.myEmail.close()
+            log(self.job.job_id, f"Current state: {self.myEmail.state}")
+        if self.myEmail.state == "AUTH":
+            self.myEmail.logout()
+            log(self.job.job_id, f"Current state: {self.myEmail.state}")
 
     def get_next_message(self, message="1"):
         self.current_message = message
@@ -91,7 +105,7 @@ class EmailManager:
 
             try:
                 self.msg = email.message_from_bytes(data[0][1])
-            except AttributeError:
+            except (AttributeError, TypeError):
                 log(self.job.job_id, "No new emails to read.")
                 self.email_close()
                 return False
@@ -130,20 +144,20 @@ class EmailManager:
                 return
             try:
                 self.msg = email.message_from_bytes(data[0][1])
-            except AttributeError:
+            except (AttributeError, TypeError):
                 exit_condition = False
                 log(self.job.job_id, "No new emails to delete.")
                 self.email_close()
-                log("Deleted " + str(count) + " emails from " + self.mb)
+                log(self.job.job_id, "Deleted " + str(count) + " emails from " + self.mb)
                 log(self.job.job_id, "-------ENDED EMAIL CLEAN-UP SCRIPT-------")
                 return
             try:
                 self.myEmail.store(message, '+FLAGS', '\\Deleted')
                 self.myEmail.expunge()
                 count = count + 1
-                log("Deleted Email - " + self.msg['Date'])
+                log(self.job.job_id, "Deleted Email - " + self.msg['Date'])
             except AttributeError:
-                log("Failed to delete - " + self.msg['Date'])
+                log(self.job.job_id, "Failed to delete - " + self.msg['Date'])
 
     def get_next_attachment(self):
         self.connect()

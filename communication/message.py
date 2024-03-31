@@ -1,5 +1,6 @@
 import math
 import os
+from datetime import datetime
 
 from telepot.namedtuple import InlineKeyboardButton, InlineKeyboardMarkup
 
@@ -92,7 +93,19 @@ class Message:
     def this_telepot_account(self, account):
         self._this_telepot_account = account
 
-    def add_keyboard(self, button_text: list, button_val: list, arrangement: list):
+    def add_job_keyboard(self, button_text: list, button_val: list, arrangement: list):
+        cb_id = self.job.cb_id
+        if self.job_id == 0:
+            self.job_id = self.job.job_id
+
+        self._arrange_keyboard(self.job_id, button_text, button_val, arrangement, cb_id)
+
+    def _add_one_time_keyboard(self, button_text: list, button_val: list, arrangement: list):
+        job_id = datetime.now().strftime("%Y%m%d%H%M%S")
+        cb_id = "/"
+        self._arrange_keyboard(job_id, button_text, button_val, arrangement, cb_id)
+
+    def _arrange_keyboard(self, job_id, button_text: list, button_val: list, arrangement: list, cb_id):
         if len(button_text) == 0 or len(button_text) != len(button_val):
             logger.log(job_id=self.job_id, error_code=20011)
             logger.log(job_id=self.job_id, msg="Button Text Length " + str(len(button_text)))
@@ -100,18 +113,14 @@ class Message:
             return
 
         buttons = []
-        cb_id = self.job.cb_id
-        if self.job_id == 0:
-            self.job_id = self.job.job_id
-
         for i in range(len(button_text)):
-            # FORMAT = msg_id; cb_id; btn_text; (step; value)
-            button_prefix = f"{str(self.job_id)};{str(cb_id)};{button_text[i]}"
+            # FORMAT = job_id; cb_id; btn_text; (step; value)
+            button_prefix = f"{str(job_id)};{str(cb_id)};{button_text[i]}"
             button_data = f"{button_prefix};{button_val[i]}"
 
             if len(button_data) >= 60:
                 telepot_cb = {button_prefix: button_data}
-                save_loc = os.path.join(loc_telepot_callback, f"{str(self.job_id)}_cb.json")
+                save_loc = os.path.join(loc_telepot_callback, f"{str(job_id)}_cb.json")
                 JSONEditor(save_loc).add_level1(telepot_cb, job_id=self.job_id)
                 button_data = f"{button_prefix};X"
 
@@ -128,7 +137,7 @@ class Message:
             keyboard_markup.append(keyboard_row)
         self.keyboard = InlineKeyboardMarkup(inline_keyboard=keyboard_markup)
 
-    def keyboard_extractor(self, index, options, bpr: int = 3, add_cancel: bool = False, add_other: bool = False):
+    def job_keyboard_extractor(self, index, options, bpr: int = 3, add_cancel: bool = False, add_other: bool = False):
         button_text = options
 
         button_value = []
@@ -138,8 +147,6 @@ class Message:
         if add_other:
             button_text.append("Other")
             button_value.append(f'{index};{"/GET"}')
-            # todo detect GET and trigger manual input
-            # todo if a get user input message is pending dont send another
 
         arrangement = [bpr for _ in range(int(math.floor(len(button_text) / bpr)))]
         if len(button_text) % bpr != 0:
@@ -152,7 +159,22 @@ class Message:
 
         logger.log(job_id=self.job.job_id, msg="Keyboard extracted > " + str(arrangement))
 
-        self.add_keyboard(button_text, button_value, arrangement)
+        self.add_job_keyboard(button_text, button_value, arrangement)
+
+    def one_time_keyboard_extractor(self, function, options, bpr: int = 3):
+        button_text = options
+
+        button_value = []
+        for text in button_text:
+            button_value.append(f'{function};{text}')
+
+        arrangement = [bpr for _ in range(int(math.floor(len(button_text) / bpr)))]
+        if len(button_text) % bpr != 0:
+            arrangement.append(len(button_text) % bpr)
+
+        logger.log(job_id=self.job.job_id, msg="Keyboard extracted > " + str(arrangement))
+
+        self._add_one_time_keyboard(button_text, button_value, arrangement)
 
     def send_to_master(self):
         self.job = None

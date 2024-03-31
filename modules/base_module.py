@@ -31,7 +31,8 @@ class Module:
                     check_list=None,
                     default: str = "",
                     option_list=None,
-                    description: str = "") -> (bool, str):
+                    description: str = "",
+                    no_recover: bool = False) -> (bool, str):
 
         if sum([check_int, check_float, check_date, check_time]) > 1:
             raise InvalidParameterException("Contradicting check items are selected")
@@ -137,7 +138,7 @@ class Module:
                     log(self._job.job_id, f"Time format mismatch {str(value)} for {time_format}")
 
         # If anything failed
-        if not success:
+        if not success and not no_recover:
             self._job.store_message()
             get_manual = check_int or check_float or check_date or check_time
 
@@ -147,7 +148,7 @@ class Module:
 
             if option_list:
                 msg = Message(send_string=send_val, job=self._job)
-                msg.keyboard_extractor(index=index, options=option_list, add_cancel=True, add_other=get_manual)
+                msg.job_keyboard_extractor(index=index, options=option_list, add_cancel=True, add_other=get_manual)
                 self.send_message(message=msg)
             else:
                 self.send_message(message=Message(send_string=send_val, job=self._job), get_input=True, index=index)

@@ -8,6 +8,9 @@ main_channel = "spark"                      # TELEPOT
 # imap = 'outlook.office365.com'
 imap = 'imap.gmail.com'
 
+# sent_mail = "Sent"
+sent_mail = '"[Gmail]/Sent Mail"'
+
 # --- LINKS ---
 # CCTV
 cctv_download = "resources/CCTVImages"

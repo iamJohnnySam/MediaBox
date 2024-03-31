@@ -1,25 +1,20 @@
-from datetime import datetime
 import random
 import numpy as np
 
 import global_variables
-import refs
 from brains.job import Job
 from tools import logger
 from PIL import Image
-import os
-import shutil
 
 if global_variables.operation_mode:
     import tflite_runtime.interpreter as tflite
 
 
 class ImageClassifier:
-    def __init__(self, job: Job, nn_path, nn_name="A00", save_random=0.75, threshold=0.6):
+    def __init__(self, job: Job, nn_path, nn_name="A00", threshold=0.6):
         self.job = job
         self.output_data = None
         self.nn_name = nn_name
-        self.save_random = save_random
         self.threshold = threshold
 
         if global_variables.operation_mode:
@@ -47,21 +42,6 @@ class ImageClassifier:
             output = random.random() * random.random()
             logger.log(self.job.job_id, f"CNN output set to {output} as not in operation mode")
 
-        if output > self.threshold:
-            sus = True
-            sav = os.path.join(refs.cctv_save, self.nn_name, "1")
-        else:
-            sus = False
-            sav = os.path.join(refs.cctv_save, self.nn_name, "0")
+        sus = True if output > self.threshold else False
 
-        copy_destination = "None"
-        if random.random() > self.save_random and global_variables.operation_mode:
-            if not os.path.exists(sav):
-                os.makedirs(sav)
-
-            file_name = datetime.now().strftime("%Y-%m-%d, %H-%M-%S") + ".jpg"
-
-            copy_destination = shutil.copyfile(att_path,
-                                               os.path.join(sav, file_name))
-            logger.log(self.job.job_id, "Image Saved - " + copy_destination)
-        return output, sus, copy_destination
+        return output, sus

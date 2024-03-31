@@ -126,11 +126,14 @@ class Messenger:
             log(job_id=0, error_code=20002, error=str(e))
             return
 
-        try:
-            msg_id = int(q[0])
-        except ValueError as e:
-            log(job_id=0, error_code=20004, error=str(e))
-            return
+        if q[1] == "/":
+            msg_id = 0
+        else:
+            try:
+                msg_id = int(q[0])
+            except ValueError as e:
+                log(job_id=0, error_code=20004, error=str(e))
+                return
 
         log(job_id=msg_id, msg='Callback Query: ' + str(query['data']))
 
@@ -144,6 +147,13 @@ class Messenger:
             except ValueError as e:
                 log(job_id=msg_id, error_code=20003, error=str(e))
                 return
+
+        if msg_id == 0:
+            msg = Job(function=q[4])
+            msg.collect(q[5], 0)
+            task_queue.add_job(msg)
+            self.bot.answerCallbackQuery(query['id'], text=f'Acknowledged!')
+            return
 
         try:
             msg = Job(job_id=msg_id)

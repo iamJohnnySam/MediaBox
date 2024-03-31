@@ -20,11 +20,11 @@ def handle_photo(self, msg):
         if type(self.command_dictionary[key]) is dict and "photo" in self.command_dictionary[key].keys():
             button_text.append(f'{self.command_dictionary[key]["function"]}_photo')
 
-    button_text, button_cb, button_value, arrangement = self.keyboard_extractor(msg.photo_name, None,
-                                                                                button_text,
+    button_text, button_cb, button_value, arrangement = self.job_keyboard_extractor(msg.photo_name, None,
+                                                                                    button_text,
                                                                                 'run_command',
-                                                                                sql_result=False,
-                                                                                command_only=True)
+                                                                                    sql_result=False,
+                                                                                    command_only=True)
     self.send_with_keyboard(msg="Which function to call?",
                             chat_id=msg.chat_id,
                             button_text=button_text,
@@ -360,32 +360,3 @@ class Message:
 
     def add_reply(self, reply_id):
         self.replies[] = reply_id
-
-
-def send_message(telepot_account, chat_id, msg, image=False, keyboard=None, reply_to=None, caption=""):
-    telepot_lock.acquire()
-    msg_id = telepot_channels[telepot_account].send_now(msg, image, chat_id,
-                                                        caption=caption,
-                                                        reply_to=reply_to,
-                                                        keyboard=keyboard)
-    telepot_lock.release()
-    return msg_id
-
-
-def send_to_master(telepot_account, msg, image=False, keyboard=None, reply_to=None, caption=""):
-    telepot_lock.acquire()
-    msg_id = telepot_channels[telepot_account].send_now(msg, image,
-                                                        caption=caption,
-                                                        reply_to=reply_to,
-                                                        keyboard=keyboard)
-    telepot_lock.release()
-    return msg_id
-
-
-def send_to_group(telepot_account, msg, group, image=False, caption=""):
-    telepot_lock.acquire()
-    telepot_channels[telepot_account].send_to_group(group, msg, image,
-                                                    caption=caption)
-    telepot_lock.release()
-
-

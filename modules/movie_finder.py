@@ -60,9 +60,9 @@ class MovieFinder(Module):
         for movie_entry in movies:
             title, image, link, torrent = get_movie_details(movie_entry)
             send_movie = Message(f"{title}\n{image}", job=self._job)
-            send_movie.add_keyboard(button_text=["Download"],
-                                    button_val=[f"1;{torrent}"],
-                                    arrangement=[1])
+            send_movie.add_job_keyboard(button_text=["Download"],
+                                        button_val=[f"1;{torrent}"],
+                                        arrangement=[1])
             self.send_message(send_movie)
 
 

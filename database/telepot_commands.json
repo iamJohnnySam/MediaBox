@@ -43,8 +43,13 @@
     "news": true
   },
   "subscribe_news": {
-    "function": "subscribe_news",
+    "function": "subs_news",
     "definition": "Subscribe to News Channels",
+    "news": true
+  },
+  "news_channels": {
+    "function": "show_news",
+    "definition": "Show News Channels",
     "news": true
   },
   "add_me_to_news": {
@@ -60,7 +65,10 @@
 
   "CCTV Controls": false,
   "check_cctv": {
-    "function": "check_cctv",
+    "definition": "Download cctv",
+    "cctv": true
+  },
+  "get_cctv": {
     "definition": "Check latest cctv",
     "cctv": true
   },

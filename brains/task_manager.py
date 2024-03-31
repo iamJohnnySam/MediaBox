@@ -76,7 +76,9 @@ def run_task(job: Job):
         NewsReader(job).get_news()
     elif func == "check_news_all":
         NewsReader(job).get_news_all()
-    elif func == "subscribe_news":
+    elif func == "show_news":
+        NewsReader(job).show_news_channels()
+    elif func == "subs_news":
         pass
     elif func == "add_me_to_news":
         pass
@@ -86,8 +88,12 @@ def run_task(job: Job):
     elif func == "check_cctv":
         cctv = CCTVChecker(job)
         cctv.download_cctv()
+        cctv.clean_up(refs.sent_mail)
+    elif func == "get_cctv":
+        cctv = CCTVChecker(job)
+        cctv.download_cctv()
         cctv.get_last(10)
-        cctv.clean_up()
+        cctv.clean_up(refs.sent_mail)
     elif func == "add_me_to_cctv":
         pass
     elif func == "remove_me_from_cctv":

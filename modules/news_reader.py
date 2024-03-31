@@ -103,3 +103,37 @@ class NewsReader(Module):
                 news_sent = True
 
         return news_sent
+
+    def show_news_channels(self):
+        news = JSONEditor(refs.news_sources).read()
+        news_channels = []
+        prev_channel = ""
+        for channel in news.keys():
+            if type(news[channel]) is bool:
+                if len(news_channels) != 0:
+                    send_message = Message(prev_channel, job=self._job)
+                    send_message.one_time_keyboard_extractor("subs_news", news_channels)
+
+                prev_channel = channel
+                news_channels = []
+            else:
+                news_channels.append(channel)
+
+    def subscribe(self):
+        sources = JSONEditor(refs.news_sources).read()
+        success, source = self.check_value(index=-1,
+                                           option_list=[s for s in sources.keys() if type(sources[s]) is not bool],
+                                           no_recover=True)
+        if not success:
+            self.show_news_channels()
+
+        if not self.admin_db.exists(refs.tbl_groups,
+                                    f"group_name = 'news_{source}' AND chat_id = '{self._job.chat_id}'") == 0:
+            self.manage_chat_group(f'news_{data[1]}', from_id, add=False, remove=True)
+            reply_text = f"You are Unsubscribed from {source}."
+
+        else:
+            self.manage_chat_group(f'news_{data[1]}', from_id)
+            reply_text = f"You are now Subscribed to {source}."
+
+        self.send_message(Message(reply_text, job=self._job))

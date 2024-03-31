@@ -1,46 +1,5 @@
-import os
-import shutil
-from datetime import datetime
-
-import telepot
-
-import global_variables
-from brains.job import Job
-from tools import logger
-from communication.message_handler import Messenger
-from database_manager.json_editor import JSONEditor
-from database_manager.sql_connector import sql_databases
-from modules import transmission
 
 
-class Communicator(Messenger):
-
-    def __init__(self, telepot_account):
-        super().__init__(telepot_account)
-
-
-
-
-
-
-
-    def subscribe_news(self, msg: Job):
-        news = JSONEditor(global_var.news_sources).read()
-        news_channels = []
-        prev_channel = ""
-        for channel in news.keys():
-            if type(news[channel]) is bool:
-                if len(news_channels) != 0:
-                    btn_text, btn_cb, btn_value, arr = self.keyboard_extractor(msg.chat_id, "", news_channels,
-                                                                               'subs_news',
-                                                                               sql_result=False, command_only=True)
-                    self.send_with_keyboard(send_string=prev_channel, job=msg,
-                                            button_text=btn_text, button_cb=btn_cb, button_val=btn_value,
-                                            arrangement=arr)
-                prev_channel = channel
-                news_channels = []
-            else:
-                news_channels.append(channel)
 
 
 
@@ -112,24 +71,6 @@ class Communicator(Messenger):
         self.baby_weight_trend(msg, caption=send_string)
 
 
-
-    def list_torrents(self, msg: Job):
-        torrent_list = transmission.list_all()
-        self.send_now(str(torrent_list),
-                      chat=msg.chat_id,
-                      reply_to=msg.message_id)
-
-    def clean_up_downloads(self, msg: Job):
-        transmission.torrent_complete_sequence()
-        self.send_now("Clean-up completed successfully",
-                      chat=msg.chat_id,
-                      reply_to=msg.message_id)
-
-
-
-
-
-
     # -------------- PHOTO FUNCTIONS --------------
 
     def finance_photo(self, callback_id, query_id, from_id, value):
@@ -179,7 +120,7 @@ class Communicator(Messenger):
             query = f'SELECT DISTINCT type FROM categories WHERE in_out = "{in_out}"'
             result = list(sql_databases["finance"].run_sql(query, fetch_all=True))
 
-            button_text, button_cb, button_value, arrangement = self.keyboard_extractor(data[0], "2", result, 'finance')
+            button_text, button_cb, button_value, arrangement = self.job_keyboard_extractor(data[0], "2", result, 'finance')
             button_text.append("Delete")
             button_cb.append("finance")
             button_value.append(f'{data[0]};2;Delete')
@@ -197,7 +138,7 @@ class Communicator(Messenger):
             query = f'SELECT DISTINCT category FROM categories WHERE type = "{data[2]}"'
             result = list(sql_databases["finance"].run_sql(query, fetch_all=True))
 
-            button_text, button_cb, button_value, arrangement = self.keyboard_extractor(data[0], "3", result, 'finance')
+            button_text, button_cb, button_value, arrangement = self.job_keyboard_extractor(data[0], "3", result, 'finance')
             button_text.append("Delete")
             button_cb.append("finance")
             button_value.append(f'{data[0]};3;Delete')
@@ -218,23 +159,3 @@ class Communicator(Messenger):
             sql_databases["finance"].run_sql(query, fetch_all=True)
             logger.log(f'Updated Transaction - {data[0]}')
             self.send_now(f'[{data[0]}] Transaction successfully updated', chat=from_id)
-
-
-
-
-    def cb_subs_news(self, callback_id, query_id, from_id, value):
-        data = value.split(";")
-
-        if not sql_databases["administration"].exists(self.database_groups,
-                                                      f"group_name = 'news_{data[1]}' AND chat_id = '{from_id}'") == 0:
-            self.manage_chat_group(f'news_{data[1]}', from_id, add=False, remove=True)
-            reply_text = f"You are Unsubscribed from {data[1]}."
-
-        else:
-            self.manage_chat_group(f'news_{data[1]}', from_id)
-            reply_text = f"You are now Subscribed to {data[1]}."
-
-        try:
-            self.bot.answerCallbackQuery(query_id, text=reply_text)
-        except telepot.exception.TelegramError:
-            pass
