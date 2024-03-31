@@ -1,10 +1,14 @@
+import refs
 from brains.job import Job
+from database_manager.sql_connector import sql_databases
 from modules.base_module import Module
 
 
 class Finance(Module):
     def __init__(self, job: Job):
         super().__init__(job)
+
+        self.db_finance = sql_databases[refs.db_finance]
 
     def finance(self, msg: Job):
         if msg.value == "":
@@ -27,7 +31,7 @@ class Finance(Module):
         else:
             columns = 'transaction_by, amount'
             val = (msg.chat_id, amount)
-            success, sql_id = sql_databases["finance"].insert('transaction_lkr', columns, val,
+            success, sql_id = self.db_finance.insert('transaction_lkr', columns, val,
                                                               get_id=True,
                                                               id_column='transaction_id')
 

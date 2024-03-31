@@ -54,6 +54,8 @@ tbl_jobs = "jobs"
 db_news = "news"
 tbl_news = "news_articles"
 
+db_finance = "finance"
+
 # Back up
 backup_location = '/mnt/MediaBox/MediaBox/Backup'
 terminal_output = '../nohup.out'
