@@ -37,7 +37,7 @@ torrent_tv_shows = '/mnt/MediaBox/TVShows'
 torrent_unknown = '/mnt/MediaBox/Unknown'
 
 # Tools
-charts_save_location = "resource/charts/"
+charts_save_location = "resources/charts/"
 if not os.path.isdir(charts_save_location):
     os.makedirs(charts_save_location)
 

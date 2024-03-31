@@ -258,7 +258,11 @@ class Job:
             self.store_message()
 
         if self.is_stored:
-            query = f"UPDATE {tbl_jobs} SET {field} = '{item}', cb_id = '{self._current_callback}' " \
+            if type(item) is bool:
+                val = str(item)
+            else:
+                val = f"'{item}'"
+            query = f"UPDATE {tbl_jobs} SET {field} = {val}, cb_id = '{self._current_callback}' " \
                     f"WHERE job_id = '{self._job_id}'"
             self._db.run_sql(query, job_id=self.job_id)
 

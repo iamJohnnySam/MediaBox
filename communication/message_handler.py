@@ -237,4 +237,4 @@ class Messenger:
             self.bot.editMessageReplyMarkup(msg, reply_markup=keyboard)
             log(job_id=job.job_id, msg=f"Keyboard updated for {msg_id}")
         except telepot.exception.TelegramError as e:
-            log(job_id=job.job_id, msg=str(e), log_type="warn")
+            log(job_id=job.job_id, log_type="warn")
