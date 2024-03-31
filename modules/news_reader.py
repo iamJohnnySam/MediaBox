@@ -36,6 +36,7 @@ class NewsReader(Module):
         if not success:
             return
         self._check_news(source)
+        self.check_value(index=-1, option_list=self._get_news_subscriptions())
         self._job.complete()
 
     def _check_news(self, source):
@@ -44,7 +45,6 @@ class NewsReader(Module):
         if not news_sent:
             self.send_message(Message(job=self._job, send_string=f"No new news articles for {source}."))
         self._job.collection = []
-        self.check_value(index=-1, option_list=self._get_news_subscriptions())
 
     def news_extractor(self, source: str, news):
         news_sent = False
