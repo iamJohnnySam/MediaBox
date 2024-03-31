@@ -27,6 +27,7 @@ class Admin(Module):
     def help(self):
         message = "--- AVAILABLE COMMANDS ---"
         command_dictionary = JSONEditor(refs.db_telepot_commands).read()
+        add_command = ""
 
         for command in command_dictionary.keys():
             if type(command_dictionary[command]) != bool:
@@ -36,9 +37,15 @@ class Admin(Module):
                     definition = command_dictionary[command]['definition']
                 else:
                     definition = command
-                message = f"{message}\n/{command} - {definition}"
+
+                if self._job.telepot_account in command_dictionary[command] or self._job.telepot_account == refs.main_channel:
+                    if add_command != "":
+                        message = message + add_command
+                        add_command = ""
+                    message = f"{message}\n/{command} - {definition}"
+
             else:
-                message = message + "\n\n" + command
+                add_command = "\n\n" + command
         self.send_message(Message(message))
 
     def start_over(self):
