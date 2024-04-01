@@ -167,3 +167,14 @@ def backup_sequence(job: Job):
     backup.databases.append(refs.db_baby)
     backup.databases.append(refs.db_entertainment)
     backup.run_backup()
+
+    # todo move to task creation
+    # backup.backup.copy_files.append(telepot_accounts)
+    # backup.backup.copy_folders.append(telepot_commands)
+    # backup.backup.copy_folders.append(telepot_callback_database)
+
+    # todo move to task creation
+    # backup.backup.move_folders.append(telepot_image_dump)
+
+    # todo move to task creation
+    # backup.backup.move_folders_common.append(finance_images)
