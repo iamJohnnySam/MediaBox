@@ -71,8 +71,13 @@ class Messenger:
             log(job_id=msg.job_id, error_code=30001)
 
         elif msg.function == "cancel":
-            # todo cancel procedure. Remove from waiting list and trigger fail command
-            pass
+            if msg.chat_id in self.waiting_user_input.keys():
+                self._process_waiting_list(msg, "")
+                task_queue.add_job(msg)
+
+        elif msg.function == "raise_exception" or msg.function == "shutdown":
+            log(job_id=msg.job_id, msg=f"Raising Controlled Exception to shutdown the bot")
+            raise ControlledException("Shutdown bot")
 
         elif msg.function in self.commands.keys():
             if type(self.commands[msg.function]) is bool:
@@ -98,10 +103,6 @@ class Messenger:
                 msg.function = self.commands[msg.function]["function"]
                 log(job_id=msg.job_id, msg=f"Function updated from {old_func} to {msg.function}")
 
-                if msg.function == "raise_exception":
-                    log(job_id=msg.job_id, msg=f"Raising Controlled Exception to shutdown the bot")
-                    raise ControlledException("Shutdown bot")
-
             else:
                 # function update not required
                 pass
@@ -111,19 +112,24 @@ class Messenger:
 
         elif msg.function == "chat":
             if msg.chat_id in self.waiting_user_input.keys():
-                msg.job_id = self.waiting_user_input[msg.chat_id]["job"]
-                index = self.waiting_user_input[msg.chat_id]["index"]
-                msg.collect(msg.user_input, index)
-                del self.waiting_user_input[msg.chat_id]
+                self._process_waiting_list(msg)
                 task_queue.add_job(msg)
-                log(job_id=msg.job_id, msg=f"Message recalled and function, {msg.function} added to queue with "
-                                           f"{msg.user_input} collected at index {index}.")
 
             else:
                 self.send_now(Message("Chatbot Disabled. Type /help to find more information", job=msg))
 
         else:
             self.send_now(Message("Sorry, that command is not known to me...", job=msg))
+
+    def _process_waiting_list(self, msg: Job, override_value=None):
+        input_value = msg.user_input if override_value is None else override_value
+
+        msg.job_id = self.waiting_user_input[msg.chat_id]["job"]
+        index = self.waiting_user_input[msg.chat_id]["index"]
+        msg.collect(input_value, index)
+        del self.waiting_user_input[msg.chat_id]
+        log(job_id=msg.job_id, msg=f"Message recalled and function, {msg.function} added to queue with "
+                                   f"{input_value} collected at index {index}.")
 
     def handle_callback(self, query):
         try:

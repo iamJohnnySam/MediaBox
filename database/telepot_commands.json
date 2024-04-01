@@ -176,7 +176,7 @@
   },
 
   "Bot Admin": false,
-  "shut_down": {
+  "shutdown": {
     "definition": "Shut Down Bot",
     "function": "raise_exception",
     "all_bots": true
