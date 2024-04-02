@@ -21,9 +21,9 @@ class Message:
         self._db = sql_databases[db_admin]
 
         if job is not None:
-            self.job_id = job.job_id
+            self._job_id = job.job_id
         else:
-            self.job_id = 0
+            self._job_id = 0
 
         self.send_string = send_string
         self.job = job
@@ -38,6 +38,16 @@ class Message:
         if self.send_string == "" or self.send_string is None:
             logger.log(job_id=self.job_id, error_code=20006)
             self.send_string = "NO MESSAGE"
+
+    @property
+    def job_id(self):
+        if self._job_id != 0:
+            return self._job_id
+        else:
+            if self.job is not None:
+                return self.job.job_id
+            else:
+                return 0
 
     @property
     def master(self):
@@ -96,7 +106,7 @@ class Message:
     def add_job_keyboard(self, button_text: list, button_val: list, arrangement: list):
         cb_id = self.job.cb_id
         if self.job_id == 0:
-            self.job_id = self.job.job_id
+            self._job_id = self.job.job_id
 
         self._arrange_keyboard(self.job_id, button_text, button_val, arrangement, cb_id)
 

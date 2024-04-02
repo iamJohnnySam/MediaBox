@@ -179,5 +179,3 @@ for database in database_list:
     if database == 'information_schema':
         continue
     sql_databases[database] = SQLConnector(database_user, database_password, database)
-    # todo create SQL backup
-    # backup.databases.append(database)

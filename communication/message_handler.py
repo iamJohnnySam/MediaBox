@@ -209,6 +209,11 @@ class Messenger:
             raise ValueError("Invalid data type. Expected a Message.")
         message.this_telepot_account = self.channel
 
+        if message.job_id == 0:
+            send_string = message.send_string
+        else:
+            send_string = f"{message.send_string}\n[{message.job_id:03}]"
+
         replies = []
         for chat in message.chats:
             if message.photo != "":
@@ -216,7 +221,7 @@ class Messenger:
                     reply = self.bot.sendPhoto(chat,
                                                photo=open(str(message.photo), 'rb'),
                                                reply_to_message_id=message.reply_to,
-                                               caption=message.send_string,
+                                               caption=str(send_string),
                                                reply_markup=message.keyboard)
                 except telepot.exception.TelegramError as e:
                     log(message.job_id, error_code=20015, error=str(e))
@@ -224,7 +229,7 @@ class Messenger:
                 replies.append(reply)
             else:
                 try:
-                    reply = self.bot.sendMessage(chat, str(message.send_string),
+                    reply = self.bot.sendMessage(chat, str(send_string),
                                                  reply_to_message_id=message.reply_to,
                                                  reply_markup=message.keyboard)
                 except telepot.exception.TelegramError as e:

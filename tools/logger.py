@@ -76,7 +76,7 @@ def log(job_id: int = 0, msg: str = "", log_type: str = "debug", error_code: int
     if print_message:
         for segment in message.split("\n"):
             print(f'{log_type},{datetime.now().strftime("%m-%d %H:%M:%S")},{caller.ljust(15)},'
-                  f'{str(job_id)},>,{segment}')
+                  f'{job_id:03},>,{segment}')
 
 
 if not os.path.exists(refs.logs_location):
