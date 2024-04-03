@@ -50,7 +50,7 @@ class RefactorFolder(Module):
                 self.torrent_step_2(sub_directories, directory_path, last_loc)
             else:
                 log(self._job.job_id, f'Folder Refactor Error - {directory_path}, Base location - {last_loc}',
-                    log_type="error", error_code=50005)
+                    log_type="error", error_code=50004)
 
             self.remove_directory(directory_path)
 
