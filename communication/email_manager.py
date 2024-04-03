@@ -160,7 +160,8 @@ class EmailManager:
                 log(self.job.job_id, "Failed to delete - " + self.msg['Date'])
 
     def get_next_attachment(self):
-        self.connect()
+        if self.myEmail.state != "SELECTED":
+            self.connect()
 
         if len(self.attachments.keys()) == 0:
             if self.unread_emails > 0:
