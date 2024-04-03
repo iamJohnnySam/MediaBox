@@ -1,8 +1,12 @@
 import platform
 
+import refs
+
 operation_mode = True if platform.machine() == 'armv7l' else False
 platform = platform.machine()
-# todo change main channel if not in operation mode
+
+if not operation_mode:
+    refs.main_channel = "test"
 
 ready_to_run = False
 stop_all = False

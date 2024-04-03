@@ -13,6 +13,9 @@ def init_channel(channel):
     if channel == 'all':
         logger.log(msg=f"Starting all Telepot channels")
         for account in telepot_accounts.keys():
+            if account == "test":
+                logger.log(msg="Skip Test Account")
+                continue
             channels[account] = Messenger(account,
                                           telepot_accounts[account]["account"],
                                           telepot_accounts[account]["master"])
