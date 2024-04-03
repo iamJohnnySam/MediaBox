@@ -116,6 +116,7 @@ class Messenger:
                 task_queue.add_job(msg)
 
             else:
+                # todo
                 self.send_now(Message("Chatbot Disabled. Type /help to find more information", job=msg))
 
         else:

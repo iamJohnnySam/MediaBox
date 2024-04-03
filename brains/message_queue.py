@@ -6,13 +6,13 @@ msg_lock = threading.Lock()
 
 
 def add_message(msg):
-    global job_q
+    global msg_q
     with msg_lock:
         msg_q.put(msg)
 
 
 def get_message():
-    global job_q
+    global msg_q
     with msg_lock:
         msg = msg_q.get()
     return msg

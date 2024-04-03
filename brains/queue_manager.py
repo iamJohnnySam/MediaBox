@@ -139,6 +139,9 @@ def run_task(job: Job):
     elif func == "reboot_pi":
         Admin(job).reboot_pi()
 
+    # todo edit message
+    # todo add class variable in each module to state the format of the collection set
+
     else:
         log(error_code=40005)
 

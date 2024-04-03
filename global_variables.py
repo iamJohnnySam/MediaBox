@@ -2,6 +2,7 @@ import platform
 
 operation_mode = True if platform.machine() == 'armv7l' else False
 platform = platform.machine()
+# todo change main channel if not in operation mode
 
 ready_to_run = False
 stop_all = False

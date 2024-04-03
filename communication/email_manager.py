@@ -9,12 +9,12 @@ from tools.logger import log
 
 
 class EmailManager:
-    result = "Not OK"
-    attachments = {}
-    current_date = None
-    current_message = "1"
-
     def __init__(self, job: Job, email_address, password, mb):
+        self.result = "Not OK"
+        self.attachments = {}
+        self.current_date = None
+        self.current_message = "1"
+
         self.job = job
         self.mail_connect_error = False
         self.msg = None

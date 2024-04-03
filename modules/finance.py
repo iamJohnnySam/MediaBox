@@ -1,8 +1,13 @@
+import os
+
 import refs
 from brains.job import Job
 from database_manager.sql_connector import sql_databases
 from modules.base_module import Module
+from tools.logger import log
 
+
+# todo
 
 class Finance(Module):
     def __init__(self, job: Job):
@@ -129,5 +134,7 @@ class Finance(Module):
             cat_id = list(sql_databases["finance"].run_sql(query))[0]
             query = f'UPDATE transaction_lkr SET category_id = "{cat_id}" WHERE transaction_id = "{data[0]}"'
             sql_databases["finance"].run_sql(query, fetch_all=True)
-            logger.log(f'Updated Transaction - {data[0]}')
+            log(f'Updated Transaction - {data[0]}')
             self.send_now(f'[{data[0]}] Transaction successfully updated', chat=from_id)
+
+# todo add another option with the same params

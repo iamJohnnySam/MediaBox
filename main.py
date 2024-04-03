@@ -5,12 +5,12 @@ import time
 
 import refs
 from brains.job import Job
-from brains.task_manager import backup_sequence
+from brains.queue_manager import backup_sequence
 from communication import channels
 from communication.message import Message
 from tools import logger, start_up
 import global_variables
-from brains import schedule_manager, task_manager
+from brains import schedule_manager, queue_manager
 from web import web_app
 
 if global_variables.operation_mode:
@@ -20,7 +20,7 @@ else:
     logger.log(msg="Code Running in Testing mode on: " + global_variables.platform)
     channels.init_channel(refs.main_channel)
 
-t_task = threading.Thread(target=task_manager.run_task_manager)
+t_task = threading.Thread(target=queue_manager.run_task_manager)
 t_task.start()
 logger.log(msg="Thread Started: Task Manager")
 

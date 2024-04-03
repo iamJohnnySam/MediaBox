@@ -15,11 +15,11 @@ from tools.logger import log
 
 
 class CCTVChecker(Module):
-    last_detect_A02 = None
-    last_detect_A01 = None
 
     def __init__(self, job: Job):
         super().__init__(job)
+        self.last_detect_A02 = None
+        self.last_detect_A01 = None
         if not os.path.exists(refs.cctv_download):
             os.makedirs(refs.cctv_download)
 
