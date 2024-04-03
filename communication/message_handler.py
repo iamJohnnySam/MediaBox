@@ -1,4 +1,5 @@
 import os
+import sys
 
 import telepot
 from telepot.loop import MessageLoop
@@ -76,8 +77,8 @@ class Messenger:
                 task_queue.add_job(msg)
 
         elif msg.function == "raise_exception" or msg.function == "shutdown":
-            log(job_id=msg.job_id, msg=f"Raising controlled exception to shutdown the bot")
-            raise ControlledException("Shutdown bot")
+            log(job_id=msg.job_id, msg=f"Shutting down thread.")
+            sys.exit()
 
         elif msg.function in self.commands.keys():
             if type(self.commands[msg.function]) is bool:
