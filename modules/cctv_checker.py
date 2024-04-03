@@ -78,8 +78,9 @@ class CCTVChecker(Module):
                     file_name = f"{datetime.now().strftime('%Y-%m-%d, %H-%M-%S')}-{date}-{val:.3f}.jpg"
                     t = 1
                     while os.path.isfile(os.path.join(sav_cctv, file_name)):
-                        file_name = f"{datetime.now().strftime('%Y-%m-%d, %H-%M-%S')}-{date}-{val:.3f} ({t}).jpg"
+                        file_name = f"{datetime.now().strftime('%Y-%m-%d-%H-%M-%S')}-{date}-{val:.3f}({t}).jpg"
                         t = t+1
+                        file_name = file_name.replace(":", "").replace(" ", "")
                     move_destination = shutil.move(att_path, os.path.join(sav_cctv, file_name))
                     log(self._job.job_id, f"Image Saved in {move_destination} with sus level at {val:.3f}")
 

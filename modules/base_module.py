@@ -172,7 +172,6 @@ class Module:
             return
 
         message.job = self._job
-        message.job_id = self._job.job_id
 
         if get_input and self._job.chat_id in in_queue:
             log(job_id=self._job.job_id, msg="Chats in Queue: " + str(in_queue))

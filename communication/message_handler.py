@@ -76,7 +76,7 @@ class Messenger:
                 task_queue.add_job(msg)
 
         elif msg.function == "raise_exception" or msg.function == "shutdown":
-            log(job_id=msg.job_id, msg=f"Raising Controlled Exception to shutdown the bot")
+            log(job_id=msg.job_id, msg=f"Raising controlled exception to shutdown the bot")
             raise ControlledException("Shutdown bot")
 
         elif msg.function in self.commands.keys():
