@@ -120,7 +120,8 @@ class Messenger:
                 self.send_now(Message("Chatbot Disabled. Type /help to find more information", job=msg))
 
         else:
-            self.send_now(Message("Sorry, that command is not known to me...", job=msg))
+            self.send_now(Message("Sorry, that command is not known to me... If you need help please send /help and I "
+                                  "will send you a list of commands which you can use to start a task", job=msg))
 
     def _process_waiting_list(self, msg: Job, override_value=None):
         input_value = msg.user_input if override_value is None else override_value
