@@ -4,16 +4,16 @@ import refs
 from communication.message import Message
 from modules.base_module import Module
 from modules.subscriptions import Subscriptions
-from tools import logger
 from brains.job import Job
 from database_manager.json_editor import JSONEditor
 from database_manager.sql_connector import sql_databases
+from tools.logger import log
 
 
 class NewsReader(Module):
     def __init__(self, job: Job):
         super().__init__(job)
-        logger.log(self._job.job_id, f"Object Created")
+        log(self._job.job_id, f"Object Created")
         self.admin_db = sql_databases[refs.db_admin]
         self.news_db = sql_databases[refs.db_news]
 
@@ -21,7 +21,7 @@ class NewsReader(Module):
         query = f"SELECT group_name FROM {refs.tbl_groups} WHERE chat_id = {self._job.chat_id}"
         result = self.admin_db.run_sql(query, job_id=self._job.job_id, fetch_all=True)
         subs = [source[0].replace("news_", "") for source in result if source[0].startswith("news_")]
-        logger.log(self._job.job_id, str(subs))
+        log(self._job.job_id, str(subs))
         return subs
 
     def get_news_all(self):
@@ -40,6 +40,10 @@ class NewsReader(Module):
 
     def _check_news(self, source):
         news_sources = JSONEditor(refs.news_sources).read()
+        if source == '':
+            log(self._job.job_id, error_code=50005)
+            self._job.collection = []
+            return
         news_sent = self.news_extractor(source, news_sources[source])
         if not news_sent:
             self.send_message(Message(job=self._job, send_string=f"No new news articles for {source}."))
@@ -69,7 +73,7 @@ class NewsReader(Module):
 
         for article in feed.entries:
             if debug:
-                logger.log(article, log_type="debug")
+                log(article, log_type="debug")
 
             # title
             title = getattr(article, article_title)
@@ -112,12 +116,16 @@ class NewsReader(Module):
             if type(news[channel]) is bool:
                 if len(news_channels) != 0:
                     send_message = Message(prev_channel, job=self._job)
-                    send_message.one_time_keyboard_extractor("subs_news", news_channels)
-
+                    send_message.function_keyboard_extractor("subs_news", news_channels)
+                    self.send_message(send_message)
                 prev_channel = channel
                 news_channels = []
             else:
                 news_channels.append(channel)
+
+    def show_subscribed_news_channels(self):
+        query = f"SELECT group_name FROM {refs.tbl_groups} WHERE chat_id ='{self._job.chat_id}'"
+        result = self.admin_db.run_sql(query, job_id=self._job.job_id)
 
     def subscribe(self):
         sources = JSONEditor(refs.news_sources).read()

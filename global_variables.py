@@ -1,12 +1,14 @@
 import platform
 
 import refs
+from tools.logger import log
 
 operation_mode = True if platform.machine() == 'armv7l' else False
 platform = platform.machine()
 
 if not operation_mode:
     refs.main_channel = "test"
+    log(msg="Main Channel switched")
 
 ready_to_run = False
 stop_all = False

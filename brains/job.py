@@ -4,21 +4,25 @@ import os
 import telepot
 from PIL import Image
 
-from refs import main_channel, db_admin, tbl_jobs, tbl_chats, telepot_image_dump
+import refs
 from database_manager.sql_connector import sql_databases
 from tools.custom_exceptions import *
 from tools.logger import log
 
 
 class Job:
-    def __init__(self, telepot_account: str = main_channel,
+    def __init__(self, telepot_account: str = "",
                  message: dict = None,
                  job_id: int = 0,
                  chat_id: int = 0, username: str = "", reply_to: int = 0, function: str = "",
-                 collection=None):
+                 collection=None,
+                 background_task: bool = False):
 
-        self._db = sql_databases[db_admin]
-        self._telepot_account = telepot_account
+        self._telepot_account = refs.main_channel if telepot_account == "" else telepot_account
+
+        self._db = sql_databases[refs.db_admin]
+
+        self.is_background_task = background_task
 
         # Important Variables
         self._job_id = job_id
@@ -64,7 +68,7 @@ class Job:
 
     def get_job(self):
         query = f"SELECT account, chat_id, reply_to, username, function, collection, photo, replies, cb_id " \
-                f"FROM {tbl_jobs} WHERE job_id ='{str(self._job_id)}'"
+                f"FROM {refs.tbl_jobs} WHERE job_id ='{str(self._job_id)}'"
         result = self._db.run_sql(query, job_id=self._job_id)
         if len(result) == 0:
             log(job_id=self._job_id, error_code=40003)
@@ -84,7 +88,7 @@ class Job:
 
     def update_job(self):
         if self.is_stored:
-            query = f"SELECT replies, cb_id FROM {tbl_jobs} WHERE job_id ='{str(self._job_id)}'"
+            query = f"SELECT replies, cb_id FROM {refs.tbl_jobs} WHERE job_id ='{str(self._job_id)}'"
             result = self._db.run_sql(query, job_id=self._job_id)
             if len(result) == 0:
                 log(job_id=self._job_id, error_code=40003)
@@ -141,7 +145,7 @@ class Job:
     # Job Properties
     @property
     def master(self):
-        query = f"SELECT chat_id FROM {tbl_chats} WHERE master = 1"
+        query = f"SELECT chat_id FROM {refs.tbl_chats} WHERE master = 1"
         result = self._db.run_sql(query, job_id=self.job_id)[0]
         return result
 
@@ -182,7 +186,7 @@ class Job:
     @property
     def collection(self) -> list:
         if self.is_stored and self._collection == []:
-            query = f"SELECT collection FROM {tbl_jobs} WHERE job_id ='{str(self._job_id)}'"
+            query = f"SELECT collection FROM {refs.tbl_jobs} WHERE job_id ='{str(self._job_id)}'"
             result = self._db.run_sql(query, job_id=self.job_id)
             collect = result[0].split(";")
         else:
@@ -208,9 +212,9 @@ class Job:
     @property
     def photo_loc(self):
         """Returns the full path in which the photo is saved"""
-        if not os.path.exists(telepot_image_dump):
-            os.makedirs(telepot_image_dump)
-        return [os.path.join(telepot_image_dump, x) for x in self.photo_names]
+        if not os.path.exists(refs.telepot_image_dump):
+            os.makedirs(refs.telepot_image_dump)
+        return [os.path.join(refs.telepot_image_dump, x) for x in self.photo_names]
 
     @property
     def cb_id(self):
@@ -226,7 +230,7 @@ class Job:
     # Checks
     @property
     def is_authorised(self):
-        if self._db.exists(tbl_chats, f"chat_id = '{self.chat_id}'") == 0:
+        if self._db.exists(refs.tbl_chats, f"chat_id = '{self.chat_id}'") == 0:
             return False
         else:
             return True
@@ -262,18 +266,18 @@ class Job:
                 val = str(item)
             else:
                 val = f"'{item}'"
-            query = f"UPDATE {tbl_jobs} SET {field} = {val}, cb_id = '{self._current_callback}' " \
+            query = f"UPDATE {refs.tbl_jobs} SET {field} = {val}, cb_id = '{self._current_callback}' " \
                     f"WHERE job_id = '{self._job_id}'"
             self._db.run_sql(query, job_id=self.job_id)
 
     def get_master_details(self) -> (int, str):
-        query = f"SELECT chat_id, chat_name FROM {tbl_chats} WHERE master = 1"
+        query = f"SELECT chat_id, chat_name FROM {refs.tbl_chats} WHERE master = 1"
         return self._db.run_sql(query, job_id=self._job_id)
 
     @property
     def replies(self):
         if self._replies == {} and self.is_stored:
-            query = f"SELECT replies FROM {tbl_jobs} WHERE job_id ='{str(self._job_id)}'"
+            query = f"SELECT replies FROM {refs.tbl_jobs} WHERE job_id ='{str(self._job_id)}'"
             reps = self._db.run_sql(query, job_id=self.job_id)[0]
             if reps is None:
                 return {}
@@ -284,7 +288,7 @@ class Job:
 
     @property
     def callbacks(self):
-        query = f"SELECT callbacks FROM {tbl_jobs} WHERE job_id ='{str(self._job_id)}'"
+        query = f"SELECT callbacks FROM {refs.tbl_jobs} WHERE job_id ='{str(self._job_id)}'"
         return json.loads(self._db.run_sql(query, job_id=self.job_id)[0])
 
     @property
@@ -296,7 +300,7 @@ class Job:
             if self._function == "":
                 log(job_id=self.job_id, msg="Message to be stored without function", log_type="warn")
 
-            success, self._job_id = self._db.insert(table=tbl_jobs,
+            success, self._job_id = self._db.insert(table=refs.tbl_jobs,
                                                     columns="account, chat_id, reply_to, username, function",
                                                     val=(self._telepot_account, self._chat_id, self._reply_to,
                                                          self._username,
@@ -325,7 +329,7 @@ class Job:
 
     def collect(self, value: str, index: int):
         if self.is_stored and self._collection == []:
-            query = f"SELECT collection FROM {tbl_jobs} WHERE job_id ='{str(self._job_id)}'"
+            query = f"SELECT collection FROM {refs.tbl_jobs} WHERE job_id ='{str(self._job_id)}'"
             result = self._db.run_sql(query, job_id=self.job_id)[0]
             self._collection = [] if result is None else result.split(";")
 

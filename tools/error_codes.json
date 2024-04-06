@@ -40,5 +40,6 @@
   "50001": "Torrent Listing Error",
   "50002": "Invalid Keyboard creation error",
   "50003": "SQL Error. No rows were affected.",
-  "50004": "Folder Refactor Error"
+  "50004": "Folder Refactor Error",
+  "50005": "Missing source in check_news"
 }

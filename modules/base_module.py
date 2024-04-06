@@ -38,6 +38,8 @@ class Module:
             raise InvalidParameterException("Contradicting check items are selected")
 
         success = True
+        no_save = (index <= 0)
+        no_save = no_save or (len(self._job.collection) == 1 and self._job.collection[0] != "")
 
         if option_list is None:
             option_list = [] if check_list is None else check_list
@@ -139,19 +141,26 @@ class Module:
 
         # If anything failed
         if (not success) and (not no_recover):
-            self._job.store_message()
+            if not (option_list and no_save):
+                self._job.store_message()
             get_manual = check_int or check_float or check_date or check_time
 
             send_val = f"Please enter the {description if description!='' else 'value'}" \
                        f"{' in ' if replace_str != '' else ''}{replace_str}" \
                        f"{' from the options below' if option_list else ''}."
 
-            if option_list:
+            if option_list and not no_save:
                 msg = Message(send_string=send_val, job=self._job)
                 msg.job_keyboard_extractor(index=index, options=option_list, add_cancel=True, add_other=get_manual)
                 self.send_message(message=msg)
+            elif option_list and no_save:
+                msg = Message(send_string=send_val, job=self._job)
+                msg.function_keyboard_extractor(self._job.function, options=option_list)
+                # msg.job_keyboard_extractor(index=index, options=option_list, add_cancel=True, add_other=get_manual)
+                self.send_message(message=msg)
             else:
-                self.send_message(message=Message(send_string=send_val, job=self._job), get_input=True, index=index)
+                self.send_message(message=Message(send_string=send_val+"\nSend /cancel to cancel Job", job=self._job),
+                                  get_input=True, index=index)
 
         return success, value
 
@@ -168,7 +177,7 @@ class Module:
         try:
             in_queue = channels[channel].waiting_user_input.keys()
         except KeyError as e:
-            self.channel_error(e)
+            self.channel_error(e, channel)
             return
 
         message.job = self._job
@@ -181,14 +190,14 @@ class Module:
             try:
                 channels[self._job.telepot_account].send_now(message=message)
             except KeyError as e:
-                self.channel_error(e)
+                self.channel_error(e, channel)
                 return
 
             if get_input:
                 try:
                     channels[self._job.telepot_account].get_user_input(job=self._job, index=index)
                 except KeyError as e:
-                    self.channel_error(e)
+                    self.channel_error(e, channel)
                     return
 
     def close_all_callbacks(self):
@@ -200,10 +209,10 @@ class Module:
         message.send_to_master()
         self.send_message(message=message)
 
-    def channel_error(self, e):
+    def channel_error(self, e, channel):
         if global_variables.operation_mode:
             log(job_id=self._job.job_id, error_code=10003, msg=str(e))
             raise InvalidParameterException
         else:
             log(job_id=self._job.job_id, log_type="warn",
-                msg="Unable to send message. Channel may not be available due not in operation mode.")
+                msg=f"Unable to send message. Channel, {channel} may not be available due not in operation mode.")

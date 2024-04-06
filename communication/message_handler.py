@@ -73,8 +73,10 @@ class Messenger:
 
         elif msg.function == "cancel":
             if msg.chat_id in self.waiting_user_input.keys():
-                self._process_waiting_list(msg, "")
-                task_queue.add_job(msg)
+                msg.job_id = self.waiting_user_input[msg.chat_id]["job"]
+                del self.waiting_user_input[msg.chat_id]
+                self.send_now(Message(f"Job canceled.", msg))
+                msg.complete()
 
         elif msg.function == "raise_exception" or msg.function == "shutdown":
             log(job_id=msg.job_id, msg=f"Shutting down thread.")
@@ -164,8 +166,8 @@ class Messenger:
                 return
 
         if msg_id == 0:
-            msg = Job(function=q[4])
-            msg.collect(q[5], 0)
+            msg = Job(function=q[3])
+            msg.collect(q[4], 0)
             task_queue.add_job(msg)
             self.bot.answerCallbackQuery(query['id'], text=f'Acknowledged!')
             return
@@ -207,6 +209,10 @@ class Messenger:
         self.update_keyboard(msg, msg.replies[q[1]])
 
     def send_now(self, message: Message):
+        if message.job.is_background_task:
+            log(job_id=message.job_id, msg="Sending avoided due to background task")
+            return
+
         if type(message) != Message:
             log(message.job_id, error_code=20013)
             raise ValueError("Invalid data type. Expected a Message.")

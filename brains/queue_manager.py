@@ -47,6 +47,7 @@ def run_task_manager():
 
 
 def run_task(job: Job):
+    # todo command dictionary
     job.update_job()
     func = job.function
     if func == "alive":
@@ -70,6 +71,8 @@ def run_task(job: Job):
         NewsReader(job).get_news()
     elif func == "check_news_all":
         NewsReader(job).get_news_all()
+    elif func == "show_subs_news":
+        NewsReader(job).show_subscribed_news_channels()
     elif func == "show_news":
         NewsReader(job).show_news_channels()
     elif func == "subs_news":

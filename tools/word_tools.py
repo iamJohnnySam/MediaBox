@@ -1,5 +1,6 @@
 import re
 import string
+from datetime import datetime
 
 from brains.job import Job
 from tools.logger import log
@@ -86,3 +87,13 @@ def breakdown_torrent_file_name(job: Job, file_name):
         base_name = ""
 
     return file_name, tv_show, movie, subtitle, base_name
+
+
+def greeting() -> str:
+    current_time = datetime.now()
+    if current_time.hour < 12:
+        return 'Good morning'
+    elif 12 <= current_time.hour < 18:
+        return 'Good afternoon'
+    else:
+        return 'Good evening'

@@ -171,12 +171,18 @@ class Message:
 
         self.add_job_keyboard(button_text, button_value, arrangement)
 
-    def one_time_keyboard_extractor(self, function, options, bpr: int = 3):
-        button_text = options
+    def function_keyboard_extractor(self, function, options: list[str], button_text: list[str] = [], bpr: int = 3):
+        if not button_text:
+            button_text = options
 
         button_value = []
-        for text in button_text:
-            button_value.append(f'{function};{text}')
+
+        for i in range(len(options)):
+            if type(function) == list:
+                f = function[i]
+            else:
+                f = function
+            button_value.append(f'{f};{options[i]}')
 
         arrangement = [bpr for _ in range(int(math.floor(len(button_text) / bpr)))]
         if len(button_text) % bpr != 0:
