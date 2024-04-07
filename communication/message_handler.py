@@ -212,7 +212,7 @@ class Messenger:
         self.update_keyboard(msg, msg.replies[q[1]])
 
     def send_now(self, message: Message):
-        if message.job.is_background_task:
+        if message.job is not None and message.job.is_background_task:
             log(job_id=message.job_id, msg="Sending avoided due to background task")
             return
 
