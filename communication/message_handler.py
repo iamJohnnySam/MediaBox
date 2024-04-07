@@ -170,6 +170,8 @@ class Messenger:
             msg.collect(q[4], 0)
             task_queue.add_job(msg)
             self.bot.answerCallbackQuery(query['id'], text=f'Acknowledged!')
+            print(query['from']['id'], query['id'])
+            self.update_keyboard(msg, telepot.origin_identifier(query))
             return
 
         try:
@@ -259,8 +261,15 @@ class Messenger:
 
     def update_keyboard(self, job: Job, msg_id, keyboard=None):
         msg: tuple = tuple(msg_id)
-        try:
-            self.bot.editMessageReplyMarkup(msg, reply_markup=keyboard)
-            log(job_id=job.job_id, msg=f"Keyboard updated for {msg_id}")
-        except telepot.exception.TelegramError as e:
-            log(job_id=job.job_id, msg="No updates", log_type="warn")
+        if keyboard is None:
+            try:
+                self.bot.deleteMessage(msg)
+                log(job_id=job.job_id, msg=f"Message Deleted: {msg_id}")
+            except telepot.exception.TelegramError as e:
+                log(job_id=job.job_id, msg="No updates", log_type="warn")
+        else:
+            try:
+                self.bot.editMessageReplyMarkup(msg, reply_markup=keyboard)
+                log(job_id=job.job_id, msg=f"Keyboard updated for {msg_id}")
+            except telepot.exception.TelegramError as e:
+                log(job_id=job.job_id, msg="No updates", log_type="warn")
