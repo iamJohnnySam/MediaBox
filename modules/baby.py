@@ -22,8 +22,8 @@ class Baby(Module):
                                            description="amount consumed")
         if not success:
             return
-        source_types = ["Breast", "Express", "Formula"]
-        success, source = self.check_value(index=1, check_list=source_types, default="Formula",
+        source_types = ["breast", "express", "formula"]
+        success, source = self.check_value(index=1, check_list=source_types, default="formula",
                                            description="source")
         if not success:
             return

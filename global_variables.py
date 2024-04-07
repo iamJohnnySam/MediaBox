@@ -25,4 +25,5 @@ date_formats = ["%Y-%m-%d", "%d-%m-%Y", "%Y-%b-%d", "%d-%b-%Y", "%m-%d-%y", "%b-
 time_formats = ["%H:%M:%S", "%H:%M",
                 "%H-%M-%S", "%H-%M"]
 
-
+credit_words = ["Credit", "inward slip transfer", "Int.Pd", "ISLI"]
+debit_words = ["Debit", "trx", "transaction", "bill payment", "WTax.Pd"]

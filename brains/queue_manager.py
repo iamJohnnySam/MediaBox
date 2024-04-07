@@ -9,6 +9,7 @@ from modules.admin import Admin
 from modules.baby import Baby
 from modules.backup import BackUp
 from modules.cctv_checker import CCTVChecker
+from modules.finance import Finance
 from modules.folder_refactor import RefactorFolder
 from modules.movie_finder import MovieFinder
 from modules.news_reader import NewsReader
@@ -106,7 +107,7 @@ def run_task(job: Job):
     elif func == "finance":
         pass
     elif func == "sms_bill":
-        pass
+        Finance(job).sms()
 
     elif func == "baby_feed":
         Baby(job).feed()

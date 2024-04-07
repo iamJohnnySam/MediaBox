@@ -34,6 +34,9 @@ logger.log(msg="Thread Started: Web app")
 
 global_variables.ready_to_run = True
 logger.log(msg="Ready to Run...")
+channels.channels[refs.main_channel].send_now(Message("- iamJohnnySam -\n"
+                                                      "Version 2.0\n\n"
+                                                      "Program Started"))
 
 t_task.join()
 global_variables.stop_all = True

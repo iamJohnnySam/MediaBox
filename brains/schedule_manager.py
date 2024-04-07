@@ -26,8 +26,6 @@ def run_schedule_manager():
         schedule.every().day.at("08:30").do(add_task, "clean_up_downloads")
         schedule.every().day.at("21:00").do(add_task, "backup_database")
 
-    # todo reminder to read news
-
     log(msg="Schedules Created")
 
     while not global_variables.stop_all:

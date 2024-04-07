@@ -55,6 +55,10 @@ db_news = "news"
 tbl_news = "news_articles"
 
 db_finance = "transactions"
+tbl_fin_cat = 'categories'
+tbl_fin_trans = 'transaction_lkr'
+tbl_fin_vendor = 'vendors'
+tbl_fin_raw_vendor = 'vendors_raw'
 
 db_baby = "baby"
 
