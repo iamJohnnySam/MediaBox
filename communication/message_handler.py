@@ -129,7 +129,10 @@ class Messenger:
     def _process_waiting_list(self, msg: Job, override_value=None):
         input_value = msg.user_input if override_value is None else override_value
 
-        msg.job_id = self.waiting_user_input[msg.chat_id]["job"]
+        if self.waiting_user_input[msg.chat_id]["job"] == 0:
+            msg.function = self.waiting_user_input[msg.chat_id]["function"]
+        else:
+            msg.job_id = self.waiting_user_input[msg.chat_id]["job"]
         index = self.waiting_user_input[msg.chat_id]["index"]
         msg.collect(input_value, index)
         del self.waiting_user_input[msg.chat_id]
@@ -168,36 +171,35 @@ class Messenger:
         if msg_id == 0:
             msg = Job(function=q[3], chat_id=query['from']['id'], username=query['from']['first_name'],
                       telepot_account=self.channel)
-            msg.collect(q[4], 0)
-            task_queue.add_job(msg)
-            self.bot.answerCallbackQuery(query['id'], text=f'Acknowledged!')
-            print(query['from']['id'], query['id'])
-            self.update_keyboard(msg, telepot.origin_identifier(query))
-            return
-
-        try:
-            msg = Job(job_id=msg_id)
-        except LookupError as e:
-            log(job_id=msg_id, error_code=20005, error=str(e))
-            self.bot.answerCallbackQuery(query['id'], text=f'FAILED! (Error 20005) [{msg_id}]')
-            return
+        else:
+            try:
+                msg = Job(job_id=msg_id)
+            except LookupError as e:
+                log(job_id=msg_id, error_code=20005, error=str(e))
+                self.bot.answerCallbackQuery(query['id'], text=f'FAILED! (Error 20005) [{msg_id}]')
+                return
 
         if q[4] == '/CANCEL':
-            replies = msg.replies
-            for reply in replies.keys():
-                self.update_keyboard(msg, replies[reply])
+            self.update_keyboard(msg, telepot.origin_identifier(query))
             msg.complete()
             self.bot.answerCallbackQuery(query['id'], text=f'Cancelled! [{msg_id}]')
             return
 
         elif q[4] == '/GET':
-            self.get_user_input(job=msg, index=int(q[3]))
-            self.update_keyboard(msg, msg.replies[q[1]])
+            if msg.job_id == 0:
+                self.get_user_input(job=msg, index=0)
+            else:
+                self.get_user_input(job=msg, index=int(q[3]))
+            self.update_keyboard(msg, telepot.origin_identifier(query), delete_message=False)
+            self.edit_message(msg, telepot.origin_identifier(query), "Please send the value")
             self.bot.answerCallbackQuery(query['id'], text=f'Type and send value! [{msg_id}]')
             return
 
         try:
-            msg.collect(q[4], int(q[3]))
+            if msg.job_id == 0:
+                msg.collect(q[4], 0)
+            else:
+                msg.collect(q[4], int(q[3]))
         except ValueError as e:
             log(job_id=msg_id, error_code=20004, error=str(e))
             self.bot.answerCallbackQuery(query['id'], text=f'FAILED! (Error 20004) [{msg_id}]')
@@ -209,7 +211,9 @@ class Messenger:
 
         task_queue.add_job(msg)
         self.bot.answerCallbackQuery(query['id'], text=f'Acknowledged! [{msg_id}]')
-        self.update_keyboard(msg, msg.replies[q[1]])
+
+        self.update_keyboard(msg, telepot.origin_identifier(query))
+        # self.update_keyboard(msg, msg.replies[q[1]])
 
     def send_now(self, message: Message):
         if message.job is not None and message.job.is_background_task:
@@ -252,17 +256,18 @@ class Messenger:
             log(job_id=message.job_id,
                 msg=f"OUTGOING: {chat}, ID: {reply['message_id']}, Message: {message.send_string}")
 
-        if message.job_id != 0:
+        if message.job is not None and message.job_id != 0:
             message.job.add_reply(replies)
 
     def get_user_input(self, job: Job, index=0):
         self.waiting_user_input[job.chat_id] = {"job": job.job_id,
-                                                "index": index}
+                                                "index": index,
+                                                "function": job.function}
         log(job_id=job.job_id, msg=f"Waiting user input from {job.chat_id}")
 
-    def update_keyboard(self, job: Job, msg_id, keyboard=None):
+    def update_keyboard(self, job: Job, msg_id, keyboard=None, delete_message: bool = True):
         msg: tuple = tuple(msg_id)
-        if keyboard is None:
+        if keyboard is None and delete_message:
             try:
                 self.bot.deleteMessage(msg)
                 log(job_id=job.job_id, msg=f"Message Deleted: {msg_id}")
@@ -274,3 +279,13 @@ class Messenger:
                 log(job_id=job.job_id, msg=f"Keyboard updated for {msg_id}")
             except telepot.exception.TelegramError as e:
                 log(job_id=job.job_id, msg="No updates", log_type="warn")
+
+    def edit_message(self, job: Job, msg_id, new_message):
+        msg: tuple = tuple(msg_id)
+        try:
+            self.bot.editMessageText(msg, text=new_message)
+            log(job_id=job.job_id, msg=f"Message {msg_id} updated to {new_message}")
+        except telepot.exception.TelegramError as e:
+            log(job_id=job.job_id, msg=f"Could not update message {msg_id}", log_type="warn")
+
+

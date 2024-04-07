@@ -171,7 +171,11 @@ class Message:
 
         self.add_job_keyboard(button_text, button_value, arrangement)
 
-    def function_keyboard_extractor(self, function, options: list[str], button_text: list[str] = [], bpr: int = 3):
+    def function_keyboard_extractor(self, function, options: list[str], button_text=None, bpr: int = 3,
+                                    add_cancel: bool = False, add_other: bool = False):
+        if button_text is None:
+            button_text = []
+
         if not button_text:
             button_text = options
 
@@ -184,9 +188,18 @@ class Message:
                 f = function
             button_value.append(f'{f};{options[i]}')
 
+        if add_other and type(function) == str:
+            button_text.append("Other")
+            button_value.append(f'{function};{"/GET"}')
+
         arrangement = [bpr for _ in range(int(math.floor(len(button_text) / bpr)))]
         if len(button_text) % bpr != 0:
             arrangement.append(len(button_text) % bpr)
+
+        if add_cancel:
+            button_text.append("Cancel")
+            button_value.append(f'cancel;/CANCEL')
+            arrangement.append(1)
 
         logger.log(job_id=self.job.job_id, msg="Keyboard extracted > " + str(arrangement))
 

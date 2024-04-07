@@ -155,7 +155,8 @@ class Module:
                 self.send_message(message=msg)
             elif option_list and no_save:
                 msg = Message(send_string=send_val, job=self._job)
-                msg.function_keyboard_extractor(self._job.function, options=option_list)
+                msg.function_keyboard_extractor(self._job.function, options=option_list,
+                                                add_cancel=True, add_other=get_manual)
                 # msg.job_keyboard_extractor(index=index, options=option_list, add_cancel=True, add_other=get_manual)
                 self.send_message(message=msg)
             else:
