@@ -166,7 +166,8 @@ class Messenger:
                 return
 
         if msg_id == 0:
-            msg = Job(function=q[3])
+            msg = Job(function=q[3], chat_id=query['from']['id'], username=query['from']['username'],
+                      telepot_account=self.channel)
             msg.collect(q[4], 0)
             task_queue.add_job(msg)
             self.bot.answerCallbackQuery(query['id'], text=f'Acknowledged!')
