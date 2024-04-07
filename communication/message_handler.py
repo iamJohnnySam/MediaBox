@@ -166,7 +166,7 @@ class Messenger:
                 return
 
         if msg_id == 0:
-            msg = Job(function=q[3], chat_id=query['from']['id'], username=query['from']['username'],
+            msg = Job(function=q[3], chat_id=query['from']['id'], username=query['from']['first_name'],
                       telepot_account=self.channel)
             msg.collect(q[4], 0)
             task_queue.add_job(msg)
