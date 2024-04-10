@@ -21,6 +21,8 @@ class MovieFinder(Module):
                 self.close_all_callbacks()
                 self._job.complete()
                 self.send_message(Message(f"Movie {torrent_id} added to queue."))
+                if not self._job.is_master:
+                    self.send_admin(Message(f"Movie {torrent_id} added to queue."))
             return
 
         success, movie = self.check_value(index=-1, description="name of the movie")

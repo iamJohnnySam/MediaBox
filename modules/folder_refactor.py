@@ -23,6 +23,8 @@ class RefactorFolder(Module):
             log(self._job.job_id, "Nothing to refactor")
             return
 
+        self._job.is_background_task = False
+
         self.sort_torrent_files(files, self.path)
 
         for directory in directories:

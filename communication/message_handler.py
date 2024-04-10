@@ -1,5 +1,6 @@
 import os
 import sys
+import threading
 
 import telepot
 from telepot.loop import MessageLoop
@@ -11,6 +12,8 @@ from database_manager.json_editor import JSONEditor
 from brains import task_queue
 from tools.custom_exceptions import ControlledException
 from tools.logger import log
+
+shutdown_bot: dict[str:bool] = {}
 
 
 class Messenger:
@@ -27,13 +30,16 @@ class Messenger:
 
         # Listen
         self.bot = telepot.Bot(telepot_key)
-        MessageLoop(self.bot, {'chat': self.handle,
-                               'callback_query': self.handle_callback}).run_as_thread()
+        self.loop = MessageLoop(self.bot, {'chat': self.handle, 'callback_query': self.handle_callback})
+        self.loop.run_as_thread()
         log(msg=f'Telepot {telepot_account} listening')
+
+        self.shutdown_attempted = False
 
         # todo command to shutdown the bot
 
     def handle(self, msg):
+        self.shutdown()
         try:
             content = msg['text']
         except ValueError:
@@ -79,8 +85,8 @@ class Messenger:
                 msg.complete()
 
         elif msg.function == "raise_exception" or msg.function == "shutdown":
-            log(job_id=msg.job_id, msg=f"Shutting down thread.")
-            sys.exit()
+            shutdown_bot[self.channel] = True
+            self.shutdown()
 
         elif msg.function in self.commands.keys():
             if type(self.commands[msg.function]) is bool:
@@ -89,9 +95,10 @@ class Messenger:
                 msg.complete()
                 return
 
-            elif self.channel != main_channel and type(self.commands[msg.function]) is not str and not (
-                    self.channel in self.commands[msg.function].keys() or "all_bots" in self.commands[
-                msg.function].keys()):
+            elif self.channel != main_channel and \
+                    type(self.commands[msg.function]) is not str and \
+                    not (self.channel in self.commands[msg.function].keys() or
+                         "all_bots" in self.commands[msg.function].keys()):
                 self.send_now(Message("That command does not work on this chatbot", job=msg))
                 log(job_id=msg.job_id, error_code=30003)
                 msg.complete()
@@ -140,6 +147,7 @@ class Messenger:
                                    f"{input_value} collected at index {index}.")
 
     def handle_callback(self, query):
+        self.shutdown()
         try:
             q = str(query['data']).split(";")
         except ValueError as e:
@@ -272,13 +280,13 @@ class Messenger:
                 self.bot.deleteMessage(msg)
                 log(job_id=job.job_id, msg=f"Message Deleted: {msg_id}")
             except telepot.exception.TelegramError as e:
-                log(job_id=job.job_id, msg="No updates", log_type="warn")
+                log(job_id=job.job_id, msg=f"No updates - {str(e)}", log_type="warn")
         else:
             try:
                 self.bot.editMessageReplyMarkup(msg, reply_markup=keyboard)
                 log(job_id=job.job_id, msg=f"Keyboard updated for {msg_id}")
             except telepot.exception.TelegramError as e:
-                log(job_id=job.job_id, msg="No updates", log_type="warn")
+                log(job_id=job.job_id, msg=f"No updates - {str(e)}", log_type="warn")
 
     def edit_message(self, job: Job, msg_id, new_message):
         msg: tuple = tuple(msg_id)
@@ -286,6 +294,17 @@ class Messenger:
             self.bot.editMessageText(msg, text=new_message)
             log(job_id=job.job_id, msg=f"Message {msg_id} updated to {new_message}")
         except telepot.exception.TelegramError as e:
-            log(job_id=job.job_id, msg=f"Could not update message {msg_id}", log_type="warn")
+            log(job_id=job.job_id, msg=f"Could not update message {msg_id} - {str(e)}", log_type="warn")
 
-
+    def shutdown(self):
+        if self.channel in shutdown_bot.keys():
+            log(msg=f"This bot will attempt to shutdown - Thread ID = {threading.get_ident()}", log_type="info")
+            if self.shutdown_attempted:
+                self.send_now(Message(f"{self.channel.capitalize()} Bot previous shutdown attempt failed. "
+                                      f"Continuation is blocked.\nReattempting shutdown..."))
+            else:
+                self.send_now(Message(f"{self.channel.capitalize()} Bot attempt to shutdown.."))
+            self.shutdown_attempted = True
+            del self.loop
+            sys.exit()
+            raise ControlledException("Shutdown Bot")
