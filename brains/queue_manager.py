@@ -105,7 +105,7 @@ def run_task(job: Job):
         log(job.job_id, "Cleanup sequence Complete")
 
     elif func == "finance":
-        pass
+        Finance(job).finance()
     elif func == "sms_bill":
         Finance(job).sms()
 

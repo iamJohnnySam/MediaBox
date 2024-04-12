@@ -20,7 +20,7 @@ def run_schedule_manager():
     schedule.every().day.at("07:00").do(master_reminder.read_news)
     schedule.run_all(delay_seconds=2)
 
-    schedule.every().day.at("05:00").do(add_task, "check_shows")
+    schedule.every().day.at("06:30").do(add_task, "check_shows")
     if global_variables.operation_mode:
         schedule.every().day.at("07:00").do(add_task, "check_cctv")
         schedule.every().day.at("08:30").do(add_task, "clean_up_downloads")

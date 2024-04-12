@@ -55,8 +55,9 @@ class Finance(Module):
         # 2 - date
         # 3 - raw vendor
         # 4 - vendor
-        # 5 - category Type
-        # 6 - category
+        # 5 - duplicate?
+        # 6 - category Type
+        # 7 - category
 
         index = 0
         success, value = self.check_value(index=index, description="transaction amount",
@@ -112,12 +113,15 @@ class Finance(Module):
             self.db_finance.insert(refs.tbl_fin_raw_vendor, "raw_vendor, vendor_id", (raw_vendor, vendor_id))
 
         index = 5
+        # todo check duplicates
+
+        index = 6
         if vendor_exists != 0:
-            # todo get cat id and collect at index 5 and 6
+            # todo get cat id and collect at index 6 and 7
             pass
         # todo
 
-        index = 6
+        index = 7
         # cat_id
         # todo category
 
