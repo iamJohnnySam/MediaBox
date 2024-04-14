@@ -3,9 +3,9 @@ import feedparser
 import refs
 from brains.job import Job
 from communication.message import Message
+from database_manager.sql_connector import SQLConnector
 from modules.base_module import Module
 from modules.transmission import Transmission
-from database_manager.sql_connector import sql_databases
 from tools.logger import log
 
 
@@ -27,6 +27,7 @@ class ShowDownloader(Module):
 
     def __init__(self, job: Job):
         super().__init__(job)
+        self.db = SQLConnector(job.job_id, database=refs.db_entertainment)
         log(self._job.job_id, "Show Downloader Object Created")
 
     def check_shows(self):
@@ -36,14 +37,10 @@ class ShowDownloader(Module):
 
         for x in feed.entries:
             episode_name, episode_quality = quality_extract(x.title)
+            show_exists = self.db.check_exists(refs.tbl_tv_shows, {'episode_name': episode_name,
+                                                                   'name': x.tv_show_name})
 
-            query = f'SELECT COUNT(1) ' \
-                    f'FROM tv_show ' \
-                    f'WHERE episode_name="{episode_name}" AND name="{x.tv_show_name}";'
-
-            show_exists = sql_databases["entertainment"].run_sql(query=query)
-
-            if show_exists[0] == 0:
+            if show_exists == 0:
                 found = False
                 if len(show_list) != 0:
                     for row in show_list:
@@ -66,7 +63,7 @@ class ShowDownloader(Module):
                 if success:
                     columns = "name, episode_id, episode_name, magnet, quality, torrent_name"
                     val = (row[4], row[0], row[1], row[2], str(row[3]), str(torrent_id))
-                    sql_databases["entertainment"].insert('tv_show', columns, val)
+                    self.db.insert(refs.tbl_tv_shows, columns, val)
                     log(self._job.job_id, torrent_id)
 
                     message = f'{str(row[1])} added at {str(row[3])} torrent id = {str(torrent_id)}'

@@ -61,8 +61,13 @@ tbl_fin_vendor = 'vendors'
 tbl_fin_raw_vendor = 'vendors_raw'
 
 db_baby = "baby"
+tbl_baby_feed = 'feed'
+tbl_baby_diaper = 'diaper'
+tbl_baby_weight = 'weight'
+tbl_baby_pump = 'pump'
 
 db_entertainment = "entertainment"
+tbl_tv_shows = 'tv_show'
 
 # Back up
 backup_location = '/mnt/MediaBox/MediaBox/Backup'

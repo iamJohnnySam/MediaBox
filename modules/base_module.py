@@ -38,14 +38,13 @@ class Module:
             raise InvalidParameterException("Contradicting check items are selected")
 
         success = True
-        no_save = (index <= 0)
-        no_save = no_save or (len(self._job.collection) == 1 and self._job.collection[0] != "")
+        no_save = (index <= 0) or len(self._job.collection) == 0
 
         if option_list is None:
             option_list = [] if check_list is None else check_list
 
         if len(self._job.collection) <= index:
-            if default != "":
+            if default != "" and default is not None:
                 value = default
                 self._job.collect(default, index)
                 log(self._job.job_id, f"Index not available. Default used")
@@ -141,11 +140,11 @@ class Module:
 
         # If anything failed
         if (not success) and (not no_recover):
-            if not (option_list and no_save):
+            if not no_save:
                 self._job.store_message()
             get_manual = check_int or check_float or check_date or check_time
 
-            send_val = f"Please enter the {description if description!='' else 'value'}" \
+            send_val = f"Please enter the {description if description != '' else 'value'}" \
                        f"{' in ' if replace_str != '' else ''}{replace_str}" \
                        f"{' from the options below' if option_list else ''}."
 
@@ -160,7 +159,7 @@ class Module:
                 # msg.job_keyboard_extractor(index=index, options=option_list, add_cancel=True, add_other=get_manual)
                 self.send_message(message=msg)
             else:
-                self.send_message(message=Message(send_string=send_val+"\nSend /cancel to cancel Job", job=self._job),
+                self.send_message(message=Message(send_string=send_val + "\nSend /cancel to cancel Job", job=self._job),
                                   get_input=True, index=index)
 
         return success, value
@@ -202,7 +201,7 @@ class Module:
                     return
 
     def close_all_callbacks(self):
-        replies = self._job.replies
+        replies: dict = self._job.replies
         for reply in replies.keys():
             channels[self._job.telepot_account].update_keyboard(self._job, replies[reply])
 

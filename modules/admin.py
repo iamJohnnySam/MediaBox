@@ -5,14 +5,14 @@ import refs
 from communication.message import Message
 from database_manager.json_editor import JSONEditor
 from brains.job import Job
-from database_manager.sql_connector import sql_databases
+from database_manager.sql_connector import SQLConnector
 from modules.base_module import Module
 
 
 class Admin(Module):
     def __int__(self, job: Job):
         super().__init__(job)
-        self._db = sql_databases["administration"]
+        self._db = SQLConnector(job, database=refs.db_admin)
 
     def alive(self):
         self.send_message(Message(f"Hello {self._job.f_name} (chat id: {str(self._job.chat_id)})!\n"
@@ -78,4 +78,3 @@ class Admin(Module):
             self.send_message(Message("This is a server command. Requesting admin...", job=self._job))
             self.send_admin(Message(f"/reboot_pi requested by {self._job.f_name}."))
         self._job.complete()
-

@@ -1,10 +1,11 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
+import refs
 from communication.message import Message
+from database_manager.sql_connector import SQLConnector
 from tools.grapher import grapher_simple_trend, grapher_weight_trend, grapher_category, grapher_bar_trend
 from tools.custom_exceptions import *
 from brains.job import Job
-from database_manager.sql_connector import sql_databases
 from modules.base_module import Module
 from tools.logger import log
 
@@ -12,7 +13,7 @@ from tools.logger import log
 class Baby(Module):
     def __init__(self, job: Job):
         super().__init__(job)
-        self._db = sql_databases["baby"]
+        self._db = SQLConnector(job.job_id, database=refs.db_baby)
         log(self._job.job_id, f"Baby Module Created")
         self._group = "baby"
 
@@ -36,19 +37,15 @@ class Baby(Module):
         if not success:
             return
 
-        day_total = 0.0
-        query = f'SELECT amount FROM feed WHERE date = "{date}"'
-        result = list(self._db.run_sql(query, fetch_all=1))
-        for val in result:
-            day_total = day_total + val[0]
-        day_total = day_total + float(amount)
-
         columns = "date, time, amount, source, added_by"
         val = (date, time, float(amount), source, str(self._job.chat_id))
-        self._db.insert('feed', columns, val)
+        self._db.insert(refs.tbl_baby_feed, columns, val)
+
+        day_total = self._get_total(refs.tbl_baby_feed, "amount", date)
+        average: int = self._get_seven_day_average(refs.tbl_baby_feed, "amount", date)
 
         self.send_message(Message(f'\U0001F37C\nBaby was fed {amount}ml on {date} at {time} with {source} milk '
-                                  f'for a total of {"{:10.1f}".format(day_total).strip()}ml today.'
+                                  f'for a total of {"{:10.1f}".format(day_total).strip()}ml today - {average}%.'
                                   f'\nUse /feed to submit a new entry',
                                   job=self._job,
                                   group=self._group), channel="baby")
@@ -70,23 +67,18 @@ class Baby(Module):
         if not success:
             return
 
-        day_total = 0.0
-        query = f'SELECT amount FROM pump WHERE date = "{date}" AND  user_id = "{str(self._job.chat_id)}"'
-        result = list(self._db.run_sql(query, fetch_all=1))
-        for val in result:
-            day_total = day_total + val[0]
-        day_total = day_total + float(amount)
-
         columns = "date, time, amount, breast, user_id"
         val = (date, time, float(amount), source, str(self._job.chat_id))
-        self._db.insert('pump', columns, val)
+        self._db.insert(refs.tbl_baby_pump, columns, val)
+
+        day_total = self._get_total(refs.tbl_baby_pump, "amount", date, user_id=True)
 
         self.send_message(Message(f'\U0001F37C\nYou pumped {amount}ml on {date} at {time} from {source} boob.'
                                   f'for a total of {day_total} today!', job=self._job))
         self._job.complete()
 
     def diaper(self):
-        source_types = ["Pee", "Poo", "PooPee"]
+        source_types = ["pee", "poo", "poopee"]
         success, source = self.check_value(index=0, check_list=source_types, description="type")
         if not success:
             return
@@ -99,22 +91,22 @@ class Baby(Module):
 
         columns = "date, time, what, count, added_by"
 
-        if source == "Pee":
+        if source == "pee":
             emoji = '\U0001F6BC \U0001F4A6'
-            self._db.insert('diaper', columns, (date, time, "pee", 1, str(self._job.chat_id)))
-        elif source == "Poo":
+            self._db.insert(refs.tbl_baby_diaper, columns, (date, time, "pee", 1, str(self._job.chat_id)))
+        elif source == "poo":
             emoji = '\U0001F6BC \U0001F4A9'
-            self._db.insert('diaper', columns, (date, time, "poo", 1, str(self._job.chat_id)))
-        elif source == "PooPee":
+            self._db.insert(refs.tbl_baby_diaper, columns, (date, time, "poo", 1, str(self._job.chat_id)))
+        elif source == "poopee":
             emoji = '\U0001F6BC \U0001F4A6 \U0001F4A9'
-            self._db.insert('diaper', columns, (date, time, "pee", 1, str(self._job.chat_id)))
-            self._db.insert('diaper', columns, (date, time, "poo", 1, str(self._job.chat_id)))
+            self._db.insert(refs.tbl_baby_diaper, columns, (date, time, "pee", 1, str(self._job.chat_id)))
+            self._db.insert(refs.tbl_baby_diaper, columns, (date, time, "poo", 1, str(self._job.chat_id)))
         else:
             raise ImpossibleException(f"{source} did not match Pee, Poo or PooPee")
 
         day_total = 0
-        query = f'SELECT count FROM diaper WHERE date = "{date}"'
-        result = list(self._db.run_sql(query, fetch_all=1))
+        result = list(self._db.select(table=refs.tbl_baby_diaper,
+                                      columns="count", where={"date": date}, fetch_all=True))
         for val in result:
             day_total = day_total + val[0]
 
@@ -132,12 +124,13 @@ class Baby(Module):
         if not success:
             return
 
-        query = 'SELECT date, weight FROM weight ORDER BY weight_id DESC LIMIT 1;'
-        last_entry = self._db.run_sql(query=query)
+        last_entry = self._db.select(table=refs.tbl_baby_weight,
+                                     columns="date, weight",
+                                     order="weight_id", ascending=False, limit=1)
 
         columns = "date, weight, added_by"
         val = (date, weight, str(self._job.chat_id))
-        self._db.insert('weight', columns, val)
+        self._db.insert(refs.tbl_baby_weight, columns, val)
 
         send_string = f"\U0001F6BC \U0001F3C6 \nbaby Weight Added - {weight}kg. \n" \
                       f"That's a weight gain of {(float(weight) - last_entry[1]):10.2f}kg since {last_entry[0]}."
@@ -147,8 +140,8 @@ class Baby(Module):
         self._job.complete()
 
     def weight_trend(self, caption=None):
-        query = 'SELECT date, weight FROM weight ORDER BY timestamp'
-        result = list(self._db.run_sql(query, fetch_all=1))
+        result = list(self._db.select(table=refs.tbl_baby_weight,
+                                      columns="date, weight", order="timestamp", fetch_all=True))
 
         if caption is None:
             caption = "\U0001F37C \U0001F3C6 \nBaby Weight trend. Add new weight using /weight command"
@@ -167,18 +160,18 @@ class Baby(Module):
         self._job.complete()
 
     def feed_history(self):
-        query = 'SELECT date, source, amount FROM feed ORDER BY timestamp'
-        result = list(self._db.run_sql(query, fetch_all=1))
+        result = list(self._db.select(table=refs.tbl_baby_feed,
+                                      columns="date, source, amount", order="timestamp", fetch_all=True))
 
         pic = grapher_category(graph_list=result,
                                x_name="Date",
                                y_name="Amount (ml)",
                                chart_title="Feed History - " + datetime.now().strftime('%Y-%m-%d %H:%M'))
 
-        today = datetime.now().strftime('%Y-%m-%d')
-        query = f'SELECT source, amount FROM feed WHERE date = "{today}"'
-        result = list(self._db.run_sql(query, fetch_all=1))
-
+        result = list(self._db.select(table=refs.tbl_baby_feed,
+                                      columns="source, amount",
+                                      where={"date": datetime.now().strftime('%Y-%m-%d')},
+                                      order="timestamp", fetch_all=True))
         caption = None
         if result is not None:
             calc = {}
@@ -199,17 +192,18 @@ class Baby(Module):
         self._job.complete()
 
     def diaper_history(self):
-        query = 'SELECT date, what, count FROM diaper ORDER BY timestamp'
-        result = list(self._db.run_sql(query, fetch_all=1))
+        result = list(self._db.select(table=refs.tbl_baby_diaper,
+                                      columns="date, what, count", order="timestamp", fetch_all=True))
 
         pic = grapher_category(graph_list=result,
                                x_name="Date",
                                y_name="Diapers",
                                chart_title="Diaper History - " + datetime.now().strftime('%Y-%m-%d %H:%M'))
 
-        today = datetime.now().strftime('%Y-%m-%d')
-        query = f'SELECT what, count FROM diaper WHERE date = "{today}"'
-        result = list(self._db.run_sql(query, fetch_all=1))
+        result = list(self._db.select(table=refs.tbl_baby_diaper,
+                                      columns="what, count",
+                                      where={"date": datetime.now().strftime('%Y-%m-%d')},
+                                      order="timestamp", fetch_all=True))
 
         caption = None
         if result is not None:
@@ -231,8 +225,8 @@ class Baby(Module):
         self._job.complete()
 
     def feed_trend(self):
-        query = 'SELECT time, amount, date FROM feed ORDER BY timestamp'
-        result = list(self._db.run_sql(query, fetch_all=1))
+        result = list(self._db.select(table=refs.tbl_baby_feed,
+                                      columns="time, amount, date", order="timestamp", fetch_all=True))
 
         pic = grapher_bar_trend(graph_list=result,
                                 x_name="Time of Day (round to nearest hour)",
@@ -244,8 +238,8 @@ class Baby(Module):
         self.send_message(Message(caption, job=self._job, photo=pic))
 
     def diaper_trend(self):
-        query = 'SELECT time, count, date, what FROM diaper ORDER BY timestamp'
-        result = list(self._db.run_sql(query, fetch_all=1))
+        result = list(self._db.select(table=refs.tbl_baby_diaper,
+                                      columns="time, count, date, what", order="timestamp", fetch_all=True))
 
         pic = grapher_bar_trend(graph_list=result,
                                 x_name="Time of Day (round to nearest hour)",
@@ -257,9 +251,10 @@ class Baby(Module):
         self._job.complete()
 
     def feed_trend_today(self):
-        query = f'SELECT time, amount, date FROM feed WHERE date = "{datetime.now().strftime("%Y-%m-%d")}" ' \
-                f'ORDER BY timestamp'
-        result = list(self._db.run_sql(query, fetch_all=1))
+        result = list(self._db.select(table=refs.tbl_baby_feed,
+                                      columns="time, amount, date",
+                                      where={"date": datetime.now().strftime("%Y-%m-%d")},
+                                      order="timestamp", fetch_all=True))
 
         pic = grapher_bar_trend(graph_list=result,
                                 x_name="Time of Day (round to nearest hour)",
@@ -267,9 +262,10 @@ class Baby(Module):
                                 chart_title="Feed Trend Today - " + datetime.now().strftime('%Y-%m-%d %H:%M'),
                                 x_time=True)
 
-        query = f'SELECT time, amount, source FROM feed WHERE date = "{datetime.now().strftime("%Y-%m-%d")}" ' \
-                f'ORDER BY timestamp'
-        result = list(self._db.run_sql(query, fetch_all=1))
+        result = list(self._db.select(table=refs.tbl_baby_feed,
+                                      columns="time, amount, source",
+                                      where={"date": datetime.now().strftime("%Y-%m-%d")},
+                                      order="timestamp", fetch_all=True))
 
         caption = "Record:"
         for row in result:
@@ -280,9 +276,10 @@ class Baby(Module):
         self._job.complete()
 
     def diaper_trend_today(self):
-        query = f'SELECT time, count, date, what FROM diaper WHERE date = "{datetime.now().strftime("%Y-%m-%d")}" ' \
-                f'ORDER BY timestamp'
-        result = list(self._db.run_sql(query, fetch_all=1))
+        result = list(self._db.select(table=refs.tbl_baby_diaper,
+                                      columns="time, count, date, what",
+                                      where={"date": datetime.now().strftime("%Y-%m-%d")},
+                                      order="timestamp", fetch_all=True))
 
         pic = grapher_bar_trend(graph_list=result,
                                 x_name="Time of Day (round to nearest hour)",
@@ -296,3 +293,31 @@ class Baby(Module):
 
         self.send_message(Message(caption, job=self._job, photo=pic))
         self._job.complete()
+
+    def _get_total(self, table, col, date, user_id: bool = False):
+        where = {"date": date}
+        if user_id:
+            where["user_id"] = self._job.chat_id
+
+        total = 0.0
+        result = list(self._db.select(table=table, columns=col, where=where, fetch_all=True))
+
+        for val in result:
+            total = total + val[0]
+        return total
+
+    def _get_seven_day_average(self, table, col, date, user_id: bool = False, today_tot=0):
+        if today_tot == 0:
+            today_tot = self._get_total(table, col, date, user_id)
+
+        avg = [0, 0, 0, 0, 0, 0, 0]
+        for i in range(len(avg)):
+            new_date = datetime.strptime(date, '%Y-%m-%d') - timedelta(days=i + 1)
+            avg[i] = self._get_total(table, col, new_date.strftime('%Y-%m-%d'), user_id)
+
+        try:
+            average = int(today_tot * len(avg) * 100 / sum(avg))
+        except ZeroDivisionError:
+            average = 0
+
+        return average

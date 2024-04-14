@@ -123,6 +123,7 @@ class Messenger:
         elif msg.function == "chat":
             if msg.chat_id in self.waiting_user_input.keys():
                 self._process_waiting_list(msg)
+                msg.called_back = True
                 task_queue.add_job(msg)
 
             else:
@@ -217,6 +218,7 @@ class Messenger:
             self.bot.answerCallbackQuery(query['id'], text=f'FAILED! (Error 20014) [{msg_id}]')
             return
 
+        msg.called_back = True
         task_queue.add_job(msg)
         self.bot.answerCallbackQuery(query['id'], text=f'Acknowledged! [{msg_id}]')
 

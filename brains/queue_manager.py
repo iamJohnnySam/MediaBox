@@ -61,7 +61,7 @@ def run_task(job: Job):
         backup_sequence(job)
     elif func == "backup_database":
         backup = BackUp(job, refs.backup_location)
-        backup.cp_databases()
+        backup.cp_all_databases()
 
     elif func == "check_shows":
         ShowDownloader(job).check_shows()
@@ -73,7 +73,8 @@ def run_task(job: Job):
     elif func == "check_news_all":
         NewsReader(job).get_news_all()
     elif func == "show_subs_news":
-        NewsReader(job).show_subscribed_news_channels()
+        job.function = "check_news"
+        NewsReader(job).get_news()
     elif func == "show_news":
         NewsReader(job).show_news_channels()
     elif func == "subs_news":

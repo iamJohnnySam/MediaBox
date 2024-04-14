@@ -5,6 +5,7 @@ from datetime import datetime
 
 import global_variables
 from brains.job import Job
+from database_manager.sql_connector import SQLConnector
 from modules.base_module import Module
 from tools import logger
 import passwords
@@ -118,11 +119,25 @@ class BackUp(Module):
         for database in self.databases:
             backup_file = f'{database}_{timestamp}_database_backup.sql'
             backup_file_path = os.path.join(self.backup_location, backup_file)
+            self._backup_database(database, backup_file_path)
 
-            mysqldump_cmd = f'mysqldump -h localhost -u {passwords.database_user} -p{passwords.database_password}' \
-                            f' {database} > {backup_file_path}'
-            os.system(mysqldump_cmd)
+    def cp_all_databases(self):
+        db = SQLConnector(self._job)
+        database_list = db.get_databases()
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
-            gzip_cmd = f'gzip {backup_file_path}'
-            os.system(gzip_cmd)
-            logger.log(self._job.job_id, f'BackUp {database} database > {backup_file_path}.')
+        for database in database_list:
+            if database == 'information_schema':
+                continue
+            backup_file = f'{database}_{timestamp}_database_backup.sql'
+            backup_file_path = os.path.join(self.backup_location, backup_file)
+            self._backup_database(database, backup_file_path)
+
+    def _backup_database(self, database, backup_file_path):
+        mysqldump_cmd = f'mysqldump -h localhost -u {passwords.database_user} -p{passwords.database_password}' \
+                        f' {database} > {backup_file_path}'
+        os.system(mysqldump_cmd)
+
+        gzip_cmd = f'gzip {backup_file_path}'
+        os.system(gzip_cmd)
+        logger.log(self._job.job_id, f'BackUp {database} database > {backup_file_path}.')

@@ -4,10 +4,10 @@ from datetime import datetime
 
 from telepot.namedtuple import InlineKeyboardButton, InlineKeyboardMarkup
 
-from refs import db_admin, tbl_chats, tbl_groups, loc_telepot_callback
+import refs
 from database_manager.json_editor import JSONEditor
-from database_manager.sql_connector import sql_databases
 from brains.job import Job
+from database_manager.sql_connector import SQLConnector
 from tools import logger
 from tools.custom_exceptions import InvalidParameterException
 
@@ -18,12 +18,12 @@ class Message:
                  group: str = None,
                  photo: str = ""):
 
-        self._db = sql_databases[db_admin]
-
         if job is not None:
             self._job_id = job.job_id
         else:
             self._job_id = 0
+
+        self._db = SQLConnector(self._job_id, database=refs.db_admin)
 
         self.send_string = send_string
         self.job = job
@@ -51,8 +51,7 @@ class Message:
 
     @property
     def master(self):
-        query = f"SELECT chat_id FROM {tbl_chats} WHERE master = 1"
-        result = self._db.run_sql(query)[0]
+        result = self._db.select(table=refs.tbl_chats, columns="chat_id", where={"master": 1})[0]
         return result
 
     @property
@@ -61,11 +60,11 @@ class Message:
             chats = [self.master]
 
         elif self.group is not None:
-            if sql_databases[db_admin].exists(tbl_groups, f"group_name = '{self.group}'") == 0:
+            if self._db.check_exists(refs.tbl_groups, {"group_name": self.group}) == 0:
                 logger.log(job_id=self.job_id, error_code=20007)
                 raise ValueError
-            query = f"SELECT chat_id FROM {tbl_groups} WHERE group_name = '{self.group}'"
-            result = sql_databases["administration"].run_sql(query, fetch_all=True)
+            result = self._db.select(table=refs.tbl_groups, columns="chat_id", where={"group_name": self.group},
+                                     fetch_all=True)
             chats = [row[0] for row in result]
 
         elif self.job is not None:
@@ -130,7 +129,7 @@ class Message:
 
             if len(button_data) >= 60:
                 telepot_cb = {button_prefix: button_data}
-                save_loc = os.path.join(loc_telepot_callback, f"{str(job_id)}_cb.json")
+                save_loc = os.path.join(refs.loc_telepot_callback, f"{str(job_id)}_cb.json")
                 JSONEditor(save_loc).add_level1(telepot_cb, job_id=self.job_id)
                 button_data = f"{button_prefix};X"
 
@@ -207,5 +206,5 @@ class Message:
 
     def send_to_master(self):
         self.job = None
-        self._chat = self.master
+        self._chat = None
         self.group = None

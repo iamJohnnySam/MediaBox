@@ -138,14 +138,12 @@ class EmailManager:
             try:
                 ret, data = self.myEmail.fetch(message, '(RFC822)')
             except (imaplib.IMAP4.error, imaplib.IMAP4.abort) as error:
-                exit_condition = False
                 self.connection_err = self.connection_err + 1
                 log(self.job.job_id, "Error Occurred: " + str(error))
                 return
             try:
                 self.msg = email.message_from_bytes(data[0][1])
             except (AttributeError, TypeError):
-                exit_condition = False
                 log(self.job.job_id, "No new emails to delete.")
                 self.email_close()
                 log(self.job.job_id, "Deleted " + str(count) + " emails from " + self.mb)
