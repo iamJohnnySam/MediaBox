@@ -67,8 +67,8 @@ class Finance(Module):
         # 7 - category
 
         index = 0
-        success, value = self.check_value(index=index, description="transaction amount",
-                                          check_float=True, replace_str="lkr")
+        success, t_value = self.check_value(index=index, description="transaction amount",
+                                            check_float=True, replace_str="lkr")
         if not success:
             return
 
@@ -97,26 +97,62 @@ class Finance(Module):
                                            option_list=options)
         if not success:
             return
-        self._fill_lut(raw_vendor, vendor,
-                       refs.tbl_fin_raw_vendor, "raw_vendor", "vendor_id",
-                       refs.tbl_fin_vendor, "name", "vendor_id")
+        vendor_id = self._fill_lut(raw_vendor, vendor,
+                                   refs.tbl_fin_raw_vendor, "raw_vendor", "vendor_id",
+                                   refs.tbl_fin_vendor, "name", "vendor_id")
 
         index = 5
-        # todo check duplicates
+        check_duplicate = self.db_finance.check_exists(refs.tbl_fin_trans, where={"date": t_date,
+                                                                                  "amount": t_value,
+                                                                                  "vendor_id": vendor_id})
+        if check_duplicate == 0:
+            default_duplicate = "yes"
+        else:
+            default_duplicate = None
+        success, duplicate = self.check_value(index=index, description="yes if you want to continue. Duplicate exists.",
+                                              default=default_duplicate,
+                                              option_list=['yes'])
+        if not success:
+            return
 
         index = 6
-        if vendor_exists != 0:
-            # todo get cat id and collect at index 6 and 7
-            pass
-        # todo
+        pre_sel_cats_str = self.db_finance.select(refs.tbl_fin_vendor, "category_id", where={"vendor_id": vendor_id})
+        if pre_sel_cats_str is not None and pre_sel_cats_str[0] is not None:
+            pre_sel_cat_ids = pre_sel_cats_str[0].split(";")
+        else:
+            pre_sel_cat_ids = []
+
+        pre_sel_cats = []
+        if self.check_index() <= index:
+            for pre_sel_cat_id in pre_sel_cat_ids:
+                pre_sel_cats.append(self.db_finance.select(refs.tbl_fin_cat,
+                                                           "category",
+                                                           where={"category_id": pre_sel_cat_id})[0])
+
+        if not pre_sel_cats:
+            all_cats = self.db_finance.select(refs.tbl_fin_cat, "category", where={"in_out": t_type}, fetch_all=True)
+            pre_sel_cats = [x[0] for x in all_cats]
+
+        success, cat = self.check_value(index=index, description="category of transaction",
+                                        option_list=pre_sel_cats)
+        if not success:
+            return
 
         index = 7
-        # cat_id
-        # todo category
+        cat_id = self.db_finance.select(refs.tbl_fin_cat, "category_id", where={"category": cat})[0]
+        if cat_id not in pre_sel_cats_str:
+            pre_sel_cat_ids.append(str(cat_id))
+            new_cat_ids = ';'.join(pre_sel_cat_ids)
+            self.db_finance.update(refs.tbl_fin_vendor, {"category_id": new_cat_ids}, {"vendor_id": vendor_id})
+
+        success, cat = self.check_value(index=index, description="category ID", default=cat_id)
+        if not success:
+            return
 
         self.db_finance.insert(refs.tbl_fin_trans,
                                "transaction_by, date, type, category_id, amount, vendor_id, photo_id",
-                               (self._job.chat_id, t_date, t_type, cat_id, value, vendor_id, self._job.photo_ids))
+                               (self._job.chat_id, t_date, t_type, cat_id, t_value, vendor_id,
+                                ";".join([str(ele) for ele in self._job.photo_ids])))
         self._job.complete()
 
         # todo add another option with the same params
@@ -154,13 +190,15 @@ class Finance(Module):
 
         vendor_exists = self.db_finance.check_exists(table=lut_table, where={lut_column: item})
         if vendor_exists == 0:
-            success, vendor_id = self.db_finance.insert(lut_table, lut_column, (item,))
+            vendor_id = self.db_finance.insert(lut_table, lut_column, (item,))
         else:
             vendor_id = self.db_finance.select(lut_table, lut_id, where={lut_column: item})[0]
 
         raw_vendor_exists = self.db_finance.check_exists(raw_table, where={raw_column: raw_item})
         if raw_vendor_exists == 0:
             self.db_finance.insert(refs.tbl_fin_raw_vendor, f"{raw_column}, {raw_id}", (raw_item, vendor_id))
+
+        return vendor_id
 
     def finance_photo(self):
         if not os.path.exists(refs.finance_images):
