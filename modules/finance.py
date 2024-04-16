@@ -54,7 +54,7 @@ class Finance(Module):
         # Extract vendor
         try:
             # vendor_match = str(re.findall(r'at ([^.0-9]+?)(?=\s\d+|[.])', sms)[0])
-            vendor_match = str(re.findall(r'at ([^.0-9]+?)(?=\s\d+ [A-Z]{2}|$)', sms)[0])
+            vendor_match = str(re.findall(r'at ([^.0-9]+?)(?=\s\d+ [A-Z]{2}|$|[.]| on)', sms)[0])
             vendor_match = re.sub(' +', ' ', vendor_match)
             log(job_id=self._job.job_id, msg=f"Vendor: {vendor_match}")
         except IndexError:
@@ -102,7 +102,7 @@ class Finance(Module):
                                                         refs.tbl_fin_raw_vendor, "vendor_id", "raw_vendor",
                                                         refs.tbl_fin_vendor, "name", "vendor_id")
         success, vendor = self.check_value(index=index, description="proper vendor name", default=default_vendor,
-                                           check_list=options)
+                                           check_list=options, manual_option=True)
         if not success:
             return
         vendor_id = self._fill_lut(raw_vendor, vendor,
@@ -153,13 +153,13 @@ class Finance(Module):
             new_cat_ids = ';'.join(pre_sel_cat_ids)
             self.db_finance.update(refs.tbl_fin_vendor, {"category_id": new_cat_ids}, {"vendor_id": vendor_id})
 
-        success, cat = self.check_value(index=index, description="category ID", default=cat_id, check_int=True)
+        success, cat_id = self.check_value(index=index, description="category ID", default=cat_id, check_int=True)
         if not success:
             return
 
         self.db_finance.insert(refs.tbl_fin_trans,
-                               "transaction_by, date, type, category_id, amount, vendor_id, photo_id",
-                               (self._job.chat_id, t_date, t_type, cat_id, t_value, vendor_id,
+                               "transaction_by, date, type, category_id, amount, vendor_id, vendor, photo_id",
+                               (self._job.chat_id, t_date, t_type, cat_id, t_value, vendor_id, vendor,
                                 ";".join([str(ele) for ele in self._job.photo_ids])))
         send_string = f"{str(t_type).capitalize()} added to {cat} ({cat_id}) for LKR {t_value} with {vendor} " \
                       f"({vendor_id})."

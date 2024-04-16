@@ -32,7 +32,8 @@ class Module:
                     default: str = "",
                     option_list=None,
                     description: str = "",
-                    no_recover: bool = False) -> (bool, str):
+                    no_recover: bool = False,
+                    manual_option: bool = False) -> (bool, str):
 
         if sum([check_int, check_float, check_date, check_time]) > 1:
             raise InvalidParameterException("Contradicting check items are selected")
@@ -142,7 +143,7 @@ class Module:
         if (not success) and (not no_recover):
             if not no_save:
                 self._job.store_message()
-            get_manual = check_int or check_float or check_date or check_time
+            get_manual = check_int or check_float or check_date or check_time or manual_option
 
             send_val = f"Please enter the {description if description != '' else 'value'}" \
                        f"{' in ' if replace_str != '' else ''}{replace_str}" \
