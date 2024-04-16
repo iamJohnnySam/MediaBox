@@ -346,7 +346,7 @@ class Job:
             log(job_id=self.job_id, msg=f"Replaced with {value} at index {index}.")
         elif index == len(self._collection):
             self._collection.append(value)
-            log(job_id=self.job_id, msg=f"({self._job_id}): Added {value} at index {index}.")
+            log(job_id=self.job_id, msg=f"Added {value} at index {index}.")
         else:
             log(job_id=self.job_id, error_code=40004)
             raise IndexError("Cannot collect")

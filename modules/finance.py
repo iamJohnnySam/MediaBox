@@ -6,6 +6,7 @@ from datetime import datetime
 import global_variables
 import refs
 from brains.job import Job
+from communication.message import Message
 from database_manager.sql_connector import SQLConnector
 from modules.base_module import Module
 from tools.custom_exceptions import InvalidParameterException
@@ -25,7 +26,13 @@ class Finance(Module):
         sms = str(sms).lower()
 
         # Extract value
-        value_match = str(re.findall(r'lkr (\d+\.\d{2})', sms)[0]).replace("lkr ", "")
+        try:
+            value_match = str(re.findall(r'lkr (\d+\.\d{2})', sms)[0]).replace("lkr ", "")
+        except IndexError:
+            value_match = str(re.findall(r'(?:rs\.|lkr)\s?(?:\d{1,3}(?:,\d{3})*(?:\.\d{2})?|\d+(?:\.\d{2})?)', sms)[0])
+            value_match = value_match.replace("lkr ", "").replace("rs. ", "").replace(",", "").strip()
+        log(job_id=self._job.job_id, msg=f"Transaction amount: {value_match}")
+        value_match.replace("lkr ", "").replace("rs.  ", "").replace(",", "").strip()
         self._job.collect(value_match, 0)
 
         # Check Transaction Type
@@ -46,7 +53,8 @@ class Finance(Module):
 
         # Extract vendor
         try:
-            vendor_match = str(re.findall(r'at ([^.0-9]+?)(?=\s\d+|[.])', sms)[0])
+            # vendor_match = str(re.findall(r'at ([^.0-9]+?)(?=\s\d+|[.])', sms)[0])
+            vendor_match = str(re.findall(r'at ([^.0-9]+?)(?=\s\d+ [A-Z]{2}|$)', sms)[0])
             vendor_match = re.sub(' +', ' ', vendor_match)
             log(job_id=self._job.job_id, msg=f"Vendor: {vendor_match}")
         except IndexError:
@@ -74,7 +82,7 @@ class Finance(Module):
 
         index = 1
         success, t_type = self.check_value(index=index, description="transaction type",
-                                           option_list=["income", "expense"])
+                                           check_list=["income", "expense"])
         if not success:
             return
 
@@ -94,7 +102,7 @@ class Finance(Module):
                                                         refs.tbl_fin_raw_vendor, "vendor_id", "raw_vendor",
                                                         refs.tbl_fin_vendor, "name", "vendor_id")
         success, vendor = self.check_value(index=index, description="proper vendor name", default=default_vendor,
-                                           option_list=options)
+                                           check_list=options)
         if not success:
             return
         vendor_id = self._fill_lut(raw_vendor, vendor,
@@ -111,7 +119,7 @@ class Finance(Module):
             default_duplicate = None
         success, duplicate = self.check_value(index=index, description="yes if you want to continue. Duplicate exists.",
                                               default=default_duplicate,
-                                              option_list=['yes'])
+                                              check_list=['yes'])
         if not success:
             return
 
@@ -134,7 +142,7 @@ class Finance(Module):
             pre_sel_cats = [x[0] for x in all_cats]
 
         success, cat = self.check_value(index=index, description="category of transaction",
-                                        option_list=pre_sel_cats)
+                                        check_list=pre_sel_cats)
         if not success:
             return
 
@@ -145,7 +153,7 @@ class Finance(Module):
             new_cat_ids = ';'.join(pre_sel_cat_ids)
             self.db_finance.update(refs.tbl_fin_vendor, {"category_id": new_cat_ids}, {"vendor_id": vendor_id})
 
-        success, cat = self.check_value(index=index, description="category ID", default=cat_id)
+        success, cat = self.check_value(index=index, description="category ID", default=cat_id, check_int=True)
         if not success:
             return
 
@@ -153,6 +161,10 @@ class Finance(Module):
                                "transaction_by, date, type, category_id, amount, vendor_id, photo_id",
                                (self._job.chat_id, t_date, t_type, cat_id, t_value, vendor_id,
                                 ";".join([str(ele) for ele in self._job.photo_ids])))
+        send_string = f"{str(t_type).capitalize()} added to {cat} ({cat_id}) for LKR {t_value} with {vendor} " \
+                      f"({vendor_id})."
+        log(self._job.job_id, msg=send_string)
+        self.send_message(Message(send_string=send_string))
         self._job.complete()
 
         # todo add another option with the same params
