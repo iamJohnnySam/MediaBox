@@ -81,14 +81,14 @@ class Finance(Module):
             return
 
         index = 1
-        success, t_type = self.check_value(index=index, description="transaction type",
-                                           check_list=["income", "expense"])
+        success, t_date = self.check_value(index=index, description="transaction date",
+                                           check_date=True, default=datetime.today().strftime('%Y-%m-%d'))
         if not success:
             return
 
         index = 2
-        success, t_date = self.check_value(index=index, description="transaction date",
-                                           check_date=True, default=datetime.today().strftime('%Y-%m-%d'))
+        success, t_type = self.check_value(index=index, description="transaction type",
+                                           check_list=["income", "expense"])
         if not success:
             return
 
@@ -172,6 +172,9 @@ class Finance(Module):
     def _get_from_lookup(self, item, index,
                          raw_table, raw_id, raw_lookup,
                          lut_table, lut_column, lut_id):
+
+        item = ''.join(letter for letter in item if (letter.isalnum() or letter.isspace()))
+        item = re.sub(' +', ' ', item)
 
         default_id = self.db_finance.select(table=raw_table,
                                             columns=raw_id,

@@ -65,6 +65,7 @@ class ShowDownloader(Module):
                     val = (row[4], row[0], row[1], row[2], str(row[3]), str(torrent_id))
                     self.db.insert(refs.tbl_tv_shows, columns, val)
                     log(self._job.job_id, torrent_id)
+                    self._job.is_background_task = False
 
                     message = f'{str(row[1])} added at {str(row[3])} torrent id = {str(torrent_id)}'
                     self.send_message(Message(message, job=self._job, group=refs.group_tv_show))
