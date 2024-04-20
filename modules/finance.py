@@ -189,8 +189,9 @@ class Finance(Module):
         else:
             cond = ""
             for item_part in str(item).split(" "):
+                pre_sym = '' if len(item_part) < 3 else '%'
                 filler = "" if cond == "" else " OR "
-                cond = cond + filler + f'{lut_column} LIKE "%{item_part}%"'
+                cond = cond + filler + f'{lut_column} LIKE "{pre_sym}{item_part}%"'
             lut_options = self.db_finance.select(lut_table, lut_column, where=cond, fetch_all=True)
             options = [x[0] for x in lut_options] if lut_options is not None else None
         log(job_id=self._job.job_id, msg=f"Options: {options}")
