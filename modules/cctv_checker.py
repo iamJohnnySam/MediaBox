@@ -70,7 +70,7 @@ class CCTVChecker(Module):
             else:
                 continue
 
-            if global_variables.operation_mode:
+            if global_variables.operation_mode and refs.hard_disk:
                 if sus or (not sus and random() > 0.75):
                     if not os.path.exists(sav_cctv):
                         os.makedirs(sav_cctv)

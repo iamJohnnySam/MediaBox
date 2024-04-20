@@ -73,6 +73,7 @@ class Finance(Module):
         # 5 - duplicate?
         # 6 - category Type
         # 7 - category
+        # todo user_id
 
         index = 0
         success, t_value = self.check_value(index=index, description="transaction amount",

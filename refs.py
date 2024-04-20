@@ -6,6 +6,8 @@ log_level = "debug"                         # LOGGING LEVEL
 log_print = True
 main_channel = "spark"                      # TELEPOT
 
+hard_disk = False
+
 # --- EMAIL ---
 # imap = 'outlook.office365.com'
 imap = 'imap.gmail.com'
