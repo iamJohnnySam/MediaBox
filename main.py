@@ -43,7 +43,8 @@ global_variables.stop_all = True
 t_schedule.join()
 logger.log(msg="All threads merged")
 
-backup_sequence(Job(function="backup_all"))
+if refs.hard_disk:
+    backup_sequence(Job(function="backup_all"))
 
 # ------ EXIT CONDITIONS -----------
 if not global_variables.stop_all:
