@@ -35,21 +35,21 @@ class Finance(Module):
         value_match.replace("lkr ", "").replace("rs.  ", "").replace(",", "").strip()
         self._job.collect(value_match, 0)
 
-        # Check Transaction Type
-        if any(x.lower() in sms for x in global_variables.credit_words):
-            self._job.collect('income', 1)
-        elif any(x.lower() in sms for x in global_variables.debit_words):
-            self._job.collect('expense', 1)
-        else:
-            raise InvalidParameterException(f"Could not find transaction type in {sms}")
-
         # Extract date
         try:
             date_match = str(re.findall(r'(\d{2}[/-]\d{2}[/-]\d{4})', sms)[0])
             log(job_id=self._job.job_id, msg=f"Date: {date_match}")
         except IndexError:
             date_match = datetime.today().strftime('%Y-%m-%d')
-        self._job.collect(date_match, 2)
+        self._job.collect(date_match, 1)
+
+        # Check Transaction Type
+        if any(x.lower() in sms for x in global_variables.credit_words):
+            self._job.collect('income', 2)
+        elif any(x.lower() in sms for x in global_variables.debit_words):
+            self._job.collect('expense', 2)
+        else:
+            raise InvalidParameterException(f"Could not find transaction type in {sms}")
 
         # Extract vendor
         try:
@@ -131,19 +131,22 @@ class Finance(Module):
         else:
             pre_sel_cat_ids = []
 
+        show_man = False
         pre_sel_cats = []
         if self.check_index() <= index:
             for pre_sel_cat_id in pre_sel_cat_ids:
                 pre_sel_cats.append(self.db_finance.select(refs.tbl_fin_cat,
                                                            "category",
                                                            where={"category_id": pre_sel_cat_id})[0])
+            show_man = True
 
         if not pre_sel_cats:
             all_cats = self.db_finance.select(refs.tbl_fin_cat, "category", where={"in_out": t_type}, fetch_all=True)
             pre_sel_cats = [x[0] for x in all_cats]
+            show_man = False
 
         success, cat = self.check_value(index=index, description="category of transaction",
-                                        check_list=pre_sel_cats)
+                                        check_list=pre_sel_cats, manual_option=show_man)
         if not success:
             return
 
