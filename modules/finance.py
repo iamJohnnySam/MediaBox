@@ -131,6 +131,8 @@ class Finance(Module):
         else:
             pre_sel_cat_ids = []
 
+        pre_sel_cat_ids = [i for n, i in enumerate(pre_sel_cat_ids) if i not in pre_sel_cat_ids[:n]]
+
         show_man = False
         pre_sel_cats = []
         if self.check_index() <= index:
@@ -152,7 +154,7 @@ class Finance(Module):
 
         index = 7
         cat_id = self.db_finance.select(refs.tbl_fin_cat, "category_id", where={"category": cat})[0]
-        if cat_id not in pre_sel_cats_str:
+        if cat_id not in pre_sel_cat_ids:
             pre_sel_cat_ids.append(str(cat_id))
             new_cat_ids = ';'.join(pre_sel_cat_ids)
             self.db_finance.update(refs.tbl_fin_vendor, {"category_id": new_cat_ids}, {"vendor_id": vendor_id})

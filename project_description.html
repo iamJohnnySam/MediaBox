@@ -102,7 +102,10 @@ sudo apt install phpmyadmin
 <p>Setting up the Apache to be able to access the SQL database from within the network if needed.</p>
 
 sudo mysql -u root -p
-GRANT ALL PRIVILEGES ON *.* TO 'MediaBox'@'localhost' IDENTIFIED BY 'xxx' WITH GRANT OPTION;
+CREATE USER 'mediabox'@'localhost' IDENTIFIED BY 'xxx1';
+GRANT ALL PRIVILEGES ON *.* TO 'mediabox'@'localhost';
+
+GRANT ALL PRIVILEGES ON *.* TO 'MediaBox'@'localhost' IDENTIFIED BY 'xxx2' WITH GRANT OPTION;
 
 <pre><code>
 sudo nano /etc/apache2/apache2.conf

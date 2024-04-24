@@ -13,6 +13,8 @@ ALL=(ALL) NOPASSWD:ALL
 sudo hostnamectl set-hostname MediaBox-HP
 </code></pre>
 <pre><code>
+sudo apt-get install wpasupplicant -y
+sudo apt-get install iw -y
 sudo apt-get install samba samba-common-bin -y
 sudo apt-get install transmission-daemon -y
 sudo systemctl stop transmission-daemon -y

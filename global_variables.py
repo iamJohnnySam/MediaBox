@@ -3,7 +3,7 @@ import platform as plat
 import refs
 from tools.logger import log
 
-operation_mode = True if plat.machine() == 'armv7l' else False
+operation_mode = True if plat.machine() == 'armv7l' or plat.machine() == "x86_64" else False
 platform = plat.machine()
 
 if not operation_mode:
