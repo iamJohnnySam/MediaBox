@@ -7,4 +7,4 @@ sudo blkid
 sudo nano /etc/fstab
 
 # Add to Bottom
-UUID=27705CE4072C15B2	/mnt/MediaBox	ntfs	defaults,auto,users,rw 0 0
+UUID=27705CE4072C15B2	/mnt/MediaBox	ntfs	defaults,nofail,auto,users,rw 0 0
