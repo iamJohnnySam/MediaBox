@@ -1,30 +1,20 @@
-<h3>INSTALLATION: Setting up the Raspberry Pi</h3>
-<p>Target Operating System: Raspbian -
-	<a href="https://www.raspberrypi.com/documentation/computers/os.html#python-on-raspberry-pi">Bookworm</a></p>
-<p>Update the Raspberry Pi</p>
 
-<pre><code>
-sudo apt-get update
-sudo apt-get upgrade
-</code></pre>
+
 
 <p>Plug in an external drive and mount</p>
 
 <pre><code>
-sudo mkdir /mnt/MediaBox
-sudo mount /dev/sda1 /mnt/MediaBox
-sudo blkid
+
 </code></pre>
 
-<p>/dev/sda1: LABEL="data-ntfs" BLOCK_SIZE="512" UUID="27705CE4072C15B2" TYPE="ntfs" PARTLABEL="data-ntfs"
-	PARTUUID="b62c5b39-5e0f-493c-95a5-032c5cb7adb7"</p>
+<p></p>
 
 <pre><code>
-sudo nano /etc/fstab
+
 </code></pre>
 
 <pre><code>
-UUID=27705CE4072C15B2	/mnt/MediaBox	ntfs	defaults,auto,users,rw 0 0
+
 </code></pre>
 
 <p>Set up static IP to be able to consistently access the system from your local network</p>
