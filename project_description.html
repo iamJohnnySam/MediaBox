@@ -7,25 +7,6 @@ curl -L "https://drive.google.com/file/d/1qkNWVF28CRyTo96fLCgB2BvELqPFTdcO/view?
 </code></pre>
 
 
-<code>sudo crontab -e</code>
-<code>@reboot sh /home/pi/launcher.sh</code>
-<code>git config --global --add safe.directory /home/pi/MediaBox
-sudo git config --global --add safe.directory /home/pi/MediaBox</code></pre>
-<p>Sometimes there are permission issues which come up all of a sudden with git. Installing the below shell file
-	will make it easier to debug later.</p>
-<pre><code>cd /home/pi
-nano permission_error_correction.sh</code>
-<code>#!/bin/sh
-# launcher.sh
-sudo chmod -R 777 MediaBox
-cd /home/pi/MediaBox
-git reset --hard origin/master
-cd
-sh launcher.sh</code>
-<code>chmod 755 permission_error_correction.sh</code></pre>
-<br>
-<h3>INSTALLATION: Configuring Installation</h3>
-<p>Setting up the databases. <a href="https://pimylifeup.com/raspberry-pi-mysql/">More Information.</a> </p>
 
 <pre><code>
 sudo mysql -u root -p
