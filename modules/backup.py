@@ -3,21 +3,21 @@ import os
 import shutil
 from datetime import datetime
 
-import global_variables
 from brains.job import Job
 from database_manager.sql_connector import SQLConnector
 from modules.base_module import Module
-from tools import logger
+from tools import logger, params
 import passwords
 
 
 class BackUp(Module):
 
-    def __init__(self, job: Job, loc):
+    def __init__(self, job: Job):
         super().__init__(job)
+        loc = params.get_param('backup', 'backup_location')
         self.backup_location = os.path.join(loc, datetime.now().strftime("%Y%m%d%H%M%S"))
         self.common_backup_location = loc
-        if global_variables.operation_mode and not os.path.exists(self.backup_location):
+        if not os.path.exists(self.backup_location):
             os.makedirs(self.backup_location)
 
         self.copy_folders = []
@@ -32,24 +32,22 @@ class BackUp(Module):
 
     def run_backup(self):
         logger.log(self._job.job_id, "Backup Started")
-        if global_variables.operation_mode:
-            self.cp_files()
-            self.mv_files()
-            self.cp_folders()
-            self.mv_folders()
-            self.cp_databases()
+        self.cp_files()
+        self.mv_files()
+        self.cp_folders()
+        self.mv_folders()
+        self.cp_databases()
         logger.log(self._job.job_id, "Backup Ended")
 
     def cp_files(self):
-        if global_variables.operation_mode:
-            for file in self.copy_files:
-                destination = os.path.join(self.backup_location, file)
-                if not os.path.exists(os.path.dirname(destination)):
-                    os.makedirs(os.path.dirname(destination))
-                    logger.log(self._job.job_id, f"Directory created > {os.path.dirname(destination)}")
+        for file in self.copy_files:
+            destination = os.path.join(self.backup_location, file)
+            if not os.path.exists(os.path.dirname(destination)):
+                os.makedirs(os.path.dirname(destination))
+                logger.log(self._job.job_id, f"Directory created > {os.path.dirname(destination)}")
 
-                shutil.copy(file, destination)
-                logger.log(self._job.job_id, f"Copied {file} -> {destination}")
+            shutil.copy(file, destination)
+            logger.log(self._job.job_id, f"Copied {file} -> {destination}")
 
     def mv_files(self):
         for file in self.move_files:
@@ -122,7 +120,7 @@ class BackUp(Module):
             self._backup_database(database, backup_file_path)
 
     def cp_all_databases(self):
-        db = SQLConnector(self._job)
+        db = SQLConnector(self._job.job_id)
         database_list = db.get_databases()
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 

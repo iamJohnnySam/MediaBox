@@ -6,6 +6,7 @@ from PIL import Image
 
 import refs
 from database_manager.sql_connector import SQLConnector
+from tools import params
 from tools.custom_exceptions import *
 from tools.logger import log
 
@@ -18,7 +19,8 @@ class Job:
                  collection=None,
                  background_task: bool = False):
 
-        self._telepot_account = refs.main_channel if telepot_account == "" else telepot_account
+        self._telepot_account = params.get_param('telepot',
+                                                 'main_channel') if telepot_account == "" else telepot_account
 
         self._db = SQLConnector(0, database=refs.db_admin)
 
@@ -271,7 +273,6 @@ class Job:
             self.store_message()
 
         if self.is_stored:
-
             self._db.update(table=refs.tbl_jobs,
                             update={field: item, "cb_id": self._current_callback},
                             where={'job_id': self._job_id})

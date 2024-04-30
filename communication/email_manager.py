@@ -3,13 +3,12 @@ import imaplib
 import traceback
 
 import global_variables
-import refs
 from brains.job import Job
 from tools.logger import log
 
 
 class EmailManager:
-    def __init__(self, job: Job, email_address, password, mb):
+    def __init__(self, job: Job, email_address, imap, password, mb):
         self.result = "Not OK"
         self.attachments = {}
         self.current_date = None
@@ -23,7 +22,7 @@ class EmailManager:
         self.email = email_address
         self.password = password
         self.mb = mb
-        self.myEmail = imaplib.IMAP4_SSL(refs.imap, 993)
+        self.myEmail = imaplib.IMAP4_SSL(imap, 993)
         log(self.job.job_id, "Email Manager Object Created - " + email_address)
 
     def log_in(self):

@@ -5,16 +5,17 @@ import refs
 from brains.job import Job
 from communication.message import Message
 from modules.base_module import Module
-from tools import file_tools
+from tools import file_tools, params
 from tools.logger import log
 from tools.word_tools import breakdown_torrent_file_name
 
 
 class RefactorFolder(Module):
+    module = 'media'
 
-    def __init__(self, job: Job, path):
+    def __init__(self, job: Job):
         super().__init__(job)
-        self.path = path
+        self.path = params.get_param(self.module, 'download')
         self.send_string = ""
 
     def clean_torrent_downloads(self):
@@ -96,21 +97,21 @@ class RefactorFolder(Module):
             file_name, tv_show, movie, subtitle, base_name = breakdown_torrent_file_name(self._job, file)
             log(self._job.job_id, f'{file_name}, {tv_show}, {movie}, {subtitle}, {base_name}')
             if tv_show and not movie:
-                base_loc = os.path.join(refs.torrent_tv_shows, base_name)
+                base_loc = os.path.join(params.get_param(self.module, 'movies'), base_name)
                 file_tools.move_file(self._job, os.path.join(directory, file),
                                      base_loc,
                                      file_name)
                 self.send_string = self.send_string + "\n" + file_name
 
             elif movie and not tv_show:
-                base_loc = os.path.join(refs.torrent_movies, base_name)
+                base_loc = os.path.join(params.get_param(self.module, 'tv_shows'), base_name)
                 file_tools.move_file(self._job, os.path.join(directory, file),
                                      base_loc,
                                      file_name)
                 self.send_string = self.send_string + "\n" + file_name
 
             else:
-                base_loc = os.path.join(refs.torrent_unknown, base_name)
+                base_loc = os.path.join(params.get_param(self.module, 'unknown_files'), base_name)
                 file_tools.move_file(self._job, os.path.join(directory, file),
                                      base_loc,
                                      base_name + file_name)

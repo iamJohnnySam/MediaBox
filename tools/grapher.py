@@ -198,7 +198,7 @@ def grapher_trend(graph_list, x_name, y_name, chart_title, size=False):
         size_data = [row[2] for row in graph_list]
 
         for t in t_column:
-            t_data.append(convert_to_time(t))
+            t_data.append(str(convert_to_time(t)))
 
         plt.scatter(t_data, y_data,
                     c=size_data,
@@ -238,7 +238,7 @@ def grapher_simple_trend(graph_list, x_name, y_name, chart_title):
 
     x = []
     for row in graph_list:
-        x.append(convert_to_date(row[0]).date())
+        x.append(str(convert_to_date(row[0]).date()))
 
     plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y/%m/%d'))
     plt.gca().xaxis.set_major_locator(mdates.DayLocator())

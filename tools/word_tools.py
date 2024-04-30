@@ -2,6 +2,7 @@ import re
 import string
 from datetime import datetime
 
+import global_variables
 from brains.job import Job
 from tools.logger import log
 
@@ -97,3 +98,39 @@ def greeting() -> str:
         return 'Good afternoon'
     else:
         return 'Good evening'
+
+
+def check_date_validity(job_id, value) -> (bool, str):
+    date_formats = global_variables.date_formats
+    success = False
+    for date_format in date_formats:
+        try:
+            date_obj = datetime.strptime(value, date_format)
+            if '%Y' not in value:
+                date_obj = date_obj.replace(year=datetime.now().year)
+            value = date_obj.strftime('%Y-%m-%d')
+            success = True
+            log(job_id, f"Date format accepted {str(value)} for {date_format}")
+            break
+        except ValueError:
+            success = False
+            log(job_id, f"Date format mismatch {str(value)} for {date_format}")
+
+    return success, value
+
+
+def check_time_validity(job_id, value) -> (bool, str):
+    time_formats = global_variables.time_formats
+    success = False
+    for time_format in time_formats:
+        try:
+            time_obj = datetime.strptime(value, time_format).time()
+            value = time_obj.strftime("%H:%M:%S")
+            success = True
+            log(job_id, f"Time format accepted {str(value)} for {time_format}")
+            break
+        except ValueError:
+            success = False
+            log(job_id, f"Time format mismatch {str(value)} for {time_format}")
+
+    return success, value

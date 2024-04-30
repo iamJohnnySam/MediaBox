@@ -9,6 +9,7 @@ from brains.job import Job
 from communication.message import Message
 from database_manager.sql_connector import SQLConnector
 from modules.base_module import Module
+from tools import params
 from tools.custom_exceptions import InvalidParameterException
 from tools.logger import log
 
@@ -223,11 +224,12 @@ class Finance(Module):
         return vendor_id
 
     def finance_photo(self):
-        if not os.path.exists(refs.finance_images):
-            os.makedirs(refs.finance_images)
+        image_loc = params.get_param('finance', 'images')
+        if not os.path.exists(image_loc):
+            os.makedirs(image_loc)
 
         for value in self._job.photo_ids:
             shutil.move(os.path.join(refs.telepot_image_dump, value),
-                        os.path.join(refs.finance_images, value))
+                        os.path.join(image_loc, value))
 
         # todo OCR

@@ -1,12 +1,13 @@
 from datetime import datetime, timedelta
 
-import global_variables
 from communication.channels import channels
 from communication.message import Message
 from brains import message_queue
 from brains.job import Job
+from tools import params
 from tools.custom_exceptions import *
 from tools.logger import log
+from tools.word_tools import check_time_validity, check_date_validity
 
 
 class Module:
@@ -112,32 +113,10 @@ class Module:
             value = (datetime.now() + timedelta(days=1)).strftime('%Y-%m-%d')
 
         if success and check_date:
-            date_formats = global_variables.date_formats
-            for date_format in date_formats:
-                try:
-                    date_obj = datetime.strptime(value, date_format)
-                    if '%Y' not in value:
-                        date_obj = date_obj.replace(year=datetime.now().year)
-                    value = date_obj.strftime('%Y-%m-%d')
-                    success = True
-                    log(self._job.job_id, f"Date format accepted {str(value)} for {date_format}")
-                    break
-                except ValueError:
-                    success = False
-                    log(self._job.job_id, f"Date format mismatch {str(value)} for {date_format}")
+            success, value = check_date_validity(self._job.job_id, value)
 
         if success and check_time:
-            time_formats = global_variables.time_formats
-            for time_format in time_formats:
-                try:
-                    time_obj = datetime.strptime(value, time_format).time()
-                    value = time_obj.strftime("%H:%M:%S")
-                    success = True
-                    log(self._job.job_id, f"Time format accepted {str(value)} for {time_format}")
-                    break
-                except ValueError:
-                    success = False
-                    log(self._job.job_id, f"Time format mismatch {str(value)} for {time_format}")
+            success, value = check_time_validity(self._job.job_id, value)
 
         # If anything failed
         if (not success) and (not no_recover):
@@ -211,7 +190,7 @@ class Module:
         self.send_message(message=message)
 
     def channel_error(self, e, channel):
-        if global_variables.operation_mode:
+        if params.is_module_available('telepot'):
             log(job_id=self._job.job_id, error_code=10003, msg=str(e))
             raise InvalidParameterException
         else:

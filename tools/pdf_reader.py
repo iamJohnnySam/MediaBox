@@ -12,6 +12,7 @@ class PDFReader:
                 open(output_path, 'wb') as output_file:
             reader = PdfFileReader(input_file)
             reader.decrypt(password)
+            log(self.job_id, msg='PDF Decrypted')
 
             writer = PdfFileWriter()
 
@@ -19,4 +20,3 @@ class PDFReader:
                 writer.addPage(reader.getPage(i))
 
             writer.write(output_file)
-

@@ -1,16 +1,16 @@
 from transmission_rpc import Client
 
-import global_variables
 from brains.job import Job
 from communication.message import Message
 from modules.base_module import Module
+from tools import params
 from tools.logger import log
 
 
 class Transmission(Module):
     def __init__(self, job: Job):
         super().__init__(job)
-        if global_variables.operation_mode:
+        if params.is_module_available('media'):
             self.client = Client()
         self.active_torrents = {}
 
@@ -25,7 +25,7 @@ class Transmission(Module):
         return self.active_torrents
 
     def add_torrent(self, path, paused=False):
-        if global_variables.operation_mode:
+        if params.is_module_available('media'):
             torrent = self.client.add_torrent(path, paused=paused)
             success, torrent_name = self._add_torrent_to_list(torrent)
             log(self._job.job_id, msg=f"Torrent Added: {torrent_name}")

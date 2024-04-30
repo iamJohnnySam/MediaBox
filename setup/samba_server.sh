@@ -1,9 +1,12 @@
-sudo apt-get install samba samba-common-bin
+sudo apt-get install samba samba-common-bin -y
+cd
+mkdir media
+
 sudo nano /etc/samba/smb.conf
 
 # Add to Bottom
 [media]
-path = /home/iamjohnnysam/media
+path = /home/hp/media
 writeable=Yes
 create mask=0777
 directory mask=0777
@@ -23,5 +26,5 @@ create mask=0777
 directory mask=0777
 public=no
 
-sudo smbpasswd -a pi
+sudo smbpasswd -a hp
 sudo systemctl restart smbd

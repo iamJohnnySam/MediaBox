@@ -1,14 +1,14 @@
-sudo apt install mariadb-server
+sudo apt install mariadb-server -y
 sudo mysql_secure_installation
 
-sudo apt install phpmyadmin
+sudo apt install phpmyadmin -y
 
 
 sudo mysql -u root -p
-CREATE USER 'mediabox'@'localhost' IDENTIFIED BY 'xxx1';
+CREATE USER 'mediabox'@'localhost' IDENTIFIED BY 'xxx';
 GRANT ALL PRIVILEGES ON *.* TO 'mediabox'@'localhost';
 
-GRANT ALL PRIVILEGES ON *.* TO 'MediaBox'@'localhost' IDENTIFIED BY 'xxx2' WITH GRANT OPTION;
+# GRANT ALL PRIVILEGES ON *.* TO 'MediaBox'@'localhost' IDENTIFIED BY 'xxx2' WITH GRANT OPTION;
 
 sudo nano /etc/apache2/apache2.conf
 

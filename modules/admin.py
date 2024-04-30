@@ -7,12 +7,13 @@ from database_manager.json_editor import JSONEditor
 from brains.job import Job
 from database_manager.sql_connector import SQLConnector
 from modules.base_module import Module
+from tools import params
 
 
 class Admin(Module):
     def __int__(self, job: Job):
         super().__init__(job)
-        self._db = SQLConnector(job, database=refs.db_admin)
+        self._db = SQLConnector(job.job_id, database=refs.db_admin)
 
     def alive(self):
         self.send_message(Message(f"Hello {self._job.f_name} (chat id: {str(self._job.chat_id)})!\n"
@@ -37,7 +38,11 @@ class Admin(Module):
                 else:
                     definition = command
 
-                if self._job.telepot_account in command_dictionary[command] or self._job.telepot_account == refs.main_channel or "all_bots" in command_dictionary[command]:
+                a = self._job.telepot_account in command_dictionary[command]
+                b = self._job.telepot_account == params.get_param('telepot', 'main_channel')
+                c = "all_bots" in command_dictionary[command]
+
+                if a or b or c:
                     if add_command != "":
                         message = message + add_command
                         add_command = ""

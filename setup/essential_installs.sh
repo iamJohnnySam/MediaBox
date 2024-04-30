@@ -7,3 +7,8 @@ sudo apt-get install python3-flask -y
 sudo apt-get install libopenjp2-7-dev -y
 sudo apt-get install libopenblas-dev -y
 sudo apt install unixodbc-dev -y
+
+# HP
+sudo apt-get install parted -y
+sudo apt-get install ntfs-3g -y
+sudo apt-get install fuse -y

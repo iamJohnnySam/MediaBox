@@ -1,12 +1,11 @@
 import random
 import numpy as np
 
-import global_variables
 from brains.job import Job
-from tools import logger
+from tools import logger, params
 from PIL import Image
 
-if global_variables.operation_mode:
+if params.is_module_available('cctv'):
     import tflite_runtime.interpreter as tflite
 
 
@@ -17,7 +16,7 @@ class ImageClassifier:
         self.nn_name = nn_name
         self.threshold = threshold
 
-        if global_variables.operation_mode:
+        if params.is_module_available('cctv'):
             # self.model = tf.lite.Interpreter(model_path=nn_path)
             self.model = tflite.Interpreter(model_path=nn_path)
             self.model.allocate_tensors()
@@ -33,7 +32,7 @@ class ImageClassifier:
         img = np.float32(img)
         img = np.expand_dims(img, axis=0)
 
-        if global_variables.operation_mode:
+        if params.is_module_available('cctv'):
             self.model.set_tensor(self.input_details[0]['index'], img)
             self.model.invoke()
             self.output_data = self.model.get_tensor(self.output_details[0]['index'])

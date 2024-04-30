@@ -60,7 +60,7 @@ def run_task(job: Job):
     elif func == "backup_all":
         backup_sequence(job)
     elif func == "backup_database":
-        backup = BackUp(job, refs.backup_location)
+        backup = BackUp(job)
         backup.cp_all_databases()
 
     elif func == "check_shows":
@@ -83,12 +83,12 @@ def run_task(job: Job):
     elif func == "check_cctv":
         cctv = CCTVChecker(job)
         cctv.download_cctv()
-        cctv.clean_up(refs.sent_mail)
+        cctv.clean_up()
     elif func == "get_cctv":
         cctv = CCTVChecker(job)
         cctv.download_cctv()
         cctv.get_last(10)
-        cctv.clean_up(refs.sent_mail)
+        cctv.clean_up()
     elif func == "add_me_to_cctv":
         Subscriptions(job).manage_chat_group("cctv")
     elif func == "remove_me_from_cctv":
@@ -102,7 +102,7 @@ def run_task(job: Job):
         torrent.delete_downloaded()
         torrent.list_torrents()
         log(job.job_id, "Starting Downloads Refactor")
-        RefactorFolder(job, refs.torrent_download).clean_torrent_downloads()
+        RefactorFolder(job).clean_torrent_downloads()
         log(job.job_id, "Cleanup sequence Complete")
 
     elif func == "finance":
@@ -164,7 +164,7 @@ def check_running_tasks():
 
 
 def backup_sequence(job: Job):
-    backup = BackUp(job, refs.backup_location)
+    backup = BackUp(job)
     backup.move_folders.append(refs.logs_location)
     backup.move_png_files.append(refs.charts_save_location)
     backup.copy_files.append(refs.password_file)

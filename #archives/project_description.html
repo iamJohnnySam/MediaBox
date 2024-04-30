@@ -1,57 +1,12 @@
-<pre><code>
-cd /home/pi/MediaBox/cctv/
-mkdir nn_models
-cd nn_models
-curl -L "https://drive.google.com/file/d/1-1i0UqlOT46jTQZP980FOhBcdHFGfaPW/view?usp=sharing" -o modelA01.tflite
-curl -L "https://drive.google.com/file/d/1qkNWVF28CRyTo96fLCgB2BvELqPFTdcO/view?usp=sharing" -o modelA02.tflite
-</code></pre>
-
-
-
-<pre><code>
-sudo mysql -u root -p
-</code></pre>
-
-<pre><code>
-CREATE DATABASE transactions;
-CREATE DATABASE administration;
-CREATE DATABASE entertainment;
-CREATE DATABASE news;
-CREATE DATABASE baby;
-GRANT ALL PRIVILEGES ON transactions.* TO 'mediabox'@'localhost';
-GRANT ALL PRIVILEGES ON administration.* TO 'mediabox'@'localhost';
-GRANT ALL PRIVILEGES ON entertainment.* TO 'mediabox'@'localhost';
-GRANT ALL PRIVILEGES ON news.* TO 'mediabox'@'localhost';
-GRANT ALL PRIVILEGES ON baby.* TO 'mediabox'@'localhost';
-FLUSH PRIVILEGES;
-</code></pre>
-
-<p>Run the program</p>
-<pre><code>sh launcher.sh</code></pre>
-
-<p>Run the Test Program</p>
-<pre><code>cd /home/pi/MediaBox
-git pull origin master
-. /home/pi/MediaBox/env/bin/activate
-python database_update_temp_file.py
-deactivate
-cd</code></pre>
-<br>
-
-
-
 <h3>MAIN METHOD: main.py</h3>
-<p>The code can be broken down in to 3 main areas which are the main interactions of the program. These three
-	sections of the program will run on its own thread.</p>
+<p></p>
 <ul>
 	<li>Communicator: Interact the program through the chatbot. (daemon thread)</li>
 	<li>Web App: Interact with the program through the web app. (thread: t_webapp)</li>
 	<li>Scheduler: The program will interact with itself using a scheduler at predefined time intervals.
 		(thread: t_scheduler, daemon thread)</li>
 </ul>
-<p>At the start of the program it will execute "platform.machine()" to identify if the code is running on Raspberry
-	Pi. In which case it will run in full operation. If the identified platform is not armv7l it will only run the
-	programmed functions for the purpose of debugging the code.</p>
+<p></p>
 <p>Instead of using threading.join() to wait until the threads have completed. The main function has a loop which
 	runs on t_scheduler.is_alive() since t_scheduler is the only non-daemon thread. Inside the thread, the scheduler
 	will perform a check for running sub_threads inside scheduler and sleep for 10 seconds.</p>
@@ -79,36 +34,6 @@ cd</code></pre>
 	<li>check_news - Signal the Scheduler to run News Reader</li>
 </ul>
 <p>This file also holds all the paths and links that the program needs.</p>
-
-
-
-
-<h3>SECRET GLOBAL VARIABLES: settings.py</h3>
-<p>Similar to the global variables file, there is another file under the name settings.py which contains all the
-	usernames and passwords of all accounts used in the program</p>
-<ul>
-	<li>em: outlook.com Username</li>
-	<li>pw: outlook.com Password</li>
-	<li>database_user: mySQL Username</li>
-	<li>database_password: mySQL Password</li>
-</ul>
-
-
-
-
-<h3>FUNCTION: Logger</h3>
-<p>This is one of the most important functions which help to log the activities of the program to keep track, monitor
-	and troubleshoot any issues that may come up. The logger function performs the following actions.</p>
-<ul>
-	<li>Creates a log file in the log folder with the current date</li>
-	<li>Adds the message in to the log file under the classification of debug, information, error or warning</li>
-	<li>Inspects the stack and identifies where the call is coming from</li>
-	<li>Prints the message type, timestamp, calling information and the message to the console</li>
-</ul>
-<p>The message to console is printed as follows:</p>
-<pre><code>f'{message_type},{timestamp},{caller_name},>,{message}'</code></pre>
-<p>The logger can be called from anywhere in the code with the following call.</p>
-<pre><code>logger.log(log_message, message_type="info")</code></pre>
 
 
 
@@ -148,9 +73,6 @@ for account in telegram_accounts:
 <pre><code>communicator.send_to_group(telepot_account, msg, group, image=False, caption="")</code></pre>
 <p>Once the above objects are created the constructor of the object creates a thread which controls the
 	communication for that account.</p>
-
-
-<h3>THREAD: WebApp</h3>
 
 
 <h3>CLASS: Communicator</h3>
@@ -194,23 +116,4 @@ interactions with the user.</p>
 <p>Finally in the constructor of this class the telepot MessageLoop is initialized as a thread which contains both a
 	handle function which handles the standard messages which come through the chat and a callback query function which
 	handles all the queries which are returned through the in-line keyboards.</p>
-
-<h4>Base Communicator</h4>
-
-<h4>Top level Communicator</h4>
-
-
-<h3>CLASS: BackUp</h3>
-<p>This class is responsible for backing up files and folders. One object from each class is dedicated for one
-	backup location which takes in as an argument from the constructor. The class has a number of lists which are
-	used to hold the items that need to back up.</p>
-<ul>
-	<li>copy_folders</li>
-	<li>copy_files</li>
-	<li>move_folders</li>
-	<li>move_folders_common: backs up in to a common location instead of a dated folder</li>
-	<li>move_files</li>
-	<li>move_png_files</li>
-	<li>databases</li>
-</ul>
 

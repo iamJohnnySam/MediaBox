@@ -5,12 +5,12 @@ import threading
 import telepot
 from telepot.loop import MessageLoop
 
-from refs import db_telepot_commands, loc_telepot_callback, main_channel
+import refs
 from communication.message import Message
 from brains.job import Job
 from database_manager.json_editor import JSONEditor
 from brains import task_queue
-from tools.custom_exceptions import ControlledException
+from tools import params
 from tools.logger import log
 
 shutdown_bot: dict[str:bool] = {}
@@ -26,7 +26,7 @@ class Messenger:
         self.waiting_user_input = {}
 
         # Get Commands
-        self.commands = JSONEditor(db_telepot_commands).read()
+        self.commands = JSONEditor(refs.db_telepot_commands).read()
 
         # Listen
         self.bot = telepot.Bot(telepot_key)
@@ -95,7 +95,7 @@ class Messenger:
                 msg.complete()
                 return
 
-            elif self.channel != main_channel and \
+            elif self.channel != params.get_param('telepot', 'main_channel') and \
                     type(self.commands[msg.function]) is not str and \
                     not (self.channel in self.commands[msg.function].keys() or
                          "all_bots" in self.commands[msg.function].keys()):
@@ -167,7 +167,7 @@ class Messenger:
         log(job_id=msg_id, msg='Callback Query: ' + str(query['data']))
 
         if q[3] == "X":
-            save_loc = os.path.join(loc_telepot_callback, f"{q[0]}_cb.json")
+            save_loc = os.path.join(refs.loc_telepot_callback, f"{q[0]}_cb.json")
             query_data = JSONEditor(save_loc).read()[f'{q[0]};{q[1]};{q[2]}']
             log(job_id=msg_id, msg="Recovered Query: " + query_data)
 
@@ -309,4 +309,3 @@ class Messenger:
             self.shutdown_attempted = True
             del self.loop
             sys.exit()
-            raise ControlledException("Shutdown Bot")

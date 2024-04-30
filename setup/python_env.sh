@@ -1,5 +1,9 @@
+sudo apt-get install git -y
+sudo apt install python3 -y
+sudo apt install python3-pip -y
+
 cd MediaBox
-python -m venv env
+python3 -m venv env
 source env/bin/activate
 
 pip install numpy
@@ -24,9 +28,11 @@ pip install matplotlib
 pip install pyodbc
 pip install pandas
 pip install opencv-python
+pip install python-git-info
 
 deactivate
 cd ..
 
+sudo nano launcher.sh
 # Install the launcher
 sudo chmod 755 launcher.sh
