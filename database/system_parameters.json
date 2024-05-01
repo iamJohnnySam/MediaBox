@@ -1,11 +1,20 @@
 {
     "socket": {
         "spark": {
-            "server": true
+            "server": true,
+            "port": 1234,
+            "connection_count": 1
         },
         "mediabox": {
             "server": false,
-            "connect": "spark"
+            "connect": {
+                "spark": 1234,
+                "iamjohnnysam-dell": 4321}
+        },
+        "iamjohnnysam-dell": {
+            "server": true,
+            "port": 4321,
+            "connection_count": 1
         }
     },
     "telepot": {

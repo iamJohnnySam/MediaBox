@@ -5,7 +5,8 @@ import refs
 from database_manager.json_editor import JSONEditor
 from tools.custom_exceptions import UnexpectedOperation
 
-modules: dict[str, dict[str, dict[str, str | bool]]] = JSONEditor(refs.parameter_file).read()
+modules: dict[str, dict[str, dict[str, str | bool | int | list[str] | dict[str, int]]]] = JSONEditor(
+    refs.parameter_file).read()
 known_hosts: dict[str, dict[str, str]] = JSONEditor(refs.host_file).read()
 
 

@@ -7,5 +7,6 @@ cd /home/hp/MediaBox
 python3 -V
 git pull origin master
 . /home/hp/MediaBox/env/bin/activate
+echo $USER
 python3 main.py
 deactivate

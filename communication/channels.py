@@ -1,11 +1,15 @@
+import global_variables
 from communication.message import Message
 from refs import db_telepot_accounts
-from communication import message_handler
+from communication import message_handler, network_handler
 from database_manager.json_editor import JSONEditor
 from tools import logger, params
 
 channels: dict[str, message_handler.Messenger] = {}
-module = 'telepot'
+sockets: dict[str, network_handler.Spider] = {}
+
+tp_module = 'telepot'
+sk_module = 'socket'
 
 
 def init_channel():
@@ -13,9 +17,9 @@ def init_channel():
     for account in telepot_accounts.keys():
         message_handler.shutdown_bot[account] = True
 
-    if params.is_module_available(module):
-        logger.log(msg=f"Starting Telepot channels: {params.get_param(module, 'channels')}.")
-        for account in params.get_param(module, 'channels'):
+    if params.is_module_available(tp_module):
+        logger.log(msg=f"Starting Telepot channels: {params.get_param(tp_module, 'channels')}.")
+        for account in params.get_param(tp_module, 'channels'):
             channels[account] = message_handler.Messenger(account,
                                                           telepot_accounts[account]["account"],
                                                           telepot_accounts[account]["master"])
@@ -25,11 +29,18 @@ def init_channel():
         logger.log(error_code=20012)
 
 
+def init_socket():
+    if params.is_module_available(sk_module):
+        if params.get_param(sk_module, 'server'):
+            host = global_variables.host
+            sockets[host] = network_handler.Spider()
+
+
 def send_message(msg: Message, account=None):
-    if params.is_module_available(module):
+    if params.is_module_available(tp_module):
         if account is None:
-            account = params.get_param(module, 'main_channel')
+            account = params.get_param(tp_module, 'main_channel')
         channels[account].send_now(msg)
     else:
-        host = params.get_module_hosts(module)
+        host = params.get_module_hosts(tp_module)
         # todo pass to network

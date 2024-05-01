@@ -8,7 +8,8 @@ sudo mysql -u root -p
 CREATE USER 'mediabox'@'localhost' IDENTIFIED BY 'xxx';
 GRANT ALL PRIVILEGES ON *.* TO 'mediabox'@'localhost';
 
-# GRANT ALL PRIVILEGES ON *.* TO 'MediaBox'@'localhost' IDENTIFIED BY 'xxx2' WITH GRANT OPTION;
+GRANT ALL PRIVILEGES ON *.* TO 'mediabox'@'localhost' IDENTIFIED BY 'xxx' WITH GRANT OPTION;
+FLUSH PRIVILEGES;
 
 sudo nano /etc/apache2/apache2.conf
 
