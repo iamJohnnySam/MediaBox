@@ -27,6 +27,9 @@ log(msg="Thread Started: Schedule Manager")
 if params.is_module_available('telepot'):
     channels.init_channel()
 
+if params.is_module_available('socket'):
+    channels.init_socket()
+
 if params.is_module_available('web'):
     t_webapp = threading.Thread(target=web_app.run_webapp, daemon=True)
     t_webapp.start()

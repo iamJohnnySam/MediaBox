@@ -11,6 +11,11 @@ known_hosts: dict[str, dict[str, str]] = JSONEditor(refs.host_file).read()
 
 
 @cache
+def is_host_known(host: str):
+    return host in known_hosts.keys()
+
+
+@cache
 def is_module_available(module: str):
     if module in modules.keys():
         return True if global_variables.host in modules[module].keys() else False

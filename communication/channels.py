@@ -31,9 +31,16 @@ def init_channel():
 
 def init_socket():
     if params.is_module_available(sk_module):
+        logger.log(msg=f"Starting Sockets.")
         if params.get_param(sk_module, 'server'):
             host = global_variables.host
-            sockets[host] = network_handler.Spider()
+            sockets[host] = network_handler.Spider(port=params.get_param("socket", "port"),
+                                                   connection_count=params.get_param("socket", "connection_count"))
+        else:
+            connections: dict = params.get_param("socket", "connect")
+            for connection in connections.keys():
+                sockets[connection] = network_handler.Spider(hostname=connection,
+                                                             port=connections[connection])
 
 
 def send_message(msg: Message, account=None):

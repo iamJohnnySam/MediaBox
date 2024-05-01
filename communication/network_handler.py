@@ -16,7 +16,7 @@ class Spider:
         self.connections = {}
         log(msg="Socket Initialized")
 
-        if hostname is None:
+        if hostname is None or hostname == global_variables.host:
             self.is_server = True
             self.my_socket.bind(('', port))
             log(msg=f"Socket bound to {port}")
@@ -34,8 +34,18 @@ class Spider:
         threading.Thread(target=self.__accept, daemon=True).start()
 
     def __accept(self):
-        c, addr = self.my_socket.accept()
-        host = socket.gethostbyaddr(addr)
+        host_unknown = True
+        c, addr, host = None, None, None
+
+        while host_unknown:
+            c, addr = self.my_socket.accept()
+            host = socket.gethostbyaddr(addr)
+            if params.is_host_known():
+                host_unknown = False
+            else:
+                c.close()
+                return
+
         log(msg=f"{host} Connected via {addr}")
         self.connections[host] = c
         threading.Thread(target=self.__listen, args=host, daemon=True)
