@@ -28,13 +28,16 @@ class Spider:
         else:
             self.is_server = False
             try:
-                _, _, ip_ = socket.gethostbyname_ex(hostname)
-                ip = ip_[0]
+                hostname, alias_list, ip_addr_list = socket.gethostbyname_ex(hostname)
+                log(msg=f"Scanning hostname {hostname} resulted in alias list: {alias_list} and "
+                        f"IP addresses: {ip_addr_list}.")
+                ip = ip_addr_list[0]
             except socket.gaierror as e:
                 log(msg=f"Error Getting Hostname: {e}", log_type="error")
                 ip = params.get_static_ip(hostname)
                 if ip is None:
                     raise socket.gaierror
+            log(msg=f"Connecting to socket {ip} on port {port}")
             address = (ip, port)
             threading.Thread(target=self.__connect, args=address, daemon=True)
 
