@@ -42,12 +42,8 @@ def init_socket():
         else:
             connections: dict = params.get_param("socket", "connect")
             for connection in connections.keys():
-                threading.Thread(target=connect_client, args=(connection, connections[connection])).start()
-
-
-def connect_client(connection, port):
-    network = network_handler.Spider(hostname=connection, port=port)
-    sockets[connection] = network
+                network = network_handler.Spider(hostname=connection, port=connections[connection])
+                sockets[connection] = network
 
 
 def send_message(msg: Message, account=None):
