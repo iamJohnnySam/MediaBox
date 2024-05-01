@@ -2,9 +2,9 @@ import os
 import gitinfo
 
 import global_variables
-import refs
+from tools import params
 
-if refs.known_hosts[global_variables.host]['system'] == 'Linux':
+if params.known_hosts[global_variables.host]['system'] == 'Linux':
     print("")
     print("")
     print("")
@@ -17,7 +17,7 @@ def keep_gap():
 
 
 def print_logo():
-    if refs.known_hosts[global_variables.host]['system'] == 'Linux':
+    if params.known_hosts[global_variables.host]['system'] == 'Linux':
         os.system("reset")
 
     print("   _                           _           _                               ____                      ")
@@ -40,6 +40,7 @@ def print_logo():
         print("  / /|_/ / _ \\/ __  / / __ `/ __  / __ \\| |/_/ ")
         print(" / /  / /  __/ /_/ / / /_/ / /_/ / /_/ />  <   ")
         print("/_/  /_/\\___/\\__,_/_/\\__,_/_____/\\____/_/|_|   ")
+        print()
 
     print("Author: John Neuman Gayan Samarasinghe")
     print("Email: iamJohnnySam@outlook.com")

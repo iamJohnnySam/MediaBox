@@ -5,7 +5,6 @@ import os
 from datetime import date, datetime
 
 import refs
-from refs import log_level, error_codes
 
 today_date = str(date.today())
 
@@ -19,7 +18,7 @@ def log(job_id: int = 0, msg: str = "", log_type: str = "debug", error_code: int
         raise ValueError("Invalid Parameters for record")
 
     elif error_code != 0:
-        with open(error_codes, 'r') as file:
+        with open(refs.error_codes, 'r') as file:
             errors: dict = json.load(file)
 
         if str(error_code) in errors.keys():
@@ -52,22 +51,22 @@ def log(job_id: int = 0, msg: str = "", log_type: str = "debug", error_code: int
     if log_type == "warn":
         log_type = "WRN"
         logging.warning(message)
-        if refs.log_print and log_level in ["debug", "info", "warn"]:
+        if refs.log_print and refs.log_level in ["debug", "info", "warn"]:
             print_message = True
     elif log_type == "error":
         log_type = "ERR"
         logging.error(message)
-        if refs.log_print and log_level in ["debug", "info", "warn", "error"]:
+        if refs.log_print and refs.log_level in ["debug", "info", "warn", "error"]:
             print_message = True
     elif log_type == "debug":
         logging.debug(message)
         log_type = "DBG"
-        if refs.log_print and log_level in ["debug"]:
+        if refs.log_print and refs.log_level in ["debug"]:
             print_message = True
     else:
         logging.info(message)
         log_type = "INF"
-        if refs.log_print and log_level in ["debug", "info"]:
+        if refs.log_print and refs.log_level in ["debug", "info"]:
             print_message = True
 
     if error != "":
@@ -78,9 +77,6 @@ def log(job_id: int = 0, msg: str = "", log_type: str = "debug", error_code: int
             print(f'{log_type},{datetime.now().strftime("%m-%d %H:%M:%S")},{caller.ljust(15)},'
                   f'{job_id:03},>,{segment}')
 
-
-if not os.path.exists(refs.logs_location):
-    os.makedirs(refs.logs_location)
 
 try:
     logging.basicConfig(filename=log_file_name(), level=logging.DEBUG)

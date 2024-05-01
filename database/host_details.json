@@ -1,0 +1,11 @@
+{
+    "spark": {
+        "platform": "armv7l",
+        "system": "Linux"},
+    "mediabox": {
+        "platform": "x86_64",
+        "system": "Linux"},
+    "iamjohnnysam-dell": {
+        "platform": "AMD64",
+        "system": "Windows"}
+}

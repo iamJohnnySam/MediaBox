@@ -1,76 +1,13 @@
-# --- SETTINGS ---
 import os
 
 # --- SYSTEM INFORMATION ---
-known_hosts: dict[str, dict[str, str]] = {
-    'spark': {
-        'platform': 'armv7l',
-        'system': 'Linux'},
-    'mediabox': {
-        'platform': 'x86_64',
-        'system': 'Linux'},
-    'iamjohnnysam-dell': {
-        'platform': 'AMD64',
-        'system': 'Windows'}}
+host_file = 'database/host_details.json'
+parameter_file = 'database/system_parameters.json'
 
-# --- MODULES INSTALLED ON WHICH SYSTEM ---
-modules: dict[str, dict[str, dict[str, str | bool]]] = {
-    'socket': {
-        'spark': {
-            'server': True,
-        },
-        'mediabox': {
-            'server': False,
-            'connect': 'spark'
-        }
-    },
-    'telepot': {
-        'spark': {
-            'channels': ['spark', 'baby'],
-            'main_channel': 'spark'
-        },
-        'iamjohnnysam-dell': {
-            'channels': ['test'],
-            'main_channel': 'test'
-        }
-    },
-    'finance': {
-        'images': 'database/finance_images'
-    },
-    'web': {
-        'spark': {}
-    },
-    'media': {
-        'mediabox': {
-            'media_path': "/home/hp/media",
-            'download': '/home/hp/media/Downloads',
-            'movies': '/home/hp/media/Movies',
-            'tv_shows': '/home/hp/media/TVShows',
-            'unknown_files': '/home/hp/media/Unknown'
-        }
-    },
-    'cctv': {
-        'mediabox': {
-            'imap': 'imap.gmail.com',
-            'mailbox': 'CCTV',
-            'sent': '"[Gmail]/Sent Mail"',
-            'model1': 'ai_models/cctv/modelA01.tflite',
-            'model2': 'ai_models/cctv/modelA02.tflite',
-            'download_loc': 'resources/CCTVImages',
-            'save_loc': '/home/hp/media/CCTVSaved'
-        }
-    },
-    'backup': {
-        'spark': {
-            'backup_location': '/home/pi/backup'
-        },
-        'mediabox': {
-            'backup_location': '/home/hp/backup'
-        }
-    }
-}
-
+# --- LOGGING ---
 logs_location = 'log/'
+if not os.path.exists(logs_location):
+    os.makedirs(logs_location)
 log_level = "debug"  # LOGGING LEVEL
 log_print = True
 

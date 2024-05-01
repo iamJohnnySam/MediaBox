@@ -2,20 +2,24 @@ from functools import cache
 
 import global_variables
 import refs
+from database_manager.json_editor import JSONEditor
 from tools.custom_exceptions import UnexpectedOperation
+
+modules: dict[str, dict[str, dict[str, str | bool]]] = JSONEditor(refs.parameter_file).read()
+known_hosts: dict[str, dict[str, str]] = JSONEditor(refs.host_file).read()
 
 
 @cache
 def is_module_available(module: str):
-    if module in refs.modules.keys():
-        return True if global_variables.host in refs.modules[module].keys() else False
+    if module in modules.keys():
+        return True if global_variables.host in modules[module].keys() else False
     else:
         raise UnexpectedOperation
 
 
 @cache
 def is_parameter_available(module: str, parameter: str):
-    return True if parameter in refs.modules[module][global_variables.host].keys() else False
+    return True if parameter in modules[module][global_variables.host].keys() else False
 
 
 @cache
@@ -28,12 +32,12 @@ def get_param(module: str, parameter: str, get_from_connected_host: bool = False
     else:
         host = global_variables.host
 
-    return refs.modules[module][host][parameter]
+    return modules[module][host][parameter]
 
 
 @cache
 def get_module_hosts(module: str):
-    return refs.modules[module].keys()
+    return modules[module].keys()
 
 
 @cache
