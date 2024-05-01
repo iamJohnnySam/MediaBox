@@ -1,4 +1,5 @@
 sudo apt-get install net-tools
+sudo apt-get install ifmetric
 
 ip a
 ip r | grep default
@@ -8,6 +9,7 @@ sudo nano /etc/network/interfaces
 # Add to bottom
 allow-hotplug wlx00e05d0b1b82
 iface wlx00e05d0b1b82 inet dhcp
+        up ifmetric wlx00e05d0b1b82 10
         wpa-ssid xxx
         wpa-psk  xxx
 

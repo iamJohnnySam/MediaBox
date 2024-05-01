@@ -36,7 +36,6 @@ class Spider:
                 ip = params.get_static_ip(hostname)
                 if ip is None:
                     raise socket.gaierror
-            log(msg=f"Connecting to socket {ip} on port {port}")
             address = (ip, port)
             threading.Thread(target=self.__connect, args=address, daemon=True)
 
@@ -50,13 +49,19 @@ class Spider:
         while host_unknown:
             log(msg=f"Server is listening on {self.my_socket.getsockname()}...")
             c, addr = self.my_socket.accept()
-            log(msg=f"{host} Following address is attempting to connect: {addr}")
-            host = socket.gethostbyaddr(addr)
-            if params.is_host_known():
+            log(msg=f"Following address is attempting to connect: {addr}")
+            try:
+                host, alias_list, ip_addr_list = socket.gethostbyaddr(addr[0])
+                log(msg=f"Scanning IP {addr} resulted in hostname {host}, alias list: {alias_list} and "
+                        f"IP addresses: {ip_addr_list}.")
+            except Exception as e:
+                log(msg=str(e), log_type="error")
+                host = params.get_host_from_ip(addr[0])
+
+            if params.is_host_known(host):
                 host_unknown = False
             else:
                 c.close()
-                return
 
         log(msg=f"{host} Connected via {addr}")
         self.connections[host] = c
@@ -79,7 +84,9 @@ class Spider:
         connection.close()
 
     def __connect(self, address):
+        log(msg=f"Connecting to socket, port {address}")
         self.my_socket.connect(address)
+        log(msg=f"Connected to socket, port {address}")
         self.__listen()
 
     def send_data(self, host, data: str):

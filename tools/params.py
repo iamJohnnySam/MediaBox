@@ -22,6 +22,14 @@ def get_static_ip(host: str):
         return None
 
 
+def get_host_from_ip(ip: str):
+    for host in known_hosts.keys():
+        if "static_ip" in known_hosts[host].keys():
+            if ip == known_hosts[host]["static_ip"]:
+                return host
+    return ""
+
+
 @cache
 def is_module_available(module: str):
     if module in modules.keys():
