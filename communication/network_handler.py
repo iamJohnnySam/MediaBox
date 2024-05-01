@@ -91,7 +91,7 @@ class Spider:
                 warn_show = warn_show - 1
                 self.my_socket.connect(self._client_address)
                 self.is_server_connected = True
-            except (ConnectionRefusedError, TimeoutError) as e:
+            except (ConnectionRefusedError, TimeoutError, OSError) as e:
                 if warn_show >= 0:
                     log(msg=f"Could not connect to server due to {e}.\n"
                             f"This loop will iterate every {delay_time}seconds until connected.\n"
