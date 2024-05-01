@@ -31,7 +31,7 @@ class Spider:
                 _, _, ip_ = socket.gethostbyname_ex(hostname)
                 ip = ip_[0]
             except socket.gaierror as e:
-                log(msg=f"Error Getting Hostname: {e}", log_type="err")
+                log(msg=f"Error Getting Hostname: {e}", log_type="error")
                 ip = params.get_static_ip(hostname)
                 if ip is None:
                     raise socket.gaierror
