@@ -1,5 +1,6 @@
 import socket
 import threading
+import time
 
 import global_variables
 from tools import params
@@ -92,9 +93,11 @@ class Spider:
                 self.my_socket.connect(address)
                 attempts = attempts-1
             except ConnectionRefusedError:
-                log(msg=f"Connection Refused {address}", log_type="error")
+                log(msg=f"Connection Refused {address}. {attempts} attempts remaining.", log_type="error")
                 if attempts == 0:
                     raise ConnectionRefusedError
+                log(msg=f"Sleeping for 1 minute before retrying.")
+                time.sleep(60)
         log(msg=f"Connected to socket, port {address}")
         self.__listen()
 
