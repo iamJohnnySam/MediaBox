@@ -2,18 +2,18 @@
     "socket": {
         "spark": {
             "server": true,
-            "port": 1234,
+            "port": 12345,
             "connection_count": 1
         },
         "mediabox": {
             "server": false,
             "connect": {
-                "spark": 1234,
-                "iamjohnnysam-dell": 4321}
+                "spark": 12345,
+                "iamjohnnysam-dell": 54321}
         },
         "iamjohnnysam-dell": {
             "server": true,
-            "port": 4321,
+            "port": 54321,
             "connection_count": 1
         }
     },

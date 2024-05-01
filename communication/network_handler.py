@@ -48,7 +48,7 @@ class Spider:
         c, addr, host = None, None, None
 
         while host_unknown:
-            log(msg="Server is listening...")
+            log(msg=f"Server is listening on {self.my_socket.getsockname()}...")
             c, addr = self.my_socket.accept()
             log(msg=f"{host} Following address is attempting to connect: {addr}")
             host = socket.gethostbyaddr(addr)
