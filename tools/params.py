@@ -12,10 +12,12 @@ known_hosts: dict[str, dict[str, str]] = JSONEditor(refs.host_file).read()
 
 @cache
 def is_host_known(host: str):
+    host = host.lower()
     return host in known_hosts.keys()
 
 
 def get_static_ip(host: str):
+    host = host.lower()
     if host in known_hosts.keys() and "static_ip" in known_hosts[host].keys():
         return known_hosts[host]["static_ip"]
     else:

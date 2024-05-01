@@ -1,9 +1,12 @@
+import threading
+
 import global_variables
 from communication.message import Message
 from refs import db_telepot_accounts
 from communication import message_handler, network_handler
 from database_manager.json_editor import JSONEditor
-from tools import logger, params
+from tools import params
+from tools.logger import log
 
 channels: dict[str, message_handler.Messenger] = {}
 sockets: dict[str, network_handler.Spider] = {}
@@ -18,7 +21,7 @@ def init_channel():
         message_handler.shutdown_bot[account] = True
 
     if params.is_module_available(tp_module):
-        logger.log(msg=f"Starting Telepot channels: {params.get_param(tp_module, 'channels')}.")
+        log(msg=f"Starting Telepot channels: {params.get_param(tp_module, 'channels')}.")
         for account in params.get_param(tp_module, 'channels'):
             channels[account] = message_handler.Messenger(account,
                                                           telepot_accounts[account]["account"],
@@ -26,12 +29,12 @@ def init_channel():
             del message_handler.shutdown_bot[account]
 
     else:
-        logger.log(error_code=20012)
+        log(error_code=20012)
 
 
 def init_socket():
     if params.is_module_available(sk_module):
-        logger.log(msg=f"Starting Sockets.")
+        log(msg=f"Starting Sockets.")
         if params.get_param(sk_module, 'server'):
             host = global_variables.host
             sockets[host] = network_handler.Spider(port=params.get_param("socket", "port"),
@@ -39,8 +42,16 @@ def init_socket():
         else:
             connections: dict = params.get_param("socket", "connect")
             for connection in connections.keys():
-                sockets[connection] = network_handler.Spider(hostname=connection,
-                                                             port=connections[connection])
+                threading.Thread(target=connect_client, args=(connection, connections[connection]))
+
+
+def connect_client(connection, port):
+    try:
+        network = network_handler.Spider(hostname=connection, port=port)
+    except ConnectionRefusedError:
+        log(msg=f"Could not connect {connection}.", log_type="error")
+        return
+    sockets[connection] = network
 
 
 def send_message(msg: Message, account=None):
