@@ -20,7 +20,7 @@ class Job:
                  background_task: bool = False):
 
         self._telepot_account = params.get_param('telepot',
-                                                 'main_channel') if telepot_account == "" else telepot_account
+                                                 'main_channel', True) if telepot_account == "" else telepot_account
 
         self._db = SQLConnector(0, database=refs.db_admin)
 

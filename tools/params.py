@@ -19,10 +19,23 @@ def is_parameter_available(module: str, parameter: str):
 
 
 @cache
-def get_param(module: str, parameter: str):
-    return refs.modules[module][global_variables.host][parameter]
+def get_param(module: str, parameter: str, get_from_connected_host: bool = False):
+    if get_from_connected_host:
+        if is_parameter_available(module, parameter):
+            host = global_variables.host
+        else:
+            host = get_connected_host()
+    else:
+        host = global_variables.host
+
+    return refs.modules[module][host][parameter]
 
 
 @cache
 def get_module_hosts(module: str):
     return refs.modules[module].keys()
+
+
+@cache
+def get_connected_host():
+    return get_param('socket', 'connect')

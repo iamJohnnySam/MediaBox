@@ -9,8 +9,6 @@ from modules.reminder import Reminder
 from tools import params
 from tools.logger import log
 
-master_reminder = Reminder(Job(function="reminder"))
-
 
 def run_schedule_manager():
 
@@ -28,6 +26,7 @@ def run_schedule_manager():
         schedule.every().day.at("21:00").do(add_task, "backup_database")
 
     if params.is_module_available('telepot'):
+        master_reminder = Reminder(Job(function="reminder"))
         # schedule.every(60).minutes.do(add_task, func=news_read.run_code)
         schedule.every().day.at("07:00").do(master_reminder.read_news)
 

@@ -4,8 +4,8 @@
 
 sudo apt-get update -y
 cd /home/hp/MediaBox
-python -V
+python3 -V
 git pull origin master
 . /home/hp/MediaBox/env/bin/activate
-python main.py
+python3 main.py
 deactivate

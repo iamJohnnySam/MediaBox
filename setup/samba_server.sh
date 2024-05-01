@@ -1,4 +1,5 @@
 sudo apt-get install samba samba-common-bin -y
+sudo apt install cifs-utils -y
 cd
 mkdir media
 
