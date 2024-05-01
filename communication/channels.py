@@ -46,11 +46,7 @@ def init_socket():
 
 
 def connect_client(connection, port):
-    try:
-        network = network_handler.Spider(hostname=connection, port=port)
-    except (ConnectionRefusedError, TimeoutError) as e:
-        log(msg=f"Could not connect {connection}. {e}", log_type="error")
-        return
+    network = network_handler.Spider(hostname=connection, port=port)
     sockets[connection] = network
 
 
