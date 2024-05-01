@@ -21,7 +21,6 @@ class Spider:
             self.my_socket.bind(('', port))
             log(msg=f"Socket bound to {port}")
             self.my_socket.listen(connection_count)
-            log(msg="Server is listening...")
             for i in range(connection_count):
                 self.__start_thread_to_accept()
 
@@ -49,7 +48,9 @@ class Spider:
         c, addr, host = None, None, None
 
         while host_unknown:
+            log(msg="Server is listening...")
             c, addr = self.my_socket.accept()
+            log(msg=f"{host} Following address is attempting to connect: {addr}")
             host = socket.gethostbyaddr(addr)
             if params.is_host_known():
                 host_unknown = False
