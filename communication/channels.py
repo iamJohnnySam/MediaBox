@@ -42,7 +42,7 @@ def init_socket():
         else:
             connections: dict = params.get_param("socket", "connect")
             for connection in connections.keys():
-                threading.Thread(target=connect_client, args=(connection, connections[connection]))
+                threading.Thread(target=connect_client, args=(connection, connections[connection])).start()
 
 
 def connect_client(connection, port):
