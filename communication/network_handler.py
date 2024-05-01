@@ -53,6 +53,7 @@ class Spider:
             log(msg=f"Following address is attempting to connect: {addr}")
             try:
                 host, alias_list, ip_addr_list = socket.gethostbyaddr(addr[0])
+                host = host.lower()
                 log(msg=f"Scanning IP {addr} resulted in hostname {host}, alias list: {alias_list} and "
                         f"IP addresses: {ip_addr_list}.")
             except Exception as e:
@@ -92,6 +93,7 @@ class Spider:
             attempts = attempts - 1
             try:
                 self.my_socket.connect(address)
+                connected = True
             except ConnectionRefusedError:
                 log(msg=f"Connection Refused {address}. {attempts} attempts remaining.", log_type="error")
                 if attempts == 0:
