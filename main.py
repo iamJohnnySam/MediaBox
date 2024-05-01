@@ -16,11 +16,11 @@ from web import web_app
 start_up.print_logo()
 log(msg=f"Running {global_variables.system} on {global_variables.platform}. Host: {global_variables.host}")
 
-t_task = threading.Thread(target=queue_manager.run_task_manager)
+t_task = threading.Thread(target=queue_manager.run_task_mgr)
 t_task.start()
 log(msg="Thread Started: Task Manager")
 
-t_schedule = threading.Thread(target=schedule_manager.run_schedule_manager)
+t_schedule = threading.Thread(target=schedule_manager.run_scheduler)
 t_schedule.start()
 log(msg="Thread Started: Schedule Manager")
 

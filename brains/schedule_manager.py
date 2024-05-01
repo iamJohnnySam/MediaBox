@@ -10,7 +10,7 @@ from tools import params
 from tools.logger import log
 
 
-def run_schedule_manager():
+def run_scheduler():
 
     if params.is_module_available('media'):
         schedule.every().day.at("00:30").do(add_task, "check_shows")

@@ -21,7 +21,7 @@ from tools.logger import log
 running_tasks = {}
 
 
-def run_task_manager():
+def run_task_mgr():
     while not global_variables.ready_to_run:
         time.sleep(1)
 

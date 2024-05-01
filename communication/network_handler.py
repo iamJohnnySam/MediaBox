@@ -91,10 +91,10 @@ class Spider:
                 warn_show = warn_show - 1
                 self.my_socket.connect(self._client_address)
                 self.is_server_connected = True
-            except (ConnectionRefusedError, TimeoutError, OSError) as e:
+            except (ConnectionRefusedError, TimeoutError) as e:
                 if warn_show >= 0:
                     log(msg=f"Could not connect to server due to {e}.\n"
-                            f"This loop will iterate every {delay_time}seconds until connected.\n"
+                            f"This loop will iterate every {delay_time} seconds until connected.\n"
                             f"This error message will stop appearing after {warn_show} attempt(s).")
                 time.sleep(delay_time)
 
@@ -112,11 +112,13 @@ class Spider:
                 data = connection.recv(1024)
             except ConnectionResetError as e:
                 log(msg=f"{host}: connection dropped with server {self._client_address}: {e}.")
+                connection.close()
                 self.__reconnect(host)
                 break
 
             if not data:
                 log(msg=f"{host}: No data received. Connection will close.")
+                connection.close()
                 self.__reconnect(host)
                 break
 
@@ -125,6 +127,7 @@ class Spider:
         connection.close()
 
     def __reconnect(self, host):
+        log(msg="Short sleep before reconnecting...")
         time.sleep(3)
         if not self.is_server:
             self.__start_thread_to_connect()
