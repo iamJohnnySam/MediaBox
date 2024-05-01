@@ -37,7 +37,7 @@ class Spider:
         host_unknown = True
         c, addr, host = None, None, None
 
-        while host_unknown or not global_variables.stop_all:
+        while host_unknown and not global_variables.stop_all:
             log(msg=f"Server is listening on {self.my_socket.getsockname()}...")
             c, addr = self.my_socket.accept()
 
@@ -57,7 +57,7 @@ class Spider:
                 log(msg=f"Rejected connection from {addr}", log_type="warn")
                 c.close()
 
-        log(msg=f"{host} Connected via {addr}")
+        log(msg=f"{host}: Connected via {addr}")
         self.connections[host] = c
         self.__listen(host)
 
@@ -95,7 +95,7 @@ class Spider:
                 if warn_show >= 0:
                     log(msg=f"Could not connect to server due to {e}.\n"
                             f"This loop will iterate every {delay_time}seconds until connected.\n"
-                            f"This error message will stop appearing after {warn_show} attempts.")
+                            f"This error message will stop appearing after {warn_show} attempt(s).")
                 time.sleep(delay_time)
 
         log(msg=f"Connected to socket, port {self._client_address}")
@@ -111,7 +111,7 @@ class Spider:
             try:
                 data = connection.recv(1024)
             except ConnectionResetError as e:
-                log(msg=f"{host} connection dropped with server {self._client_address}: {e}.")
+                log(msg=f"{host}: connection dropped with server {self._client_address}: {e}.")
                 self.__reconnect(host)
                 break
 
@@ -125,6 +125,7 @@ class Spider:
         connection.close()
 
     def __reconnect(self, host):
+        time.sleep(3)
         if not self.is_server:
             self.__start_thread_to_connect()
         else:
