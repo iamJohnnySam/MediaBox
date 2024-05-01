@@ -37,7 +37,7 @@ class Spider:
                 if ip is None:
                     raise socket.gaierror
             address = (ip, port)
-            threading.Thread(target=self.__connect, args=(address,), daemon=True)
+            threading.Thread(target=self.__connect, args=(address,), daemon=True).start()
 
     def __start_thread_to_accept(self):
         threading.Thread(target=self.__accept, daemon=True).start()
@@ -65,7 +65,7 @@ class Spider:
 
         log(msg=f"{host} Connected via {addr}")
         self.connections[host] = c
-        threading.Thread(target=self.__listen, args=(host,), daemon=True)
+        threading.Thread(target=self.__listen, args=(host,), daemon=True).start()
 
     def __listen(self, host=None):
         if host is None:
