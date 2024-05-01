@@ -130,6 +130,7 @@ class Spider:
         log(msg="Short sleep before reconnecting...")
         time.sleep(3)
         if not self.is_server:
+            self.my_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.__start_thread_to_connect()
         else:
             del self.connections[host]
