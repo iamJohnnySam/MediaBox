@@ -15,6 +15,13 @@ def is_host_known(host: str):
     return host in known_hosts.keys()
 
 
+def get_static_ip(host: str):
+    if host in known_hosts.keys() and "static_ip" in known_hosts[host].keys():
+        return known_hosts[host]["static_ip"]
+    else:
+        return None
+
+
 @cache
 def is_module_available(module: str):
     if module in modules.keys():

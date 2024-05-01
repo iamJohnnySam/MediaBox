@@ -27,7 +27,15 @@ class Spider:
 
         else:
             self.is_server = False
-            address = (socket.gethostbyname(hostname), port)
+            try:
+                _, _, ip_ = socket.gethostbyname_ex(hostname)
+                ip = ip_[0]
+            except socket.gaierror as e:
+                log(msg=f"Error Getting Hostname: {e}", log_type="err")
+                ip = params.get_static_ip(hostname)
+                if ip is None:
+                    raise socket.gaierror
+            address = (ip, port)
             threading.Thread(target=self.__connect, args=address, daemon=True)
 
     def __start_thread_to_accept(self):
