@@ -89,13 +89,19 @@ class Spider:
         connected = False
         attempts = 10
         while not connected:
+            attempts = attempts - 1
             try:
                 self.my_socket.connect(address)
-                attempts = attempts-1
             except ConnectionRefusedError:
                 log(msg=f"Connection Refused {address}. {attempts} attempts remaining.", log_type="error")
                 if attempts == 0:
                     raise ConnectionRefusedError
+                log(msg=f"Sleeping for 1 minute before retrying.")
+                time.sleep(60)
+            except TimeoutError:
+                log(msg=f"Connection Timed out {address}. {attempts} attempts remaining.", log_type="error")
+                if attempts == 0:
+                    raise TimeoutError
                 log(msg=f"Sleeping for 1 minute before retrying.")
                 time.sleep(60)
         log(msg=f"Connected to socket, port {address}")
