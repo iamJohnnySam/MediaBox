@@ -1,4 +1,4 @@
-import pickle
+import json
 import socket
 import threading
 import time
@@ -126,7 +126,8 @@ class Spider:
                 self.__reconnect(host)
                 break
 
-            r_data: dict = pickle.loads(data)
+            data = data.decode()
+            r_data: dict = json.loads(data)
             log(msg=f"{host}: Data Received: {data}")
 
             if r_data["m_type"] == "job":
@@ -155,6 +156,6 @@ class Spider:
     def send_data(self, data: dict, host):
         if self.is_server:
             connection: socket.socket = self.connections[host]
-            connection.sendall(pickle.dumps(data))
+            connection.sendall(str.encode(json.dumps(data)))
         else:
-            self.my_socket.sendall(pickle.dumps(data))
+            self.my_socket.sendall(str.encode(json.dumps(data)))
