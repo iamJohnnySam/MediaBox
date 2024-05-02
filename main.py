@@ -25,10 +25,10 @@ t_schedule.start()
 log(msg="Thread Started: Schedule Manager")
 
 if params.is_module_available('telepot'):
-    channels.init_channel()
+    channel_control.init_channel()
 
 if params.is_module_available('socket'):
-    channels.init_socket()
+    channel_control.init_socket()
 
 if params.is_module_available('web'):
     t_webapp = threading.Thread(target=web_app.run_webapp, daemon=True)
@@ -37,9 +37,9 @@ if params.is_module_available('web'):
 
 global_variables.ready_to_run = True
 log(msg="Ready to Run...")
-channels.send_message(Message("--- iamJohnnySam ---\n"
-                              "Version 2.1\n\n"
-                              f"Program Started on {global_variables.host}..."))
+channel_control.send_message(Message("--- iamJohnnySam ---\n"
+                                     "Version 2.1\n\n"
+                                     f"Program Started on {global_variables.host}..."))
 
 t_task.join()
 crashed = True if not global_variables.stop_all else False
@@ -52,7 +52,7 @@ backup_sequence(Job(function="backup_all"))
 
 # ------ EXIT CONDITIONS -----------
 if not global_variables.stop_all or crashed:
-    channels.send_message(Message("Crashed."))
+    channel_control.send_message(Message("Crashed."))
     time.sleep(60)
 
 if (not global_variables.stop_all) or global_variables.restart:
@@ -66,10 +66,10 @@ if (not global_variables.stop_all) or global_variables.restart:
 
 else:
     if global_variables.reboot_pi:
-        channels.send_message(Message("Rebooting now..."))
+        channel_control.send_message(Message("Rebooting now..."))
         log(msg="Rebooting now...")
         os.system("sudo reboot")
 
     else:
-        channels.send_message(Message("Exiting..."))
+        channel_control.send_message(Message("Exiting..."))
         log(msg="CLEAN EXIT")

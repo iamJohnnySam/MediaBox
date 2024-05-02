@@ -45,7 +45,7 @@ def init_socket():
                 channels.sockets[connection] = network
 
 
-def send_message_to_host(msg: Message, account=None):
+def send_message(msg: Message, account=None):
     if params.is_module_available(tp_module):
         if account is None:
             account = params.get_param(tp_module, 'main_channel')
