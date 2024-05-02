@@ -4,6 +4,8 @@ import threading
 import time
 
 import global_variables
+from brains import task_queue
+from brains.job import Job
 from tools import params
 from tools.logger import log
 
@@ -106,6 +108,7 @@ class Spider:
         if host is not None:
             connection: socket.socket = self.connections[host]
         else:
+            host = global_variables.host
             connection = self.my_socket
 
         while not global_variables.stop_all:
@@ -123,8 +126,20 @@ class Spider:
                 self.__reconnect(host)
                 break
 
-            data = pickle.loads(data)
+            r_data: dict = pickle.loads(data)
             log(msg=f"{host}: Data Received: {data}")
+
+            if r_data["m_type"] == "job":
+                job = Job(telepot_account=r_data["account"],
+                          job_id=r_data["job"],
+                          chat_id=r_data["chat"],
+                          username=r_data["username"],
+                          reply_to=r_data["reply"],
+                          function=r_data["function"],
+                          collection=r_data["collection"],
+                          other_host=True)
+                task_queue.add_job(job)
+
         connection.close()
 
     def __reconnect(self, host):

@@ -17,7 +17,8 @@ class Job:
                  job_id: int = 0,
                  chat_id: int = 0, username: str = "", reply_to: int = 0, function: str = "",
                  collection=None,
-                 background_task: bool = False):
+                 background_task: bool = False,
+                 other_host: bool = False):
 
         self._telepot_account = params.get_param('telepot',
                                                  'main_channel', True) if telepot_account == "" else telepot_account
@@ -56,10 +57,16 @@ class Job:
             self._job_id: int = 0
             self.breakdown_message(message)
 
-        elif job_id != 0:
+        elif job_id != 0 and not other_host:
             self._job_id = job_id
             self._db.job_id = self._job_id
             self._get_job()
+
+        elif job_id != 0 and other_host:
+            self.store_message()
+
+        elif other_host:
+            pass
 
         elif manual_params:
             if chat_id == 0:
@@ -381,6 +388,7 @@ class Job:
     def compress(self):
         return {
             "job": self._job_id,
+            "account": self._telepot_account,
             "chat": self.chat_id,
             "username": self._username,
             "reply": self._reply_to,

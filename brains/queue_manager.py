@@ -5,6 +5,7 @@ import global_variables
 import refs
 from brains import task_queue
 from brains.job import Job
+from communication import channel_control
 from modules.admin import Admin
 from modules.baby import Baby
 from modules.backup import BackUp
@@ -200,3 +201,4 @@ def run_on_other_host(job, module):
         log(job_id=job.job_id, msg=f"No connected host detected for module {module}.", log_type="error")
     else:
         log(job_id=job.job_id, msg=f"Sending job to host {host} for executing module {module}.")
+        channel_control.send_job_to_host(job, host)
