@@ -66,7 +66,7 @@ def run_task(job: Job):
         backup.cp_all_databases()
 
     elif func == "check_shows":
-        module = "shows"
+        module = "media"
         if params.is_module_available(module):
             ShowDownloader(job).check_shows()
         else:
