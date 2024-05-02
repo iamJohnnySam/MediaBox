@@ -377,3 +377,13 @@ class Job:
         d = self.callbacks
         d[str(cb)] = value
         self.update_db('callbacks', json.dumps(d))
+
+    def compress(self):
+        return {
+            "job": self._job_id,
+            "chat": self.chat_id,
+            "username": self._username,
+            "reply": self._reply_to,
+            "function": self.function,
+            "collection": self.collection
+        }

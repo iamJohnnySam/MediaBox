@@ -1,3 +1,4 @@
+import pickle
 import socket
 import threading
 import time
@@ -109,7 +110,7 @@ class Spider:
 
         while not global_variables.stop_all:
             try:
-                data = connection.recv(1024)
+                data = connection.recv(4096)
             except ConnectionResetError as e:
                 log(msg=f"{host}: connection dropped with server {self._client_address}: {e}.")
                 connection.close()
@@ -122,7 +123,7 @@ class Spider:
                 self.__reconnect(host)
                 break
 
-            data = data.decode()
+            data = pickle.loads(data)
             log(msg=f"{host}: Data Received: {data}")
         connection.close()
 
@@ -136,6 +137,9 @@ class Spider:
             del self.connections[host]
             self.__start_thread_to_accept()
 
-    def send_data(self, host, data: str):
-        connection: socket.socket = self.connections[host]
-        connection.sendall(data.encode())
+    def send_data(self, data: dict, host):
+        if self.is_server:
+            connection: socket.socket = self.connections[host]
+            connection.sendall(pickle.dumps(data))
+        else:
+            self.my_socket.sendall(pickle.dumps(data))

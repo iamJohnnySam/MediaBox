@@ -9,6 +9,8 @@ stop_all = False
 restart = False
 reboot_pi = False
 
+socket_id = 0
+
 date_formats = ["%Y-%m-%d", "%d-%m-%Y", "%Y-%b-%d", "%d-%b-%Y", "%m-%d-%y", "%b-%d-%y",
                 "%Y/%m/%d", "%d/%m/%Y", "%Y/%b/%d", "%d/%b/%Y",
                 "%m/%d", "%d/%m", "%b/%d", "%d/%b",

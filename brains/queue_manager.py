@@ -16,6 +16,7 @@ from modules.news_reader import NewsReader
 from modules.show_downloader import ShowDownloader
 from modules.subscriptions import Subscriptions
 from modules.transmission import Transmission
+from tools import params
 from tools.logger import log
 
 running_tasks = {}
@@ -57,6 +58,7 @@ def run_task(job: Job):
         Admin(job).time()
     elif func == "help":
         Admin(job).help()
+
     elif func == "backup_all":
         backup_sequence(job)
     elif func == "backup_database":
@@ -64,7 +66,11 @@ def run_task(job: Job):
         backup.cp_all_databases()
 
     elif func == "check_shows":
-        ShowDownloader(job).check_shows()
+        module = "shows"
+        if params.is_module_available(module):
+            ShowDownloader(job).check_shows()
+        else:
+            run_on_other_host(job, module)
     elif func == "find_movie":
         MovieFinder(job).find_movie()
 
@@ -186,3 +192,11 @@ def backup_sequence(job: Job):
 
     # todo move to task creation
     # backup.backup.move_folders_common.append(finance_images)
+
+
+def run_on_other_host(job, module):
+    host = params.get_connected_host_with_module(module)
+    if host is None:
+        log(job_id=job.job_id, msg=f"No connected host detected for module {module}.", log_type="error")
+    else:
+        log(job_id=job.job_id, msg=f"Sending job to host {host} for executing module {module}.")

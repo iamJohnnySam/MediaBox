@@ -198,6 +198,14 @@ class SQLConnector:
         log(job_id=self._job_id, msg=f'Result > {result[0]}.')
         return result[0]
 
+    def create_table(self, tbl_name):
+        log(job_id=self._job_id, msg=f'Creating table > {tbl_name}.')
+        # todo
+        # column_name_1 column_Data_type,
+        # column_name_2 column_Data_type,
+        # :
+        # column_name_n column_Data_type
+
     def _run_sql_command(self, sql: str, val=None):
         self.check_connection()
         log(job_id=self._job_id, msg=f'SQL > {sql}')

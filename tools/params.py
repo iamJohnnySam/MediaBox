@@ -2,6 +2,7 @@ from functools import cache
 
 import global_variables
 import refs
+from communication import channels
 from database_manager.json_editor import JSONEditor
 from tools.custom_exceptions import UnexpectedOperation
 
@@ -51,7 +52,7 @@ def get_param(module: str, parameter: str, get_from_connected_host: bool = False
         if is_parameter_available(module, parameter):
             host = global_variables.host
         else:
-            host = get_connected_host()
+            host = get_connected_host().keys()[0]
     else:
         host = global_variables.host
 
@@ -66,3 +67,18 @@ def get_module_hosts(module: str):
 @cache
 def get_connected_host():
     return get_param('socket', 'connect')
+
+
+@cache
+def get_connected_host_with_module(module):
+    hosts = get_module_hosts(module)
+    for host in hosts:
+        if host in channels.sockets.keys():
+            if channels.sockets[host].is_server_connected:
+                return host
+
+        for socket in channels.sockets.keys():
+            if channels.sockets[socket].is_server:
+                if host in channels.sockets[socket].connections.keys():
+                    return host
+    return None

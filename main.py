@@ -6,7 +6,7 @@ import time
 from tools import start_up, params
 from brains.job import Job
 from brains.queue_manager import backup_sequence
-from communication import channels
+from communication import channel_control
 from communication.message import Message
 import global_variables
 from brains import schedule_manager, queue_manager

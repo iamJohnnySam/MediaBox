@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 
-from communication.channels import channels
+from communication.channels import bots
 from communication.message import Message
 from brains import message_queue
 from brains.job import Job
@@ -109,6 +109,9 @@ class Module:
         if success and check_date and value.lower() == "yesterday":
             value = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
 
+        if success and check_date and value.lower() == "today":
+            value = datetime.now().strftime('%Y-%m-%d')
+
         if success and check_date and value.lower() == "tomorrow":
             value = (datetime.now() + timedelta(days=1)).strftime('%Y-%m-%d')
 
@@ -155,7 +158,7 @@ class Module:
 
     def __send_message(self, channel, message: Message, get_input=False, index=0):
         try:
-            in_queue = channels[channel].waiting_user_input.keys()
+            in_queue = bots[channel].waiting_user_input.keys()
         except KeyError as e:
             self.channel_error(e, channel)
             return
@@ -168,14 +171,14 @@ class Module:
             log(job_id=self._job.job_id, msg="Message added to Queue.")
         else:
             try:
-                channels[self._job.telepot_account].send_now(message=message)
+                bots[self._job.telepot_account].send_now(message=message)
             except KeyError as e:
                 self.channel_error(e, channel)
                 return
 
             if get_input:
                 try:
-                    channels[self._job.telepot_account].get_user_input(job=self._job, index=index)
+                    bots[self._job.telepot_account].get_user_input(job=self._job, index=index)
                 except KeyError as e:
                     self.channel_error(e, channel)
                     return
@@ -183,7 +186,7 @@ class Module:
     def close_all_callbacks(self):
         replies: dict = self._job.replies
         for reply in replies.keys():
-            channels[self._job.telepot_account].update_keyboard(self._job, replies[reply])
+            bots[self._job.telepot_account].update_keyboard(self._job, replies[reply])
 
     def send_admin(self, message: Message):
         message.send_to_master()

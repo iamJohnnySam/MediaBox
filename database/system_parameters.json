@@ -3,18 +3,21 @@
         "spark": {
             "server": true,
             "port": 12345,
-            "connection_count": 1
+            "connection_count": 1,
+            "identifier": "s"
         },
         "mediabox": {
             "server": false,
             "connect": {
                 "spark": 12345,
-                "iamjohnnysam-dell": 54321}
+                "iamjohnnysam-dell": 54321},
+            "identifier": "m"
         },
         "iamjohnnysam-dell": {
             "server": true,
             "port": 54321,
-            "connection_count": 1
+            "connection_count": 1,
+            "identifier": "h"
         }
     },
     "telepot": {
