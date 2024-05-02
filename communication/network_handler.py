@@ -130,7 +130,7 @@ class Spider:
             r_data: dict = json.loads(data)
             log(msg=f"{host}: Data Received: {data}")
 
-            if r_data["m_type"] == "job":
+            if r_data["type"] == "job":
                 job = Job(telepot_account=r_data["account"],
                           job_id=r_data["job"],
                           chat_id=r_data["chat"],
