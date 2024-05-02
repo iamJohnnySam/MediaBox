@@ -104,13 +104,17 @@ def run_task(job: Job):
     elif func == "list_torrents":
         Transmission(job).send_list()
     elif func == "clean_up_downloads":
-        log(job.job_id, "Starting Transmission Cleanup")
-        torrent = Transmission(job)
-        torrent.delete_downloaded()
-        torrent.list_torrents()
-        log(job.job_id, "Starting Downloads Refactor")
-        RefactorFolder(job).clean_torrent_downloads()
-        log(job.job_id, "Cleanup sequence Complete")
+        module = "media"
+        if params.is_module_available(module):
+            log(job.job_id, "Starting Transmission Cleanup")
+            torrent = Transmission(job)
+            torrent.delete_downloaded()
+            torrent.list_torrents()
+            log(job.job_id, "Starting Downloads Refactor")
+            RefactorFolder(job).clean_torrent_downloads()
+            log(job.job_id, "Cleanup sequence Complete")
+        else:
+            run_on_other_host(job, module)
 
     elif func == "finance":
         Finance(job).finance()
