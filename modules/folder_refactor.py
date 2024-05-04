@@ -85,6 +85,7 @@ class RefactorFolder(Module):
 
         for file in sub_files:
             dst_path = os.path.join(destination, file)
+            file_tools.create_folder_if_not_exist(self._job, destination)
             file_path = os.path.join(subs_folder, file)
             shutil.move(file_path, dst_path)
             log(self._job.job_id, f"Moved {file_path} -> {dst_path}")
@@ -97,14 +98,14 @@ class RefactorFolder(Module):
             file_name, tv_show, movie, subtitle, base_name = breakdown_torrent_file_name(self._job, file)
             log(self._job.job_id, f'{file_name}, {tv_show}, {movie}, {subtitle}, {base_name}')
             if tv_show and not movie:
-                base_loc = os.path.join(params.get_param(self.module, 'movies'), base_name)
+                base_loc = os.path.join(params.get_param(self.module, 'tv_shows'), base_name)
                 file_tools.move_file(self._job, os.path.join(directory, file),
                                      base_loc,
                                      file_name)
                 self.send_string = self.send_string + "\n" + file_name
 
             elif movie and not tv_show:
-                base_loc = os.path.join(params.get_param(self.module, 'tv_shows'), base_name)
+                base_loc = os.path.join(params.get_param(self.module, 'movies'), base_name)
                 file_tools.move_file(self._job, os.path.join(directory, file),
                                      base_loc,
                                      file_name)

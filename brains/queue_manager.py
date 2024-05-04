@@ -102,7 +102,11 @@ def run_task(job: Job):
         Subscriptions(job).manage_chat_group("cctv", add=False, remove=True)
 
     elif func == "list_torrents":
-        Transmission(job).send_list()
+        module = "media"
+        if params.is_module_available(module):
+            Transmission(job).send_list()
+        else:
+            run_on_other_host(job, module)
     elif func == "clean_up_downloads":
         module = "media"
         if params.is_module_available(module):

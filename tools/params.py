@@ -69,7 +69,6 @@ def get_connected_host():
     return get_param('socket', 'connect')
 
 
-@cache
 def get_connected_host_with_module(module):
     hosts = get_module_hosts(module)
     for host in hosts:

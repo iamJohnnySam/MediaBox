@@ -208,3 +208,15 @@ class Message:
         self.job = None
         self._chat = None
         self.group = None
+
+    def compress(self):
+        return{
+            "job": self._job_id,
+            "channel": self._this_telepot_account,
+            "msg": self.send_string,
+            "chat": self._chat,
+            "reply": self._reply_to,
+            "group": self.group,
+            "keyboard": self.keyboard,
+            "photo": self.photo
+        }

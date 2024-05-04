@@ -59,6 +59,10 @@ def send_job_to_host(job: Job, account):
     send_to_host(job.compress(), account, "job")
 
 
+def send_message_to_host(msg: Message, account):
+    send_to_host(msg.compress(), account, "msg")
+
+
 def send_to_host(val: dict, account: str, m_type: str):
     send_id = f"{params.get_param('socket', 'identifier')}-{global_variables.socket_id}"
     global_variables.socket_id = global_variables.socket_id + 1

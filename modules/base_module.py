@@ -157,6 +157,11 @@ class Module:
             self.__send_message(self._job.telepot_account, message, get_input, index)
 
     def __send_message(self, channel, message: Message, get_input=False, index=0):
+        if not params.is_module_available("telepot"):
+            pass
+            # todo
+
+
         try:
             in_queue = bots[channel].waiting_user_input.keys()
         except KeyError as e:
