@@ -12,7 +12,7 @@ from tools.logger import log
 
 class Spider:
     def __init__(self, hostname: str = None, port: int = 12345, connection_count: int = 1):
-        self.connections = {}
+        self.connections: dict[str, socket.socket] = {}
         self.is_server_connected = False
 
         self.my_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

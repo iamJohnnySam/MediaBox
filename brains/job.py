@@ -266,7 +266,7 @@ class Job:
     def complete(self):
         if self.is_stored:
             self.store_message()
-            self.update_db('complete', item=True)
+            self.update_db('complete', item=1)
             log(job_id=self._job_id, msg="Message Completed")
 
     def update_db(self, field: str, item: str | bool | list | int | float, force=False):

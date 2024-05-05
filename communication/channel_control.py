@@ -80,3 +80,21 @@ def send_to_host(val: dict, account: str, m_type: str):
                 if connection == account:
                     channels.sockets[host].send_data(val, account)
                     return
+
+
+def send_to_network(job, module):
+    host = params.get_connected_host_with_module(module)
+    if host is None:
+        log(job_id=job.job_id, msg=f"No connected host detected for module {module}.", log_type="error")
+    else:
+        log(job_id=job.job_id, msg=f"Sending job to host {host} for executing module {module}.")
+        send_job_to_host(job, host)
+
+
+def inform_network(job):
+    for socket in channels.sockets.keys():
+        if channels.sockets[socket].is_server:
+            for connection in channels.sockets[socket].connections:
+                send_job_to_host(job, connection)
+        else:
+            send_job_to_host(job, socket)

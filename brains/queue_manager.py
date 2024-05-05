@@ -71,7 +71,7 @@ def run_task(job: Job):
         if params.is_module_available(module):
             ShowDownloader(job).check_shows()
         else:
-            run_on_other_host(job, module)
+            channel_control.send_to_network(job, module)
     elif func == "find_movie":
         MovieFinder(job).find_movie()
 
@@ -88,14 +88,22 @@ def run_task(job: Job):
         NewsReader(job).subscribe()
 
     elif func == "check_cctv":
-        cctv = CCTVChecker(job)
-        cctv.download_cctv()
-        cctv.clean_up()
+        module = "cctv"
+        if params.is_module_available(module):
+            cctv = CCTVChecker(job)
+            cctv.download_cctv()
+            cctv.clean_up()
+        else:
+            channel_control.send_to_network(job, module)
     elif func == "get_cctv":
-        cctv = CCTVChecker(job)
-        cctv.download_cctv()
-        cctv.get_last(10)
-        cctv.clean_up()
+        module = "cctv"
+        if params.is_module_available(module):
+            cctv = CCTVChecker(job)
+            cctv.download_cctv()
+            cctv.get_last(10)
+            cctv.clean_up()
+        else:
+            channel_control.send_to_network(job, module)
     elif func == "add_me_to_cctv":
         Subscriptions(job).manage_chat_group("cctv")
     elif func == "remove_me_from_cctv":
@@ -106,7 +114,7 @@ def run_task(job: Job):
         if params.is_module_available(module):
             Transmission(job).send_list()
         else:
-            run_on_other_host(job, module)
+            channel_control.send_to_network(job, module)
     elif func == "clean_up_downloads":
         module = "media"
         if params.is_module_available(module):
@@ -118,7 +126,7 @@ def run_task(job: Job):
             RefactorFolder(job).clean_torrent_downloads()
             log(job.job_id, "Cleanup sequence Complete")
         else:
-            run_on_other_host(job, module)
+            channel_control.send_to_network(job, module)
 
     elif func == "finance":
         Finance(job).finance()
@@ -156,6 +164,7 @@ def run_task(job: Job):
         Admin(job).start_over()
     elif func == "exit_all":
         Admin(job).exit_all()
+        channel_control.inform_network(job)
     elif func == "reboot_pi":
         Admin(job).reboot_pi()
 
@@ -201,12 +210,3 @@ def backup_sequence(job: Job):
 
     # todo move to task creation
     # backup.backup.move_folders_common.append(finance_images)
-
-
-def run_on_other_host(job, module):
-    host = params.get_connected_host_with_module(module)
-    if host is None:
-        log(job_id=job.job_id, msg=f"No connected host detected for module {module}.", log_type="error")
-    else:
-        log(job_id=job.job_id, msg=f"Sending job to host {host} for executing module {module}.")
-        channel_control.send_job_to_host(job, host)
