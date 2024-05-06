@@ -168,8 +168,18 @@ class Finance(Module):
                                "transaction_by, date, type, category_id, amount, vendor_id, vendor, photo_id",
                                (self._job.chat_id, t_date, t_type, cat_id, t_value, vendor_id, vendor,
                                 ";".join([str(ele) for ele in self._job.photo_ids])))
+
+        result = list(self.db_finance.select(table=refs.tbl_fin_trans,
+                                             columns="vendor, type, amount",
+                                             where={"date": t_date.strftime('%Y-%m-%d')},
+                                             order="timestamp", fetch_all=True))
+
         send_string = f"{str(t_type).capitalize()} added to {cat} ({cat_id}) for LKR {t_value} with {vendor} " \
-                      f"({vendor_id})."
+                      f"({vendor_id}).\nSummary for {t_date}"
+
+        for row in result:
+            send_string = send_string + f"\n{row[0]}: {'-' if row[1] == 'expense' else '+'}{row[2]:.2f}"
+
         log(self._job.job_id, msg=send_string)
         self.send_message(Message(send_string=send_string))
         self._job.complete()
