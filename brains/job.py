@@ -18,7 +18,21 @@ class Job:
                  chat_id: int = 0, username: str = "", reply_to: int = 0, function: str = "",
                  collection=None,
                  background_task: bool = False,
-                 other_host: bool = False):
+                 other_host: bool = False, orig_job_id: int = 0):
+
+        """
+        :param telepot_account: Name of the telepot account which initiated request.
+        :param message: Telepot message to extract information and create Job.
+        :param job_id: Job ID specific to host.
+        :param chat_id: Chat ID who initiated request.
+        :param username: Name of Chat who initiated the request.
+        :param reply_to: Message ID that initiated the request.
+        :param function: Main function identifier.
+        :param collection: Data collection for function.
+        :param background_task: Block outgoing messages if true.
+        :param other_host: If true, the Job was initiated from another host.
+        :param orig_job_id: Job ID of the host which initiated the request.
+        """
 
         self._telepot_account = params.get_param('telepot',
                                                  'main_channel', True) if telepot_account == "" else telepot_account
@@ -27,6 +41,10 @@ class Job:
 
         self.is_background_task = background_task
         self.called_back = False
+        self.user_input = ""
+        self._collected = False
+        self._replied = False
+        self._waiting_to_get_job = False
 
         # Important Variables
         self._job_id = job_id
@@ -39,17 +57,14 @@ class Job:
             self._collection: [str] = []
         else:
             self._collection: [str] = collection
+            self._collected = True
         self._photo_ids: [str] = []
         self._current_callback = 0
-
-        self.user_input = ""
-        self._collected = False
-        self._replied = False
-        self._waiting_to_get_job = False
+        self.original_job_id = orig_job_id
 
         manual_params = function != ""
 
-        if message is None and job_id == 0 and not manual_params:
+        if message is None and job_id == 0 and not manual_params and orig_job_id == 0:
             log(job_id=job_id, error_code=40001)
             raise InvalidParameterException("Not enough parameters to create a job")
 
@@ -57,12 +72,20 @@ class Job:
             self._job_id: int = 0
             self.breakdown_message(message)
 
-        elif job_id != 0 and not other_host:
+        elif not other_host and job_id != 0:
             self._job_id = job_id
             self._db.job_id = self._job_id
             self._get_job()
 
-        elif job_id != 0 and other_host:
+        elif other_host and orig_job_id != 0:
+            self.original_job_id = job_id
+            self._job_id = orig_job_id
+            self._db.job_id = self._job_id
+            self.store_message()
+            self._get_job()
+
+        elif other_host and job_id != 0 and orig_job_id == 0:
+            self.original_job_id = job_id
             self.store_message()
 
         elif other_host:
@@ -233,8 +256,8 @@ class Job:
 
     @property
     def cb_id(self):
-        """Returns the next available callback ID to use when generating a keyboard. Everytime this value is referred
-                a new callback ID is generated."""
+        """Returns the next available callback ID to use when generating a keyboard.
+        Everytime this value is referred, a new callback ID is generated."""
         if not self.is_stored:
             log(self.job_id, error_code=40006)
             self.store_message()
@@ -309,11 +332,10 @@ class Job:
             if self._function == "":
                 log(job_id=self.job_id, msg="Message to be stored without function", log_type="warn")
 
-            self._job_id = self._db.insert(table=refs.tbl_jobs,
-                                           columns="account, chat_id, reply_to, username, function",
-                                           val=(self._telepot_account, self._chat_id, self._reply_to,
-                                                self._username,
-                                                self._function))
+            cols = "account, chat_id, reply_to, username, function"
+            vals = (self._telepot_account, self._chat_id, self._reply_to, self._username, self._function)
+
+            self._job_id = self._db.insert(table=refs.tbl_jobs, columns=cols, val=vals)
             self._db.job_id = self._job_id
 
             if self._photo_ids:
@@ -393,5 +415,6 @@ class Job:
             "username": self._username,
             "reply": self._reply_to,
             "function": self.function,
-            "collection": self.collection
+            "collection": self.collection,
+            "original_job_id": self.original_job_id
         }

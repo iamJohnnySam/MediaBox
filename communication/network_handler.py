@@ -138,7 +138,8 @@ class Spider:
                           reply_to=r_data["reply"],
                           function=r_data["function"],
                           collection=r_data["collection"],
-                          other_host=True)
+                          other_host=True,
+                          orig_job_id=r_data["original_job_id"])
                 task_queue.add_job(job)
 
         connection.close()
