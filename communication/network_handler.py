@@ -62,7 +62,9 @@ class Spider:
                 log(msg=f"Rejected connection from {addr}", log_type="warn")
                 c.close()
 
-        log(msg=f"{host}: Connected via {addr}")
+        con_msg = f"{host}: Connected via {addr}"
+        log(msg= con_msg)
+        channel_control.send_message(Message(con_msg))
         self.connections[host] = c
         self.__listen(host)
 
