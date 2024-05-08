@@ -6,6 +6,8 @@ import time
 import global_variables
 from brains import task_queue
 from brains.job import Job
+from communication import channel_control
+from communication.message import Message
 from tools import params
 from tools.logger import log
 
@@ -101,7 +103,9 @@ class Spider:
                             f"This error message will stop appearing after {warn_show} attempt(s).")
                 time.sleep(delay_time)
 
-        log(msg=f"Connected to socket, port {self._client_address}")
+        con_msg = f"Connected to socket, port {self._client_address}"
+        log(msg=con_msg)
+        channel_control.send_message(Message(con_msg))
         self.__listen()
 
     def __listen(self, host=None):
