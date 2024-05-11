@@ -171,7 +171,7 @@ class Finance(Module):
 
         result = list(self.db_finance.select(table=refs.tbl_fin_trans,
                                              columns="vendor, type, amount",
-                                             where={"date": t_date.strftime('%Y-%m-%d')},
+                                             where={"date": t_date},
                                              order="timestamp", fetch_all=True))
 
         send_string = f"{str(t_type).capitalize()} added to {cat} ({cat_id}) for LKR {t_value} with {vendor} " \

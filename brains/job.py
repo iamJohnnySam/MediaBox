@@ -34,8 +34,11 @@ class Job:
         :param orig_job_id: Job ID of the host which initiated the request.
         """
 
-        self._telepot_account = params.get_param('telepot',
-                                                 'main_channel', True) if telepot_account == "" else telepot_account
+        if telepot_account == "":
+            if params.is_module_available("telepot"):
+                self._telepot_account = params.get_param('telepot', 'main_channel', True)
+        else:
+            self._telepot_account = telepot_account
 
         self._db = SQLConnector(0, database=refs.db_admin)
 
