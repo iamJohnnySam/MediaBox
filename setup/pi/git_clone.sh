@@ -4,6 +4,3 @@ git clone https://<token>@github.com/iamJohnnySam/MediaBox.git
 
 git config --global --add safe.directory /home/pi/MediaBox
 sudo git config --global --add safe.directory /home/pi/MediaBox
-# or
-git config --global --add safe.directory /home/hp/MediaBox
-sudo git config --global --add safe.directory /home/hp/MediaBox

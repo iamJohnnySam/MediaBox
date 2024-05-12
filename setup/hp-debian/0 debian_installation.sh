@@ -11,7 +11,8 @@
 Hostname: mediabox
 Domain: iamjohnnysam.com
 #root password
-user: hp
+user: MediaBox
+
 username: hp
 #user password
 1: Guided - use entire disk

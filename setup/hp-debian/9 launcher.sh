@@ -1,5 +1,5 @@
 #!/bin/sh
-# launcher.sh
+# 9 launcher.sh
 # navigate to home directory, then to this directory, then execute python script, then back home
 
 sudo apt-get update -y
