@@ -3,7 +3,7 @@ import threading
 import mysql.connector
 
 import passwords
-from tools.custom_exceptions import InvalidParameterException
+from shared_tools.custom_exceptions import InvalidParameterException
 from shared_tools.logger import log
 
 

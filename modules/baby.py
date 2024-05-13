@@ -4,7 +4,7 @@ import refs
 from communication.message import Message
 from database_manager.sql_connector import SQLConnector
 from tools.grapher import grapher_simple_trend, grapher_weight_trend, grapher_category, grapher_bar_trend
-from tools.custom_exceptions import *
+from shared_tools.custom_exceptions import *
 from brains.job import Job
 from modules.base_module import Module
 from shared_tools.logger import log

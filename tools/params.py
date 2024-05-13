@@ -3,8 +3,8 @@ from functools import cache
 import global_variables
 import refs
 from communication import channels
-from database_manager.json_editor import JSONEditor
-from tools.custom_exceptions import UnexpectedOperation
+from shared_tools.json_editor import JSONEditor
+from shared_tools.custom_exceptions import UnexpectedOperation
 
 modules: dict[str, dict[str, dict[str, str | bool | int | list[str] | dict[str, int]]]] = JSONEditor(
     refs.parameter_file).read()

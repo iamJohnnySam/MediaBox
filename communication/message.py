@@ -5,11 +5,11 @@ from datetime import datetime
 from telepot.namedtuple import InlineKeyboardButton, InlineKeyboardMarkup
 
 import refs
-from database_manager.json_editor import JSONEditor
+from shared_tools.json_editor import JSONEditor
 from brains.job import Job
 from database_manager.sql_connector import SQLConnector
 from shared_tools import logger
-from tools.custom_exceptions import InvalidParameterException
+from shared_tools.custom_exceptions import InvalidParameterException
 
 
 class Message:

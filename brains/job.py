@@ -7,7 +7,7 @@ from PIL import Image
 import refs
 from database_manager.sql_connector import SQLConnector
 from tools import params
-from tools.custom_exceptions import *
+from shared_tools.custom_exceptions import *
 from shared_tools.logger import log
 
 

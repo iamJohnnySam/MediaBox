@@ -6,7 +6,7 @@ from database_manager.sql_connector import SQLConnector
 from modules.base_module import Module
 from modules.subscriptions import Subscriptions
 from brains.job import Job
-from database_manager.json_editor import JSONEditor
+from shared_tools.json_editor import JSONEditor
 from shared_tools.logger import log
 
 

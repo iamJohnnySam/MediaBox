@@ -3,7 +3,7 @@ from datetime import datetime
 import global_variables
 import refs
 from communication.message import Message
-from database_manager.json_editor import JSONEditor
+from shared_tools.json_editor import JSONEditor
 from brains.job import Job
 from database_manager.sql_connector import SQLConnector
 from modules.base_module import Module

@@ -1,14 +1,3 @@
-import platform as plat
-
-platform = plat.machine()
-host = plat.node().lower()
-system = plat.system()
-
-ready_to_run = False
-stop_all = False
-restart = False
-reboot_pi = False
-
 socket_id = 0
 
 date_formats = ["%Y-%m-%d", "%d-%m-%Y", "%Y-%b-%d", "%d-%b-%Y", "%m-%d-%y", "%b-%d-%y",

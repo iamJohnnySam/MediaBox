@@ -4,7 +4,7 @@ from communication import channels
 from communication.message import Message
 from refs import db_telepot_accounts
 from communication import message_handler, network_handler
-from database_manager.json_editor import JSONEditor
+from shared_tools.json_editor import JSONEditor
 from tools import params
 from shared_tools.logger import log
 

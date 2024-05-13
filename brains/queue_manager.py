@@ -24,7 +24,7 @@ running_tasks = {}
 
 
 def run_task_mgr():
-    while not global_variables.ready_to_run:
+    while not global_variables.ready:
         time.sleep(1)
 
     log(msg="Task Manager Started")

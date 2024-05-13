@@ -1,75 +1,79 @@
+import multiprocessing
 import os
 import sys
-import threading
 import time
 
-from tools import start_up, params
-from brains.job import Job
-from brains.queue_manager import backup_sequence
-from communication import channel_control
-from communication.message import Message
-import global_variables
-from brains import schedule_manager, queue_manager
+from communication_handler import communication_main
+from job_handler import job_main
+from shared_models.configuration import Configuration
+from tools import start_up
 from shared_tools.logger import log
-from web import web_app
+from web_handler import web_main
 
-start_up.print_logo()
-log(msg=f"Running {global_variables.system} on {global_variables.platform}. Host: {global_variables.host}")
+flag_stop = multiprocessing.Value('i', 0)
+flag_restart = multiprocessing.Value('i', 0)
+flag_reboot = multiprocessing.Value('i', 0)
+crashed = False
 
-t_task = threading.Thread(target=queue_manager.run_task_mgr)
-t_task.start()
-log(msg="Thread Started: Task Manager")
 
-t_schedule = threading.Thread(target=schedule_manager.run_scheduler)
-t_schedule.start()
-log(msg="Thread Started: Schedule Manager")
+def main():
+    global crashed
+    config = Configuration()
+    log(msg=f"Running {config.system} on {config.machine}. Host: {config.host}")
 
-if params.is_module_available('telepot'):
-    channel_control.init_channel()
+    p_communicator = multiprocessing.Process(target=communication_main.main,
+                                             daemon=True,
+                                             args=(flag_stop,))
+    p_communicator.start()
+    log(msg="Process Started: Communication Handler")
 
-if params.is_module_available('socket'):
-    channel_control.init_socket()
+    p_tasker = multiprocessing.Process(target=job_main.main,
+                                       args=(flag_stop, flag_restart, flag_reboot))
+    p_tasker.start()
+    log(msg="Process Started: Job Handler")
 
-if params.is_module_available('web'):
-    t_webapp = threading.Thread(target=web_app.run_webapp, daemon=True)
-    t_webapp.start()
-    log(msg="Thread Started: Web app")
+    p_web = multiprocessing.Process(target=web_main.main,
+                                    daemon=True,
+                                    args=(flag_stop,))
+    p_web.start()
+    log(msg="Process Started: Web Handler")
 
-global_variables.ready_to_run = True
-log(msg="Ready to Run...")
-channel_control.send_message(Message("--- iamJohnnySam ---\n"
-                                     "Version 2.1\n\n"
-                                     f"Program Started on {global_variables.host}..."))
+    p_tasker.join()
+    log(msg="Process Ended: Job Handler")
 
-t_task.join()
-crashed = True if not global_variables.stop_all else False
-global_variables.stop_all = True
+    crashed = True if not flag_stop.value else False
+    flag_stop.value = True
 
-t_schedule.join()
-log(msg="All threads merged")
+    p_web.join()
+    log(msg="Process Ended: Web Handler")
 
-backup_sequence(Job(function="backup_all"))
 
-# ------ EXIT CONDITIONS -----------
-if not global_variables.stop_all or crashed:
-    channel_control.send_message(Message("Crashed."))
-    time.sleep(60)
+def exit_program():
+    if not flag_stop.value or crashed:
+        channel_control.send_message(Message("Crashed."))
+        time.sleep(60)
 
-if (not global_variables.stop_all) or global_variables.restart:
-    log(msg="argv was " + str(sys.argv))
-    log(msg="sys.executable was " + str(sys.executable))
-    start_up.keep_gap()
-    start_up.print_logo()
+    if (not flag_stop.value) or flag_restart.value:
+        log(msg="argv was " + str(sys.argv))
+        log(msg="sys.executable was " + str(sys.executable))
+        start_up.keep_gap()
+        start_up.print_logo()
 
-    python = sys.executable
-    os.execv(sys.executable, ['python'] + sys.argv)
-
-else:
-    if global_variables.reboot_pi:
-        channel_control.send_message(Message("Rebooting now..."))
-        log(msg="Rebooting now...")
-        os.system("sudo reboot")
+        _ = sys.executable
+        os.execv(sys.executable, ['python'] + sys.argv)
 
     else:
-        channel_control.send_message(Message("Exiting..."))
-        log(msg="CLEAN EXIT")
+        if flag_reboot.value:
+            channel_control.send_message(Message("Rebooting now..."))
+            log(msg="Rebooting now...")
+            os.system("sudo reboot")
+
+        else:
+            channel_control.send_message(Message("Exiting..."))
+            log(msg="CLEAN EXIT")
+
+
+if __name__ == "__main__":
+    start_up.print_logo()
+    main()
+    exit_program()
