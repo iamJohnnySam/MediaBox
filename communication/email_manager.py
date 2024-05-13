@@ -4,7 +4,7 @@ import traceback
 
 import global_variables
 from brains.job import Job
-from tools.logger import log
+from shared_tools.logger import log
 
 
 class EmailManager:

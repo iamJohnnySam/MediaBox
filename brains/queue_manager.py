@@ -18,7 +18,7 @@ from modules.show_downloader import ShowDownloader
 from modules.subscriptions import Subscriptions
 from modules.transmission import Transmission
 from tools import params
-from tools.logger import log
+from shared_tools.logger import log
 
 running_tasks = {}
 

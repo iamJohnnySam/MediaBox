@@ -2,7 +2,7 @@ import refs
 from brains.job import Job
 from database_manager.sql_connector import SQLConnector
 from modules.base_module import Module
-from tools.logger import log
+from shared_tools.logger import log
 
 
 class Subscriptions(Module):

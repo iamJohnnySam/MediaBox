@@ -6,7 +6,7 @@ from brains.job import Job
 from communication.message import Message
 from modules.base_module import Module
 from tools import file_tools, params
-from tools.logger import log
+from shared_tools.logger import log
 from tools.word_tools import breakdown_torrent_file_name
 
 

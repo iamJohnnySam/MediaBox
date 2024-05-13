@@ -11,7 +11,7 @@ from database_manager.sql_connector import SQLConnector
 from modules.base_module import Module
 from tools import params
 from tools.custom_exceptions import InvalidParameterException
-from tools.logger import log
+from shared_tools.logger import log
 
 
 class Finance(Module):

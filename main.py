@@ -10,7 +10,7 @@ from communication import channel_control
 from communication.message import Message
 import global_variables
 from brains import schedule_manager, queue_manager
-from tools.logger import log
+from shared_tools.logger import log
 from web import web_app
 
 start_up.print_logo()

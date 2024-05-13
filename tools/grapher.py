@@ -5,7 +5,7 @@ from matplotlib import image
 from matplotlib import pyplot as plt
 
 import refs
-from tools.logger import log
+from shared_tools.logger import log
 
 
 def convert_to_time(val):

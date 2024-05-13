@@ -6,7 +6,7 @@ from refs import db_telepot_accounts
 from communication import message_handler, network_handler
 from database_manager.json_editor import JSONEditor
 from tools import params
-from tools.logger import log
+from shared_tools.logger import log
 
 tp_module = 'telepot'
 sk_module = 'socket'

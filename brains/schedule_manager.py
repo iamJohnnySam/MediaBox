@@ -7,7 +7,7 @@ from brains import task_queue
 from brains.job import Job
 from modules.reminder import Reminder
 from tools import params
-from tools.logger import log
+from shared_tools.logger import log
 
 
 def run_scheduler():

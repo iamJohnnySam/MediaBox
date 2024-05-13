@@ -7,7 +7,7 @@ from modules.base_module import Module
 from modules.subscriptions import Subscriptions
 from brains.job import Job
 from database_manager.json_editor import JSONEditor
-from tools.logger import log
+from shared_tools.logger import log
 
 
 class NewsReader(Module):

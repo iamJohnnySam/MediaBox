@@ -1,7 +1,7 @@
 import threading
 from queue import Queue
 
-from tools.logger import log
+from shared_tools.logger import log
 
 job_q = Queue(maxsize=0)
 job_lock = threading.Lock()

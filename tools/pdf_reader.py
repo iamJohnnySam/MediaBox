@@ -1,4 +1,4 @@
-from tools.logger import log
+from shared_tools.logger import log
 from PyPDF2 import PdfFileReader, PdfFileWriter
 
 

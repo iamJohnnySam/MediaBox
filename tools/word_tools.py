@@ -4,7 +4,7 @@ from datetime import datetime
 
 import global_variables
 from brains.job import Job
-from tools.logger import log
+from shared_tools.logger import log
 
 
 def remove_words(job: Job, sentence, words_to_remove):

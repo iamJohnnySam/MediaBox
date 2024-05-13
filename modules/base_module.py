@@ -6,7 +6,7 @@ from brains import message_queue
 from brains.job import Job
 from tools import params
 from tools.custom_exceptions import *
-from tools.logger import log
+from shared_tools.logger import log
 from tools.word_tools import check_time_validity, check_date_validity
 
 

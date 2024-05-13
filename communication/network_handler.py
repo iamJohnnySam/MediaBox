@@ -9,7 +9,7 @@ from brains.job import Job
 from communication import channel_control
 from communication.message import Message
 from tools import params
-from tools.logger import log
+from shared_tools.logger import log
 
 
 class Spider:

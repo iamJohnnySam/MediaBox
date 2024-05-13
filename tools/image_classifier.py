@@ -2,7 +2,8 @@ import random
 import numpy as np
 
 from brains.job import Job
-from tools import logger, params
+from tools import params
+from shared_tools import logger
 from PIL import Image
 
 if params.is_module_available('cctv'):

@@ -6,7 +6,8 @@ from datetime import datetime
 from brains.job import Job
 from database_manager.sql_connector import SQLConnector
 from modules.base_module import Module
-from tools import logger, params
+from tools import params
+from shared_tools import logger
 import passwords
 
 

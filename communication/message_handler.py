@@ -11,7 +11,7 @@ from brains.job import Job
 from database_manager.json_editor import JSONEditor
 from brains import task_queue
 from tools import params
-from tools.logger import log
+from shared_tools.logger import log
 
 shutdown_bot: dict[str:bool] = {}
 

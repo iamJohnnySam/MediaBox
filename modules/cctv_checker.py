@@ -11,7 +11,7 @@ from modules.base_module import Module
 from tools import params
 from tools.image_classifier import ImageClassifier
 from communication.email_manager import EmailManager
-from tools.logger import log
+from shared_tools.logger import log
 
 
 class CCTVChecker(Module):

@@ -4,7 +4,7 @@ import mysql.connector
 
 import passwords
 from tools.custom_exceptions import InvalidParameterException
-from tools.logger import log
+from shared_tools.logger import log
 
 
 # http://192.168.1.32/phpmyadmin

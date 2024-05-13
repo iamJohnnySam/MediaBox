@@ -6,7 +6,7 @@ from communication.message import Message
 from database_manager.sql_connector import SQLConnector
 from modules.base_module import Module
 from modules.transmission import Transmission
-from tools.logger import log
+from shared_tools.logger import log
 
 
 def quality_extract(topic):

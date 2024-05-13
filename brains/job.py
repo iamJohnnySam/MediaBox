@@ -8,7 +8,7 @@ import refs
 from database_manager.sql_connector import SQLConnector
 from tools import params
 from tools.custom_exceptions import *
-from tools.logger import log
+from shared_tools.logger import log
 
 
 class Job:

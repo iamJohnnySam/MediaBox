@@ -1,10 +1,11 @@
 sudo apt-get install git -y
-sudo apt install python3 -y
-sudo apt install python3-pip -y
+sudo apt install python -y
+sudo apt install python3.10-venv
+sudo apt install python-pip -y
 
-cd MediaBox
-python3 -m venv env
-source env/bin/activate
+cd MediaBox || exit
+python3 -m venv env || exit
+source env/bin/activate || exit
 
 pip install numpy
 pip install schedule
@@ -31,7 +32,7 @@ pip install opencv-python
 pip install python-git-info
 
 deactivate
-cd ..
+cd || exit
 
 sudo nano launcher.sh
 # Install the launcher

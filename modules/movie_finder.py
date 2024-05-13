@@ -4,7 +4,7 @@ from communication.message import Message
 from modules.base_module import Module
 from brains.job import Job
 from modules.transmission import Transmission
-from tools.logger import log
+from shared_tools.logger import log
 
 
 class MovieFinder(Module):

@@ -1,5 +1,5 @@
 from flask import Flask, render_template
-from tools import logger
+from shared_tools import logger
 
 app = Flask(__name__)
 

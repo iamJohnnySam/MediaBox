@@ -7,7 +7,7 @@ from tools.grapher import grapher_simple_trend, grapher_weight_trend, grapher_ca
 from tools.custom_exceptions import *
 from brains.job import Job
 from modules.base_module import Module
-from tools.logger import log
+from shared_tools.logger import log
 
 
 class Baby(Module):

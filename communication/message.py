@@ -8,7 +8,7 @@ import refs
 from database_manager.json_editor import JSONEditor
 from brains.job import Job
 from database_manager.sql_connector import SQLConnector
-from tools import logger
+from shared_tools import logger
 from tools.custom_exceptions import InvalidParameterException
 
 
