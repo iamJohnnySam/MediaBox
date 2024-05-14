@@ -5,10 +5,10 @@ import time
 
 from communication_handler import communication_main
 from job_handler import job_main
+from web_handler import web_main
 from shared_models.configuration import Configuration
 from tools import start_up
 from shared_tools.logger import log
-from web_handler import web_main
 
 flag_stop = multiprocessing.Value('i', 0)
 flag_restart = multiprocessing.Value('i', 0)

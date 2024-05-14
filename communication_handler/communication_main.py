@@ -2,6 +2,10 @@ from shared_tools.logger import log
 
 
 def main(flag_stop):
+
+
+
+
     if params.is_module_available('telepot'):
         channel_control.init_channel()
 

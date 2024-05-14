@@ -1,6 +1,6 @@
 sudo apt install mariadb-server -y
 sudo mysql_secure_installation
-
+sudo apt install php
 sudo apt install phpmyadmin -y
 
 
