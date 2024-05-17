@@ -1,25 +1,4 @@
 {
-    "socket": {
-        "spark": {
-            "server": true,
-            "port": 12345,
-            "connection_count": 1,
-            "identifier": "s"
-        },
-        "mediabox": {
-            "server": false,
-            "connect": {
-                "spark": 12345,
-                "iamjohnnysam-dell": 54321},
-            "identifier": "m"
-        },
-        "iamjohnnysam-dell": {
-            "server": true,
-            "port": 54321,
-            "connection_count": 1,
-            "identifier": "h"
-        }
-    },
     "telepot": {
         "spark": {
             "channels": ["spark", "baby"],
@@ -54,14 +33,6 @@
             "model2": "ai_models/cctv/modelA02.tflite",
             "download_loc": "resources/CCTVImages",
             "save_loc": "/home/hp/media/CCTVSaved"
-        }
-    },
-    "backup": {
-        "spark": {
-            "backup_location": "/home/pi/backup"
-        },
-        "mediabox": {
-            "backup_location": "/home/hp/backup"
         }
     }
 }

@@ -4,7 +4,7 @@ import schedule
 
 import global_variables
 from brains import task_queue
-from brains.job import Job
+from shared_models.job import Job
 from modules.reminder import Reminder
 from tools import params
 from shared_tools.logger import log

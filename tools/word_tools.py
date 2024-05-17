@@ -3,7 +3,7 @@ import string
 from datetime import datetime
 
 import global_variables
-from brains.job import Job
+from shared_models.job import Job
 from shared_tools.logger import log
 
 

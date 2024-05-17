@@ -1,24 +1,32 @@
 import inspect
 import json
 import logging
-import os
+import os.path
 from datetime import date, datetime
-
-import refs
 
 today_date = str(date.today())
 
+logs_location = ""
+log_level = "error"
+error_codes = ""
+log_to_console = True
+log_to_file = False
+file_created = False
+
 
 def log_file_name():
-    return f'{refs.logs_location}log-{today_date}.log'
+    if logs_location != "" and not os.path.exists(logs_location):
+        os.makedirs(logs_location)
+    return os.path.join(logs_location, f"log-{today_date}.log")
 
 
 def log(job_id: int = 0, msg: str = "", log_type: str = "debug", error_code: int = 0, error: str = ""):
+    global file_created
     if error_code == 0 and msg == "":
         raise ValueError("Invalid Parameters for record")
 
-    elif error_code != 0:
-        with open(refs.error_codes, 'r') as file:
+    elif error_code != 0 and error_codes != "":
+        with open(error_codes, 'r') as file:
             errors: dict = json.load(file)
 
         if str(error_code) in errors.keys():
@@ -44,29 +52,35 @@ def log(job_id: int = 0, msg: str = "", log_type: str = "debug", error_code: int
         the_class = caller_frame.f_locals["self"].__class__.__name__
         caller = f"{the_class}"
 
-    if today_date != str(date.today()):
-        logging.basicConfig(filename=log_file_name(), level=logging.DEBUG)
+    if log_to_file and (today_date != str(date.today()) or not file_created):
+        level = logging.DEBUG
+        logging.basicConfig(filename=log_file_name(), level=level)
+        file_created = True
 
     print_message = False
     if log_type == "warn":
         log_type = "WRN"
-        logging.warning(message)
-        if refs.log_print and refs.log_level in ["debug", "info", "warn"]:
+        if log_to_file:
+            logging.warning(message)
+        if log_to_console and log_level in ["debug", "info", "warn"]:
             print_message = True
     elif log_type == "error":
         log_type = "ERR"
-        logging.error(message)
-        if refs.log_print and refs.log_level in ["debug", "info", "warn", "error"]:
+        if log_to_file:
+            logging.error(message)
+        if log_to_console and log_level in ["debug", "info", "warn", "error"]:
             print_message = True
     elif log_type == "debug":
-        logging.debug(message)
         log_type = "DBG"
-        if refs.log_print and refs.log_level in ["debug"]:
+        if log_to_file:
+            logging.debug(message)
+        if log_to_console and log_level in ["debug"]:
             print_message = True
     else:
-        logging.info(message)
         log_type = "INF"
-        if refs.log_print and refs.log_level in ["debug", "info"]:
+        if log_to_file:
+            logging.info(message)
+        if log_to_console and log_level in ["debug", "info"]:
             print_message = True
 
     if error != "":
@@ -76,9 +90,3 @@ def log(job_id: int = 0, msg: str = "", log_type: str = "debug", error_code: int
         for segment in message.split("\n"):
             print(f'{log_type},{datetime.now().strftime("%m-%d %H:%M:%S")},{caller.ljust(15)},'
                   f'{job_id:03},>,{segment}')
-
-
-try:
-    logging.basicConfig(filename=log_file_name(), level=logging.DEBUG)
-except PermissionError:
-    log(0, "PERMISSION ERROR", log_type="error")

@@ -5,8 +5,8 @@ from random import random
 
 import global_variables
 import passwords
-from brains.job import Job
-from communication.message import Message
+from shared_models.job import Job
+from shared_models.message import Message
 from modules.base_module import Module
 from tools import params
 from tools.image_classifier import ImageClassifier

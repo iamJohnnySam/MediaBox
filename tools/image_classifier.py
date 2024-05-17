@@ -1,7 +1,7 @@
 import random
 import numpy as np
 
-from brains.job import Job
+from shared_models.job import Job
 from tools import params
 from shared_tools import logger
 from PIL import Image

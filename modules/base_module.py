@@ -1,9 +1,9 @@
 from datetime import datetime, timedelta
 
 from communication.channels import bots
-from communication.message import Message
-from brains import message_queue
-from brains.job import Job
+from shared_models.message import Message
+from common_workspace import message_queue
+from shared_models.job import Job
 from tools import params
 from shared_tools.custom_exceptions import *
 from shared_tools.logger import log

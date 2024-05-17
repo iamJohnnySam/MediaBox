@@ -1,3 +1,11 @@
+import multiprocessing
+
+version = "3.0"
+
+flag_stop = multiprocessing.Value('i', 0)
+flag_restart = multiprocessing.Value('i', 0)
+flag_reboot = multiprocessing.Value('i', 0)
+
 socket_id = 0
 
 date_formats = ["%Y-%m-%d", "%d-%m-%Y", "%Y-%b-%d", "%d-%b-%Y", "%m-%d-%y", "%b-%d-%y",

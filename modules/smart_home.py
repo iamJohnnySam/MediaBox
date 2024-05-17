@@ -1,4 +1,4 @@
-from brains.job import Job
+from shared_models.job import Job
 from modules.base_module import Module
 from tools.package_installer import import_or_install
 

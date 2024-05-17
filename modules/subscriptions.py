@@ -1,5 +1,5 @@
 import refs
-from brains.job import Job
+from shared_models.job import Job
 from database_manager.sql_connector import SQLConnector
 from modules.base_module import Module
 from shared_tools.logger import log

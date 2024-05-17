@@ -10,4 +10,5 @@ class UnexpectedOperation(Exception):
     pass
 
 
-
+class InvalidConfiguration(Exception):
+    pass

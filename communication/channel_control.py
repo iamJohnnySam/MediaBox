@@ -1,7 +1,7 @@
 import global_variables
-from brains.job import Job
+from shared_models.job import Job
 from communication import channels
-from communication.message import Message
+from shared_models.message import Message
 from refs import db_telepot_accounts
 from communication import message_handler, network_handler
 from shared_tools.json_editor import JSONEditor

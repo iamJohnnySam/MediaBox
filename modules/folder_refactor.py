@@ -2,10 +2,11 @@ import os
 import shutil
 
 import refs
-from brains.job import Job
-from communication.message import Message
+from shared_models.job import Job
+from shared_models.message import Message
 from modules.base_module import Module
-from tools import file_tools, params
+from tools import params
+from shared_tools import file_tools
 from shared_tools.logger import log
 from tools.word_tools import breakdown_torrent_file_name
 

@@ -5,8 +5,8 @@ from datetime import datetime
 
 import global_variables
 import refs
-from brains.job import Job
-from communication.message import Message
+from shared_models.job import Job
+from shared_models.message import Message
 from database_manager.sql_connector import SQLConnector
 from modules.base_module import Module
 from tools import params

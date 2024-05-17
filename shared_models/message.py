@@ -4,71 +4,66 @@ from datetime import datetime
 
 from telepot.namedtuple import InlineKeyboardButton, InlineKeyboardMarkup
 
-import refs
+from shared_models import configuration
 from shared_tools.json_editor import JSONEditor
-from brains.job import Job
+from shared_models.job import Job
 from database_manager.sql_connector import SQLConnector
 from shared_tools import logger
 from shared_tools.custom_exceptions import InvalidParameterException
 
 
 class Message:
-    def __init__(self, send_string: str, job: Job = None, chat=None, reply_to=None,
+    def __init__(self, send_string: str, job: Job = None,
+                 chat=None, reply_to=None, telepot_account: str = None,
                  keyboard=None,
                  group: str = None,
                  photo: str = ""):
 
-        if job is not None:
-            self._job_id = job.job_id
-        else:
-            self._job_id = 0
+        if send_string == "" or send_string is None:
+            logger.log(job_id=self.job_id, error_code=20006)
+            self.send_string = "- NO MESSAGE -"
 
-        self._db = SQLConnector(self._job_id, database=refs.db_admin)
+        self._config: dict = configuration.Configuration().telegram
+        self._db = SQLConnector(self.job_id, database=self._config["database"])
 
         self.send_string = send_string
-        self.job = job
+        self._job = job
         self._chat = chat
         self._reply_to = reply_to
         self.keyboard = keyboard
         self.group = group
         self.photo = photo
-        self._this_telepot_account = ""
-
-        # Check Message
-        if self.send_string == "" or self.send_string is None:
-            logger.log(job_id=self.job_id, error_code=20006)
-            self.send_string = "NO MESSAGE"
+        self._this_telepot_account = telepot_account
 
     @property
     def job_id(self):
-        if self._job_id != 0:
-            return self._job_id
+        if self._job is not None:
+            return self._job.job_id
         else:
-            if self.job is not None:
-                return self.job.job_id
-            else:
-                return 0
+            return 0
 
     @property
     def master(self):
-        result = self._db.select(table=refs.tbl_chats, columns="chat_id", where={"master": 1})[0]
+        result = self._db.select(table=self._config["tbl_allowed_chats"], columns="chat_id", where={"master": 1})[0]
         return result
 
     @property
     def chats(self):
-        if self.job is None and self._chat is None and self.group is None:
+        if self._job is None and self._chat is None and self.group is None:
             chats = [self.master]
 
         elif self.group is not None:
-            if self._db.check_exists(refs.tbl_groups, {"group_name": self.group}) == 0:
+            if self._db.check_exists(self._config["tbl_groups"], {"group_name": self.group}) == 0:
                 logger.log(job_id=self.job_id, error_code=20007)
                 raise ValueError
-            result = self._db.select(table=refs.tbl_groups, columns="chat_id", where={"group_name": self.group},
+            result = self._db.select(table=self._config["tbl_groups"],
+                                     columns="chat_id",
+                                     where={"group_name": self.group},
                                      fetch_all=True)
             chats = [row[0] for row in result]
 
-        elif self.job is not None:
-            chats = [self.job.chat_id]
+        elif self._job is not None:
+            chats = [self._job.chat_id]
 
         elif self._chat is not None and type(self._chat) == int:
             chats = [self._chat]
@@ -81,9 +76,9 @@ class Message:
 
     @property
     def reply_to(self):
-        if self.group is None and self._reply_to is None and self.job is not None:
-            if self._this_telepot_account == "" or self.job.telepot_account == self._this_telepot_account:
-                self._reply_to = self.job.message_id
+        if self.group is None and self._reply_to is None and self._job is not None:
+            if self._this_telepot_account == "" or self._job.telepot_account == self._this_telepot_account:
+                self._reply_to = self._job.message_id
             else:
                 self._reply_to = None
                 logger.log(job_id=self.job_id, error_code=20009)
@@ -105,7 +100,7 @@ class Message:
     def add_job_keyboard(self, button_text: list, button_val: list, arrangement: list):
         cb_id = self.job.cb_id
         if self.job_id == 0:
-            self._job_id = self.job.job_id
+            self.job_id = self.job_id
 
         self._arrange_keyboard(self.job_id, button_text, button_val, arrangement, cb_id)
 
@@ -129,7 +124,7 @@ class Message:
 
             if len(button_data) >= 60:
                 telepot_cb = {button_prefix: button_data}
-                save_loc = os.path.join(refs.loc_telepot_callback, f"{str(job_id)}_cb.json")
+                save_loc = os.path.join(self._config["callback_overflow"], f"{str(job_id)}_cb.json")
                 JSONEditor(save_loc).add_level1(telepot_cb, job_id=self.job_id)
                 button_data = f"{button_prefix};X"
 
@@ -166,7 +161,7 @@ class Message:
             button_value.append(f'{index};/CANCEL')
             arrangement.append(1)
 
-        logger.log(job_id=self.job.job_id, msg="Keyboard extracted > " + str(arrangement))
+        logger.log(job_id=self.job_id, msg="Keyboard extracted > " + str(arrangement))
 
         self.add_job_keyboard(button_text, button_value, arrangement)
 
@@ -200,18 +195,18 @@ class Message:
             button_value.append(f'cancel;/CANCEL')
             arrangement.append(1)
 
-        logger.log(job_id=self.job.job_id, msg="Keyboard extracted > " + str(arrangement))
+        logger.log(job_id=self.job_id, msg="Keyboard extracted > " + str(arrangement))
 
         self._add_one_time_keyboard(button_text, button_value, arrangement)
 
     def send_to_master(self):
-        self.job = None
+        self._job = None
         self._chat = None
         self.group = None
 
     def compress(self):
-        return{
-            "job": self._job_id,
+        return {
+            "job": self.job_id,
             "channel": self._this_telepot_account,
             "msg": self.send_string,
             "chat": self._chat,

@@ -5,9 +5,9 @@ import time
 
 import global_variables
 from brains import task_queue
-from brains.job import Job
+from shared_models.job import Job
 from communication import channel_control
-from communication.message import Message
+from shared_models.message import Message
 from tools import params
 from shared_tools.logger import log
 

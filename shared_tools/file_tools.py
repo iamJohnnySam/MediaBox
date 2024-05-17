@@ -1,7 +1,7 @@
 import os
 import shutil
 
-from brains.job import Job
+from shared_models.job import Job
 from shared_tools.logger import log
 
 

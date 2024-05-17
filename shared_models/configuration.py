@@ -1,45 +1,78 @@
 import platform
+from datetime import datetime
 
-import global_variables
+from shared_tools.custom_exceptions import InvalidConfiguration
 from shared_tools.json_editor import JSONEditor
-from shared_tools.logger import log
+from shared_tools import logger
+
+config_data = {}
+config_data_read_time: datetime = datetime.now()
+updated_logger = False
 
 
 class Configuration:
 
-    def __init__(self, file_location="app_config.json"):
+    def __init__(self, config_location: str = "app_config.json"):
+        global config_data
+        global config_data_read_time
+
         self.machine = platform.machine()
         self.host = platform.node().lower()
         self.system = platform.system()
 
-        file_data: dict = JSONEditor(file_location).read()
-        if self.host in file_data.keys():
-            self._config: dict = file_data[self.host]
+        time_expired = (config_data_read_time - datetime.now()).total_seconds() > 3600
+        if time_expired or config_data == {}:
+            config_data = JSONEditor(config_location).read()
+            config_data_read_time = datetime.now()
+
+        if self.host in config_data.keys():
+            self._config: dict = config_data[self.host]
         else:
-            global_variables.flag_stop = True
-            return
+            raise InvalidConfiguration("This host is not in configuration!")
 
         if type(self._config) is not dict:
-            global_variables.flag_stop = True
-            return
+            raise InvalidConfiguration("Invalid configuration format for host. No dictionary found!")
 
-    def get_value(self, module: str) -> dict | bool:
-        log(msg=f"Reading configuration for module, {module}.")
+        if not updated_logger:
+            self._update_logger()
+
+    def _update_logger(self) -> None:
+        logger.logs_location = self._config["admin"]["log_location"]
+        logger.log_level = self._config["admin"]["log_level"]
+        logger.log_to_file = self._config["admin"]["log_to_file"]
+        logger.log_to_console = self._config["admin"]["log_to_console"]
+        logger.error_codes = self._config["admin"]["error_codes"]
+
+    def _get_module_details(self, module: str) -> dict | bool:
+        logger.log(msg=f"Reading configuration for module, {module}.")
         if module in self._config.keys():
             data: dict = self._config[module]
         else:
-            log(msg=f"Could not find the module, {module} in configuration file.")
+            logger.log(msg=f"Could not find the module, {module} in configuration file.")
             return False
 
         if type(data) is dict and "enable" in data.keys():
             if data["enable"]:
                 return data
             else:
+                logger.log(msg=f"For this configuration the module, {module} is disabled.")
                 return False
         else:
-            log(msg=f"Could not determine 'enable' state for module, {module}.")
+            logger.log(msg=f"Could not determine 'enable' state for module, {module}.")
             return False
+
+    def _get_module_details_for_prop(self, module):
+        val = self._get_module_details(module)
+        if not val:
+            raise InvalidConfiguration(f"Could not find the module, {module} in configuration file.")
+
+    def is_module_available(self, module: str):
+        return True if self._get_module_details(module) else False
 
     @property
     def telegram(self):
-        return self.get_value("telegram")
+        return self._get_module_details_for_prop("telegram")
+
+    @property
+    def socket(self):
+        return self._get_module_details_for_prop("socket")

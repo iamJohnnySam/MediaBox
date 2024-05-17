@@ -6,8 +6,8 @@ import telepot
 from telepot.loop import MessageLoop
 
 import refs
-from communication.message import Message
-from brains.job import Job
+from shared_models.message import Message
+from shared_models.job import Job
 from shared_tools.json_editor import JSONEditor
 from brains import task_queue
 from tools import params

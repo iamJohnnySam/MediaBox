@@ -4,7 +4,7 @@ import time
 import global_variables
 import refs
 from brains import task_queue
-from brains.job import Job
+from shared_models.job import Job
 from communication import channel_control
 from modules.admin import Admin
 from modules.baby import Baby

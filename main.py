@@ -3,10 +3,10 @@ import os
 import sys
 import time
 
+from common_workspace import global_var
 from communication_handler import communication_main
 from job_handler import job_main
 from web_handler import web_main
-from shared_models.configuration import Configuration
 from tools import start_up
 from shared_tools.logger import log
 
@@ -18,12 +18,12 @@ crashed = False
 
 def main():
     global crashed
-    config = Configuration()
-    log(msg=f"Running {config.system} on {config.machine}. Host: {config.host}")
+    log(msg=f"Running {global_var.configuration.system} on {global_var.configuration.machine}. "
+            f"Host: {global_var.configuration.host}")
 
     p_communicator = multiprocessing.Process(target=communication_main.main,
                                              daemon=True,
-                                             args=(flag_stop,))
+                                             args=(flag_stop, ))
     p_communicator.start()
     log(msg="Process Started: Communication Handler")
 
@@ -34,7 +34,7 @@ def main():
 
     p_web = multiprocessing.Process(target=web_main.main,
                                     daemon=True,
-                                    args=(flag_stop,))
+                                    args=(flag_stop, flag_restart, flag_reboot))
     p_web.start()
     log(msg="Process Started: Web Handler")
 

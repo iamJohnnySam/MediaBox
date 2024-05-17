@@ -3,7 +3,7 @@ import os
 import shutil
 from datetime import datetime
 
-from brains.job import Job
+from shared_models.job import Job
 from database_manager.sql_connector import SQLConnector
 from modules.base_module import Module
 from tools import params

@@ -1,11 +1,11 @@
 import feedparser
 
 import refs
-from communication.message import Message
+from shared_models.message import Message
 from database_manager.sql_connector import SQLConnector
 from modules.base_module import Module
 from modules.subscriptions import Subscriptions
-from brains.job import Job
+from shared_models.job import Job
 from shared_tools.json_editor import JSONEditor
 from shared_tools.logger import log
 

@@ -5,16 +5,11 @@ host_file = 'database/host_details.json'
 parameter_file = 'database/system_parameters.json'
 
 # --- LOGGING ---
-logs_location = 'log/'
-if not os.path.exists(logs_location):
-    os.makedirs(logs_location)
-log_level = "debug"  # LOGGING LEVEL
+
 log_print = True
 
 # telepot
 db_telepot_accounts = 'database/telepot_accounts.json'
-db_telepot_commands = 'database/telepot_commands.json'
-loc_telepot_callback = 'database/telepot/'
 telepot_image_dump = 'communication/chat_images'
 
 # Media
@@ -26,7 +21,6 @@ if not os.path.isdir(charts_save_location):
     os.makedirs(charts_save_location)
 
 # JSON Databases
-error_codes = "tools/error_codes.json"
 news_sources = 'database/news_sources.json'
 
 # SQL Databases
