@@ -1,10 +1,11 @@
 import os
 import gitinfo
 
-import global_variables
-from tools import params
+from shared_models import configuration
 
-if params.known_hosts[global_variables.host]['system'] == 'Linux':
+config = configuration.Configuration()
+
+if config.system == 'Linux':
     print("")
     print("")
     print("")
@@ -17,7 +18,7 @@ def keep_gap():
 
 
 def print_logo():
-    if params.known_hosts[global_variables.host]['system'] == 'Linux':
+    if config.system == 'Linux':
         os.system("reset")
 
     print("   _                           _           _                               ____                      ")
@@ -27,14 +28,14 @@ def print_logo():
     print("  | | | (_| | | | | | | | | |_| | | (_) | | | | | | | | | | | | | | |_| |  ___) | | (_| | | | | | | |")
     print("  |_|  \\__,_| |_| |_| |_|  \\___/   \\___/  |_| |_| |_| |_| |_| |_|  \\__, | |____/   \\__,_| |_| |_| |_|")
     print("                                                                   |___/                             ")
-    if global_variables.host == "spark":
+    if config.host == "spark":
         print("   _____                  __  ")
         print("  / ___/____  ____ ______/ /__")
         print("  \\__ \\/ __ \\/ __ `/ ___/ //_/")
         print(" ___/ / /_/ / /_/ / /  / ,<   ")
         print("/____/ .___/\\__,_/_/  /_/|_|  ")
         print("    /_/                       ")
-    elif global_variables.host == "mediabox":
+    elif config.host == "mediabox":
         print("    __  ___         ___       ____             ")
         print("   /  |/  /__  ____/ (_)___ _/ __ )____  _  __ ")
         print("  / /|_/ / _ \\/ __  / / __ `/ __  / __ \\| |/_/ ")

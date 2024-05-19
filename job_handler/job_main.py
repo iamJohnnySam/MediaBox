@@ -21,17 +21,26 @@ def main(message_q, job_q, packet_q, info_q, flag_stop, flag_restart, flag_reboo
     _ = configuration.Configuration()
 
     t_task = threading.Thread(target=queue_manager.run_task_mgr)
+    t_task.start()
     t_schedule = threading.Thread(target=schedule_manager.run_scheduler)
+    t_schedule.start()
 
-    if not global_var.flag_stop.value:
-        if not t_task.isAlive():
-            t_task.start()
+    while not global_var.flag_stop.value:
+        if not t_task.is_alive():
+            t_task.join()
+            t_task.run()
             log(msg="Thread Started: Task Manager")
 
-        if not t_schedule.isAlive():
-            t_schedule.start()
+        if not t_schedule.is_alive():
+            t_schedule.join()
+            t_schedule.run()
             log(msg="Thread Started: Schedule Manager")
 
         time.sleep(60)
 
     # todo backup_sequence(Job(function="backup_all"))
+
+
+if __name__ == "__main__":
+    main(queues.message_q, queues.job_q, queues.packet_q, queues.info_q,
+         global_var.flag_stop, global_var.flag_restart, global_var.flag_reboot)

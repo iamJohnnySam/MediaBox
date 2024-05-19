@@ -1,6 +1,6 @@
 import feedparser
 
-import refs
+from shared_models import configuration
 from shared_models.job import Job
 from shared_models.message import Message
 from database_manager.sql_connector import SQLConnector
@@ -27,17 +27,20 @@ class ShowDownloader(Module):
 
     def __init__(self, job: Job):
         super().__init__(job)
-        self.db = SQLConnector(job.job_id, database=refs.db_entertainment)
+
+        self.config = configuration.Configuration().media
+
+        self.db = SQLConnector(job.job_id, database=self.config["database"])
         log(self._job.job_id, "Show Downloader Object Created")
 
     def check_shows(self):
         log(self._job.job_id, "-------STARTED TV SHOW CHECK SCRIPT-------")
-        feed = feedparser.parse(refs.feed_link)
+        feed = feedparser.parse(self.config["show_feed"])
         show_list = []
 
         for x in feed.entries:
             episode_name, episode_quality = quality_extract(x.title)
-            show_exists = self.db.check_exists(refs.tbl_tv_shows, {'episode_name': episode_name,
+            show_exists = self.db.check_exists(self.config["tbl_tv_shows"], {'episode_name': episode_name,
                                                                    'name': x.tv_show_name})
 
             if show_exists == 0:
@@ -63,12 +66,12 @@ class ShowDownloader(Module):
                 if success:
                     columns = "name, episode_id, episode_name, magnet, quality, torrent_name"
                     val = (row[4], row[0], row[1], row[2], str(row[3]), str(torrent_id))
-                    self.db.insert(refs.tbl_tv_shows, columns, val)
+                    self.db.insert(self.config["tbl_tv_shows"], columns, val)
                     log(self._job.job_id, torrent_id)
                     self._job.is_background_task = False
 
                     message = f'{str(row[1])} added at {str(row[3])} torrent id = {str(torrent_id)}'
-                    self.send_message(Message(message, job=self._job, group=refs.group_tv_show))
+                    self.send_message(Message(message, job=self._job, group=self.config["telegram_group"]))
                 else:
                     log(self._job.job_id, "Torrent Add Failed: " + str(row[2]), log_type="error")
 
