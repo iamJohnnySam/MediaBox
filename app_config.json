@@ -1,4 +1,15 @@
 {
+  "COMMON": {
+    "socket": {
+      "enable": true,
+      "port": 10000,
+      "connect": {
+        "iamjohnnysam-dell": {"port": 10000, "static_ip": "192.168.1.10"},
+        "spark": {"port": 10000, "static_ip": "192.168.1.32"},
+        "mediabox": {"port": 10000, "static_ip": "192.168.1.30"},
+        "entertainer": {"port": 10000, "static_ip": "192.168.1.31"}}
+    }
+  },
   "iamjohnnysam-dell": {
     "admin": {
       "identifier": "h",
@@ -9,15 +20,6 @@
       "backup_location": "backup/",
       "error_codes": "tools/error_codes.json"
     },
-    "socket": {
-      "enable": true,
-      "port": 10000,
-      "connect": {
-        "iamjohnnysam-dell": {"port": 10000, "static_ip": "192.168.1.10"},
-        "spark": {"port": 10000, "static_ip": "192.168.1.32"},
-        "mediabox": {"port": 10000, "static_ip": "192.168.1.30"},
-        "entertainer": {"port": 10000, "static_ip": "192.168.1.31"}}
-    },
     "telegram": {
       "enable": true,
       "connect": ["test"],
@@ -26,52 +28,26 @@
       "db_telepot_accounts": "database/telepot_accounts.json",
       "database": "administration",
       "tbl_allowed_chats": "telepot_allowed_chats",
-      "tbl_groups": "telepot_groups"
+      "tbl_groups": "telepot_groups",
+      "telepot_image_dump": "communication/chat_images"
     }
   },
   "spark": {
      "admin": {
       "identifier": "s",
       "backup_location": "/home/pi/backup"
-    },
-    "socket": {
-      "enable": true,
-      "port": 10000,
-      "connect": {
-        "iamjohnnysam-dell": {"port": 10000, "static_ip": "192.168.1.10"},
-        "spark": {"port": 10000, "static_ip": "192.168.1.32"},
-        "mediabox": {"port": 10000, "static_ip": "192.168.1.30"},
-        "entertainer": {"port": 10000, "static_ip": "192.168.1.31"}}
     }
   },
   "mediabox": {
      "admin": {
       "identifier": "m",
       "backup_location": "/home/hp/backup"
-    },
-    "socket": {
-      "enable": true,
-      "port": 10000,
-      "connect": {
-        "iamjohnnysam-dell": {"port": 10000, "static_ip": "192.168.1.10"},
-        "spark": {"port": 10000, "static_ip": "192.168.1.32"},
-        "mediabox": {"port": 10000, "static_ip": "192.168.1.30"},
-        "entertainer": {"port": 10000, "static_ip": "192.168.1.31"}}
     }
   },
   "entertainer": {
      "admin": {
       "identifier": "e",
       "backup_location": "/home/pi/backup"
-    },
-    "socket": {
-      "enable": true,
-      "port": 10000,
-      "connect": {
-        "iamjohnnysam-dell": {"port": 10000, "static_ip": "192.168.1.10"},
-        "spark": {"port": 10000, "static_ip": "192.168.1.32"},
-        "mediabox": {"port": 10000, "static_ip": "192.168.1.30"},
-        "entertainer": {"port": 10000, "static_ip": "192.168.1.31"}}
     }
   }
 }

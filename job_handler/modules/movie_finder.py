@@ -1,9 +1,9 @@
 import feedparser
 
 from shared_models.message import Message
-from modules.base_module import Module
+from job_handler.base_module import Module
 from shared_models.job import Job
-from modules.transmission import Transmission
+from job_handler.modules.transmission import Transmission
 from shared_tools.logger import log
 
 

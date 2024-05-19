@@ -5,7 +5,7 @@ from datetime import datetime
 
 from shared_models.job import Job
 from database_manager.sql_connector import SQLConnector
-from modules.base_module import Module
+from job_handler.base_module import Module
 from tools import params
 from shared_tools import logger
 import passwords

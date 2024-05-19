@@ -8,10 +8,6 @@ parameter_file = 'database/system_parameters.json'
 
 log_print = True
 
-# telepot
-db_telepot_accounts =
-telepot_image_dump = 'communication/chat_images'
-
 # Media
 feed_link = "https://showrss.info/user/275495.rss?magnets=true&namespaces=true&name=clean&quality=null&re=null"
 

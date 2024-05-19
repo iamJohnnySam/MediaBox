@@ -3,7 +3,7 @@ import time
 import schedule
 
 import global_variables
-from brains import task_queue
+from job_handler import task_queue
 from shared_models.job import Job
 from modules.reminder import Reminder
 from tools import params

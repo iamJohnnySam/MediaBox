@@ -6,7 +6,7 @@ from database_manager.sql_connector import SQLConnector
 from tools.grapher import grapher_simple_trend, grapher_weight_trend, grapher_category, grapher_bar_trend
 from shared_tools.custom_exceptions import *
 from shared_models.job import Job
-from modules.base_module import Module
+from job_handler.base_module import Module
 from shared_tools.logger import log
 
 

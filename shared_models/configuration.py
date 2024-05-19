@@ -25,13 +25,17 @@ class Configuration:
             config_data = JSONEditor(config_location).read()
             config_data_read_time = datetime.now()
 
+        common_config: dict = config_data["COMMON"]
+
         if self.host in config_data.keys():
-            self._config: dict = config_data[self.host]
+            host_config: dict = config_data[self.host]
         else:
             raise InvalidConfiguration("This host is not in configuration!")
 
-        if type(self._config) is not dict:
+        if type(host_config) is not dict or type(common_config) is not dict:
             raise InvalidConfiguration("Invalid configuration format for host. No dictionary found!")
+
+        self._config = host_config.update(common_config)
 
         if not updated_logger:
             self._update_logger()

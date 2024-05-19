@@ -9,7 +9,7 @@ import refs
 from shared_models.message import Message
 from shared_models.job import Job
 from shared_tools.json_editor import JSONEditor
-from brains import task_queue
+from job_handler import task_queue
 from tools import params
 from shared_tools.logger import log
 

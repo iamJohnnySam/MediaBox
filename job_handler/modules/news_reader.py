@@ -3,8 +3,8 @@ import feedparser
 import refs
 from shared_models.message import Message
 from database_manager.sql_connector import SQLConnector
-from modules.base_module import Module
-from modules.subscriptions import Subscriptions
+from job_handler.base_module import Module
+from job_handler.modules.subscriptions import Subscriptions
 from shared_models.job import Job
 from shared_tools.json_editor import JSONEditor
 from shared_tools.logger import log

@@ -1,5 +1,5 @@
 from shared_models.job import Job
-from communication import channels
+from communication_handler import channels
 from shared_models.message import Message
 from tools import params
 from shared_tools.logger import log

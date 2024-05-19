@@ -3,7 +3,7 @@ import threading
 import time
 
 from common_workspace import global_var
-from communication_handler.socket.network_connection import Link
+from communication_handler.socket.link import Link
 from shared_tools.configuration_tools import is_config_enabled, get_host_from_ip
 from shared_tools.logger import log
 

@@ -1,7 +1,7 @@
 import socket
 import time
 
-from communication_handler.socket.network_connection import Link
+from communication_handler.socket.link import Link
 from shared_tools.logger import log
 
 

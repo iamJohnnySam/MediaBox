@@ -2,7 +2,7 @@ from functools import cache
 
 import global_variables
 import refs
-from communication import channels
+from communication_handler import channels
 from shared_tools.json_editor import JSONEditor
 from shared_tools.custom_exceptions import UnexpectedOperation
 

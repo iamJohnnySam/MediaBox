@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 
-from communication.channels import bots
+from communication_handler.channels import bots
 from shared_models.message import Message
 from common_workspace import message_queue
 from shared_models.job import Job
