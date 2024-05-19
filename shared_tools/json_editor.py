@@ -9,13 +9,14 @@ class JSONEditor:
     def __init__(self, location):
         self.file = location
 
-        if not os.path.exists(location):
-            os.makedirs(os.path.dirname(location), exist_ok=True)
-            with open(location, "w") as f:
+    def add_level1(self, data, job_id=0):
+        if not os.path.exists(self.file):
+            os.makedirs(os.path.dirname(self.file), exist_ok=True)
+            with open(self.file, "w") as f:
                 json.dump({}, f)
 
-    def add_level1(self, data, job_id=0):
         log(job_id=job_id, msg="Added Level 1 data: " + str(list(data.keys())[0]) + " at " + self.file)
+
         with open(self.file, 'r+') as file:
             file_data = json.load(file)
             file_data.update(data)

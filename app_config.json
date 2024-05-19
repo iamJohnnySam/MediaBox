@@ -19,7 +19,7 @@
       "log_to_console": true,
       "backup_location": "backup/",
       "backup_databases": ["administration", "news", "transactions", "baby", "entertainment"],
-      "error_codes": "tools/error_codes.json"
+      "error_codes": "shared_tools/error_codes.json"
     },
     "telegram": {
       "enable": true,
@@ -33,19 +33,51 @@
       "telepot_image_dump": "communication/chat_images"
     },
     "media": {
-      "enable": false
+      "enable": false,
+      "show_feed": "https://showrss.info/user/275495.rss?magnets=true&namespaces=true&name=clean&quality=null&re=null",
+      "media_path": "/home/hp/media",
+      "download": "/home/hp/media/Downloads",
+      "movies": "/home/hp/media/Movies",
+      "tv_shows": "/home/hp/media/TVShows",
+      "unknown_files": "/home/hp/media/Unknown",
+      "database": "entertainment",
+      "tbl_tv_shows": "tv_show",
+      "telegram_group": "show"
     },
     "cctv": {
-      "enable": false
+      "enable": false,
+      "imap": "imap.gmail.com",
+      "mailbox": "CCTV",
+      "sent": "\"[Gmail]/Sent Mail\"",
+      "model1": "ai_models/cctv/modelA01.tflite",
+      "model2": "ai_models/cctv/modelA02.tflite",
+      "download_loc": "resources/CCTVImages",
+      "save_loc": "/home/hp/media/CCTVSaved",
+      "telegram_group": "cctv"
     },
     "news": {
-      "enable": true
+      "enable": true,
+      "sources": "database/news_sources.json",
+      "database": "news",
+      "tbl_news": "news_articles"
     },
     "finance": {
-      "enable": true
+      "enable": true,
+      "images": "database/finance_images",
+      "database": "transactions",
+      "tbl_transactions": "transaction_lkr",
+      "tbl_categories": "categories",
+      "tbl_raw_vendors": "vendors_raw",
+      "tbl_vendors": "vendors"
     },
     "baby": {
-      "enable": true
+      "enable": true,
+      "database": "baby",
+      "tbl_feed": "feed",
+      "tbl_diaper": "diaper",
+      "tbl_weight": "weight",
+      "tbl_pump": "pump",
+      "telegram_group": "baby"
     }
 
   },

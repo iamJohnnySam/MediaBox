@@ -4,8 +4,11 @@ import matplotlib.dates as mdates
 from matplotlib import image
 from matplotlib import pyplot as plt
 
-import refs
 from shared_tools.logger import log
+
+charts_save_location = "resources/charts/"
+if not os.path.isdir(charts_save_location):
+    os.makedirs(charts_save_location)
 
 
 def convert_to_time(val):
@@ -96,7 +99,7 @@ def grapher_category(graph_list, x_name, y_name, chart_title):
     plt.xticks(rotation=75)
     plt.legend(loc="upper right")
 
-    fig_path = os.path.join(refs.charts_save_location, chart_title + '.png')
+    fig_path = os.path.join(charts_save_location, chart_title + '.png')
     plt.savefig(fig_path)
 
     return fig_path
@@ -176,7 +179,7 @@ def grapher_bar_trend(graph_list, x_name, y_name, chart_title, x_time=False):
     plt.ylabel(y_name)
     plt.legend(loc="upper right")
 
-    fig_path = os.path.join(refs.charts_save_location, chart_title + '.png')
+    fig_path = os.path.join(charts_save_location, chart_title + '.png')
     plt.savefig(fig_path)
 
     return fig_path
@@ -225,7 +228,7 @@ def grapher_trend(graph_list, x_name, y_name, chart_title, size=False):
     plt.ylabel(y_name)
     plt.legend(loc="upper right")
 
-    fig_path = os.path.join(refs.charts_save_location, chart_title + '.png')
+    fig_path = os.path.join(charts_save_location, chart_title + '.png')
     plt.savefig(fig_path)
 
     return fig_path
@@ -251,7 +254,7 @@ def grapher_simple_trend(graph_list, x_name, y_name, chart_title):
     plt.xticks(rotation=75)
     plt.legend(loc="upper right")
 
-    fig_path = os.path.join(refs.charts_save_location, chart_title + '.png')
+    fig_path = os.path.join(charts_save_location, chart_title + '.png')
     plt.savefig(fig_path)
 
     return fig_path
@@ -277,7 +280,7 @@ def grapher_weight_trend(graph_list, chart_title):
     plt.plot(x, y)
     plt.axis('off')
     plt.imshow(fig1)
-    fig_path = os.path.join(refs.charts_save_location, chart_title + '.png')
+    fig_path = os.path.join(charts_save_location, chart_title + '.png')
     plt.savefig(fig_path)
 
     return fig_path

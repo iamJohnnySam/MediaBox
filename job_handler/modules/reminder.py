@@ -1,7 +1,8 @@
 from shared_models.job import Job
 from shared_models.message import Message
 from job_handler.base_module import Module
-from tools import word_tools
+from shared_tools import word_tools
+
 
 # todo
 

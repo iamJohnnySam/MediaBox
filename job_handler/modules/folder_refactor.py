@@ -8,7 +8,7 @@ from job_handler.base_module import Module
 from tools import params
 from shared_tools import file_tools
 from shared_tools.logger import log
-from tools.word_tools import breakdown_torrent_file_name
+from shared_tools.word_tools import breakdown_torrent_file_name
 
 
 class RefactorFolder(Module):

@@ -12,9 +12,12 @@ updated_logger = False
 
 class Configuration:
 
-    def __init__(self, config_location: str = "app_config.json"):
+    def __init__(self, config_location: str = ""):
         global config_data
         global config_data_read_time
+
+        if config_location == "":
+            config_location = "app_config.json"
 
         self.machine = platform.machine()
         self.host = platform.node().lower()

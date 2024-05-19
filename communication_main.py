@@ -32,4 +32,5 @@ def main(message_q, job_q, packet_q, info_q, flag_stop, flag_restart, flag_reboo
 
 
 if __name__ == "__main__":
-    main(multiprocessing.Value('i', 0))
+    main(queues.message_q, queues.job_q, queues.packet_q, queues.info_q,
+         global_var.flag_stop, global_var.flag_restart, global_var.flag_reboot)

@@ -5,7 +5,7 @@ from shared_models.message import Message
 from shared_models.job import Job
 from shared_tools.custom_exceptions import *
 from shared_tools.logger import log
-from tools.word_tools import check_time_validity, check_date_validity
+from shared_tools.word_tools import check_time_validity, check_date_validity
 
 
 class Module:

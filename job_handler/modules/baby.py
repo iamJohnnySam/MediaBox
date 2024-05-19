@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 import refs
 from shared_models.message import Message
 from database_manager.sql_connector import SQLConnector
-from tools.grapher import grapher_simple_trend, grapher_weight_trend, grapher_category, grapher_bar_trend
+from shared_tools.grapher import grapher_simple_trend, grapher_weight_trend, grapher_category, grapher_bar_trend
 from shared_tools.custom_exceptions import *
 from shared_models.job import Job
 from job_handler.base_module import Module

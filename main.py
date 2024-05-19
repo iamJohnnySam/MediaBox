@@ -9,7 +9,7 @@ import job_main
 from shared_models import configuration
 from shared_models.message import Message
 import web_main
-from tools import start_up
+from shared_tools import start_up
 from shared_tools.logger import log
 
 crashed = False
