@@ -4,7 +4,6 @@ import time
 from common_workspace import global_var, queues
 from job_handler.sequencer import Sequence
 from shared_models.job import Job
-from modules.backup import BackUp
 from shared_tools.logger import log
 
 running_tasks = {}
@@ -24,7 +23,7 @@ def run_task_mgr():
                 queues.job_q.put(job)
                 continue
 
-            task_thread = threading.Thread(target=commands[job.function], args=(job,))
+            task_thread = threading.Thread(target=execute, args=(job,))
             task_thread.start()
 
             if job.job_id != 0:
@@ -45,4 +44,3 @@ def check_running_tasks():
     for thread in list(running_tasks.keys()):
         if not running_tasks[thread].is_alive():
             running_tasks.pop(thread, None)
-
