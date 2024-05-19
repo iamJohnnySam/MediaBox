@@ -18,6 +18,7 @@
       "log_to_file": false,
       "log_to_console": true,
       "backup_location": "backup/",
+      "backup_databases": ["administration", "news", "transactions", "baby", "entertainment"],
       "error_codes": "tools/error_codes.json"
     },
     "telegram": {
@@ -30,7 +31,23 @@
       "tbl_allowed_chats": "telepot_allowed_chats",
       "tbl_groups": "telepot_groups",
       "telepot_image_dump": "communication/chat_images"
+    },
+    "media": {
+      "enable": false
+    },
+    "cctv": {
+      "enable": false
+    },
+    "news": {
+      "enable": true
+    },
+    "finance": {
+      "enable": true
+    },
+    "baby": {
+      "enable": true
     }
+
   },
   "spark": {
      "admin": {

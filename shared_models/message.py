@@ -16,6 +16,7 @@ class Message:
     def __init__(self, send_string: str, job: Job = None,
                  chat=None, reply_to=None, telepot_account: str = None,
                  keyboard=None,
+                 get_input=False, index=0,
                  group: str = None,
                  photo: str = ""):
 
@@ -34,6 +35,8 @@ class Message:
         self.group = group
         self.photo = photo
         self._this_telepot_account = telepot_account
+        self.get_input = get_input
+        self.index = index
 
     @property
     def job_id(self):

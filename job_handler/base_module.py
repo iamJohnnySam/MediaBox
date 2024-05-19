@@ -1,10 +1,8 @@
 from datetime import datetime, timedelta
 
-from communication_handler.channels import bots
+from common_workspace import queues
 from shared_models.message import Message
-from common_workspace import message_queue
 from shared_models.job import Job
-from tools import params
 from shared_tools.custom_exceptions import *
 from shared_tools.logger import log
 from tools.word_tools import check_time_validity, check_date_validity
@@ -81,9 +79,6 @@ class Module:
                 success = False
                 log(self._job.job_id, f"No message available and no default")
 
-        # if success and not check_time and not check_date and " " in value:
-        #     value = value.split(" ")[0].strip()
-
         if success and replace_str != "" and replace_str in value:
             value = value.replace(replace_str, "").strip()
 
@@ -142,65 +137,29 @@ class Module:
                 # msg.job_keyboard_extractor(index=index, options=option_list, add_cancel=True, add_other=get_manual)
                 self.send_message(message=msg)
             else:
-                self.send_message(message=Message(send_string=send_val + "\nSend /cancel to cancel Job", job=self._job),
-                                  get_input=True, index=index)
+                self.send_message(message=Message(send_string=send_val + "\nSend /cancel to cancel Job",
+                                                  job=self._job,
+                                                  get_input=True,
+                                                  index=index))
 
         return success, value
 
-    def send_message(self, message: Message, get_input=False, index=0, channel=None):
+    def send_message(self, message: Message, channel=None):
         if channel is not None and channel != self._job.telepot_account:
             message_temp = message
             message_temp.group = None
-            self.__send_message(self._job.telepot_account, message_temp, get_input, index)
-            self.__send_message(channel, message, get_input, index)
+            message.this_telepot_account = channel
+            self.__send_message(message_temp)
+            self.__send_message(message)
+
         else:
-            self.__send_message(self._job.telepot_account, message, get_input, index)
+            self.__send_message(message)
 
-    def __send_message(self, channel, message: Message, get_input=False, index=0):
-        if not params.is_module_available("telepot"):
-            pass
-            # todo
-
-
-        try:
-            in_queue = bots[channel].waiting_user_input.keys()
-        except KeyError as e:
-            self.channel_error(e, channel)
-            return
-
+    def __send_message(self, message: Message):
         message.job = self._job
-
-        if get_input and self._job.chat_id in in_queue:
-            log(job_id=self._job.job_id, msg="Chats in Queue: " + str(in_queue))
-            message_queue.add_message(message)
-            log(job_id=self._job.job_id, msg="Message added to Queue.")
-        else:
-            try:
-                bots[self._job.telepot_account].send_now(message=message)
-            except KeyError as e:
-                self.channel_error(e, channel)
-                return
-
-            if get_input:
-                try:
-                    bots[self._job.telepot_account].get_user_input(job=self._job, index=index)
-                except KeyError as e:
-                    self.channel_error(e, channel)
-                    return
-
-    def close_all_callbacks(self):
-        replies: dict = self._job.replies
-        for reply in replies.keys():
-            bots[self._job.telepot_account].update_keyboard(self._job, replies[reply])
+        queues.message_q.put(message)
+        log(job_id=self._job.job_id, msg="Message added to Queue.")
 
     def send_admin(self, message: Message):
         message.send_to_master()
         self.send_message(message=message)
-
-    def channel_error(self, e, channel):
-        if params.is_module_available('telepot'):
-            log(job_id=self._job.job_id, error_code=10003, msg=str(e))
-            raise InvalidParameterException
-        else:
-            log(job_id=self._job.job_id, log_type="warn",
-                msg=f"Unable to send message. Channel, {channel} may not be available due not in operation mode.")

@@ -1,4 +1,4 @@
-from communication_handler.telegram.message_handler import Messenger
+from communication_handler.telegram.messenger import Messenger
 from shared_tools.configuration_tools import is_config_enabled
 from shared_tools.json_editor import JSONEditor
 from shared_tools.logger import log

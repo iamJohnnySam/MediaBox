@@ -65,9 +65,33 @@ class Configuration:
         return False if self._get_module_details(module) == {} else True
 
     @property
+    def admin(self):
+        return self._get_module_details("admin")
+
+    @property
     def telegram(self):
         return self._get_module_details("telegram")
 
     @property
     def socket(self):
         return self._get_module_details("socket")
+
+    @property
+    def media(self):
+        return self._get_module_details("media")
+
+    @property
+    def cctv(self):
+        return self._get_module_details("cctv")
+
+    @property
+    def news(self):
+        return self._get_module_details("news")
+
+    @property
+    def finance(self):
+        return self._get_module_details("finance")
+
+    @property
+    def baby(self):
+        return self._get_module_details("baby")

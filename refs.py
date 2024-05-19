@@ -20,30 +20,19 @@ if not os.path.isdir(charts_save_location):
 news_sources = 'database/news_sources.json'
 
 # SQL Databases
-db_admin = "administration"
-tbl_jobs = "jobs"
-
-db_news = "news"
 tbl_news = "news_articles"
 
-db_finance = "transactions"
 tbl_fin_cat = 'categories'
 tbl_fin_trans = 'transaction_lkr'
 tbl_fin_vendor = 'vendors'
 tbl_fin_raw_vendor = 'vendors_raw'
 
-db_baby = "baby"
 tbl_baby_feed = 'feed'
 tbl_baby_diaper = 'diaper'
 tbl_baby_weight = 'weight'
 tbl_baby_pump = 'pump'
 
-db_entertainment = "entertainment"
 tbl_tv_shows = 'tv_show'
-
-# Back up
-terminal_output = '../nohup.out'
-password_file = 'passwords.py'
 
 # groups
 group_tv_show = "show"
