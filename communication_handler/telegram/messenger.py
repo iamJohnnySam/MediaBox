@@ -5,6 +5,7 @@ import threading
 import telepot
 from telepot.loop import MessageLoop
 
+from shared_models import configuration
 from shared_models.message import Message
 from shared_models.job import Job
 from shared_tools.json_editor import JSONEditor
@@ -17,6 +18,8 @@ class Messenger:
     def __init__(self, telepot_account: str, telepot_key: str, telepot_master: int):
         self.channel = telepot_account
         self.master = telepot_master
+
+        self.config = configuration.Configuration().telegram
 
         # Waiting user input
         self.waiting_user_input = {}
