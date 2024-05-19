@@ -28,7 +28,7 @@ class Message:
         self._db = SQLConnector(self.job_id, database=self._config["database"])
 
         self.send_string = send_string
-        self._job = job
+        self.job = job
         self._chat = chat
         self._reply_to = reply_to
         self.keyboard = keyboard

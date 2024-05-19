@@ -23,15 +23,6 @@ def init_telegram(config: dict) -> (dict, str):
         log(error_code=20018)
         return channels, None
 
-    for account in accounts:
-        if account in telepot_accounts.keys():
-            log(msg=f"Starting telepot channel: {account}.")
-            channels[account] = Messenger(account,
-                                          telepot_accounts[account]["account"],
-                                          telepot_accounts[account]["master"])
-        else:
-            log(error_code=20012)
-
     try:
         main_index = config["main_account"]
     except KeyError:
@@ -42,5 +33,15 @@ def init_telegram(config: dict) -> (dict, str):
     except IndexError:
         log(error_code=20016)
         main_channel = accounts[0]
+
+    for account in accounts:
+        if account in telepot_accounts.keys():
+            log(msg=f"Starting telepot channel: {account}.")
+            channels[account] = Messenger(telepot_account=account,
+                                          telepot_key=telepot_accounts[account]["account"],
+                                          telepot_master=telepot_accounts[account]["master"],
+                                          )
+        else:
+            log(error_code=20012)
 
     return channels, main_channel

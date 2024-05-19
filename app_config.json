@@ -25,6 +25,8 @@
       "enable": true,
       "connect": ["test"],
       "main_account": 0,
+      "commands": "database/telepot_commands.json",
+      "accept_all_commands": ["test"],
       "callback_overflow": "database/telepot/",
       "db_telepot_accounts": "database/telepot_accounts.json",
       "database": "administration",

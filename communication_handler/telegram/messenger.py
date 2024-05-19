@@ -16,6 +16,7 @@ from shared_tools.logger import log
 class Messenger:
 
     def __init__(self, telepot_account: str, telepot_key: str, telepot_master: int):
+
         self.channel = telepot_account
         self.master = telepot_master
 
@@ -25,7 +26,7 @@ class Messenger:
         self.waiting_user_input = {}
 
         # Get Commands
-        self.commands = JSONEditor(refs.db_telepot_commands).read()
+        self.commands = JSONEditor(self.config["commands"]).read()
 
         # Listen
         self.bot = telepot.Bot(telepot_key)
@@ -35,10 +36,7 @@ class Messenger:
 
         self.shutdown_attempted = False
 
-        # todo command to shutdown the bot
-
     def handle(self, msg):
-        self.shutdown()
         try:
             content = msg['text']
         except ValueError:
@@ -84,7 +82,6 @@ class Messenger:
                 msg.complete()
 
         elif msg.function == "raise_exception" or msg.function == "shutdown":
-            shutdown_bot[self.channel] = True
             self.shutdown()
 
         elif msg.function in self.commands.keys():
@@ -94,7 +91,7 @@ class Messenger:
                 msg.complete()
                 return
 
-            elif self.channel != params.get_param('telepot', 'main_channel') and \
+            elif self.channel not in self.config["accept_all_commands"] and \
                     type(self.commands[msg.function]) is not str and \
                     not (self.channel in self.commands[msg.function].keys() or
                          "all_bots" in self.commands[msg.function].keys()):
@@ -147,7 +144,6 @@ class Messenger:
                                    f"{input_value} collected at index {index}.")
 
     def handle_callback(self, query):
-        self.shutdown()
         try:
             q = str(query['data']).split(";")
         except ValueError as e:
@@ -166,7 +162,7 @@ class Messenger:
         log(job_id=msg_id, msg='Callback Query: ' + str(query['data']))
 
         if q[3] == "X":
-            save_loc = os.path.join(refs.loc_telepot_callback, f"{q[0]}_cb.json")
+            save_loc = os.path.join(self.config["callback_overflow"], f"{q[0]}_cb.json")
             query_data = JSONEditor(save_loc).read()[f'{q[0]};{q[1]};{q[2]}']
             log(job_id=msg_id, msg="Recovered Query: " + query_data)
 
@@ -298,13 +294,13 @@ class Messenger:
             log(job_id=job.job_id, msg=f"Could not update message {msg_id} - {str(e)}", log_type="warn")
 
     def shutdown(self):
-        if self.channel in shutdown_bot.keys():
-            log(msg=f"This bot will attempt to shutdown - Thread ID = {threading.get_ident()}", log_type="info")
-            if self.shutdown_attempted:
-                self.send_now(Message(f"{self.channel.capitalize()} Bot previous shutdown attempt failed. "
-                                      f"Continuation is blocked.\nReattempting shutdown..."))
-            else:
-                self.send_now(Message(f"{self.channel.capitalize()} Bot attempt to shutdown.."))
-            self.shutdown_attempted = True
-            del self.loop
-            sys.exit()
+        log(msg=f"This bot will attempt to shutdown - Thread ID = {threading.get_ident()}", log_type="info")
+        if self.shutdown_attempted:
+            self.send_now(Message(f"{self.channel.capitalize()} Bot previous shutdown attempt failed. "
+                                  f"Continuation is blocked.\nReattempting shutdown..."))
+        else:
+            self.send_now(Message(f"{self.channel.capitalize()} Bot attempt to shutdown.."))
+        self.shutdown_attempted = True
+        del self.loop
+        sys.exit()
+
