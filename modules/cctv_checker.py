@@ -10,7 +10,7 @@ from shared_models.message import Message
 from modules.base_module import Module
 from tools import params
 from tools.image_classifier import ImageClassifier
-from communication.email_manager import EmailManager
+from shared_tools.email_manager import EmailManager
 from shared_tools.logger import log
 
 

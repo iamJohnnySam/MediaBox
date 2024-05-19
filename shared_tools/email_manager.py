@@ -2,7 +2,7 @@ import email
 import imaplib
 import traceback
 
-import global_variables
+from common_workspace import global_var
 from shared_models.job import Job
 from shared_tools.logger import log
 
@@ -133,7 +133,7 @@ class EmailManager:
             exit_condition = True
 
         count = 0
-        while exit_condition and (not global_variables.stop_all):
+        while exit_condition and (not global_var.flag_stop):
             try:
                 ret, data = self.myEmail.fetch(message, '(RFC822)')
             except (imaplib.IMAP4.error, imaplib.IMAP4.abort) as error:

@@ -9,7 +9,7 @@ parameter_file = 'database/system_parameters.json'
 log_print = True
 
 # telepot
-db_telepot_accounts = 'database/telepot_accounts.json'
+db_telepot_accounts =
 telepot_image_dump = 'communication/chat_images'
 
 # Media
@@ -25,8 +25,6 @@ news_sources = 'database/news_sources.json'
 
 # SQL Databases
 db_admin = "administration"
-tbl_chats = "telepot_allowed_chats"
-tbl_groups = "telepot_groups"
 tbl_jobs = "jobs"
 
 db_news = "news"

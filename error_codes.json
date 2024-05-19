@@ -21,6 +21,9 @@
   "20013": "Invalid data type. Expected a Message.",
   "20014": "Callback data incomplete.",
   "20015": "Bad Request: chat not found",
+  "20016": "Main channel index is invalid",
+  "20017": "Telegram config CONNECT key has no accounts to connect.",
+  "20018": "Telegram accounts file is missing",
 
   "30000": "Telepot User Errors",
   "30001": "No function call detected",
@@ -41,5 +44,10 @@
   "50002": "Invalid Keyboard creation error",
   "50003": "SQL Error. No rows were affected.",
   "50004": "Folder Refactor Error",
-  "50005": "Missing source in check_news"
+  "50005": "Missing source in check_news",
+
+  "60000": "Socket Errors",
+  "60001": "Socket config missing",
+  "60002": "Message to send is not a dictionary.",
+  "60017": "Socket config CONNECT key has no accounts to connect."
 }

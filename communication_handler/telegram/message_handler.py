@@ -13,8 +13,6 @@ from brains import task_queue
 from tools import params
 from shared_tools.logger import log
 
-shutdown_bot: dict[str:bool] = {}
-
 
 class Messenger:
 

@@ -38,6 +38,10 @@ def main():
     p_web.start()
     log(msg="Process Started: Web Handler")
 
+    message_queue.add_message(Message(f"--- iamJohnnySam ---\n{global_var.version}\n\n"
+                                      f"Program Started on {config.host}..."))
+
+
     p_tasker.join()
     log(msg="Process Ended: Job Handler")
 

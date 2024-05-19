@@ -43,36 +43,27 @@ class Configuration:
         logger.log_to_console = self._config["admin"]["log_to_console"]
         logger.error_codes = self._config["admin"]["error_codes"]
 
-    def _get_module_details(self, module: str) -> dict | bool:
+    def _get_module_details(self, module: str) -> dict:
         logger.log(msg=f"Reading configuration for module, {module}.")
         if module in self._config.keys():
             data: dict = self._config[module]
         else:
             logger.log(msg=f"Could not find the module, {module} in configuration file.")
-            return False
+            return {}
 
-        if type(data) is dict and "enable" in data.keys():
-            if data["enable"]:
-                return data
-            else:
-                logger.log(msg=f"For this configuration the module, {module} is disabled.")
-                return False
+        if type(data) is dict:
+            return data
         else:
-            logger.log(msg=f"Could not determine 'enable' state for module, {module}.")
-            return False
-
-    def _get_module_details_for_prop(self, module):
-        val = self._get_module_details(module)
-        if not val:
-            raise InvalidConfiguration(f"Could not find the module, {module} in configuration file.")
+            logger.log(msg=f"Configuration for {module} is not a dictionary.")
+            return {}
 
     def is_module_available(self, module: str):
-        return True if self._get_module_details(module) else False
+        return False if self._get_module_details(module) == {} else True
 
     @property
     def telegram(self):
-        return self._get_module_details_for_prop("telegram")
+        return self._get_module_details("telegram")
 
     @property
     def socket(self):
-        return self._get_module_details_for_prop("socket")
+        return self._get_module_details("socket")

@@ -1,47 +1,11 @@
-import global_variables
 from shared_models.job import Job
 from communication import channels
 from shared_models.message import Message
-from refs import db_telepot_accounts
-from communication import message_handler, network_handler
-from shared_tools.json_editor import JSONEditor
 from tools import params
 from shared_tools.logger import log
 
 tp_module = 'telepot'
 sk_module = 'socket'
-
-
-def init_channel():
-    telepot_accounts: dict = JSONEditor(db_telepot_accounts).read()
-    for account in telepot_accounts.keys():
-        message_handler.shutdown_bot[account] = True
-
-    if params.is_module_available(tp_module):
-        log(msg=f"Starting Telepot channels: {params.get_param(tp_module, 'channels')}.")
-        for account in params.get_param(tp_module, 'channels'):
-            channels.bots[account] = message_handler.Messenger(account,
-                                                               telepot_accounts[account]["account"],
-                                                               telepot_accounts[account]["master"])
-            del message_handler.shutdown_bot[account]
-
-    else:
-        log(error_code=20012)
-
-
-def init_socket():
-    if params.is_module_available(sk_module):
-        log(msg=f"Starting Sockets.")
-        if params.get_param(sk_module, 'server'):
-            host = global_variables.host
-            channels.sockets[host] = network_handler.Spider(port=params.get_param("socket", "port"),
-                                                            connection_count=params.get_param("socket",
-                                                                                              "connection_count"))
-        else:
-            connections: dict = params.get_param("socket", "connect")
-            for connection in connections.keys():
-                network = network_handler.Spider(hostname=connection, port=connections[connection])
-                channels.sockets[connection] = network
 
 
 def send_message(msg: Message, account=None):

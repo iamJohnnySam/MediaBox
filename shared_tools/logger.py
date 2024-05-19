@@ -53,7 +53,14 @@ def log(job_id: int = 0, msg: str = "", log_type: str = "debug", error_code: int
         caller = f"{the_class}"
 
     if log_to_file and (today_date != str(date.today()) or not file_created):
-        level = logging.DEBUG
+        if log_type == "warn":
+            level = logging.WARNING
+        elif log_type == "error":
+            level = logging.ERROR
+        elif log_type == "debug":
+            level = logging.DEBUG
+        else:
+            level = logging.INFO
         logging.basicConfig(filename=log_file_name(), level=level)
         file_created = True
 
@@ -88,5 +95,5 @@ def log(job_id: int = 0, msg: str = "", log_type: str = "debug", error_code: int
 
     if print_message:
         for segment in message.split("\n"):
-            print(f'{log_type},{datetime.now().strftime("%m-%d %H:%M:%S")},{caller.ljust(15)},'
+            print(f'{os.getpid()},{log_type},{datetime.now().strftime("%m-%d %H:%M:%S")},{caller.ljust(15)},'
                   f'{job_id:03},>,{segment}')
