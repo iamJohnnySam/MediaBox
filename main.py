@@ -4,11 +4,11 @@ import sys
 import time
 
 from common_workspace import global_var, queues
-import communication_main
-import job_main
+from communication_handler import communication_main
+from job_handler import job_main
 from shared_models import configuration
 from shared_models.message import Message
-import web_main
+from web_handler import web_main
 from shared_tools import start_up
 from shared_tools.logger import log
 

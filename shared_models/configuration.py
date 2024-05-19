@@ -38,17 +38,17 @@ class Configuration:
         if type(host_config) is not dict or type(common_config) is not dict:
             raise InvalidConfiguration("Invalid configuration format for host. No dictionary found!")
 
-        self._config = host_config.update(common_config)
+        self._config = common_config | host_config
 
         if not updated_logger:
             self._update_logger()
 
     def _update_logger(self) -> None:
-        logger.logs_location = self._config["admin"]["log_location"]
-        logger.log_level = self._config["admin"]["log_level"]
-        logger.log_to_file = self._config["admin"]["log_to_file"]
-        logger.log_to_console = self._config["admin"]["log_to_console"]
-        logger.error_codes = self._config["admin"]["error_codes"]
+        logger.logs_location = self.admin["log_location"]
+        logger.log_level = self.admin["log_level"]
+        logger.log_to_file = self.admin["log_to_file"]
+        logger.log_to_console = self.admin["log_to_console"]
+        logger.error_codes = self.admin["error_codes"]
 
     def _get_module_details(self, module: str) -> dict:
         logger.log(msg=f"Reading configuration for module, {module}.")
