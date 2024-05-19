@@ -1,19 +1,19 @@
 from datetime import datetime
 
-import global_variables
-import refs
+from common_workspace import global_var
+from shared_models import configuration
 from shared_models.message import Message
 from shared_tools.json_editor import JSONEditor
 from shared_models.job import Job
 from database_manager.sql_connector import SQLConnector
 from job_handler.base_module import Module
-from tools import params
 
 
 class Admin(Module):
     def __int__(self, job: Job):
         super().__init__(job)
-        self._db = SQLConnector(job.job_id, database=refs.db_admin)
+        self.telegram_config = configuration.Configuration().telegram
+        self._db = SQLConnector(job.job_id, database=self.telegram_config["database"])
 
     def alive(self):
         self.send_message(Message(f"Hello {self._job.f_name} (chat id: {str(self._job.chat_id)})!\n"
@@ -26,7 +26,7 @@ class Admin(Module):
 
     def help(self):
         message = "--- AVAILABLE COMMANDS ---"
-        command_dictionary = JSONEditor(refs.db_telepot_commands).read()
+        command_dictionary = JSONEditor(self.telegram_config["commands"]).read()
         add_command = ""
 
         for command in command_dictionary.keys():
@@ -39,7 +39,7 @@ class Admin(Module):
                     definition = command
 
                 a = self._job.telepot_account in command_dictionary[command]
-                b = self._job.telepot_account == params.get_param('telepot', 'main_channel')
+                b = self._job.telepot_account in self.telegram_config["accept_all_commands"]
                 c = "all_bots" in command_dictionary[command]
 
                 if a or b or c:
@@ -54,9 +54,8 @@ class Admin(Module):
 
     def start_over(self):
         if self._job.is_master:
-            global_variables.stop_all = True
-            global_variables.stop_cctv = True
-            global_variables.restart = True
+            global_var.flag_stop.value = True
+            global_var.flag_restart.value = True
             self.send_message(Message("Completing ongoing tasks before restart. Please wait.", job=self._job))
         else:
             self.send_message(Message("This is a server command. Requesting admin...", job=self._job))
@@ -65,8 +64,7 @@ class Admin(Module):
 
     def exit_all(self):
         if self._job.is_master:
-            global_variables.stop_all = True
-            global_variables.stop_cctv = True
+            global_var.flag_stop.value = True
             self.send_message(Message("Completing ongoing tasks before exit. Please wait.", job=self._job))
         else:
             self.send_message(Message("This is a server command. Requesting admin...", job=self._job))
@@ -75,9 +73,8 @@ class Admin(Module):
 
     def reboot_pi(self):
         if self._job.is_master:
-            global_variables.stop_all = True
-            global_variables.stop_cctv = True
-            global_variables.reboot_pi = True
+            global_var.flag_stop.value = True
+            global_var.flag_reboot.value = True
             self.send_message(Message("Completing ongoing tasks before reboot. Please wait.", job=self._job))
         else:
             self.send_message(Message("This is a server command. Requesting admin...", job=self._job))

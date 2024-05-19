@@ -15,6 +15,7 @@ class Configuration:
     def __init__(self, config_location: str = ""):
         global config_data
         global config_data_read_time
+        global updated_logger
 
         if config_location == "":
             config_location = "app_config.json"
@@ -42,6 +43,7 @@ class Configuration:
 
         if not updated_logger:
             self._update_logger()
+            updated_logger = True
 
     def _update_logger(self) -> None:
         logger.logs_location = self.admin["log_location"]

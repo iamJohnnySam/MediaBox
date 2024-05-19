@@ -3,13 +3,12 @@ import re
 import shutil
 from datetime import datetime
 
-import global_variables
-import refs
+from common_workspace import global_var
+from shared_models import configuration
 from shared_models.job import Job
 from shared_models.message import Message
 from database_manager.sql_connector import SQLConnector
 from job_handler.base_module import Module
-from tools import params
 from shared_tools.custom_exceptions import InvalidParameterException
 from shared_tools.logger import log
 
@@ -17,7 +16,13 @@ from shared_tools.logger import log
 class Finance(Module):
     def __init__(self, job: Job):
         super().__init__(job)
-        self.db_finance = SQLConnector(job.job_id, database=refs.db_finance)
+        self.config = configuration.Configuration().finance
+        self.db_finance = SQLConnector(job.job_id, database=self.config["database"])
+
+        self._tbl_transactions = self.config["tbl_transactions"]
+        self._tbl_categories = self.config["tbl_categories"]
+        self._tbl_raw_vendors = self.config["tbl_raw_vendors"]
+        self._tbl_vendors = self.config["tbl_vendors"]
 
     def sms(self):
         success, sms = self.check_value(index=-1, description="sms received from bank.")
@@ -45,9 +50,9 @@ class Finance(Module):
         self._job.collect(date_match, 1)
 
         # Check Transaction Type
-        if any(x.lower() in sms for x in global_variables.credit_words):
+        if any(x.lower() in sms for x in global_var.credit_words):
             self._job.collect('income', 2)
-        elif any(x.lower() in sms for x in global_variables.debit_words):
+        elif any(x.lower() in sms for x in global_var.debit_words):
             self._job.collect('expense', 2)
         else:
             raise InvalidParameterException(f"Could not find transaction type in {sms}")
@@ -101,18 +106,18 @@ class Finance(Module):
 
         index = 4
         default_vendor, options = self._get_from_lookup(raw_vendor, index,
-                                                        refs.tbl_fin_raw_vendor, "vendor_id", "raw_vendor",
-                                                        refs.tbl_fin_vendor, "name", "vendor_id")
+                                                        self._tbl_raw_vendors, "vendor_id", "raw_vendor",
+                                                        self._tbl_vendors, "name", "vendor_id")
         success, vendor = self.check_value(index=index, description="proper vendor name", default=default_vendor,
                                            check_list=options, manual_option=True)
         if not success:
             return
         vendor_id = self._fill_lut(raw_vendor, vendor,
-                                   refs.tbl_fin_raw_vendor, "raw_vendor", "vendor_id",
-                                   refs.tbl_fin_vendor, "name", "vendor_id")
+                                   self._tbl_raw_vendors, "raw_vendor", "vendor_id",
+                                   self._tbl_vendors, "name", "vendor_id")
 
         index = 5
-        check_duplicate = self.db_finance.check_exists(refs.tbl_fin_trans, where={"date": t_date,
+        check_duplicate = self.db_finance.check_exists(self._tbl_transactions, where={"date": t_date,
                                                                                   "amount": t_value,
                                                                                   "vendor_id": vendor_id})
         if check_duplicate == 0:
@@ -126,7 +131,7 @@ class Finance(Module):
             return
 
         index = 6
-        pre_sel_cats_str = self.db_finance.select(refs.tbl_fin_vendor, "category_id", where={"vendor_id": vendor_id})
+        pre_sel_cats_str = self.db_finance.select(self._tbl_vendors, "category_id", where={"vendor_id": vendor_id})
         if pre_sel_cats_str is not None and pre_sel_cats_str[0] is not None:
             pre_sel_cat_ids = pre_sel_cats_str[0].split(";")
         else:
@@ -138,13 +143,13 @@ class Finance(Module):
         pre_sel_cats = []
         if self.check_index() <= index:
             for pre_sel_cat_id in pre_sel_cat_ids:
-                pre_sel_cats.append(self.db_finance.select(refs.tbl_fin_cat,
+                pre_sel_cats.append(self.db_finance.select(self._tbl_categories,
                                                            "category",
                                                            where={"category_id": pre_sel_cat_id})[0])
             show_man = True
 
         if not pre_sel_cats:
-            all_cats = self.db_finance.select(refs.tbl_fin_cat, "category", where={"in_out": t_type}, fetch_all=True)
+            all_cats = self.db_finance.select(self._tbl_categories, "category", where={"in_out": t_type}, fetch_all=True)
             pre_sel_cats = [x[0] for x in all_cats]
             show_man = False
 
@@ -154,22 +159,22 @@ class Finance(Module):
             return
 
         index = 7
-        cat_id = self.db_finance.select(refs.tbl_fin_cat, "category_id", where={"category": cat})[0]
+        cat_id = self.db_finance.select(self._tbl_categories, "category_id", where={"category": cat})[0]
         if cat_id not in pre_sel_cat_ids:
             pre_sel_cat_ids.append(str(cat_id))
             new_cat_ids = ';'.join(pre_sel_cat_ids)
-            self.db_finance.update(refs.tbl_fin_vendor, {"category_id": new_cat_ids}, {"vendor_id": vendor_id})
+            self.db_finance.update(self._tbl_vendors, {"category_id": new_cat_ids}, {"vendor_id": vendor_id})
 
         success, cat_id = self.check_value(index=index, description="category ID", default=cat_id, check_int=True)
         if not success:
             return
 
-        self.db_finance.insert(refs.tbl_fin_trans,
+        self.db_finance.insert(self._tbl_transactions,
                                "transaction_by, date, type, category_id, amount, vendor_id, vendor, photo_id",
                                (self._job.chat_id, t_date, t_type, cat_id, t_value, vendor_id, vendor,
                                 ";".join([str(ele) for ele in self._job.photo_ids])))
 
-        result = list(self.db_finance.select(table=refs.tbl_fin_trans,
+        result = list(self.db_finance.select(table=self._tbl_transactions,
                                              columns="vendor, type, amount",
                                              where={"date": t_date},
                                              order="timestamp", fetch_all=True))
@@ -229,12 +234,12 @@ class Finance(Module):
 
         raw_vendor_exists = self.db_finance.check_exists(raw_table, where={raw_column: raw_item})
         if raw_vendor_exists == 0:
-            self.db_finance.insert(refs.tbl_fin_raw_vendor, f"{raw_column}, {raw_id}", (raw_item, vendor_id))
+            self.db_finance.insert(self._tbl_raw_vendors, f"{raw_column}, {raw_id}", (raw_item, vendor_id))
 
         return vendor_id
 
     def finance_photo(self):
-        image_loc = params.get_param('finance', 'images')
+        image_loc = self.config["images"]
         if not os.path.exists(image_loc):
             os.makedirs(image_loc)
 

@@ -1,6 +1,6 @@
 import feedparser
 
-import refs
+from shared_models import configuration
 from shared_models.message import Message
 from database_manager.sql_connector import SQLConnector
 from job_handler.base_module import Module
@@ -13,12 +13,19 @@ from shared_tools.logger import log
 class NewsReader(Module):
     def __init__(self, job: Job):
         super().__init__(job)
+
+        c = configuration.Configuration()
+        self.news_config = c.news
+
+        # todo remove connection to admin config
+        self.admin_config = c.telegram
+
+        self.admin_db = SQLConnector(job.job_id, database=self.admin_config["database"])
+        self.news_db = SQLConnector(job.job_id, database=self.news_config["database"])
         log(self._job.job_id, f"Object Created")
-        self.admin_db = SQLConnector(job.job_id, database=refs.db_admin)
-        self.news_db = SQLConnector(job.job_id, database=refs.db_news)
 
     def _get_news_subscriptions(self):
-        result = self.admin_db.select(table=refs.tbl_groups,
+        result = self.admin_db.select(table=self.admin_config["tbl_groups"],
                                       columns="group_name",
                                       where={"chat_id": self._job.chat_id},
                                       fetch_all=True)
@@ -41,7 +48,7 @@ class NewsReader(Module):
         self._job.complete()
 
     def _check_news(self, source):
-        news_sources = JSONEditor(refs.news_sources).read()
+        news_sources = JSONEditor(self.news_config["sources"]).read()
         if source == '':
             log(self._job.job_id, error_code=50005)
             self._job.collection = []
@@ -102,17 +109,17 @@ class NewsReader(Module):
             cols = "source, title, link, user_id"
             val = (source, title, link, self._job.chat_id)
 
-            if self.news_db.check_exists(refs.tbl_news, {"title": title,
-                                                         "source": source,
-                                                         "user_id": self._job.chat_id}) == 0:
-                self.news_db.insert(refs.tbl_news, cols, val)
+            if self.news_db.check_exists(self.news_config["tbl_news"], {"title": title,
+                                                                        "source": source,
+                                                                        "user_id": self._job.chat_id}) == 0:
+                self.news_db.insert(self.news_config["tbl_news"], cols, val)
                 self.send_message(Message(send_string=f'{title} - {link}', job=self._job))
                 news_sent = True
 
         return news_sent
 
     def show_news_channels(self):
-        news = JSONEditor(refs.news_sources).read()
+        news = JSONEditor(self.news_config["sources"]).read()
         news_channels = []
         prev_channel = ""
         for channel in news.keys():
@@ -127,14 +134,14 @@ class NewsReader(Module):
                 news_channels.append(channel)
 
     def subscribe(self):
-        sources = JSONEditor(refs.news_sources).read()
+        sources = JSONEditor(self.news_config["sources"]).read()
         success, source = self.check_value(index=-1,
                                            option_list=[s for s in sources.keys() if type(sources[s]) is not bool],
                                            no_recover=True)
         if not success:
             self.show_news_channels()
 
-        if not self.admin_db.check_exists(refs.tbl_groups,
+        if not self.admin_db.check_exists(self.admin_config["tbl_groups"],
                                           f"group_name = 'news_{source}' AND chat_id = '{self._job.chat_id}'") == 0:
             Subscriptions(self._job).manage_chat_group(f'news_{source}', add=False, remove=True)
             reply_text = f"You are Unsubscribed from {source}."

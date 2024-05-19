@@ -3,12 +3,12 @@ import shutil
 import os
 from random import random
 
-import global_variables
 import passwords
+from common_workspace import global_var
+from shared_models import configuration
 from shared_models.job import Job
 from shared_models.message import Message
 from job_handler.base_module import Module
-from tools import params
 from shared_tools.image_classifier import ImageClassifier
 from shared_tools.email_manager import EmailManager
 from shared_tools.logger import log
@@ -22,13 +22,15 @@ class CCTVChecker(Module):
         self.last_detect_A02 = None
         self.last_detect_A01 = None
 
-        self.cctv_imap = params.get_param(self.module, 'imap')
-        self.cctv_mailbox = params.get_param(self.module, 'mailbox')
-        self.cctv_sent = params.get_param(self.module, 'sent')
-        self.cctv_model1 = params.get_param(self.module, 'model1')
-        self.cctv_model2 = params.get_param(self.module, 'model2')
-        self.cctv_download = params.get_param(self.module, 'download_loc')
-        self.cctv_save = params.get_param(self.module, 'save_loc')
+        self.config = configuration.Configuration().cctv
+
+        self.cctv_imap = self.config['imap']
+        self.cctv_mailbox = self.config['mailbox']
+        self.cctv_sent = self.config['sent']
+        self.cctv_model1 = self.config['model1']
+        self.cctv_model2 = self.config['model2']
+        self.cctv_download = self.config['download_loc']
+        self.cctv_save = self.config['save_loc']
 
         if not os.path.exists(self.cctv_download):
             os.makedirs(self.cctv_download)
@@ -51,7 +53,7 @@ class CCTVChecker(Module):
         while running:
             running, attachment, date, file_n = client.get_next_attachment()
 
-            if (not running) or global_variables.stop_all:
+            if (not running) or global_var.flag_stop.value:
                 break
 
             save_as = date + " " + file_n

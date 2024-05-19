@@ -3,15 +3,13 @@ from transmission_rpc import Client
 from shared_models.job import Job
 from shared_models.message import Message
 from job_handler.base_module import Module
-from tools import params
 from shared_tools.logger import log
 
 
 class Transmission(Module):
     def __init__(self, job: Job):
         super().__init__(job)
-        if params.is_module_available('media'):
-            self.client = Client()
+        self.client = Client()
         self.active_torrents = {}
 
     def list_torrents(self):
@@ -25,13 +23,10 @@ class Transmission(Module):
         return self.active_torrents
 
     def add_torrent(self, path, paused=False):
-        if params.is_module_available('media'):
-            torrent = self.client.add_torrent(path, paused=paused)
-            success, torrent_name = self._add_torrent_to_list(torrent)
-            log(self._job.job_id, msg=f"Torrent Added: {torrent_name}")
-            return success, torrent_name
-        else:
-            return True, "TEST MODE MESSAGE"
+        torrent = self.client.add_torrent(path, paused=paused)
+        success, torrent_name = self._add_torrent_to_list(torrent)
+        log(self._job.job_id, msg=f"Torrent Added: {torrent_name}")
+        return success, torrent_name
 
     def _add_torrent_to_list(self, torrent):
         torrent_id = torrent.id

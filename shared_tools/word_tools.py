@@ -2,7 +2,7 @@ import re
 import string
 from datetime import datetime
 
-import global_variables
+from common_workspace import global_var
 from shared_models.job import Job
 from shared_tools.logger import log
 
@@ -101,7 +101,7 @@ def greeting() -> str:
 
 
 def check_date_validity(job_id, value) -> (bool, str):
-    date_formats = global_variables.date_formats
+    date_formats = global_var.date_formats
     success = False
     for date_format in date_formats:
         try:
@@ -120,7 +120,7 @@ def check_date_validity(job_id, value) -> (bool, str):
 
 
 def check_time_validity(job_id, value) -> (bool, str):
-    time_formats = global_variables.time_formats
+    time_formats = global_var.time_formats
     success = False
     for time_format in time_formats:
         try:

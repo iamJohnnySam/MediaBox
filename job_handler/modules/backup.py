@@ -3,10 +3,10 @@ import os
 import shutil
 from datetime import datetime
 
+from shared_models import configuration
 from shared_models.job import Job
 from database_manager.sql_connector import SQLConnector
 from job_handler.base_module import Module
-from tools import params
 from shared_tools import logger
 import passwords
 
@@ -15,7 +15,7 @@ class BackUp(Module):
 
     def __init__(self, job: Job):
         super().__init__(job)
-        loc = params.get_param('backup', 'backup_location')
+        loc = configuration.Configuration().admin["backup_location"]
         self.backup_location = os.path.join(loc, datetime.now().strftime("%Y%m%d%H%M%S"))
         self.common_backup_location = loc
         if not os.path.exists(self.backup_location):
