@@ -7,7 +7,7 @@ from common_workspace import global_var
 from shared_models import configuration
 from shared_models.job import Job
 from shared_models.message import Message
-from database_manager.sql_connector import SQLConnector
+from shared_tools.sql_connector import SQLConnector
 from job_handler.base_module import Module
 from shared_tools.custom_exceptions import InvalidParameterException
 from shared_tools.logger import log

@@ -18,22 +18,25 @@ def main(message_q, job_q, packet_q, info_q, flag_stop, flag_restart, flag_reboo
 
     log(msg="Job Process is Starting...")
 
-    _ = configuration.Configuration()
+    config = configuration.Configuration()
 
     t_task = threading.Thread(target=queue_manager.run_task_mgr)
     t_task.start()
+    log(msg="Thread Started: Task Manager")
+
     t_schedule = threading.Thread(target=schedule_manager.run_scheduler)
     t_schedule.start()
+    log(msg="Thread Started: Schedule Manager")
 
     while not global_var.flag_stop.value:
         if not t_task.is_alive():
-            t_task.join()
-            t_task.run()
+            t_task = threading.Thread(target=queue_manager.run_task_mgr)
+            t_task.start()
             log(msg="Thread Started: Task Manager")
 
         if not t_schedule.is_alive():
-            t_schedule.join()
-            t_schedule.run()
+            t_schedule = threading.Thread(target=schedule_manager.run_scheduler)
+            t_schedule.start()
             log(msg="Thread Started: Schedule Manager")
 
         time.sleep(60)

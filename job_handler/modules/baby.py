@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 
 from shared_models import configuration
 from shared_models.message import Message
-from database_manager.sql_connector import SQLConnector
+from shared_tools.sql_connector import SQLConnector
 from shared_tools.grapher import grapher_simple_trend, grapher_weight_trend, grapher_category, grapher_bar_trend
 from shared_tools.custom_exceptions import *
 from shared_models.job import Job

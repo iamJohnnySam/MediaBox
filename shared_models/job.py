@@ -4,7 +4,6 @@ import os
 import telepot
 from PIL import Image
 
-from database_manager.sql_connector import SQLConnector
 from shared_tools.custom_exceptions import *
 from shared_tools.logger import log
 
@@ -16,7 +15,7 @@ class Job:
                  chat_id: int = 0, username: str = "", reply_to: int = 0, function: str = "",
                  collection=None,
                  background_task: bool = False,
-                 other_host: bool = False, orig_job_id: int = 0):
+                 other_host: bool = False):
 
         """
         :param telepot_account: Name of the telepot account which initiated request.
@@ -29,16 +28,9 @@ class Job:
         :param collection: Data collection for function.
         :param background_task: Block outgoing messages if true.
         :param other_host: If true, the Job was initiated from another host.
-        :param orig_job_id: Job ID of the host which initiated the request.
         """
 
-        if telepot_account == "":
-            if params.is_module_available("telepot"):
-                self._telepot_account = params.get_param('telepot', 'main_channel', True)
-        else:
-            self._telepot_account = telepot_account
-
-        self._db = SQLConnector(0, database=refs.db_admin)
+        self._telepot_account = telepot_account
 
         self.is_background_task = background_task
         self.called_back = False
@@ -49,7 +41,6 @@ class Job:
 
         # Important Variables
         self._job_id = job_id
-        self._db.job_id = self._job_id
         self._chat_id: int = chat_id
         self._reply_to: int = reply_to
         self._username: str = username
@@ -61,11 +52,10 @@ class Job:
             self._collected = True
         self._photo_ids: [str] = []
         self._current_callback = 0
-        self.original_job_id = orig_job_id
 
         manual_params = function != ""
 
-        if message is None and job_id == 0 and not manual_params and orig_job_id == 0:
+        if message is None and job_id == 0 and not manual_params:
             log(job_id=job_id, error_code=40001)
             raise InvalidParameterException("Not enough parameters to create a job")
 
@@ -75,7 +65,6 @@ class Job:
 
         elif not other_host and job_id != 0:
             self._job_id = job_id
-            self._db.job_id = self._job_id
             self._get_job()
 
         elif other_host and orig_job_id != 0:

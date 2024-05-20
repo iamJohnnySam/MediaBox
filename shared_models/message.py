@@ -7,7 +7,7 @@ from telepot.namedtuple import InlineKeyboardButton, InlineKeyboardMarkup
 from shared_models import configuration
 from shared_tools.json_editor import JSONEditor
 from shared_models.job import Job
-from database_manager.sql_connector import SQLConnector
+from shared_tools.sql_connector import SQLConnector
 from shared_tools import logger
 from shared_tools.custom_exceptions import InvalidParameterException
 
