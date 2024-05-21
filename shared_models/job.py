@@ -7,63 +7,61 @@ from PIL import Image
 from shared_tools.custom_exceptions import *
 from shared_tools.logger import log
 
+current_id = 0
+
 
 class Job:
-    def __init__(self, telepot_account: str = "",
-                 message: dict = None,
-                 job_id: int = 0,
-                 chat_id: int = 0, username: str = "", reply_to: int = 0, function: str = "",
+    def __init__(self, function: str, telepot_account: str = "",
+                 chat_id: int = 0, username: str = "", reply_to: int = 0,
                  collection=None,
-                 background_task: bool = False,
-                 other_host: bool = False):
+                 background_task: bool = False):
 
         """
+        :param function: Main function identifier.
         :param telepot_account: Name of the telepot account which initiated request.
-        :param message: Telepot message to extract information and create Job.
-        :param job_id: Job ID specific to host.
         :param chat_id: Chat ID who initiated request.
         :param username: Name of Chat who initiated the request.
         :param reply_to: Message ID that initiated the request.
-        :param function: Main function identifier.
         :param collection: Data collection for function.
         :param background_task: Block outgoing messages if true.
-        :param other_host: If true, the Job was initiated from another host.
         """
+        global current_id
+        current_id = current_id + 1
+        if current_id >= 10_000:
+            current_id = 1
+        self._job_id = current_id
 
-        self._telepot_account = telepot_account
-
-        self.is_background_task = background_task
-        self.called_back = False
-        self.user_input = ""
-        self._collected = False
-        self._replied = False
-        self._waiting_to_get_job = False
-
-        # Important Variables
-        self._job_id = job_id
-        self._chat_id: int = chat_id
-        self._reply_to: int = reply_to
-        self._username: str = username
         self._function: str = function
+        self._telepot_account: str = telepot_account
+        self._chat_id: int = chat_id
+        self._username: str = username
+        self._reply_to: int = reply_to
         if collection is None:
             self._collection: [str] = []
         else:
             self._collection: [str] = collection
-            self._collected = True
-        self._photo_ids: [str] = []
+        self.is_background_task = background_task
+
+
+
+
+
+
+
+
+
+        self.called_back = False
+        self._waiting_to_get_job = False
+
+        # Important Variables
         self._current_callback = 0
 
         manual_params = function != ""
 
-        if message is None and job_id == 0 and not manual_params:
-            log(job_id=job_id, error_code=40001)
-            raise InvalidParameterException("Not enough parameters to create a job")
 
-        elif message is not None:
-            self._job_id: int = 0
-            self.breakdown_message(message)
 
-        elif not other_host and job_id != 0:
+
+        if not other_host and job_id != 0:
             self._job_id = job_id
             self._get_job()
 
@@ -92,6 +90,10 @@ class Job:
             raise InvalidParameterException("Error creating job")
 
         self.reply_log: dict = {}
+
+        if message is None and job_id == 0 and not manual_params:
+            log(job_id=job_id, error_code=40001)
+            raise InvalidParameterException("Not enough parameters to create a job")
 
     def _get_job(self):
         columns = "account, chat_id, reply_to, username, function, collection, photo, replies, cb_id"
@@ -126,48 +128,6 @@ class Job:
 
             log(self._job_id, f"Job ({self._function}) recovered from job_id with collection: {self._collection}")
 
-    def breakdown_message(self, msg: dict):
-        self._chat_id = msg['chat']['id']
-        self._reply_to = msg['message_id']
-        self._username = msg['chat']['first_name']
-
-        if 'photo' in msg.keys():
-            for pic in msg['photo']:
-                self._photo_ids.append(msg['photo'][pic]['file_id'])
-            self.update_db('photo', self.photo_names, force=True)
-
-        if 'text' in msg.keys():
-            content = msg['text']
-            self.user_input = content
-
-            first_word: str = content.split(" ")[0].lower()
-            if first_word.startswith("/"):
-                self._function = first_word.replace("/", "")
-
-                if self._function == "start":
-                    self._function = "help"
-
-                value = content.replace(first_word, "").strip()
-                self._collection = value.split(" ")
-                self._collected = True
-
-            else:
-                words = len(content.split(" "))
-                if first_word in ['cancel'] and words == 1:
-                    self._function = 'cancel'
-                elif first_word in ['help', 'hi', 'hello'] and words == 1:
-                    self._function = 'help'
-                else:
-                    self._function = "chat"
-                value = content
-                self._collection = [value]
-
-        else:
-            self._function = "no_function"
-            value = ""
-            self._collection = []
-
-        log(job_id=self._job_id, msg=f"Function: {self._function}, Value: {value}")
 
     # Job Properties
     @property
@@ -257,13 +217,6 @@ class Job:
 
     # Checks
     @property
-    def is_authorised(self):
-        if self._db.check_exists(refs.tbl_chats, {"chat_id": self.chat_id}) == 0:
-            return False
-        else:
-            return True
-
-    @property
     def is_master(self):
         return self.master == self.chat_id
 
@@ -276,12 +229,6 @@ class Job:
         return self._photo_ids != []
 
     # Functions
-    def complete(self):
-        if self.is_stored:
-            self.store_message()
-            self.update_db('complete', item=1)
-            log(job_id=self._job_id, msg="Message Completed")
-
     def update_db(self, field: str, item: str | bool | list | int | float, force=False):
         if type(item) is str and ";" in item:
             raise InvalidParameterException

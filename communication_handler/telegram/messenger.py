@@ -8,9 +8,11 @@ from telepot.loop import MessageLoop
 from shared_models import configuration
 from shared_models.message import Message
 from shared_models.job import Job
+from shared_tools.job_tools import extract_job_from_message
 from shared_tools.json_editor import JSONEditor
 from job_handler import task_queue
 from shared_tools.logger import log
+from shared_tools.sql_connector import SQLConnector
 
 
 class Messenger:
@@ -30,27 +32,30 @@ class Messenger:
 
         # Listen
         self.bot = telepot.Bot(telepot_key)
-        self.loop = MessageLoop(self.bot, {'chat': self.handle, 'callback_query': self.handle_callback})
+        self.loop = MessageLoop(self.bot, {'chat': self.handle_message, 'callback_query': self.handle_callback})
         self.loop.run_as_thread()
         log(msg=f'Telepot {telepot_account} listening')
 
         self.shutdown_attempted = False
 
-    def handle(self, msg):
+    def handle_message(self, msg):
         try:
             content = msg['text']
         except ValueError:
             content = "### No Message ###"
         log(msg=f"INCOMING: {msg['chat']['id']}, Message: {content}", log_type="info")
-        message = Job(self.channel, msg)
 
-        if not message.is_authorised:
-            self.bot.sendMessage(message.chat_id, "Hello " + message.f_name + "! You're not allowed to be here")
-            string = f"Unauthorised Chat access: {message.f_name}, chat_id: {message.chat_id}"
+        function, chat_id, username, reply_to, collection = extract_job_from_message(msg)
+
+        if not self.is_authorised(chat_id):
+            self.bot.sendMessage(chat_id, "Hello " + username + "! You're not allowed to be here")
+            string = f"Unauthorised Chat access: {username}, chat_id: {chat_id}"
             self.send_now(Message(string))
-            log(job_id=message.job_id, msg=string, log_type="warn")
-            message.complete()
+            log(msg=string, log_type="warn")
             return
+
+        message = Job(function=function, telepot_account=self.channel, chat_id=chat_id, username=username,
+                      reply_to=reply_to, collection=collection)
 
         if 'photo' in msg.keys():
             self.handle_photo(message)
@@ -59,6 +64,13 @@ class Messenger:
             self.handle_text(message)
         else:
             log(job_id=message.job_id, error_code=20001)
+
+    def is_authorised(self, chat_id) -> bool:
+        if SQLConnector(job_id=0).check_exists(self.config["tbl_allowed_chats"], {"chat_id": chat_id}) == 0:
+            return False
+        else:
+            return True
+
 
     def handle_photo(self, msg: Job):
         for pic in range(msg.photo_ids):
