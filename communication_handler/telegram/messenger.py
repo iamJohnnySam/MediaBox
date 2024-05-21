@@ -54,8 +54,8 @@ class Messenger:
             log(msg=string, log_type="warn")
             return
 
-        message = Job(function=function, telepot_account=self.channel, chat_id=chat_id, username=username,
-                      reply_to=reply_to, collection=collection)
+        job = Job(function=function, telepot_account=self.channel, chat_id=chat_id, username=username,
+                  reply_to=reply_to, collection=collection)
 
         if 'photo' in msg.keys():
             self.handle_photo(message)
@@ -63,14 +63,13 @@ class Messenger:
         if 'text' in msg.keys():
             self.handle_text(message)
         else:
-            log(job_id=message.job_id, error_code=20001)
+            log(job_id=job.job_id, error_code=20001)
 
     def is_authorised(self, chat_id) -> bool:
         if SQLConnector(job_id=0).check_exists(self.config["tbl_allowed_chats"], {"chat_id": chat_id}) == 0:
             return False
         else:
             return True
-
 
     def handle_photo(self, msg: Job):
         for pic in range(msg.photo_ids):
@@ -91,7 +90,6 @@ class Messenger:
                 msg.job_id = self.waiting_user_input[msg.chat_id]["job"]
                 del self.waiting_user_input[msg.chat_id]
                 self.send_now(Message(f"Job canceled.", msg))
-                msg.complete()
 
         elif msg.function == "raise_exception" or msg.function == "shutdown":
             self.shutdown()
@@ -100,7 +98,6 @@ class Messenger:
             if type(self.commands[msg.function]) is bool:
                 self.send_now(Message("That's not a command", job=msg))
                 log(job_id=msg.job_id, error_code=30002)
-                msg.complete()
                 return
 
             elif self.channel not in self.config["accept_all_commands"] and \
@@ -109,7 +106,6 @@ class Messenger:
                          "all_bots" in self.commands[msg.function].keys()):
                 self.send_now(Message("That command does not work on this chatbot", job=msg))
                 log(job_id=msg.job_id, error_code=30003)
-                msg.complete()
                 return
 
             else:
@@ -315,4 +311,3 @@ class Messenger:
         self.shutdown_attempted = True
         del self.loop
         sys.exit()
-
