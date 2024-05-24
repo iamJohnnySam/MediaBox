@@ -1,10 +1,7 @@
-import multiprocessing
-import time
+import threading
 
 from common_workspace import global_var, queues
-from communication_handler.socket.network_server import Server
-from communication_handler.telegram.initialize_telegram import init_telegram
-from shared_models import configuration
+from communication_handler import message_manager, socket_manager
 from shared_tools.logger import log
 
 
@@ -19,14 +16,14 @@ def main(message_q, job_q, packet_q, info_q, flag_stop, flag_restart, flag_reboo
 
     log(msg="Communication Process is Starting...")
 
-    config = configuration.Configuration()
-    telepot_channels, main_channel = init_telegram(config.telegram)
+    t_telegram = threading.Thread(target=message_manager.run_telegram, daemon=True)
+    t_telegram.start()
 
-    server_socket = Server(config.host, config.socket)
+    t_socket = threading.Thread(target=socket_manager.run_sockets(), daemon=True)
+    t_socket.start()
 
-    while not global_var.flag_stop.value:
-        # todo
-        time.sleep(1)
+    t_telegram.join()
+    t_socket.join()
 
     flag_stop.value = global_var.flag_stop
 

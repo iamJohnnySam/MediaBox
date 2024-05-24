@@ -1,16 +1,13 @@
 import os
-import sys
-import threading
 
 import telepot
 from telepot.loop import MessageLoop
 
+from communication_handler.command_handler import Commander
 from shared_models import configuration
 from shared_models.message import Message
 from shared_models.job import Job
-from shared_tools.job_tools import extract_job_from_message
-from shared_tools.json_editor import JSONEditor
-from job_handler import task_queue
+from shared_tools.custom_exceptions import UnexpectedOperation
 from shared_tools.logger import log
 from shared_tools.sql_connector import SQLConnector
 
@@ -24,28 +21,22 @@ class Messenger:
 
         self.config = configuration.Configuration().telegram
 
-        # Waiting user input
-        self.waiting_user_input = {}
-
-        # Get Commands
-        self.commands = JSONEditor(self.config["commands"]).read()
-
         # Listen
         self.bot = telepot.Bot(telepot_key)
         self.loop = MessageLoop(self.bot, {'chat': self.handle_message, 'callback_query': self.handle_callback})
         self.loop.run_as_thread()
         log(msg=f'Telepot {telepot_account} listening')
 
-        self.shutdown_attempted = False
-
-    def handle_message(self, msg):
+    def handle_message(self, msg: dict):
         try:
             content = msg['text']
         except ValueError:
             content = "### No Message ###"
-        log(msg=f"INCOMING: {msg['chat']['id']}, Message: {content}", log_type="info")
 
-        function, chat_id, username, reply_to, collection = extract_job_from_message(msg)
+        chat_id = msg['chat']['id']
+        username = msg['chat']['first_name']
+
+        log(msg=f"INCOMING: {chat_id}, Message: {content}", log_type="info")
 
         if not self.is_authorised(chat_id):
             self.bot.sendMessage(chat_id, "Hello " + username + "! You're not allowed to be here")
@@ -54,16 +45,10 @@ class Messenger:
             log(msg=string, log_type="warn")
             return
 
-        job = Job(function=function, telepot_account=self.channel, chat_id=chat_id, username=username,
-                  reply_to=reply_to, collection=collection)
+        if "photo" in msg.keys():
+            self.handle_photo(msg)
 
-        if 'photo' in msg.keys():
-            self.handle_photo(message)
-
-        if 'text' in msg.keys():
-            self.handle_text(message)
-        else:
-            log(job_id=job.job_id, error_code=20001)
+        Commander(msg, self.channel).process_command()
 
     def is_authorised(self, chat_id) -> bool:
         if SQLConnector(job_id=0).check_exists(self.config["tbl_allowed_chats"], {"chat_id": chat_id}) == 0:
@@ -71,212 +56,79 @@ class Messenger:
         else:
             return True
 
-    def handle_photo(self, msg: Job):
-        for pic in range(msg.photo_ids):
+    def handle_photo(self, msg: dict):
+        if not os.path.exists(self.config["telepot_image_dump"]):
+            os.makedirs(self.config["telepot_image_dump"])
+
+        for pic in msg['photo']:
             try:
-                self.bot.download_file(msg.photo_ids[pic], msg.photo_loc[pic])
+                self.bot.download_file(msg['photo'][pic]['file_id'],
+                                       os.path.join(self.config["telepot_image_dump"], msg['photo'][pic]['file_id']))
             except PermissionError as e:
-                log(job_id=msg.job_id, error_code=10001, error=str(e))
+                log(error_code=10001, error=str(e))
                 self.send_now(Message("PERMISSION ERROR"))
-        msg.store_photos()
-
-    def handle_text(self, msg: Job):
-        if msg.function == "no_function":
-            task_queue.add_job(msg)
-            log(job_id=msg.job_id, error_code=30001)
-
-        elif msg.function == "cancel":
-            if msg.chat_id in self.waiting_user_input.keys():
-                msg.job_id = self.waiting_user_input[msg.chat_id]["job"]
-                del self.waiting_user_input[msg.chat_id]
-                self.send_now(Message(f"Job canceled.", msg))
-
-        elif msg.function == "raise_exception" or msg.function == "shutdown":
-            self.shutdown()
-
-        elif msg.function in self.commands.keys():
-            if type(self.commands[msg.function]) is bool:
-                self.send_now(Message("That's not a command", job=msg))
-                log(job_id=msg.job_id, error_code=30002)
-                return
-
-            elif self.channel not in self.config["accept_all_commands"] and \
-                    type(self.commands[msg.function]) is not str and \
-                    not (self.channel in self.commands[msg.function].keys() or
-                         "all_bots" in self.commands[msg.function].keys()):
-                self.send_now(Message("That command does not work on this chatbot", job=msg))
-                log(job_id=msg.job_id, error_code=30003)
-                return
-
-            else:
-                # No errors
-                pass
-
-            if "function" in self.commands[msg.function].keys():
-                old_func = msg.function
-                msg.function = self.commands[msg.function]["function"]
-                log(job_id=msg.job_id, msg=f"Function updated from {old_func} to {msg.function}")
-
-            else:
-                # function update not required
-                pass
-
-            task_queue.add_job(msg)
-            log(job_id=msg.job_id, msg=f"Message function verified and added {msg.function} to queue.")
-
-        elif msg.function == "chat":
-            if msg.chat_id in self.waiting_user_input.keys():
-                self._process_waiting_list(msg)
-                msg.called_back = True
-                task_queue.add_job(msg)
-
-            else:
-                # todo
-                self.send_now(Message("Chatbot Disabled. Type /help to find more information", job=msg))
-
-        else:
-            self.send_now(Message("Sorry, that command is not known to me... If you need help please send /help and I "
-                                  "will send you a list of commands which you can use to start a task", job=msg))
-
-    def _process_waiting_list(self, msg: Job, override_value=None):
-        input_value = msg.user_input if override_value is None else override_value
-
-        if self.waiting_user_input[msg.chat_id]["job"] == 0:
-            msg.function = self.waiting_user_input[msg.chat_id]["function"]
-        else:
-            msg.job_id = self.waiting_user_input[msg.chat_id]["job"]
-        index = self.waiting_user_input[msg.chat_id]["index"]
-        msg.collect(input_value, index)
-        del self.waiting_user_input[msg.chat_id]
-        log(job_id=msg.job_id, msg=f"Message recalled and function, {msg.function} added to queue with "
-                                   f"{input_value} collected at index {index}.")
 
     def handle_callback(self, query):
-        try:
-            q = str(query['data']).split(";")
-        except ValueError as e:
-            log(job_id=0, error_code=20002, error=str(e))
-            return
-
-        if q[1] == "/":
-            msg_id = 0
-        else:
-            try:
-                msg_id = int(q[0])
-            except ValueError as e:
-                log(job_id=0, error_code=20004, error=str(e))
-                return
-
-        log(job_id=msg_id, msg='Callback Query: ' + str(query['data']))
-
-        if q[3] == "X":
-            save_loc = os.path.join(self.config["callback_overflow"], f"{q[0]}_cb.json")
-            query_data = JSONEditor(save_loc).read()[f'{q[0]};{q[1]};{q[2]}']
-            log(job_id=msg_id, msg="Recovered Query: " + query_data)
-
-            try:
-                q = str(query_data).split(";")
-            except ValueError as e:
-                log(job_id=msg_id, error_code=20003, error=str(e))
-                return
-
-        if msg_id == 0:
-            msg = Job(function=q[3], chat_id=query['from']['id'], username=query['from']['first_name'],
-                      telepot_account=self.channel)
-        else:
-            try:
-                msg = Job(job_id=msg_id)
-            except LookupError as e:
-                log(job_id=msg_id, error_code=20005, error=str(e))
-                self.bot.answerCallbackQuery(query['id'], text=f'FAILED! (Error 20005) [{msg_id}]')
-                return
-
-        if q[4] == '/CANCEL':
-            self.update_keyboard(msg, telepot.origin_identifier(query))
-            msg.complete()
-            self.bot.answerCallbackQuery(query['id'], text=f'Cancelled! [{msg_id}]')
-            return
-
-        elif q[4] == '/GET':
-            if msg.job_id == 0:
-                self.get_user_input(job=msg, index=0)
-            else:
-                self.get_user_input(job=msg, index=int(q[3]))
-            self.update_keyboard(msg, telepot.origin_identifier(query), delete_message=False)
-            self.edit_message(msg, telepot.origin_identifier(query), "Please send the value")
-            self.bot.answerCallbackQuery(query['id'], text=f'Type and send value! [{msg_id}]')
-            return
+        log(msg='Callback Query: ' + str(query['data']))
 
         try:
-            if msg.job_id == 0:
-                msg.collect(q[4], 0)
-            else:
-                msg.collect(q[4], int(q[3]))
-        except ValueError as e:
-            log(job_id=msg_id, error_code=20004, error=str(e))
-            self.bot.answerCallbackQuery(query['id'], text=f'FAILED! (Error 20004) [{msg_id}]')
-            return
-        except IndexError as e:
-            log(job_id=msg_id, error_code=20014, error=str(e))
-            self.bot.answerCallbackQuery(query['id'], text=f'FAILED! (Error 20014) [{msg_id}]')
+            job, reply, get_val = Commander(query, channel=self.channel).process_callback()
+        except UnexpectedOperation as e:
+            log(error_code=20005, error=str(e))
+            self.bot.answerCallbackQuery(query['id'], text=f'FAILED! (Error 20005)')
             return
 
-        msg.called_back = True
-        task_queue.add_job(msg)
-        self.bot.answerCallbackQuery(query['id'], text=f'Acknowledged! [{msg_id}]')
-
-        self.update_keyboard(msg, telepot.origin_identifier(query))
-        # self.update_keyboard(msg, msg.replies[q[1]])
+        self.update_keyboard(job=job, msg_id=telepot.origin_identifier(query), delete_message=not get_val)
+        if get_val:
+            self.edit_message(job, telepot.origin_identifier(query), "Please send the value")
+        self.bot.answerCallbackQuery(query['id'], text=reply)
 
     def send_now(self, message: Message):
-        if message.job is not None and message.job.is_background_task:
-            log(job_id=message.job_id, msg="Sending avoided due to background task")
+        if type(message) != Message:
+            log(error_code=20013)
+            raise ValueError("Invalid data type. Expected a Message.")
+
+        if message.no_message:
+            log(job_id=message.msg_id, msg="Sending avoided due to background task")
             return
 
-        if type(message) != Message:
-            log(message.job_id, error_code=20013)
-            raise ValueError("Invalid data type. Expected a Message.")
-        message.this_telepot_account = self.channel
+        chats = [message.chat_id]
+        if message.group is not None:
+            database = SQLConnector(self.config["database"])
+            group_exists = database.check_exists(self.config["tbl_groups"], {"group_name": message.group}) != 0
 
-        if message.job_id == 0:
-            send_string = message.send_string
-        else:
-            send_string = f"{message.send_string}\n[{message.job_id:03}]"
+            if not group_exists:
+                log(job_id=message.msg_id, error_code=20007)
+                raise ValueError
 
-        replies = []
-        for chat in message.chats:
+            result = database.select(table=self.config["tbl_groups"],
+                                     columns="chat_id",
+                                     where={"group_name": message.group},
+                                     fetch_all=True)
+            chats = [row[0] for row in result]
+
+        for chat in chats:
             if message.photo != "":
                 try:
                     reply = self.bot.sendPhoto(chat,
                                                photo=open(str(message.photo), 'rb'),
                                                reply_to_message_id=message.reply_to,
-                                               caption=str(send_string),
+                                               caption=str(message.send_string),
                                                reply_markup=message.keyboard)
                 except telepot.exception.TelegramError as e:
-                    log(message.job_id, error_code=20015, error=str(e))
+                    log(message.msg_id, error_code=20015, error=str(e))
                     continue
-                replies.append(reply)
             else:
                 try:
-                    reply = self.bot.sendMessage(chat, str(send_string),
+                    reply = self.bot.sendMessage(chat, str(message.send_string),
                                                  reply_to_message_id=message.reply_to,
                                                  reply_markup=message.keyboard)
                 except telepot.exception.TelegramError as e:
-                    log(message.job_id, error_code=20015, error=str(e))
+                    log(message.msg_id, error_code=20015, error=str(e))
                     continue
-                replies.append(reply)
 
-            log(job_id=message.job_id,
+            log(job_id=message.msg_id,
                 msg=f"OUTGOING: {chat}, ID: {reply['message_id']}, Message: {message.send_string}")
-
-        if message.job is not None and message.job_id != 0:
-            message.job.add_reply(replies)
-
-    def get_user_input(self, job: Job, index=0):
-        self.waiting_user_input[job.chat_id] = {"job": job.job_id,
-                                                "index": index,
-                                                "function": job.function}
-        log(job_id=job.job_id, msg=f"Waiting user input from {job.chat_id}")
 
     def update_keyboard(self, job: Job, msg_id, keyboard=None, delete_message: bool = True):
         msg: tuple = tuple(msg_id)
@@ -300,14 +152,3 @@ class Messenger:
             log(job_id=job.job_id, msg=f"Message {msg_id} updated to {new_message}")
         except telepot.exception.TelegramError as e:
             log(job_id=job.job_id, msg=f"Could not update message {msg_id} - {str(e)}", log_type="warn")
-
-    def shutdown(self):
-        log(msg=f"This bot will attempt to shutdown - Thread ID = {threading.get_ident()}", log_type="info")
-        if self.shutdown_attempted:
-            self.send_now(Message(f"{self.channel.capitalize()} Bot previous shutdown attempt failed. "
-                                  f"Continuation is blocked.\nReattempting shutdown..."))
-        else:
-            self.send_now(Message(f"{self.channel.capitalize()} Bot attempt to shutdown.."))
-        self.shutdown_attempted = True
-        del self.loop
-        sys.exit()

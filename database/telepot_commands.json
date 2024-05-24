@@ -176,11 +176,6 @@
   },
 
   "Bot Admin": false,
-  "shutdown": {
-    "definition": "Shut Down Bot",
-    "function": "raise_exception",
-    "all_bots": true
-  },
   "start_over": {
     "definition": "Restart the program"
   },

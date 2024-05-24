@@ -37,23 +37,23 @@ class Finance(Module):
         except IndexError:
             value_match = str(re.findall(r'(?:rs\.|lkr)\s?(?:\d{1,3}(?:,\d{3})*(?:\.\d{2})?|\d+(?:\.\d{2})?)', sms)[0])
             value_match = value_match.replace("lkr ", "").replace("rs. ", "").replace(",", "").strip()
-        log(job_id=self._job.job_id, msg=f"Transaction amount: {value_match}")
+        log(job_id=self.job.job_id, msg=f"Transaction amount: {value_match}")
         value_match.replace("lkr ", "").replace("rs.  ", "").replace(",", "").strip()
-        self._job.collect(value_match, 0)
+        self.job.collect(value_match, 0)
 
         # Extract date
         try:
             date_match = str(re.findall(r'(\d{2}[/-]\d{2}[/-]\d{4})', sms)[0])
-            log(job_id=self._job.job_id, msg=f"Date: {date_match}")
+            log(job_id=self.job.job_id, msg=f"Date: {date_match}")
         except IndexError:
             date_match = datetime.today().strftime('%Y-%m-%d')
-        self._job.collect(date_match, 1)
+        self.job.collect(date_match, 1)
 
         # Check Transaction Type
         if any(x.lower() in sms for x in global_var.credit_words):
-            self._job.collect('income', 2)
+            self.job.collect('income', 2)
         elif any(x.lower() in sms for x in global_var.debit_words):
-            self._job.collect('expense', 2)
+            self.job.collect('expense', 2)
         else:
             raise InvalidParameterException(f"Could not find transaction type in {sms}")
 
@@ -62,12 +62,12 @@ class Finance(Module):
             # vendor_match = str(re.findall(r'at ([^.0-9]+?)(?=\s\d+|[.])', sms)[0])
             vendor_match = str(re.findall(r'at ([^.0-9]+?)(?=\s\d+ [A-Z]{2}|$|[.]| on)', sms)[0])
             vendor_match = re.sub(' +', ' ', vendor_match)
-            log(job_id=self._job.job_id, msg=f"Vendor: {vendor_match}")
+            log(job_id=self.job.job_id, msg=f"Vendor: {vendor_match}")
         except IndexError:
             vendor_match = ""
-        self._job.collect(vendor_match.strip(), 3)
+        self.job.collect(vendor_match.strip(), 3)
 
-        self._job.function = "finance"
+        self.job.function = "finance"
         self.finance()
 
     def finance(self):
@@ -171,8 +171,8 @@ class Finance(Module):
 
         self.db_finance.insert(self._tbl_transactions,
                                "transaction_by, date, type, category_id, amount, vendor_id, vendor, photo_id",
-                               (self._job.chat_id, t_date, t_type, cat_id, t_value, vendor_id, vendor,
-                                ";".join([str(ele) for ele in self._job.photo_ids])))
+                               (self.job.chat_id, t_date, t_type, cat_id, t_value, vendor_id, vendor,
+                                ";".join([str(ele) for ele in self.job.photo_ids])))
 
         result = list(self.db_finance.select(table=self._tbl_transactions,
                                              columns="vendor, type, amount",
@@ -185,9 +185,9 @@ class Finance(Module):
         for row in result:
             send_string = send_string + f"\n{row[0]}: {'-' if row[1] == 'expense' else '+'}{row[2]:.2f}"
 
-        log(self._job.job_id, msg=send_string)
+        log(self.job.job_id, msg=send_string)
         self.send_message(Message(send_string=send_string))
-        self._job.complete()
+        self.job.complete()
 
         # todo add another option with the same params
 
@@ -216,7 +216,7 @@ class Finance(Module):
                 cond = cond + filler + f'{lut_column} LIKE "{pre_sym}{item_part}%"'
             lut_options = self.db_finance.select(lut_table, lut_column, where=cond, fetch_all=True)
             options = [x[0] for x in lut_options] if lut_options is not None else None
-        log(job_id=self._job.job_id, msg=f"Options: {options}")
+        log(job_id=self.job.job_id, msg=f"Options: {options}")
 
         default = default_id[0] if default_id is not None else None
 
@@ -243,7 +243,7 @@ class Finance(Module):
         if not os.path.exists(image_loc):
             os.makedirs(image_loc)
 
-        for value in self._job.photo_ids:
+        for value in self.job.photo_ids:
             shutil.move(os.path.join(refs.telepot_image_dump, value),
                         os.path.join(image_loc, value))
 

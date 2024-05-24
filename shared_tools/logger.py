@@ -20,7 +20,7 @@ def log_file_name():
     return os.path.join(logs_location, f"log-{today_date}.log")
 
 
-def log(job_id: int = 0, msg: str = "", log_type: str = "debug", error_code: int = 0, error: str = ""):
+def log(job_id: int | str = 0, msg: str = "", log_type: str = "debug", error_code: int = 0, error: str = ""):
     global file_created
     if error_code == 0 and msg == "":
         raise ValueError("Invalid Parameters for record")

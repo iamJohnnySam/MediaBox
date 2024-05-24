@@ -18,21 +18,21 @@ class Transmission(Module):
         for torrent in torrent_list:
             success, torrent_name = self._add_torrent_to_list(torrent)
             if not success:
-                log(job_id=self._job.job_id, error_code=50001)
+                log(job_id=self.job.job_id, error_code=50001)
 
         return self.active_torrents
 
     def add_torrent(self, path, paused=False):
         torrent = self.client.add_torrent(path, paused=paused)
         success, torrent_name = self._add_torrent_to_list(torrent)
-        log(self._job.job_id, msg=f"Torrent Added: {torrent_name}")
+        log(self.job.job_id, msg=f"Torrent Added: {torrent_name}")
         return success, torrent_name
 
     def _add_torrent_to_list(self, torrent):
         torrent_id = torrent.id
         if torrent_id not in self.active_torrents.keys():
             self.active_torrents[torrent_id] = torrent
-            log(job_id=self._job.job_id, msg=f'Torrent Added - {torrent.name}')
+            log(job_id=self.job.job_id, msg=f'Torrent Added - {torrent.name}')
             return True, torrent.name
         else:
             return False, ""
@@ -43,7 +43,7 @@ class Transmission(Module):
             if self.active_torrents[torrent_number].percent_done == 1:
                 torrent_id = self.active_torrents[torrent_number].id
                 self.client.remove_torrent(torrent_id)
-                log(job_id=self._job.job_id,
+                log(job_id=self.job.job_id,
                     msg=f'Torrent deleted - {self.active_torrents[torrent_number].name}')
 
     def send_list(self):
@@ -59,4 +59,4 @@ class Transmission(Module):
             completion = str(int(self.active_torrents[torrent_number].percent_done * 100)) + "%"
             return_string = return_string + "\n" + str(torrent_number) + ": " + torrent_path + " - " + completion
 
-        self.send_message(Message(return_string, job=self._job))
+        self.send_message(Message(return_string, job=self.job))

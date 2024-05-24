@@ -10,17 +10,22 @@ from shared_tools.word_tools import check_time_validity, check_date_validity
 
 class Module:
     def __init__(self, job: Job):
-        self._job = job
-        log(self._job.job_id, f"Module Created")
+        self.job = job
+        log(self.job.job_id, f"Module Created")
+
+    @property
+    def is_master(self):
+        # todo
+        return self.master == self.chat_id
 
     def check_index(self) -> int:
-        val = len(self._job.collection)
-        log(self._job.job_id, f"Collection has {val} units.")
+        val = len(self.job.collection)
+        log(self.job.job_id, f"Collection has {val} units.")
         return val
 
     def get_index(self, index) -> str:
-        val = self._job.collection[index]
-        log(self._job.job_id, f"Return from collection {val} from index {index}.")
+        val = self.job.collection[index]
+        log(self.job.job_id, f"Return from collection {val} from index {index}.")
         return val
 
     def check_value(self, index: int = 0, replace_str: str = "",
@@ -38,22 +43,21 @@ class Module:
             raise InvalidParameterException("Contradicting check items are selected")
 
         success = True
-        no_save = (index <= 0) or len(self._job.collection) == 0
 
         if option_list is None:
             option_list = [] if check_list is None else check_list
 
-        if len(self._job.collection) <= index:
+        if len(self.job.collection) <= index:
             if default != "" and default is not None:
                 value = default
-                self._job.collect(default, index)
-                log(self._job.job_id, f"Index not available. Default used")
+                self.job.collect(default, index)
+                log(self.job.job_id, f"Index not available. Default used")
             else:
                 success = False
                 value = ""
-                log(self._job.job_id, f"Index not available and no default")
+                log(self.job.job_id, f"Index not available and no default")
         else:
-            col = self._job.collection
+            col = self.job.collection
 
             if index < 0:
                 try:
@@ -61,23 +65,23 @@ class Module:
                 except IndexError:
                     success = False
                     value = ""
-                    log(self._job.job_id, f"Unexpected index fail", log_type="warn")
+                    log(self.job.job_id, f"Unexpected index fail", log_type="warn")
             else:
                 try:
                     value = col[index]
-                    log(self._job.job_id, f"Checking {value} for errors.")
+                    log(self.job.job_id, f"Checking {value} for errors.")
                 except IndexError:
                     success = False
                     value = ""
-                    log(self._job.job_id, f"Unexpected index fail", log_type="warn")
+                    log(self.job.job_id, f"Unexpected index fail", log_type="warn")
 
         if success and value == "":
             if default != "":
                 value = default
-                log(self._job.job_id, f"No message available. Default used")
+                log(self.job.job_id, f"No message available. Default used")
             else:
                 success = False
-                log(self._job.job_id, f"No message available and no default")
+                log(self.job.job_id, f"No message available and no default")
 
         if success and replace_str != "" and replace_str in value:
             value = value.replace(replace_str, "").strip()
@@ -87,19 +91,19 @@ class Module:
                 int(value)
             except ValueError:
                 success = False
-                log(self._job.job_id, f"Unable to convert to int")
+                log(self.job.job_id, f"Unable to convert to int")
 
         if success and check_float:
             try:
                 float(value)
             except ValueError:
                 success = False
-                log(self._job.job_id, f"Unable to convert to float")
+                log(self.job.job_id, f"Unable to convert to float")
 
         if success and check_list is not None:
             if value not in check_list:
                 success = False
-                log(self._job.job_id, f"Expected item not in list")
+                log(self.job.job_id, f"Expected item not in list")
 
         if success and check_date and value.lower() == "yesterday":
             value = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
@@ -111,41 +115,34 @@ class Module:
             value = (datetime.now() + timedelta(days=1)).strftime('%Y-%m-%d')
 
         if success and check_date:
-            success, value = check_date_validity(self._job.job_id, value)
+            success, value = check_date_validity(self.job.job_id, value)
 
         if success and check_time:
-            success, value = check_time_validity(self._job.job_id, value)
+            success, value = check_time_validity(self.job.job_id, value)
 
         # If anything failed
         if (not success) and (not no_recover):
-            if not no_save:
-                self._job.store_message()
             get_manual = check_int or check_float or check_date or check_time or manual_option
 
             send_val = f"Please enter the {description if description != '' else 'value'}" \
                        f"{' in ' if replace_str != '' else ''}{replace_str}" \
                        f"{' from the options below' if option_list else ''}."
 
-            if option_list and not no_save:
-                msg = Message(send_string=send_val, job=self._job)
-                msg.job_keyboard_extractor(index=index, options=option_list, add_cancel=True, add_other=get_manual)
-                self.send_message(message=msg)
-            elif option_list and no_save:
-                msg = Message(send_string=send_val, job=self._job)
-                msg.function_keyboard_extractor(self._job.function, options=option_list,
-                                                add_cancel=True, add_other=get_manual)
-                # msg.job_keyboard_extractor(index=index, options=option_list, add_cancel=True, add_other=get_manual)
+            if option_list:
+                msg = Message(send_string=send_val, job=self.job)
+                msg.keyboard_extractor(function=self.job.function,
+                                       index=index, options=option_list,
+                                       add_cancel=True, add_other=get_manual, reply_to=self.job.reply_to)
                 self.send_message(message=msg)
             else:
-                self.send_message(message=Message(send_string=send_val + "\nSend /cancel to cancel Job",
-                                                  job=self._job,
+                self.send_message(message=Message(send_string=send_val + "\nSend /cancel to stop waiting.",
+                                                  job=self.job,
                                                   get_input=True,
                                                   index=index))
-
         return success, value
 
     def send_message(self, message: Message, channel=None):
-        if channel is not None and channel != self._job.telepot_account:
+        if channel is not None and channel != self.job.channel:
             message_temp = message
             message_temp.group = None
             message.this_telepot_account = channel
@@ -156,9 +153,9 @@ class Module:
             self.__send_message(message)
 
     def __send_message(self, message: Message):
-        message.job = self._job
+        message.job = self.job
         queues.message_q.put(message)
-        log(job_id=self._job.job_id, msg="Message added to Queue.")
+        log(job_id=self.job.job_id, msg="Message added to Queue.")
 
     def send_admin(self, message: Message):
         message.send_to_master()

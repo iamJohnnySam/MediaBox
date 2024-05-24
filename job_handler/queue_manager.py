@@ -18,17 +18,14 @@ def run_task_mgr():
 
             check_running_tasks()
 
-            if job.job_id in running_tasks.keys():
+            if job.function in running_tasks.keys():
                 log(job.job_id, "Waiting for Job to complete to process next task")
                 queues.job_q.put(job)
                 continue
 
             task_thread = threading.Thread(target=execute, args=(job,))
+            running_tasks[job.function] = task_thread
             task_thread.start()
-
-            if job.job_id != 0:
-                running_tasks[job.job_id] = task_thread
-                job.update_job()
 
         time.sleep(1)
 

@@ -8,6 +8,7 @@ flag_reboot: multiprocessing.Value = multiprocessing.Value('i', 0)
 
 default_port = 10000
 socket_id = 0
+main_telegram_channel = ""
 
 date_formats = ["%Y-%m-%d", "%d-%m-%Y", "%Y-%b-%d", "%d-%b-%Y", "%m-%d-%y", "%b-%d-%y",
                 "%Y/%m/%d", "%d/%m/%Y", "%Y/%b/%d", "%d/%b/%Y",

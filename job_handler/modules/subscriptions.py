@@ -14,20 +14,20 @@ class Subscriptions(Module):
 
     def manage_chat_group(self, group, add=True, remove=False):
         message_type = "info"
-        where = f"chat_id = '{self._job.chat_id}' AND group_name = '{group}';"
+        where = f"chat_id = '{self.job.chat_id}' AND group_name = '{group}';"
         if not add ^ remove:
             msg = "Invalid command"
             message_type = "error"
         elif add and self.admin_db.check_exists(self._tbl_groups, where) == 0:
             cols = "chat_id, group_name"
-            vals = (self._job.chat_id, group)
+            vals = (self.job.chat_id, group)
             self.admin_db.insert(self._tbl_groups, cols, vals)
-            msg = f"Added {self._job.chat_id} to {group} group"
+            msg = f"Added {self.job.chat_id} to {group} group"
         elif remove and self.admin_db.check_exists(self._tbl_groups, where) != 0:
             self.admin_db.delete(self._tbl_groups, where)
-            msg = f"Removed {self._job.chat_id} from {group} group"
+            msg = f"Removed {self.job.chat_id} from {group} group"
         else:
             msg = "Nothing to do"
 
-        log(self._job.job_id, msg, log_type=message_type)
+        log(self.job.job_id, msg, log_type=message_type)
         return msg

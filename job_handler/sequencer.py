@@ -35,6 +35,11 @@ class Sequence:
         # todo
         pass
 
+    def no_function(self):
+        # todo
+        # self.send_now(Message("Chatbot Disabled. Type /help to find more information", job=msg))
+        pass
+
     def alive(self):
         Admin(self.job).alive()
 

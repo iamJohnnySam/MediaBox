@@ -19,7 +19,8 @@
       "log_to_console": true,
       "backup_location": "backup/",
       "backup_databases": ["administration", "news", "transactions", "baby", "entertainment"],
-      "error_codes": "shared_tools/error_codes.json"
+      "error_codes": "shared_tools/error_codes.json",
+      "main_telegram_channel": "test"
     },
     "telegram": {
       "enable": true,
@@ -27,7 +28,7 @@
       "main_account": 0,
       "commands": "database/telepot_commands.json",
       "accept_all_commands": ["test"],
-      "callback_overflow": "database/telepot/",
+      "callback_overflow": "database/callbacks.json",
       "db_telepot_accounts": "database/telepot_accounts.json",
       "database": "administration",
       "tbl_allowed_chats": "telepot_allowed_chats",

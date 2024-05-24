@@ -22,41 +22,41 @@ class NewsReader(Module):
 
         self.admin_db = SQLConnector(job.job_id, database=self.admin_config["database"])
         self.news_db = SQLConnector(job.job_id, database=self.news_config["database"])
-        log(self._job.job_id, f"Object Created")
+        log(self.job.job_id, f"Object Created")
 
     def _get_news_subscriptions(self):
         result = self.admin_db.select(table=self.admin_config["tbl_groups"],
                                       columns="group_name",
-                                      where={"chat_id": self._job.chat_id},
+                                      where={"chat_id": self.job.chat_id},
                                       fetch_all=True)
         subs = [source[0].replace("news_", "") for source in result if source[0].startswith("news_")]
-        log(self._job.job_id, str(subs))
+        log(self.job.job_id, str(subs))
         return subs
 
     def get_news_all(self):
-        self._job.collect("all", 0)
+        self.job.collect("all", 0)
         sources = self._get_news_subscriptions()
         for source in sources:
             self._check_news(source)
-        self._job.complete()
+        self.job.complete()
 
     def get_news(self):
         success, source = self.check_value(index=-1, option_list=self._get_news_subscriptions())
         if not success:
             return
         self._check_news(source)
-        self._job.complete()
+        self.job.complete()
 
     def _check_news(self, source):
         news_sources = JSONEditor(self.news_config["sources"]).read()
         if source == '':
-            log(self._job.job_id, error_code=50005)
-            self._job.collection = []
+            log(self.job.job_id, error_code=50005)
+            self.job.collection = []
             return
         news_sent = self.news_extractor(source, news_sources[source])
         if not news_sent:
-            self.send_message(Message(job=self._job, send_string=f"No new news articles for {source}."))
-        self._job.collection = []
+            self.send_message(Message(job=self.job, send_string=f"No new news articles for {source}."))
+        self.job.collection = []
 
     def news_extractor(self, source: str, news):
         news_sent = False
@@ -107,13 +107,13 @@ class NewsReader(Module):
                 link = link[idx1 + len_idx1: idx2]
 
             cols = "source, title, link, user_id"
-            val = (source, title, link, self._job.chat_id)
+            val = (source, title, link, self.job.chat_id)
 
             if self.news_db.check_exists(self.news_config["tbl_news"], {"title": title,
                                                                         "source": source,
-                                                                        "user_id": self._job.chat_id}) == 0:
+                                                                        "user_id": self.job.chat_id}) == 0:
                 self.news_db.insert(self.news_config["tbl_news"], cols, val)
-                self.send_message(Message(send_string=f'{title} - {link}', job=self._job))
+                self.send_message(Message(send_string=f'{title} - {link}', job=self.job))
                 news_sent = True
 
         return news_sent
@@ -125,8 +125,8 @@ class NewsReader(Module):
         for channel in news.keys():
             if type(news[channel]) is bool:
                 if len(news_channels) != 0:
-                    send_message = Message(prev_channel, job=self._job)
-                    send_message.function_keyboard_extractor("subs_news", news_channels)
+                    send_message = Message(prev_channel, job=self.job)
+                    send_message.keyboard_extractor(function="subs_news", options=news_channels)
                     self.send_message(send_message)
                 prev_channel = channel
                 news_channels = []
@@ -142,12 +142,12 @@ class NewsReader(Module):
             self.show_news_channels()
 
         if not self.admin_db.check_exists(self.admin_config["tbl_groups"],
-                                          f"group_name = 'news_{source}' AND chat_id = '{self._job.chat_id}'") == 0:
-            Subscriptions(self._job).manage_chat_group(f'news_{source}', add=False, remove=True)
+                                          f"group_name = 'news_{source}' AND chat_id = '{self.job.chat_id}'") == 0:
+            Subscriptions(self.job).manage_chat_group(f'news_{source}', add=False, remove=True)
             reply_text = f"You are Unsubscribed from {source}."
 
         else:
-            Subscriptions(self._job).manage_chat_group(f'news_{source}')
+            Subscriptions(self.job).manage_chat_group(f'news_{source}')
             reply_text = f"You are now Subscribed to {source}."
 
-        self.send_message(Message(reply_text, job=self._job))
+        self.send_message(Message(reply_text, job=self.job))

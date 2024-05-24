@@ -38,15 +38,15 @@ class CCTVChecker(Module):
         for f in os.listdir(self.cctv_download):
             os.remove(os.path.join(self.cctv_download, f))
 
-        log(self._job.job_id, "Created Object")
+        log(self.job.job_id, "Created Object")
 
     def download_cctv(self):
-        log(self._job.job_id, "-------STARTED CCTV MAIN SCRIPT-------")
+        log(self.job.job_id, "-------STARTED CCTV MAIN SCRIPT-------")
 
-        cctv_classifier1 = ImageClassifier(self._job, self.cctv_model1, "A01")
-        cctv_classifier2 = ImageClassifier(self._job, self.cctv_model2, "A02")
+        cctv_classifier1 = ImageClassifier(self.job, self.cctv_model1, "A01")
+        cctv_classifier2 = ImageClassifier(self.job, self.cctv_model2, "A02")
 
-        client = EmailManager(self._job, passwords.gmail_em, self.cctv_imap, passwords.gmail_pw, self.cctv_mailbox)
+        client = EmailManager(self.job, passwords.gmail_em, self.cctv_imap, passwords.gmail_pw, self.cctv_mailbox)
 
         running = True
 
@@ -93,32 +93,32 @@ class CCTVChecker(Module):
                     t = t+1
                 file_name = file_name.replace(":", "").replace(" ", "")
                 move_destination = shutil.move(att_path, os.path.join(sav_cctv, file_name))
-                log(self._job.job_id, f"Image Saved in {move_destination} with sus level at {val:.3f}")
+                log(self.job.job_id, f"Image Saved in {move_destination} with sus level at {val:.3f}")
 
-        log(self._job.job_id, "-------ENDED CCTV MAIN SCRIPT-------")
+        log(self.job.job_id, "-------ENDED CCTV MAIN SCRIPT-------")
         client.email_close()
 
     def get_last(self, amount: int = 10):
         a01_files = sorted(os.listdir(os.path.join(self.cctv_save, "A01", "1")))[-amount:]
         a02_files = sorted(os.listdir(os.path.join(self.cctv_save, "A02", "1")))[-amount:]
 
-        self.send_message(Message(job=self._job, send_string=f"Last {amount} CCTV images for A01 channel."))
+        self.send_message(Message(job=self.job, send_string=f"Last {amount} CCTV images for A01 channel."))
         for photo in a01_files:
-            self.send_message(Message(job=self._job, send_string=photo,
+            self.send_message(Message(job=self.job, send_string=photo,
                                       photo=os.path.join(self.cctv_save, "A01", "1", photo)))
 
-        self.send_message(Message(job=self._job, send_string=f"Last {amount} CCTV images for A02 channel."))
+        self.send_message(Message(job=self.job, send_string=f"Last {amount} CCTV images for A02 channel."))
         for photo in a02_files:
-            self.send_message(Message(job=self._job, send_string=photo,
+            self.send_message(Message(job=self.job, send_string=photo,
                                       photo=os.path.join(self.cctv_save, "A02", "1", photo)))
 
         else:
-            log(self._job.job_id, f"Cannot get last {amount} CCTV images. Not in Operation Mode")
+            log(self.job.job_id, f"Cannot get last {amount} CCTV images. Not in Operation Mode")
 
     def clean_up(self, mailbox=""):
         if mailbox == "":
             mailbox = self.cctv_sent
-        client = EmailManager(self._job, passwords.gmail_em, self.cctv_imap, passwords.gmail_pw, mailbox)
+        client = EmailManager(self.job, passwords.gmail_em, self.cctv_imap, passwords.gmail_pw, mailbox)
         client.delete_all_emails(mailbox)
         client.email_close()
-        self._job.complete()
+        self.job.complete()

@@ -1,13 +1,14 @@
 import platform
 from datetime import datetime
 
+from common_workspace import global_var
 from shared_tools.custom_exceptions import InvalidConfiguration
 from shared_tools.json_editor import JSONEditor
 from shared_tools import logger
 
 config_data = {}
 config_data_read_time: datetime = datetime.now()
-updated_logger = False
+initial_update = False
 
 
 class Configuration:
@@ -15,7 +16,7 @@ class Configuration:
     def __init__(self, config_location: str = ""):
         global config_data
         global config_data_read_time
-        global updated_logger
+        global initial_update
 
         if config_location == "":
             config_location = "app_config.json"
@@ -41,9 +42,10 @@ class Configuration:
 
         self._config = common_config | host_config
 
-        if not updated_logger:
+        if not initial_update:
             self._update_logger()
-            updated_logger = True
+            global_var.main_telegram_channel = self.admin["main_telegram_channel"]
+            initial_update = True
 
     def _update_logger(self) -> None:
         logger.logs_location = self.admin["log_location"]

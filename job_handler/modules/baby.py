@@ -15,7 +15,7 @@ class Baby(Module):
         super().__init__(job)
         self.config = configuration.Configuration().baby
         self._db = SQLConnector(job.job_id, database=self.config["database"])
-        log(self._job.job_id, f"Baby Module Created")
+        log(self.job.job_id, f"Baby Module Created")
 
         self._tbl_feed = self.config["tbl_feed"]
         self._tbl_diaper = self.config["tbl_diaper"]
@@ -44,7 +44,7 @@ class Baby(Module):
             return
 
         columns = "date, time, amount, source, added_by"
-        val = (date, time, float(amount), source, str(self._job.chat_id))
+        val = (date, time, float(amount), source, str(self.job.chat_id))
         self._db.insert(self._tbl_feed, columns, val)
 
         day_total = self._get_total(self._tbl_feed, "amount", date)
@@ -53,9 +53,9 @@ class Baby(Module):
         self.send_message(Message(f'\U0001F37C\nBaby was fed {amount}ml on {date} at {time} with {source} milk '
                                   f'for a total of {"{:10.1f}".format(day_total).strip()}ml today - {average}%.'
                                   f'\nUse /feed to submit a new entry',
-                                  job=self._job,
+                                  job=self.job,
                                   group=self._group), channel="baby")
-        self._job.complete()
+        self.job.complete()
 
     def pump(self):
         amount_list = ["10ml", "20ml", "30ml", "40ml"]
@@ -74,14 +74,14 @@ class Baby(Module):
             return
 
         columns = "date, time, amount, breast, user_id"
-        val = (date, time, float(amount), source, str(self._job.chat_id))
+        val = (date, time, float(amount), source, str(self.job.chat_id))
         self._db.insert(self._tbl_pump, columns, val)
 
         day_total = self._get_total(self._tbl_pump, "amount", date, user_id=True)
 
         self.send_message(Message(f'\U0001F37C\nYou pumped {amount}ml on {date} at {time} from {source} boob.'
-                                  f'for a total of {day_total} today!', job=self._job))
-        self._job.complete()
+                                  f'for a total of {day_total} today!', job=self.job))
+        self.job.complete()
 
     def diaper(self):
         source_types = ["pee", "poo", "poopee"]
@@ -99,14 +99,14 @@ class Baby(Module):
 
         if source == "pee":
             emoji = '\U0001F6BC \U0001F4A6'
-            self._db.insert(self._tbl_diaper, columns, (date, time, "pee", 1, str(self._job.chat_id)))
+            self._db.insert(self._tbl_diaper, columns, (date, time, "pee", 1, str(self.job.chat_id)))
         elif source == "poo":
             emoji = '\U0001F6BC \U0001F4A9'
-            self._db.insert(self._tbl_diaper, columns, (date, time, "poo", 1, str(self._job.chat_id)))
+            self._db.insert(self._tbl_diaper, columns, (date, time, "poo", 1, str(self.job.chat_id)))
         elif source == "poopee":
             emoji = '\U0001F6BC \U0001F4A6 \U0001F4A9'
-            self._db.insert(self._tbl_diaper, columns, (date, time, "pee", 1, str(self._job.chat_id)))
-            self._db.insert(self._tbl_diaper, columns, (date, time, "poo", 1, str(self._job.chat_id)))
+            self._db.insert(self._tbl_diaper, columns, (date, time, "pee", 1, str(self.job.chat_id)))
+            self._db.insert(self._tbl_diaper, columns, (date, time, "poo", 1, str(self.job.chat_id)))
         else:
             raise ImpossibleException(f"{source} did not match Pee, Poo or PooPee")
 
@@ -118,9 +118,9 @@ class Baby(Module):
 
         self.send_message(Message(f"{emoji}\n{source} diaper recorded on {date} at {time}.\nYour baby has had "
                                   f"{str(day_total)} nappy/diaper changes today.\nUse /diaper to submit a new entry",
-                                  job=self._job,
+                                  job=self.job,
                                   group=self._group), channel="baby")
-        self._job.complete()
+        self.job.complete()
 
     def weight(self):
         success, weight = self.check_value(index=0, replace_str="kg", check_float=True, description="weight")
@@ -135,15 +135,15 @@ class Baby(Module):
                                      order="weight_id", ascending=False, limit=1)
 
         columns = "date, weight, added_by"
-        val = (date, weight, str(self._job.chat_id))
+        val = (date, weight, str(self.job.chat_id))
         self._db.insert(self._tbl_weight, columns, val)
 
         send_string = f"\U0001F6BC \U0001F3C6 \nbaby Weight Added - {weight}kg. \n" \
                       f"That's a weight gain of {(float(weight) - last_entry[1]):10.2f}kg since {last_entry[0]}."
 
-        log(self._job.job_id, send_string)
+        log(self.job.job_id, send_string)
         self.weight_trend(caption=send_string)
-        self._job.complete()
+        self.job.complete()
 
     def weight_trend(self, caption=None):
         result = list(self._db.select(table=self._tbl_weight,
@@ -163,7 +163,7 @@ class Baby(Module):
                                    chart_title="Baby Weight Trend WHO - " + datetime.now().strftime('%Y-%m-%d %H:%M'))
 
         self.send_message(Message("WHO Chart", group=self._group, photo=pic))
-        self._job.complete()
+        self.job.complete()
 
     def feed_history(self):
         result = list(self._db.select(table=self._tbl_feed,
@@ -194,8 +194,8 @@ class Baby(Module):
                 caption = caption + f'\n{i} milk = {calc[i]}ml'
             caption = caption + "\nUse /feed to submit a new entry."
 
-        self.send_message(Message(caption, job=self._job, photo=pic))
-        self._job.complete()
+        self.send_message(Message(caption, job=self.job, photo=pic))
+        self.job.complete()
 
     def diaper_history(self):
         result = list(self._db.select(table=self._tbl_diaper,
@@ -227,8 +227,8 @@ class Baby(Module):
                 caption = caption + f'\n{i} = {calc[i]} nappies/diapers'
             caption = caption + "\nUse /diaper to submit a new entry."
 
-        self.send_message(Message(caption, job=self._job, photo=pic))
-        self._job.complete()
+        self.send_message(Message(caption, job=self.job, photo=pic))
+        self.job.complete()
 
     def feed_trend(self):
         result = list(self._db.select(table=self._tbl_feed,
@@ -241,7 +241,7 @@ class Baby(Module):
                                 x_time=True)
 
         caption = "Use /feed to submit a new entry."
-        self.send_message(Message(caption, job=self._job, photo=pic))
+        self.send_message(Message(caption, job=self.job, photo=pic))
 
     def diaper_trend(self):
         result = list(self._db.select(table=self._tbl_diaper,
@@ -253,8 +253,8 @@ class Baby(Module):
                                 chart_title="Diaper Trend - " + datetime.now().strftime('%Y-%m-%d %H:%M'),
                                 x_time=True)
         caption = "Use /diaper to submit a new entry."
-        self.send_message(Message(caption, job=self._job, photo=pic))
-        self._job.complete()
+        self.send_message(Message(caption, job=self.job, photo=pic))
+        self.job.complete()
 
     def feed_trend_today(self):
         result = list(self._db.select(table=self._tbl_feed,
@@ -278,8 +278,8 @@ class Baby(Module):
             caption = caption + f"\n{row[0]} - {row[1]} - {row[2]}"
         caption = caption + "\nUse /feed to submit a new entry."
 
-        self.send_message(Message(caption, job=self._job, photo=pic))
-        self._job.complete()
+        self.send_message(Message(caption, job=self.job, photo=pic))
+        self.job.complete()
 
     def diaper_trend_today(self):
         result = list(self._db.select(table=self._tbl_diaper,
@@ -297,13 +297,13 @@ class Baby(Module):
             caption = caption + f"\n{row[0]} - {row[1]} - {row[3]}"
         caption = caption + "\nUse /diaper to submit a new entry."
 
-        self.send_message(Message(caption, job=self._job, photo=pic))
-        self._job.complete()
+        self.send_message(Message(caption, job=self.job, photo=pic))
+        self.job.complete()
 
     def _get_total(self, table, col, date, user_id: bool = False):
         where = {"date": date}
         if user_id:
-            where["user_id"] = self._job.chat_id
+            where["user_id"] = self.job.chat_id
 
         total = 0.0
         result = list(self._db.select(table=table, columns=col, where=where, fetch_all=True))
