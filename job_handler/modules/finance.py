@@ -1,6 +1,4 @@
-import os
 import re
-import shutil
 from datetime import datetime
 
 from common_workspace import global_var
@@ -59,7 +57,6 @@ class Finance(Module):
 
         # Extract vendor
         try:
-            # vendor_match = str(re.findall(r'at ([^.0-9]+?)(?=\s\d+|[.])', sms)[0])
             vendor_match = str(re.findall(r'at ([^.0-9]+?)(?=\s\d+ [A-Z]{2}|$|[.]| on)', sms)[0])
             vendor_match = re.sub(' +', ' ', vendor_match)
             log(job_id=self.job.job_id, msg=f"Vendor: {vendor_match}")
@@ -118,8 +115,8 @@ class Finance(Module):
 
         index = 5
         check_duplicate = self.db_finance.check_exists(self._tbl_transactions, where={"date": t_date,
-                                                                                  "amount": t_value,
-                                                                                  "vendor_id": vendor_id})
+                                                                                      "amount": t_value,
+                                                                                      "vendor_id": vendor_id})
         if check_duplicate == 0:
             default_duplicate = "yes"
         else:
@@ -149,7 +146,8 @@ class Finance(Module):
             show_man = True
 
         if not pre_sel_cats:
-            all_cats = self.db_finance.select(self._tbl_categories, "category", where={"in_out": t_type}, fetch_all=True)
+            all_cats = self.db_finance.select(self._tbl_categories, "category", where={"in_out": t_type},
+                                              fetch_all=True)
             pre_sel_cats = [x[0] for x in all_cats]
             show_man = False
 
@@ -170,9 +168,8 @@ class Finance(Module):
             return
 
         self.db_finance.insert(self._tbl_transactions,
-                               "transaction_by, date, type, category_id, amount, vendor_id, vendor, photo_id",
-                               (self.job.chat_id, t_date, t_type, cat_id, t_value, vendor_id, vendor,
-                                ";".join([str(ele) for ele in self.job.photo_ids])))
+                               "transaction_by, date, type, category_id, amount, vendor_id, vendor",
+                               (self.job.chat_id, t_date, t_type, cat_id, t_value, vendor_id, vendor))
 
         result = list(self.db_finance.select(table=self._tbl_transactions,
                                              columns="vendor, type, amount",
@@ -187,7 +184,6 @@ class Finance(Module):
 
         log(self.job.job_id, msg=send_string)
         self.send_message(Message(send_string=send_string))
-        self.job.complete()
 
         # todo add another option with the same params
 
@@ -238,13 +234,5 @@ class Finance(Module):
 
         return vendor_id
 
-    def finance_photo(self):
-        image_loc = self.config["images"]
-        if not os.path.exists(image_loc):
-            os.makedirs(image_loc)
-
-        for value in self.job.photo_ids:
-            shutil.move(os.path.join(refs.telepot_image_dump, value),
-                        os.path.join(image_loc, value))
-
+        # todo finance photo
         # todo OCR

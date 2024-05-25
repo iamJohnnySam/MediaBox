@@ -1,5 +1,3 @@
-from functools import cache
-
 from shared_models import configuration
 from shared_tools.logger import log
 

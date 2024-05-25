@@ -41,7 +41,7 @@ class ShowDownloader(Module):
         for x in feed.entries:
             episode_name, episode_quality = quality_extract(x.title)
             show_exists = self.db.check_exists(self.config["tbl_tv_shows"], {'episode_name': episode_name,
-                                                                   'name': x.tv_show_name})
+                                                                             'name': x.tv_show_name})
 
             if show_exists == 0:
                 found = False

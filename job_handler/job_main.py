@@ -18,7 +18,7 @@ def main(message_q, job_q, packet_q, info_q, flag_stop, flag_restart, flag_reboo
 
     log(msg="Job Process is Starting...")
 
-    config = configuration.Configuration()
+    _ = configuration.Configuration()
 
     t_task = threading.Thread(target=queue_manager.run_task_mgr)
     t_task.start()

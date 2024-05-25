@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 
+import passwords
 from common_workspace import queues
 from shared_models.message import Message
 from shared_models.job import Job
@@ -15,8 +16,7 @@ class Module:
 
     @property
     def is_master(self):
-        # todo
-        return self.master == self.chat_id
+        return self.job.chat_id == passwords.telegram_chat_id
 
     def check_index(self) -> int:
         val = len(self.job.collection)

@@ -1,6 +1,5 @@
 from datetime import datetime
 
-import passwords
 from common_workspace import global_var
 from shared_models import configuration
 from shared_models.message import Message
@@ -54,7 +53,7 @@ class Admin(Module):
         self.send_message(Message(message))
 
     def start_over(self):
-        if self.job.chat_id == passwords.telegram_chat_id:
+        if self.is_master:
             global_var.flag_stop.value = True
             global_var.flag_restart.value = True
             self.send_message(Message("Completing ongoing tasks before restart. Please wait.", job=self.job))
@@ -63,7 +62,7 @@ class Admin(Module):
             self.send_admin(Message(f"/start_over requested by {self.job.username}."))
 
     def exit_all(self):
-        if self.job.chat_id == passwords.telegram_chat_id:
+        if self.is_master:
             global_var.flag_stop.value = True
             self.send_message(Message("Completing ongoing tasks before exit. Please wait.", job=self.job))
         else:
@@ -71,7 +70,7 @@ class Admin(Module):
             self.send_admin(Message(f"/exit_all requested by {self.job.username}."))
 
     def reboot_pi(self):
-        if self.job.chat_id == passwords.telegram_chat_id:
+        if self.is_master:
             global_var.flag_stop.value = True
             global_var.flag_reboot.value = True
             self.send_message(Message("Completing ongoing tasks before reboot. Please wait.", job=self.job))

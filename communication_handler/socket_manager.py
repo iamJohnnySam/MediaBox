@@ -31,7 +31,7 @@ def check_connection_threads():
 
 def run_sockets():
     config = configuration.Configuration()
-    server_socket = Server(config.host, config.socket)
+    _ = Server(config.host, config.socket)
 
     while True:
         while not queues.packet_q.empty():

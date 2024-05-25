@@ -121,4 +121,3 @@ class CCTVChecker(Module):
         client = EmailManager(self.job, passwords.gmail_em, self.cctv_imap, passwords.gmail_pw, mailbox)
         client.delete_all_emails(mailbox)
         client.email_close()
-        self.job.complete()

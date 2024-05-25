@@ -18,10 +18,8 @@ class MovieFinder(Module):
             movie = self.get_index(1)
             success, torrent_id = Transmission(self.job).add_torrent(movie)
             if success:
-                self.close_all_callbacks()
-                self.job.complete()
                 self.send_message(Message(f"Movie {torrent_id} added to queue."))
-                if not self.job.is_master:
+                if not self.is_master:
                     self.send_admin(Message(f"Movie {torrent_id} added to queue."))
             return
 
@@ -62,9 +60,12 @@ class MovieFinder(Module):
         for movie_entry in movies:
             title, image, link, torrent = get_movie_details(movie_entry)
             send_movie = Message(f"{title}\n{image}", job=self.job)
-            send_movie.add_keyboard(button_text=["Download"],
+            send_movie.add_keyboard(function=self.job.function,
+                                    reply_to=self.job.reply_to,
+                                    button_text=["Download"],
                                     button_val=[f"1;{torrent}"],
-                                    arrangement=[1])
+                                    arrangement=[1],
+                                    collection=self.job.collection)
             self.send_message(send_movie)
 
 

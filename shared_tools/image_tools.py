@@ -3,7 +3,7 @@ from PIL import Image
 from shared_tools.logger import log
 
 
-def resize_image(job_id:int, picture_location):
+def resize_image(job_id: int, picture_location):
     foo = Image.open(picture_location)
     w, h = foo.size
     if w > h and w > 1024:
