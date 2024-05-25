@@ -128,7 +128,7 @@
       "backup_location": "/home/hp/backup",
       "backup_databases": ["administration", "entertainment"],
       "error_codes": "shared_tools/error_codes.json",
-      "main_telegram_channel": "spark"
+      "main_telegram_channel": "media"
     },
     "telegram": {
       "enable": true,
