@@ -16,13 +16,16 @@ connection_threads: dict[str, threading.Thread] = {}
 
 def connect_client(host, ip, port):
     client = Client(ip, port).connect()
+    log(msg=f"Creating client connection: {host} at {ip} on port {port}")
     if type(client) is Link:
         connected_clients[host] = client
+        log(msg=f"Client Connected: {host} at {ip} on port {port}")
 
 
 def check_connection_threads():
     for host in connection_threads.keys():
         if not connection_threads[host].is_alive():
+            log(msg=f"Thread for {host} ended.")
             del connection_threads[host]
 
 
@@ -62,9 +65,14 @@ def run_sockets():
                         continue
                 time.sleep(1)
 
+            if not packet_sent:
+                log(msg=f"Packet for {module} was not sent to hosts: {hosts}. Packet {packet} added to back of queue.")
+                queues.packet_q.put(packet)
+
             if queues.packet_q.empty():
                 for client in connected_clients.keys():
                     connected_clients[client].close_connection()
+                    log(msg=f"Client, {client}, connection closed.")
                     del connected_clients[client]
 
         time.sleep(5)

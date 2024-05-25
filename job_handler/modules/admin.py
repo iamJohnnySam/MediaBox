@@ -11,10 +11,11 @@ from job_handler.base_module import Module
 
 
 class Admin(Module):
-    def __int__(self, job: Job):
+    def __init__(self, job: Job):
         super().__init__(job)
         config = configuration.Configuration()
         self.telegram_config = config.telegram
+        self.command_config = config.commands
         self._db = SQLConnector(job.job_id, database=self.telegram_config["database"])
 
     def alive(self):
@@ -26,7 +27,7 @@ class Admin(Module):
 
     def help(self):
         message = "--- AVAILABLE COMMANDS ---"
-        command_dictionary = JSONEditor(self.telegram_config["commands"]).read()
+        command_dictionary = JSONEditor(self.command_config["commands"]).read()
         add_command = ""
 
         for command in command_dictionary.keys():

@@ -31,7 +31,8 @@ def get_host_with_module(module: str, connect: str = "") -> list[str]:
     for host in config.keys():
         if module.lower() in config[host].keys():
             if connect == "":
-                hosts.append(host)
+                if "enable" in config[host][module].keys() and config[host][module]["enable"]:
+                    hosts.append(host)
             else:
                 if "connect" in config[host][module].keys():
                     if connect in config[host][module]["connect"]:
