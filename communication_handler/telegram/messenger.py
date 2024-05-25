@@ -66,7 +66,7 @@ class Messenger:
     def handle_message(self, msg: dict):
         try:
             content = msg['text']
-        except ValueError:
+        except KeyError:
             content = "### No Message ###"
 
         chat_id = msg['chat']['id']
