@@ -69,7 +69,7 @@ def create_keyboard_data(msg_id, reply_to, function, button_text, button_value, 
     # FORMAT = msg_id; reply; btn_text; (function; step; value; collection)
 
     button_prefix = f"{msg_id};{reply_to};{button_text}"
-    button_data = f"{function};{button_prefix};{button_value}"
+    button_data = f"{button_prefix};{function};{button_value}"
     if collection != "":
         button_data = f"{button_data};{collection}"
 
@@ -120,7 +120,7 @@ def extract_job_from_callback(msg: dict):
             return
 
     function = q[3]
-    index = q[4]
+    index = int(q[4])
     value = q[5]
     if len(q) > 5:
         collection = q[6:]

@@ -1,10 +1,7 @@
 import math
 
-from telepot.namedtuple import InlineKeyboardButton, InlineKeyboardMarkup
-
 import passwords
 from common_workspace import global_var
-from shared_tools.message_tools import create_keyboard_data
 from shared_models.job import Job
 from shared_tools.logger import log
 
@@ -14,13 +11,13 @@ message_id = 0
 class Message:
     def __init__(self, send_string: str,
                  job: Job = None,
-                 keyboard=None,
                  get_input=False, index=0,
                  group: str = None,
                  photo: str = ""):
 
         self.send_string = send_string
-        self.keyboard = keyboard
+        self.keyboard = False
+        self.keyboard_details = {}
         self.group = group
         self.photo = photo
         self.get_input = get_input
@@ -30,6 +27,8 @@ class Message:
         if job is None:
             global message_id
             message_id = message_id + 1
+            if message_id == 1000:
+                message_id = 1
             self.msg_id = f"m{message_id}"
             self.chat_id = passwords.telegram_chat_id
             self.reply_to = None
@@ -66,34 +65,13 @@ class Message:
 
     def add_keyboard(self, function: str | list[str], reply_to, button_text: list, button_val: list, arrangement: list,
                      collection: str):
-        if len(button_text) == 0 or len(button_text) != len(button_val):
-            log(job_id=self.msg_id, error_code=20011)
-            log(job_id=self.msg_id, msg="Button Text Length " + str(len(button_text)))
-            log(job_id=self.msg_id, msg="Button Value Length " + str(len(button_val)))
-            return
-
-        buttons = []
-        for i in range(len(button_text)):
-
-            button_data = create_keyboard_data(msg_id=self.msg_id,
-                                               reply_to=reply_to,
-                                               function=function[i] if type(function) is list else function,
-                                               button_text=button_text[i],
-                                               button_value=button_val[i],
-                                               collection=collection)
-
-            buttons.append(InlineKeyboardButton(text=str(button_text[i]), callback_data=button_data))
-            log(job_id=self.msg_id, msg=f'Keyboard button created > {button_data}')
-
-        keyboard_markup = []
-        c = 0
-        for i in range(len(arrangement)):
-            keyboard_row = []
-            for j in range(arrangement[i]):
-                keyboard_row.append(buttons[c])
-                c = c + 1
-            keyboard_markup.append(keyboard_row)
-        self.keyboard = InlineKeyboardMarkup(inline_keyboard=keyboard_markup)
+        self.keyboard = True
+        self.keyboard_details["function"] = function
+        self.keyboard_details["reply_to"] = reply_to
+        self.keyboard_details["button_text"] = button_text
+        self.keyboard_details["button_val"] = button_val
+        self.keyboard_details["arrangement"] = arrangement
+        self.keyboard_details["collection"] = collection
 
     def keyboard_extractor(self, function, options, index=0, button_text=None, bpr: int = 3,
                            add_cancel: bool = False, add_other: bool = False, collection: list = None,
@@ -139,14 +117,33 @@ class Message:
         self.reply_to = None
         self.group = None
 
-    def compress(self):
+    def message_compress(self):
+        log(self.msg_id, f"Message ({self.send_string}) compressed.")
         return {
-            "msg_id": self.msg_id,
+            "id": self.msg_id,
+            "packet_type": "message",
             "channel": self._channel,
             "msg": self.send_string,
             "chat": self.chat_id,
             "reply": self.reply_to,
             "group": self.group,
-            "keyboard": self.keyboard,
-            "photo": self.photo
+            "keyboard": self.keyboard_details,
+            "photo": self.photo,
+            "get_input": self.get_input,
+            "no_message": self.no_message,
+            "index": self.index
         }
+
+    def message_decompress(self, message_details: dict):
+        self._channel = message_details["channel"]
+        self.send_string = message_details["msg"]
+        self.chat_id = message_details["chat"]
+        self.reply_to = message_details["reply"]
+        self.group = message_details["group"]
+        self.keyboard_details = message_details["keyboard"]
+        self.keyboard = False if self.keyboard_details == {} else True
+        self.photo = message_details["photo"]
+        self.get_input = message_details["get_input"]
+        self.no_message = message_details["no_message"]
+        self.index = message_details["index"]
+        log(self.msg_id, f"Message ({self.send_string}) decompressed.")

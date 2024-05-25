@@ -38,14 +38,12 @@ class NewsReader(Module):
         sources = self._get_news_subscriptions()
         for source in sources:
             self._check_news(source)
-        self.job.complete()
 
     def get_news(self):
         success, source = self.check_value(index=-1, option_list=self._get_news_subscriptions())
         if not success:
             return
         self._check_news(source)
-        self.job.complete()
 
     def _check_news(self, source):
         news_sources = JSONEditor(self.news_config["sources"]).read()

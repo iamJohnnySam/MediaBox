@@ -2,8 +2,9 @@ import socket
 import threading
 import time
 
-from common_workspace import global_var
+from common_workspace import global_var, queues
 from communication_handler.socket.link import Link
+from shared_models.message import Message
 from shared_tools.configuration_tools import is_config_enabled, get_host_from_ip
 from shared_tools.logger import log
 
@@ -11,7 +12,7 @@ from shared_tools.logger import log
 class Server:
     def __init__(self, host_name: str, config: dict):
         self._host_name = host_name
-        self._config = config
+        self._config: dict = config
         self.connections: dict[str, Link] = {}
 
         if not is_config_enabled(self._config, "Sockets"):
@@ -48,7 +49,7 @@ class Server:
 
         while not global_var.flag_stop:
             for i in range(len(t_accepts)):
-                if not t_accepts[i].isAlive():
+                if not t_accepts[i].is_alive():
                     log(msg=f"Listening to connection [id: {i}]...")
                     t_accepts[i].start()
             time.sleep(60)
@@ -70,7 +71,7 @@ class Server:
                         f"Scanning IP {addr} resulted in hostname {host} and IP addresses: {ip_addr_list}.")
             except Exception as e:
                 log(msg=f"Server {connect_id}: Could not resolve IP address: {e}", log_type="error")
-                host = get_host_from_ip(self._expected_connections, addr[0])
+                host = get_host_from_ip(config=self._expected_connections, ip=addr[0])
 
             if host != "":
                 host_unknown = False
@@ -80,10 +81,7 @@ class Server:
 
         con_msg = f"Server {connect_id}: {host} connected via {addr}"
         log(msg=con_msg)
-        channel_control.send_message(Message(con_msg))
+        queues.message_q.put(Message(send_string=con_msg))
 
         self.connections[host] = Link(host, c)
         self.connections[host].listen()
-
-
-

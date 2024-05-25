@@ -1,25 +1,6 @@
-from shared_models.job import Job
-from communication_handler import channels
-from shared_models.message import Message
-from tools import params
-from shared_tools.logger import log
-
-tp_module = 'telepot'
-sk_module = 'socket'
-
-
-def send_message(msg: Message, account=None):
-    if params.is_module_available(tp_module):
-        if account is None:
-            account = params.get_param(tp_module, 'main_channel')
-        channels.bots[account].send_now(msg)
-    else:
-        host = params.get_module_hosts(tp_module)
-        # todo pass to network
-
 
 def send_job_to_host(job: Job, account):
-    send_to_host(job.compress(), account, "job")
+    send_to_host(job.job_compress(), account, "job")
 
 
 def send_message_to_host(msg: Message, account):

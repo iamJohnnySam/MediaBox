@@ -6,7 +6,7 @@ from shared_tools.custom_exceptions import InvalidConfiguration
 from shared_tools.json_editor import JSONEditor
 from shared_tools import logger
 
-config_data = {}
+all_config_data: dict[str, dict[str, str | bool | list | dict]] = {}
 config_data_read_time: datetime = datetime.now()
 initial_update = False
 
@@ -14,7 +14,7 @@ initial_update = False
 class Configuration:
 
     def __init__(self, config_location: str = ""):
-        global config_data
+        global all_config_data
         global config_data_read_time
         global initial_update
 
@@ -26,14 +26,14 @@ class Configuration:
         self.system = platform.system()
 
         time_expired = (config_data_read_time - datetime.now()).total_seconds() > 3600
-        if time_expired or config_data == {}:
-            config_data = JSONEditor(config_location).read()
+        if time_expired or all_config_data == {}:
+            all_config_data = JSONEditor(config_location).read()
             config_data_read_time = datetime.now()
 
-        common_config: dict = config_data["COMMON"]
+        common_config: dict = all_config_data["COMMON"]
 
-        if self.host in config_data.keys():
-            host_config: dict = config_data[self.host]
+        if self.host in all_config_data.keys():
+            host_config: dict = all_config_data[self.host]
         else:
             raise InvalidConfiguration("This host is not in configuration!")
 
@@ -72,6 +72,10 @@ class Configuration:
         return False if self._get_module_details(module) == {} else True
 
     @property
+    def commands(self):
+        return self._get_module_details("commands")
+
+    @property
     def admin(self):
         return self._get_module_details("admin")
 
@@ -102,3 +106,7 @@ class Configuration:
     @property
     def baby(self):
         return self._get_module_details("baby")
+
+    @property
+    def web(self):
+        return self._get_module_details("web")

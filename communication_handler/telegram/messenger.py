@@ -2,14 +2,49 @@ import os
 
 import telepot
 from telepot.loop import MessageLoop
+from telepot.namedtuple import InlineKeyboardMarkup, InlineKeyboardButton
 
 from communication_handler.command_handler import Commander
 from shared_models import configuration
 from shared_models.message import Message
 from shared_models.job import Job
 from shared_tools.custom_exceptions import UnexpectedOperation
+from shared_tools.image_tools import resize_image
 from shared_tools.logger import log
+from shared_tools.message_tools import create_keyboard_data
 from shared_tools.sql_connector import SQLConnector
+
+
+def create_keyboard(msg_id, function: str | list[str], reply_to, button_text: list, button_val: list,
+                    arrangement: list, collection: str):
+    if len(button_text) == 0 or len(button_text) != len(button_val):
+        log(job_id=msg_id, error_code=20011)
+        log(job_id=msg_id, msg="Button Text Length " + str(len(button_text)))
+        log(job_id=msg_id, msg="Button Value Length " + str(len(button_val)))
+        return
+
+    buttons = []
+    for i in range(len(button_text)):
+        button_data = create_keyboard_data(msg_id=msg_id,
+                                           reply_to=reply_to,
+                                           function=function[i] if type(function) is list else function,
+                                           button_text=button_text[i],
+                                           button_value=button_val[i],
+                                           collection=collection)
+
+        buttons.append(InlineKeyboardButton(text=str(button_text[i]), callback_data=button_data))
+        log(job_id=msg_id, msg=f'Keyboard button created > {button_data}')
+
+    keyboard_markup = []
+    c = 0
+    for i in range(len(arrangement)):
+        keyboard_row = []
+        for j in range(arrangement[i]):
+            keyboard_row.append(buttons[c])
+            c = c + 1
+        keyboard_markup.append(keyboard_row)
+
+    return InlineKeyboardMarkup(inline_keyboard=keyboard_markup)
 
 
 class Messenger:
@@ -51,7 +86,8 @@ class Messenger:
         Commander(msg, self.channel).process_command()
 
     def is_authorised(self, chat_id) -> bool:
-        if SQLConnector(job_id=0).check_exists(self.config["tbl_allowed_chats"], {"chat_id": chat_id}) == 0:
+        database = SQLConnector(job_id=0, database=self.config["database"])
+        if database.check_exists(self.config["tbl_allowed_chats"], {"chat_id": chat_id}) == 0:
             return False
         else:
             return True
@@ -61,12 +97,13 @@ class Messenger:
             os.makedirs(self.config["telepot_image_dump"])
 
         for pic in msg['photo']:
+            photo_loc = os.path.join(self.config["telepot_image_dump"], msg['photo'][pic]['file_id'])
             try:
-                self.bot.download_file(msg['photo'][pic]['file_id'],
-                                       os.path.join(self.config["telepot_image_dump"], msg['photo'][pic]['file_id']))
+                self.bot.download_file(msg['photo'][pic]['file_id'], photo_loc)
             except PermissionError as e:
                 log(error_code=10001, error=str(e))
                 self.send_now(Message("PERMISSION ERROR"))
+            resize_image(job_id=0, picture_location=photo_loc)
 
     def handle_callback(self, query):
         log(msg='Callback Query: ' + str(query['data']))
@@ -107,6 +144,17 @@ class Messenger:
                                      fetch_all=True)
             chats = [row[0] for row in result]
 
+        if message.keyboard:
+            keyboard = create_keyboard(msg_id=message.msg_id,
+                                       function=message.keyboard_details["function"],
+                                       reply_to=message.keyboard_details["reply_to"],
+                                       button_text=message.keyboard_details["button_text"],
+                                       button_val=message.keyboard_details["button_val"],
+                                       arrangement=message.keyboard_details["arrangement"],
+                                       collection=message.keyboard_details["collection"])
+        else:
+            keyboard = None
+
         for chat in chats:
             if message.photo != "":
                 try:
@@ -114,7 +162,7 @@ class Messenger:
                                                photo=open(str(message.photo), 'rb'),
                                                reply_to_message_id=message.reply_to,
                                                caption=str(message.send_string),
-                                               reply_markup=message.keyboard)
+                                               reply_markup=keyboard)
                 except telepot.exception.TelegramError as e:
                     log(message.msg_id, error_code=20015, error=str(e))
                     continue
@@ -122,7 +170,7 @@ class Messenger:
                 try:
                     reply = self.bot.sendMessage(chat, str(message.send_string),
                                                  reply_to_message_id=message.reply_to,
-                                                 reply_markup=message.keyboard)
+                                                 reply_markup=keyboard)
                 except telepot.exception.TelegramError as e:
                     log(message.msg_id, error_code=20015, error=str(e))
                     continue

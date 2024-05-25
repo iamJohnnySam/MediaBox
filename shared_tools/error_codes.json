@@ -33,6 +33,7 @@
   "40000": "Job Errors",
   "40001": "Insufficient parameters to create a job",
   "40002": "Conditions not met to create job",
+  "40003": "Module Error",
   "40004": "Cannot collect. Index exceeds collection length.",
   "40005": "Function not found in Task Manager list",
   "40006": "Callback ID requested for a job which is not stored!",
@@ -48,5 +49,7 @@
   "60000": "Socket Errors",
   "60001": "Socket config missing",
   "60002": "Message to send is not a dictionary.",
+  "60003": "Unknown packet data",
+  "60004": "No destination host for packet",
   "60017": "Socket config CONNECT key has no accounts to connect."
 }

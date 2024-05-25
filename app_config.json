@@ -8,6 +8,10 @@
         "spark": {"port": 10000, "static_ip": "192.168.1.32"},
         "mediabox": {"port": 10000, "static_ip": "192.168.1.30"},
         "entertainer": {"port": 10000, "static_ip": "192.168.1.31"}}
+    },
+    "commands": {
+      "enable": true,
+      "commands": "database/telepot_commands.json"
     }
   },
   "iamjohnnysam-dell": {
@@ -26,7 +30,6 @@
       "enable": true,
       "connect": ["test"],
       "main_account": 0,
-      "commands": "database/telepot_commands.json",
       "accept_all_commands": ["test"],
       "callback_overflow": "database/callbacks.json",
       "db_telepot_accounts": "database/telepot_accounts.json",
@@ -81,8 +84,10 @@
       "tbl_weight": "weight",
       "tbl_pump": "pump",
       "telegram_group": "baby"
+    },
+    "web": {
+      "enable": false
     }
-
   },
   "spark": {
      "admin": {

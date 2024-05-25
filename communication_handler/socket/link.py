@@ -2,7 +2,10 @@ import json
 import socket
 
 from common_workspace import global_var
+from communication_handler.packet_handler import Packer
 from shared_tools.logger import log
+
+data_id = 0
 
 
 class Link:
@@ -11,11 +14,12 @@ class Link:
         self.connection: socket.socket = connection
 
     def listen(self):
+        global data_id
         while not global_var.flag_stop:
             try:
                 data = self.connection.recv(4096)
             except ConnectionResetError as e:
-                log(msg=f"{self._host_name}: connection dropped with client: {e}.")
+                log(msg=f"{self._host_name}: connection dropped with host: {e}.")
                 self.connection.close()
                 break
 
@@ -28,17 +32,10 @@ class Link:
             r_data: dict = json.loads(data)
             log(msg=f"{self._host_name}: Data Received: {data}")
 
-            if r_data["type"] == "job":
-                job = Job(telepot_account=r_data["account"],
-                          job_id=r_data["job"],
-                          chat_id=r_data["chat"],
-                          username=r_data["username"],
-                          reply_to=r_data["reply"],
-                          function=r_data["function"],
-                          collection=r_data["collection"],
-                          other_host=True,
-                          orig_job_id=r_data["original_job_id"])
-                task_queue.add_job(job)
+            data_id = data_id + 1
+            if data_id >= 1000:
+                data_id = 1
+            Packer(f"d{data_id}", r_data).handle_packet()
 
         self.connection.close()
 
@@ -47,5 +44,8 @@ class Link:
             self.connection.sendall(str.encode(json.dumps(data)))
         else:
             log(error_code=60002)
+
+    def close_connection(self):
+        self.connection.close()
 
     # todo send acknowledgement

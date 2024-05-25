@@ -19,7 +19,8 @@ def run_telegram():
             msg: Message = queues.message_q.get()
 
             if msg.channel not in telepot_channels.keys():
-                # todo send to network
+                packet = msg.message_compress()
+                queues.packet_q.put(packet)
                 continue
 
             if msg.get_input and msg.chat_id in communication_queues.wait_queue[msg.channel].keys():

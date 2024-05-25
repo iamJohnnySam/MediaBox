@@ -16,8 +16,8 @@ class Commander:
         self.channel = channel
         # todo check channel
 
-        self.config = configuration.Configuration().telegram
-        self.commands = JSONEditor(self.config["commands"]).read()
+        self.config = configuration.Configuration()
+        self.commands = JSONEditor(self.config.commands["commands"]).read()
 
         if channel not in communication_queues.wait_queue.keys():
             communication_queues.wait_queue[channel] = {}
@@ -56,7 +56,7 @@ class Commander:
                 log(job_id=self.job.job_id, error_code=30002)
                 return
 
-            elif self.job.channel not in self.config["accept_all_commands"] and \
+            elif self.job.channel not in self.config.telegram["accept_all_commands"] and \
                     type(self.commands[self.job.function]) is not str and \
                     not (self.job.channel in self.commands[self.job.function].keys() or
                          "all_bots" in self.commands[self.job.function].keys()):
@@ -68,6 +68,9 @@ class Commander:
             else:
                 log(job_id=self.job.job_id,
                     msg="Command verification success.")
+
+            if "module" in self.commands[self.job.function].keys():
+                self.job.module = self.commands[self.job.function]["module"]
 
             if "function" in self.commands[self.job.function].keys():
                 old_func = self.job.function
@@ -96,8 +99,8 @@ class Commander:
             log(error_code=20019)
             raise UnexpectedOperation
 
-        job = Job(function=function, channel=self.channel, chat_id=chat_id, username=username,
-                  reply_to=reply_to, collection=collection)
+        self.job = Job(function=function, channel=self.channel, chat_id=chat_id, username=username,
+                       reply_to=reply_to, collection=collection)
 
         self.job.called_back = True
 
@@ -112,7 +115,7 @@ class Commander:
 
         else:
             try:
-                job.collect(value=value, index=index)
+                self.job.collect(value=value, index=index)
                 reply = f'Acknowledged! [{function}]'
 
             except ValueError as e:
@@ -134,7 +137,7 @@ class Commander:
 
         queue_item = communication_queues.wait_queue[self.job.channel][self.job.chat_id]
 
-        self.job.decompress(queue_item["job"])
+        self.job.job_decompress(queue_item["job"])
         index = queue_item["index"]
         self.job.collect(input_value, index)
         self.job.called_back = True
@@ -144,6 +147,6 @@ class Commander:
         del communication_queues.wait_queue[self.job.channel][self.job.chat_id]
 
     def get_user_input(self, index=0):
-        communication_queues.wait_queue[self.channel][self.job.chat_id] = {"job": self.job.compress(),
+        communication_queues.wait_queue[self.channel][self.job.chat_id] = {"job": self.job.job_compress(),
                                                                            "index": index}
         log(job_id=self.job.job_id, msg=f"Job queued and waiting input from {self.job.username} [{self.job.chat_id}]")

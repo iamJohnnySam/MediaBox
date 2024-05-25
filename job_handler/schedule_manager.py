@@ -2,8 +2,7 @@ import time
 
 import schedule
 
-from common_workspace import global_var
-from job_handler import task_queue
+from common_workspace import global_var, queues
 from shared_models import configuration
 from shared_models.job import Job
 from job_handler.modules.reminder import Reminder
@@ -41,4 +40,4 @@ def run_scheduler():
 
 
 def add_task(func: str = "alive"):
-    task_queue.add_job(Job(function=func, background_task=True))
+    queues.job_q.put(Job(function=func, background_task=True))

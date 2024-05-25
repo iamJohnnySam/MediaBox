@@ -25,8 +25,6 @@ def main(message_q, job_q, packet_q, info_q, flag_stop, flag_restart, flag_reboo
     t_telegram.join()
     t_socket.join()
 
-    flag_stop.value = global_var.flag_stop
-
 
 if __name__ == "__main__":
     main(queues.message_q, queues.job_q, queues.packet_q, queues.info_q,

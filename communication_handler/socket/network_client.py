@@ -1,7 +1,9 @@
 import socket
 import time
 
+from common_workspace import queues
 from communication_handler.socket.link import Link
+from shared_models.message import Message
 from shared_tools.logger import log
 
 
@@ -35,12 +37,12 @@ class Client:
             except (ConnectionRefusedError, TimeoutError, OSError) as e:
                 if attempts == 0:
                     log(msg=f"Could not connect to server due to {e}.")
-                    raise e
+                    return None
 
                 log(msg=f"Could not connect to server due to {e}.Retrying in {delay_time} seconds.")
                 time.sleep(delay_time)
 
         con_msg = f"Connected to socket, port {self._client_address}"
         log(msg=con_msg)
-        channel_control.send_message(Message(con_msg))
+        queues.message_q.put(Message(con_msg))
         return Link(host_name=self.host_name, connection=self.my_socket)

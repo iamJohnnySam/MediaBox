@@ -20,159 +20,189 @@
   "Entertainment Controls": false,
   "check_shows": {
     "function": "check_shows",
-    "definition": "Check new TV shows"
+    "definition": "Check new TV shows",
+    "module": "media"
   },
   "find_movie": {
     "function": "find_movie",
-    "definition": "Find a movie to download"
+    "definition": "Find a movie to download",
+    "module": "media"
   },
 
   "News Controls": false,
   "news": {
     "function": "check_news",
     "definition": "Get latest news",
-    "news": true
+    "news": true,
+    "module": "news"
   },
   "news_all": {
     "function": "check_news_all",
     "definition": "Get news from all subscriptions",
-    "news": true
+    "news": true,
+    "module": "news"
   },
   "subscribe_news": {
     "function": "subs_news",
     "definition": "Subscribe to News Channels",
-    "news": true
+    "news": true,
+    "module": "news"
   },
   "news_channels": {
     "function": "show_news",
     "definition": "Show News Channels",
-    "news": true
+    "news": true,
+    "module": "news"
   },
   "add_me_to_news": {
     "function": "add_me_to_news",
     "definition": "Add to CCTV group",
-    "news": true
+    "news": true,
+    "module": "telegram"
   },
   "remove_me_from_news": {
     "function": "remove_me_from_news",
     "definition": "Remove from CCTV group",
-    "news": true
+    "news": true,
+    "module": "telegram"
   },
 
   "CCTV Controls": false,
   "check_cctv": {
     "definition": "Download cctv",
-    "cctv": true
+    "cctv": true,
+    "module": "cctv"
   },
   "get_cctv": {
     "definition": "Check latest cctv",
-    "cctv": true
+    "cctv": true,
+    "module": "cctv"
   },
   "add_me_to_cctv": {
     "function": "add_me_to_cctv",
     "definition": "Add to CCTV group",
-    "cctv": true
+    "cctv": true,
+    "module": "telegram"
   },
   "remove_me_from_cctv": {
     "function": "remove_me_from_cctv",
     "definition": "Remove from CCTV group",
-    "cctv": true
+    "cctv": true,
+    "module": "telegram"
   },
 
   "Torrent Controls": false,
   "list_torrents": {
     "function": "list_torrents",
-    "definition": "List Torrents"
+    "definition": "List Torrents",
+    "module": "media"
   },
   "clean_downloads": {
     "function": "clean_up_downloads",
-    "definition": "Re-arrange torrent downloads"
+    "definition": "Re-arrange torrent downloads",
+    "module": "media"
   },
 
   "Finance Controls": false,
   "finance": {
     "function": "finance",
     "definition": "Add Transactions",
-    "photo": 1
+    "photo": 1,
+    "module": "finance"
   },
   "sms_bill": {
     "function": "sms_bill",
-    "definition": "Forward bank SMS"
+    "definition": "Forward bank SMS",
+    "module": "finance"
   },
 
   "Baby": false,
   "add_me_to_baby": {
     "function": "add_me_to_baby",
     "definition": "Add to baby group",
-    "baby": true
+    "baby": true,
+    "module": "telegram"
   },
   "remove_me_from_baby": {
     "function": "remove_me_from_baby",
     "definition": "Remove from baby group",
-    "baby": true
+    "baby": true,
+    "module": "telegram"
   },
 
   "Baby Feed Tracking": false,
   "feed": {
     "function": "baby_feed",
     "definition": "Add Feeding Information",
-    "baby": true
+    "baby": true,
+    "module": "baby"
   },
   "feed_history": {
     "function": "baby_feed_history",
     "definition": "Graph it",
-    "baby": true
+    "baby": true,
+    "module": "baby"
   },
   "feed_trend": {
     "function": "baby_feed_trend",
     "definition": "Feeding trend by time",
-    "baby": true
+    "baby": true,
+    "module": "baby"
   },
   "feed_trend_today": {
     "function": "baby_feed_trend_today",
     "definition": "Feeding trend today",
-    "baby": true
+    "baby": true,
+    "module": "baby"
   },
 
   "Baby Diaper Tracking": false,
   "diaper": {
     "function": "baby_diaper",
     "definition": "Add Diaper Information",
-    "baby": true
+    "baby": true,
+    "module": "baby"
   },
   "diaper_history": {
     "function": "baby_diaper_history",
     "definition": "Graph it",
-    "baby": true
+    "baby": true,
+    "module": "baby"
   },
   "diaper_trend": {
     "function": "baby_diaper_trend",
     "definition": "Diaper trend by time",
-    "baby": true
+    "baby": true,
+    "module": "baby"
   },
   "diaper_trend_today": {
     "function": "baby_diaper_trend_today",
     "definition": "Diaper trend today",
-    "baby": true
+    "baby": true,
+    "module": "baby"
   },
 
   "Baby Weight Tracking": false,
   "weight": {
     "function": "baby_weight",
     "definition": "Add Weight",
-    "baby": true
+    "baby": true,
+    "module": "baby"
   },
   "weight_trend": {
     "function": "baby_weight_trend",
     "definition": "Weight Trend",
-    "baby": true
+    "baby": true,
+    "module": "baby"
   },
 
   "Maternity": false,
   "pump": {
     "function": "mom_pump",
     "definition": "Pumped Now",
-    "mom": true
+    "mom": true,
+    "baby": true,
+    "module": "baby"
   },
 
   "Bot Admin": false,
