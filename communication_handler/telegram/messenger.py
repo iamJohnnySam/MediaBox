@@ -134,7 +134,8 @@ class Messenger:
             return
 
         chats = [message.chat_id]
-        if message.group is not None:
+        if message.group is not None and "database" in self.config.keys():
+            # todo sql access for Groups
             database = SQLConnector(self.config["database"])
             group_exists = database.check_exists(self.config["tbl_groups"], {"group_name": message.group}) != 0
 
