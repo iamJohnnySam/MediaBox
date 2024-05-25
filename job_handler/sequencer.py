@@ -126,7 +126,7 @@ class Sequence:
         cctv = CCTVChecker(self.job)
         cctv.download_cctv()
         cctv.clean_up(self.config.cctv["sent"])
-        queues.message_q.put(Message("CCTV Check Completed"))
+        queues.message_q.put(Message("CCTV Check Completed", job=self.job))
 
     def get_cctv(self):
         cctv = CCTVChecker(self.job)

@@ -4,7 +4,7 @@ import os
 from random import random
 
 import passwords
-from common_workspace import global_var
+from common_workspace import global_var, queues
 from shared_models import configuration
 from shared_models.job import Job
 from shared_models.message import Message
@@ -49,9 +49,14 @@ class CCTVChecker(Module):
         client = EmailManager(self.job, passwords.gmail_em, self.cctv_imap, passwords.gmail_pw, self.cctv_mailbox)
 
         running = True
+        count = 0
 
         while running:
             running, attachment, date, file_n = client.get_next_attachment()
+            count = count + 1
+
+            if count % 100 == 0:
+                queues.message_q.put(Message(f"{count} emails downloaded", job=self.job))
 
             if (not running) or global_var.flag_stop.value:
                 break
