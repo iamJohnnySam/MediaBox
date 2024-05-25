@@ -124,13 +124,13 @@ class Sequence:
     def check_cctv(self):
         cctv = CCTVChecker(self.job)
         cctv.download_cctv()
-        cctv.clean_up()
+        cctv.clean_up(self.config.cctv["sent"])
 
     def get_cctv(self):
         cctv = CCTVChecker(self.job)
         cctv.download_cctv()
         cctv.get_last(10)
-        cctv.clean_up()
+        cctv.clean_up(self.config.cctv["sent"])
 
     def add_me_to_cctv(self):
         # todo check if connected to the correct telegram
