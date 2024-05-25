@@ -12,6 +12,7 @@ from job_handler.modules.subscriptions import Subscriptions
 from job_handler.modules.transmission import Transmission
 from shared_models import configuration
 from shared_models.job import Job
+from shared_models.message import Message
 from shared_tools.configuration_tools import is_config_enabled
 from shared_tools.custom_exceptions import UnexpectedOperation
 from shared_tools.logger import log
@@ -125,6 +126,7 @@ class Sequence:
         cctv = CCTVChecker(self.job)
         cctv.download_cctv()
         cctv.clean_up(self.config.cctv["sent"])
+        queues.message_q.put(Message("CCTV Check Completed"))
 
     def get_cctv(self):
         cctv = CCTVChecker(self.job)
