@@ -154,7 +154,7 @@
     "cctv": {
       "enable": true,
       "imap": "imap.gmail.com",
-      "mailbox": "cctv",
+      "mailbox": "CCTV",
       "sent": "\"[Gmail]/Sent Mail\"",
       "model1": "ai_models/cctv/modelA01.tflite",
       "model2": "ai_models/cctv/modelA02.tflite",
