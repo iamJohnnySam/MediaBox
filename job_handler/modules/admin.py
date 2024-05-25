@@ -15,7 +15,6 @@ class Admin(Module):
         config = configuration.Configuration()
         self.telegram_config = config.telegram
         self.command_config = config.commands
-        self._db = SQLConnector(job.job_id, database=self.telegram_config["database"])
 
     def alive(self):
         self.send_message(Message(f"Hello {self.job.username} (chat id: {str(self.job.chat_id)})!\n"
