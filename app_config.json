@@ -130,7 +130,15 @@
       "error_codes": "shared_tools/error_codes.json",
       "main_telegram_channel": "spark"
     },
-    "telegram": {"enable": false},
+    "telegram": {
+      "enable": true,
+      "connect": ["media"],
+      "main_account": 0,
+      "accept_all_commands": ["media"],
+      "callback_overflow": "database/callbacks.json",
+      "db_telepot_accounts": "database/telepot_accounts.json",
+      "telepot_image_dump": "communication/chat_images"
+    },
     "media": {
       "enable": true,
       "show_feed": "https://showrss.info/user/275495.rss?magnets=true&namespaces=true&name=clean&quality=null&re=null",
@@ -178,9 +186,6 @@
       "accept_all_commands": ["tv"],
       "callback_overflow": "database/callbacks.json",
       "db_telepot_accounts": "database/telepot_accounts.json",
-      "database": "administration",
-      "tbl_allowed_chats": "telepot_allowed_chats",
-      "tbl_groups": "telepot_groups",
       "telepot_image_dump": "communication/chat_images"
     },
     "media": {"enable": false},

@@ -4,6 +4,7 @@ import telepot
 from telepot.loop import MessageLoop
 from telepot.namedtuple import InlineKeyboardMarkup, InlineKeyboardButton
 
+import passwords
 from communication_handler.command_handler import Commander
 from shared_models import configuration
 from shared_models.message import Message
@@ -86,11 +87,14 @@ class Messenger:
         Commander(msg, self.channel).process_command()
 
     def is_authorised(self, chat_id) -> bool:
-        database = SQLConnector(job_id=0, database=self.config["database"])
-        if database.check_exists(self.config["tbl_allowed_chats"], {"chat_id": chat_id}) == 0:
-            return False
+        if "database" in self.config.keys():
+            database = SQLConnector(job_id=0, database=self.config["database"])
+            if database.check_exists(self.config["tbl_allowed_chats"], {"chat_id": chat_id}) == 0:
+                return False
+            else:
+                return True
         else:
-            return True
+            return chat_id == passwords.telegram_chat_id
 
     def handle_photo(self, msg: dict):
         if not os.path.exists(self.config["telepot_image_dump"]):
