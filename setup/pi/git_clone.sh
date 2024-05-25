@@ -1,3 +1,4 @@
+cd
 sudo apt-get install git -y
 
 git clone https://<token>@github.com/iamJohnnySam/MediaBox.git
