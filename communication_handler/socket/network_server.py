@@ -48,7 +48,7 @@ class Server:
         for i in range(self._connection_count):
             t_accepts.append(threading.Thread(target=self.__accept, args=(i,), daemon=True))
 
-        while not global_var.flag_stop:
+        while True:
             for i in range(len(t_accepts)):
                 if not t_accepts[i].is_alive():
                     log(msg=f"Listening to connection [id: {i}]...")
