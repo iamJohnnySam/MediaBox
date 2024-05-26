@@ -48,7 +48,7 @@ class Client:
         queues.message_q.put(Message(con_msg))
 
         connection = Link(host_name=self.host_name, connection=self.my_socket)
-        threading.Thread(target=connection.listen, daemon=True)
+        threading.Thread(target=connection.listen, daemon=True).start()
 
         while not connection.ready:
             time.sleep(5)
