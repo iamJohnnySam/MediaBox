@@ -38,7 +38,7 @@ class Server:
         self._my_socket.bind(('', self._port))
         log(msg=f"Socket bound to {self._port}")
 
-        threading.Thread(target=self.__run_server(), daemon=True).start()
+        threading.Thread(target=self.__run_server, daemon=True).start()
 
     def __run_server(self):
         self._my_socket.listen(self._connection_count)
