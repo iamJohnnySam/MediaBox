@@ -12,10 +12,13 @@ class Link:
     def __init__(self, host_name: str, connection: socket.socket):
         self._host_name: str = host_name
         self.connection: socket.socket = connection
+        self.ready = False
+
+        self.send_data("/READY")
 
     def listen(self):
         global data_id
-        while not global_var.flag_stop:
+        while True:
             try:
                 data = self.connection.recv(4096)
             except ConnectionResetError as e:
@@ -29,19 +32,25 @@ class Link:
                 break
 
             data = data.decode()
-            r_data: dict = json.loads(data)
-            log(msg=f"{self._host_name}: Data Received: {data}")
 
-            data_id = data_id + 1
-            if data_id >= 1000:
-                data_id = 1
-            Packer(f"d{data_id}", r_data).handle_packet()
+            if data == "/READY":
+                self.ready = True
+            else:
+                r_data: dict = json.loads(data)
+                log(msg=f"{self._host_name}: Data Received: {data}")
+
+                data_id = data_id + 1
+                if data_id >= 1000:
+                    data_id = 1
+                Packer(f"d{data_id}", r_data).handle_packet()
 
         self.connection.close()
 
-    def send_data(self, data: dict):
+    def send_data(self, data: dict | str):
         if type(data) is dict:
             self.connection.sendall(str.encode(json.dumps(data)))
+        elif type(data) is str:
+            self.connection.sendall(data.encode())
         else:
             log(error_code=60002)
 
