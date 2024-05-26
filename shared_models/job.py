@@ -39,6 +39,7 @@ class Job:
 
         self.called_back = False
         self.bypass_channel_check = False
+        self.module = ""
 
         if self.function == "":
             log(job_id=self.job_id, error_code=40001)
@@ -71,6 +72,7 @@ class Job:
             "username": self.username,
             "reply": self.reply_to,
             "function": self.function,
+            "module": self.module,
             "collection": self.collection,
             "background_task": self.is_background_task
         }
@@ -81,6 +83,7 @@ class Job:
         self.username = job_details["username"]
         self.reply_to = job_details["reply"]
         self.function = job_details["function"]
+        self.module = job_details["module"]
         self.collection = job_details["collection"]
         self.is_background_task = job_details["background_task"]
         log(self.job_id, f"Job ({self.function}) decompressed with collection: {self.collection}")

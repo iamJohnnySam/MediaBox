@@ -73,6 +73,7 @@ class Sequence:
             module = commands[self.job.function]["module"]
         else:
             module = "any"
+        self.job.module = module
 
         if "function" in commands[self.job.function].keys():
             function = commands[self.job.function]["function"]
