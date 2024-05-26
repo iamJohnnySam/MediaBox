@@ -3,7 +3,7 @@ import feedparser
 from shared_models.message import Message
 from job_handler.base_module import Module
 from shared_models.job import Job
-from job_handler.modules.transmission import Transmission
+from shared_tools.job_tools import transform_and_queue_job
 from shared_tools.logger import log
 
 
@@ -16,11 +16,7 @@ class MovieFinder(Module):
     def find_movie(self):
         if self.job.called_back and self.check_index() > 1:
             movie = self.get_index(1)
-            success, torrent_id = Transmission(self.job).add_torrent(movie)
-            if success:
-                self.send_message(Message(f"Movie {torrent_id} added to queue."))
-                if not self.is_master:
-                    self.send_admin(Message(f"Movie {torrent_id} added to queue."))
+            transform_and_queue_job(self.job, "download_torrent", movie)
             return
 
         success, movie = self.check_value(index=-1, description="name of the movie")

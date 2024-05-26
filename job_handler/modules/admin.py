@@ -24,23 +24,24 @@ class Admin(Module):
 
     def help(self):
         message = "--- AVAILABLE COMMANDS ---"
-        command_dictionary = JSONEditor(self.command_config["commands"]).read()
+        command_dict = JSONEditor(self.command_config["commands"]).read()
         add_command = ""
 
-        for command in command_dictionary.keys():
-            if type(command_dictionary[command]) != bool:
-                if type(command_dictionary[command]) == str:
-                    definition = command_dictionary[command]
-                elif type(command_dictionary[command]) == dict and 'definition' in command_dictionary[command].keys():
-                    definition = command_dictionary[command]['definition']
+        for command in command_dict.keys():
+            if type(command_dict[command]) != bool:
+                if type(command_dict[command]) == str:
+                    definition = command_dict[command]
+                elif type(command_dict[command]) == dict and 'definition' in command_dict[command].keys():
+                    definition = command_dict[command]['definition']
                 else:
                     definition = command
 
-                a = self.job.channel in command_dictionary[command]
+                a = "bots" in command_dict[command].keys() and self.job.channel not in command_dict[command]["bots"]
                 b = self.job.channel in self.telegram_config["accept_all_commands"]
-                c = "all_bots" in command_dictionary[command]
+                c = "all_bots" in command_dict[command] and command_dict[command]["all_bots"]
+                d = not ("skip_bots" in command_dict[command] and command_dict[command]["skip_bots"])
 
-                if a or b or c:
+                if d and (a or b or c):
                     if add_command != "":
                         message = message + add_command
                         add_command = ""

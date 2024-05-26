@@ -24,7 +24,7 @@ def extract_job_from_string(msg: str) -> (str, list):
         elif first_word in ['help', 'hi', 'hello'] and words == 1:
             function = 'help'
         else:
-            function = "chat"
+            function = "no_function"
         value = msg
         collection = [value]
 

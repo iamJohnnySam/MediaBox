@@ -12,7 +12,3 @@ class UnexpectedOperation(Exception):
 
 class InvalidConfiguration(Exception):
     pass
-
-
-class ConnectionDropped(Exception):
-    pass

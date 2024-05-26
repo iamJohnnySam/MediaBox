@@ -22,10 +22,18 @@ class Transmission(Module):
 
         return self.active_torrents
 
-    def add_torrent(self, path, paused=False):
+    def add_torrent(self):
+        success, path = self.check_value(index=0, description="torrent path")
+        success, paused = self.check_value(index=1, description="torrent paused", check_int=True, default='0')
+
         torrent = self.client.add_torrent(path, paused=paused)
         success, torrent_name = self._add_torrent_to_list(torrent)
         log(self.job.job_id, msg=f"Torrent Added: {torrent_name}")
+        if success:
+            self.send_message(Message(f"Torrent {torrent_name} added to queue."))
+            if not self.is_master:
+                self.send_admin(Message(f"Torrent {torrent_name} added to queue."))
+
         return success, torrent_name
 
     def _add_torrent_to_list(self, torrent):

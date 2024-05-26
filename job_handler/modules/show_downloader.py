@@ -3,6 +3,7 @@ import feedparser
 from shared_models import configuration
 from shared_models.job import Job
 from shared_models.message import Message
+from shared_tools.job_tools import duplicate_and_transform_job
 from shared_tools.sql_connector import SQLConnector
 from job_handler.base_module import Module
 from job_handler.modules.transmission import Transmission
@@ -58,10 +59,8 @@ class ShowDownloader(Module):
                     show_list.append([x.tv_episode_id, episode_name, x.link, episode_quality, x.tv_show_name])
 
         if len(show_list) > 0:
-            torrent = Transmission(self.job)
-
             for row in show_list:
-                success, torrent_id = torrent.add_torrent(row[2])
+                success, torrent_id = Transmission(duplicate_and_transform_job(self.job, row[2])).add_torrent()
 
                 if success:
                     columns = "name, episode_id, episode_name, magnet, quality, torrent_name"

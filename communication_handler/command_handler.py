@@ -5,19 +5,18 @@ from shared_models.job import Job
 from shared_models.message import Message
 from shared_tools.custom_exceptions import UnexpectedOperation
 from shared_tools.message_tools import extract_job_from_message, extract_job_from_string, extract_job_from_callback
-from shared_tools.json_editor import JSONEditor
 from shared_tools.logger import log
 
 
 class Commander:
-    def __init__(self, msg: dict | str, channel: str):
+    def __init__(self, msg: dict | str, channel: str = None):
         self.job = None
         self.msg = msg
         self.channel = channel
-        # todo check channel
 
-        self.config = configuration.Configuration()
-        self.commands = JSONEditor(self.config.commands["commands"]).read()
+        if self.channel is None:
+            self.config = configuration.Configuration()
+            self.channel = self.config.admin["main_telegram_channel"]
 
         if channel not in communication_queues.wait_queue.keys():
             communication_queues.wait_queue[channel] = {}
@@ -50,47 +49,9 @@ class Commander:
                 del communication_queues.wait_queue[self.job.channel][self.job.chat_id]
                 queues.message_q.put(Message(send_string=f"Job canceled.", job=self.job))
 
-        elif self.job.function in self.commands.keys():
-            if type(self.commands[self.job.function]) is bool:
-                queues.message_q.put(Message(send_string="That's not a command", job=self.job))
-                log(job_id=self.job.job_id, error_code=30002)
-                return
-
-            elif self.job.channel not in self.config.telegram["accept_all_commands"] and \
-                    type(self.commands[self.job.function]) is not str and \
-                    not (self.job.channel in self.commands[self.job.function].keys() or
-                         "all_bots" in self.commands[self.job.function].keys()):
-                queues.message_q.put(Message(send_string="That command does not work on this chatbot",
-                                             job=self.job))
-                log(job_id=self.job.job_id, error_code=30003)
-                return
-
-            else:
-                log(job_id=self.job.job_id,
-                    msg="Command verification success.")
-
-            if "module" in self.commands[self.job.function].keys():
-                self.job.module = self.commands[self.job.function]["module"]
-
-            if "function" in self.commands[self.job.function].keys():
-                old_func = self.job.function
-                self.job.function = self.commands[self.job.function]["function"]
-                log(job_id=self.job.job_id,
-                    msg=f"Function updated from {old_func} -> {self.job.function}")
-
-            else:
-                log(job_id=self.job.job_id,
-                    msg="Function update not required.")
-                pass
-
-            queues.job_q.put(self.job)
-            log(job_id=self.job.job_id,
-                msg=f"Job added {self.job.function} to queue.")
-
         else:
-            queues.message_q.put(Message(f"Sorry {self.job.username}, that command is not known to me.\n"
-                                         f"If you need help please send /help",
-                                         job=self.job))
+            queues.job_q.put(self.job)
+            log(job_id=self.job.job_id, msg=f"Job added {self.job.function} to queue.")
 
     def process_callback(self) -> (Job, str, bool):
         if type(self.msg) is dict:

@@ -15,6 +15,7 @@ from shared_models.job import Job
 from shared_models.message import Message
 from shared_tools.configuration_tools import is_config_enabled
 from shared_tools.custom_exceptions import UnexpectedOperation
+from shared_tools.json_editor import JSONEditor
 from shared_tools.logger import log
 
 
@@ -23,33 +24,79 @@ class Sequence:
         self.job = job
         self.config = configuration.Configuration()
 
+        self.function, self.module = self.check_command()
+        if self.function == "":
+            return
+
         if not self.check_module_availability():
             log(job_id=self.job.job_id, msg="Sending job to network.")
             queues.packet_q.put(self.job.job_compress())
             return
 
-        log(job_id=self.job.job_id, msg=f"{self.job.chat_id} - Calling Function: {self.job.function}")
+        log(job_id=self.job.job_id, msg=f"{self.job.chat_id} - Calling Function: {self.function}")
         try:
-            func = getattr(self, self.job.function)
+            func = getattr(self, self.function)
         except AttributeError:
             log(error_code=40005, job_id=self.job.job_id)
             return
         func()
 
+    def check_command(self) -> (str, str):
+        commands = JSONEditor(self.config.commands["commands"]).read()
+
+        if self.job.function not in commands.keys():
+            queues.message_q.put(Message(f"Sorry {self.job.username}, that command is not known to me.\n"
+                                         f"If you need help please send /help", job=self.job))
+            return "", ""
+
+        if type(commands[self.job.function]) is bool:
+            queues.message_q.put(Message(send_string="That's not a command", job=self.job))
+            log(job_id=self.job.job_id, error_code=30002)
+            return "", ""
+
+        cmd = commands[self.job.function]
+        channel_is_not_main = self.job.channel not in self.config.telegram["accept_all_commands"]
+        not_a_string = type(cmd) is not str
+        channel_not_in_list = "bots" in cmd.keys() and self.job.channel not in cmd["bots"]
+        not_all_bots = "all_bots" not in cmd.keys()
+        not_bypass = not self.job.bypass_channel_check
+
+        if not_bypass and channel_is_not_main and not_a_string and channel_not_in_list and not_all_bots:
+            queues.message_q.put(Message(send_string=f"Command {self.job.function} does not work on this chatbot",
+                                         job=self.job))
+            log(job_id=self.job.job_id, error_code=30003)
+            return "", ""
+
+        log(job_id=self.job.job_id, msg="Command verification success.")
+
+        if "module" in commands[self.job.function].keys():
+            module = commands[self.job.function]["module"]
+        else:
+            module = "any"
+
+        if "function" in commands[self.job.function].keys():
+            function = commands[self.job.function]["function"]
+            log(job_id=self.job.job_id, msg=f"Function updated from {self.job.function} -> {function}")
+        else:
+            function = self.job.function
+            log(job_id=self.job.job_id, msg="Function update not required.")
+
+        return function, module
+
     def check_module_availability(self):
-        if self.job.module == "":
+        if self.module == "any":
             return True
-        elif self.job.module == "media":
+        elif self.module == "media":
             return is_config_enabled(self.config.media)
-        elif self.job.module == "news":
+        elif self.module == "news":
             return is_config_enabled(self.config.news)
-        elif self.job.module == "cctv":
+        elif self.module == "cctv":
             return is_config_enabled(self.config.cctv)
-        elif self.job.module == "telegram":
+        elif self.module == "telegram":
             return is_config_enabled(self.config.telegram)
-        elif self.job.module == "finance":
+        elif self.module == "finance":
             return is_config_enabled(self.config.finance)
-        elif self.job.module == "baby":
+        elif self.module == "baby":
             return is_config_enabled(self.config.baby)
 
         log(error_code=40003)
@@ -105,6 +152,9 @@ class Sequence:
 
     def find_movie(self):
         MovieFinder(self.job).find_movie()
+
+    def download_torrent(self):
+        Transmission(self.job).add_torrent()
 
     def check_news(self):
         NewsReader(self.job).get_news()
