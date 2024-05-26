@@ -21,7 +21,7 @@ class Link:
         while True:
             try:
                 data = self.connection.recv(4096)
-            except ConnectionResetError as e:
+            except (ConnectionResetError, ConnectionAbortedError) as e:
                 log(msg=f"{self._host_name}: connection dropped with host: {e}.")
                 self.connection.close()
                 break
