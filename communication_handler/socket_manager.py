@@ -22,8 +22,8 @@ def connect_client(host, ip, port):
         log(msg=f"Client Connected: {host} at {ip} on port {port}")
 
 
-def check_connection_threads():
-    for host in connection_threads.keys():
+def check_conn_threads():
+    for host in list(connection_threads.keys()):
         if not connection_threads[host].is_alive():
             log(msg=f"Thread for {host} ended.")
             del connection_threads[host]
@@ -57,7 +57,7 @@ def run_sockets():
 
             packet_sent = False
             while not packet_sent and len(connection_threads) != 0:
-                check_connection_threads()
+                check_conn_threads()
                 for host in hosts:
                     if host in connected_clients.keys():
                         connected_clients[host].send_data(packet)
@@ -70,7 +70,7 @@ def run_sockets():
                 queues.packet_q.put(packet)
 
             if queues.packet_q.empty():
-                for client in connected_clients.keys():
+                for client in list(connected_clients.keys()):
                     connected_clients[client].close_connection()
                     log(msg=f"Client, {client}, connection closed.")
                     del connected_clients[client]
