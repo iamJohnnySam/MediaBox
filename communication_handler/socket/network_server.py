@@ -41,11 +41,13 @@ class Server:
         threading.Thread(target=self.__run_server, daemon=True).start()
 
     def __run_server(self):
+        log(msg=f"Socket listening to {self._connection_count} connections.")
         self._my_socket.listen(self._connection_count)
         t_accepts = []
 
         for i in range(self._connection_count):
             t_accepts.append(threading.Thread(target=self.__accept, args=(i,), daemon=True))
+            t_accepts[i].start()
 
         while not global_var.flag_stop:
             for i in range(len(t_accepts)):
