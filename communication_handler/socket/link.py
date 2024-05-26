@@ -47,6 +47,7 @@ class Link:
         self.connection.close()
 
     def send_data(self, data: dict | str):
+        log(msg=f"Sending data: {data}")
         if type(data) is dict:
             self.connection.sendall(str.encode(json.dumps(data)))
         elif type(data) is str:
