@@ -47,7 +47,6 @@ class Server:
 
         for i in range(self._connection_count):
             t_accepts.append(threading.Thread(target=self.__accept, args=(i,), daemon=True))
-            t_accepts[i].start()
 
         while not global_var.flag_stop:
             for i in range(len(t_accepts)):
@@ -60,7 +59,7 @@ class Server:
         host_unknown = True
         c, addr, host = None, None, None
 
-        while host_unknown and not global_var.flag_stop:
+        while host_unknown:
             log(msg=f"Server {connect_id} is listening on {self._my_socket.getsockname()}...")
             c, addr = self._my_socket.accept()
 
