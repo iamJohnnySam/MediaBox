@@ -17,7 +17,7 @@ class Client:
             host_names, _, _ = socket.gethostbyaddr(ip_address)
             self.host_name = host_names[0]
             log(msg=f"Scanning IP address {ip_address} resulted host name: {self.host_name}.")
-        except socket.gaierror as e:
+        except Exception as e:
             log(msg=f"Error Getting Hostname: {e}.", log_type="error")
             self.host_name = ip_address
 
