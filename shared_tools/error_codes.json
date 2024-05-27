@@ -51,5 +51,6 @@
   "60002": "Message to send is not a dictionary.",
   "60003": "Unknown packet data",
   "60004": "No destination host for packet",
+  "60005": "Socket already taken",
   "60017": "Socket config CONNECT key has no accounts to connect."
 }

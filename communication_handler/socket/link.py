@@ -18,7 +18,7 @@ class Link:
 
     def listen(self):
         global data_id
-        while True:
+        while not global_var.flag_stop.value:
             try:
                 data = self.connection.recv(4096)
             except (ConnectionResetError, ConnectionAbortedError) as e:

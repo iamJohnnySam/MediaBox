@@ -1,7 +1,7 @@
 import threading
 import time
 
-from common_workspace import queues
+from common_workspace import queues, global_var
 from communication_handler.packet_handler import Packer
 from communication_handler.socket.link import Link
 from communication_handler.socket.network_client import Client
@@ -33,7 +33,7 @@ def run_sockets():
     config = configuration.Configuration()
     _ = Server(config.host, config.socket)
 
-    while True:
+    while not global_var.flag_stop.value:
         while not queues.packet_q.empty():
             packet: dict = queues.packet_q.get()
             module, connect = Packer(data_id=0, packet=packet).get_module()

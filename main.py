@@ -3,13 +3,13 @@ import os
 import sys
 import time
 
+from shared_tools import start_up
 from common_workspace import global_var, queues
 from communication_handler import communication_main
 from job_handler import job_main
 from shared_models import configuration
 from shared_models.message import Message
 from web_handler import web_main
-from shared_tools import start_up
 from shared_tools.logger import log
 
 crashed = False

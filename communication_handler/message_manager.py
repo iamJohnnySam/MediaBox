@@ -1,6 +1,6 @@
 import time
 
-from common_workspace import queues
+from common_workspace import queues, global_var
 from communication_handler import communication_queues
 from communication_handler.telegram.initialize_telegram import init_telegram
 from communication_handler.telegram.messenger import Messenger
@@ -14,7 +14,7 @@ def run_telegram():
     config = configuration.Configuration()
     telepot_channels: dict[str, Messenger] = init_telegram(config.telegram)
 
-    while True:
+    while not global_var.flag_stop.value:
         while not queues.message_q.empty():
             msg: Message = queues.message_q.get()
 

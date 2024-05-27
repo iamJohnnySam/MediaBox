@@ -6,6 +6,7 @@ from common_workspace import global_var, queues
 from communication_handler.socket.link import Link
 from shared_models.message import Message
 from shared_tools.configuration_tools import is_config_enabled, get_host_from_ip
+from shared_tools.custom_exceptions import AnotherInstanceIsRunning
 from shared_tools.logger import log
 
 
@@ -35,7 +36,12 @@ class Server:
         self._my_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         log(msg="Socket Initialized")
 
-        self._my_socket.bind(('', self._port))
+        try:
+            self._my_socket.bind(('', self._port))
+        except OSError as e:
+            log(error_code=60005, error=str(e))
+            global_var.flag_stop.value = True
+            raise AnotherInstanceIsRunning
         log(msg=f"Socket bound to {self._port}")
 
         threading.Thread(target=self.__run_server, daemon=True).start()
@@ -48,7 +54,7 @@ class Server:
         for i in range(self._connection_count):
             t_accepts.append(threading.Thread())
 
-        while True:
+        while not global_var.flag_stop.value:
             for i in range(len(t_accepts)):
                 if not t_accepts[i].is_alive():
                     log(msg=f"Listening to connection [id: {i}]...")
