@@ -41,6 +41,7 @@ class Server:
         except OSError as e:
             log(error_code=60005, error=str(e))
             global_var.flag_stop.value = True
+            queues.message_q.put(Message("Another running instance is detected. Program will exit."))
             raise AnotherInstanceIsRunning
         log(msg=f"Socket bound to {self._port}")
 
