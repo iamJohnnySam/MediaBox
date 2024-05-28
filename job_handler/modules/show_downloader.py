@@ -60,7 +60,9 @@ class ShowDownloader(Module):
 
         if len(show_list) > 0:
             for row in show_list:
-                success, torrent_id = Transmission(duplicate_and_transform_job(self.job, row[2])).add_torrent()
+                success, torrent_id = Transmission(duplicate_and_transform_job(self.job,
+                                                                               "download_torrent",
+                                                                               row[2])).add_torrent()
 
                 if success:
                     columns = "name, episode_id, episode_name, magnet, quality, torrent_name"

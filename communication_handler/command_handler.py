@@ -46,8 +46,9 @@ class Commander:
 
         elif self.job.function == "cancel":
             if self.job.chat_id in communication_queues.wait_queue[self.job.channel].keys():
+                func = communication_queues.wait_queue[self.job.channel][self.job.chat_id]["function"]
+                queues.message_q.put(Message(send_string=f"Job {func} canceled.", job=self.job))
                 del communication_queues.wait_queue[self.job.channel][self.job.chat_id]
-                queues.message_q.put(Message(send_string=f"Job canceled.", job=self.job))
 
         else:
             queues.job_q.put(self.job)

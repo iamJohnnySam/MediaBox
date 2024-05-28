@@ -24,7 +24,11 @@ class Transmission(Module):
 
     def add_torrent(self):
         success, path = self.check_value(index=0, description="torrent path")
+        if not success:
+            return
         success, paused = self.check_value(index=1, description="torrent paused", check_int=True, default='0')
+        if not success:
+            return
 
         torrent = self.client.add_torrent(path, paused=paused)
         success, torrent_name = self._add_torrent_to_list(torrent)

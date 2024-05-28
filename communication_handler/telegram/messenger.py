@@ -75,8 +75,9 @@ class Messenger:
         log(msg=f"INCOMING: {chat_id}, Message: {content}", log_type="info")
 
         if not self.is_authorised(chat_id):
-            self.bot.sendMessage(chat_id, "Hello " + username + "! You're not allowed to be here")
-            string = f"Unauthorised Chat access: {username}, chat_id: {chat_id}"
+            self.bot.sendMessage(chat_id, "Hello " + username + "! You're not allowed to be here. "
+                                                                "This is a personal channel.")
+            string = f"Unauthorised Chat access: {username}, chat_id: {chat_id}, chat: {content}"
             self.send_now(Message(string))
             log(msg=string, log_type="warn")
             return

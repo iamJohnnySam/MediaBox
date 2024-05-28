@@ -1,7 +1,8 @@
 import threading
 
 from common_workspace import global_var, queues
-from communication_handler import message_manager, socket_manager
+from communication_handler import socket_manager
+from communication_handler.telegram import message_manager
 from shared_tools.logger import log
 
 
