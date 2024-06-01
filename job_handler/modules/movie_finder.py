@@ -53,19 +53,36 @@ class MovieFinder(Module):
         if len(movies) == 0:
             movies = movie_feed.entries
 
+        options = []
+        btn_text = []
         for movie_entry in movies:
             title, image, link, torrent = get_movie_details(movie_entry)
             send_movie = Message(f"{title}\n{image}", job=self.job)
-            send_movie.add_keyboard(function=self.job.function,
-                                    reply_to=self.job.reply_to,
-                                    button_text=["Download"],
-                                    button_val=[f"1;{torrent}"],
-                                    arrangement=[1],
-                                    collection=self.job.collection)
             self.send_message(send_movie)
+            options.append(torrent)
+            title: str = title.replace("[", "").replace("]", "").replace("YTS.MX", "").strip()
+            btn_text.append(title)
+
+        number_list = []
+        i = 1
+        send_string = f"Search for {search_string} resulted in following.\nWhich movie do you want to download?"
+        for btn_val in btn_text:
+            send_string = send_string + f"\n{i:>02}: {btn_val}"
+            number_list.append(i)
+            i = i+1
+        download_movie = Message(send_string, job=self.job)
+        download_movie.keyboard_extractor(function=self.job.function,
+                                          options=options,
+                                          index=1,
+                                          button_text=number_list,
+                                          bpr=5,
+                                          add_cancel=True,
+                                          reply_to=self.job.reply_to,
+                                          collection=self.job.collection)
+        self.send_message(download_movie)
 
 
-def get_movie_details(movie):
+def get_movie_details(movie) -> (str, str, str, str):
     image_string = movie.summary_detail.value
     sub1 = 'src="'
     idx1 = image_string.index(sub1)

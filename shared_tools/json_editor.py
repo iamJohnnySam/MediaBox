@@ -24,6 +24,8 @@ class JSONEditor:
         self.lock.acquire()
         with open(self.file, 'r+') as file:
             file_data = json.load(file)
+            if file_data == "":
+                file_data = {}
             file_data.update(data)
             file.seek(0)
             json.dump(file_data, file, indent=4)
@@ -65,11 +67,18 @@ class JSONEditor:
 
     def delete(self, key: str, job_id=0):
         self.lock.acquire()
-        with open(self.file, 'w+') as file:
+
+        with open(self.file, 'r+') as file:
             data: dict = json.load(file)
+
+        for key in data.copy().keys():
             if key in data.keys():
                 del data[key]
+                log(job_id=job_id, msg="Deleted Key - " + str(key))
+
+        with open(self.file, 'w+') as file:
             json.dump(data, file, indent=4)
+
         self.lock.release()
 
         log(job_id=job_id, msg="Deleted Key - " + str(key))

@@ -1,5 +1,6 @@
 import os
 
+import mysql.connector
 import telepot
 from telepot.loop import MessageLoop
 from telepot.namedtuple import InlineKeyboardMarkup, InlineKeyboardButton
@@ -89,11 +90,15 @@ class Messenger:
 
     def is_authorised(self, chat_id) -> bool:
         if "database" in self.config.keys():
-            database = SQLConnector(job_id=0, database=self.config["database"])
-            if database.check_exists(self.config["tbl_allowed_chats"], {"chat_id": chat_id}) == 0:
-                return False
-            else:
-                return True
+
+            try:
+                database = SQLConnector(job_id=0, database=self.config["database"])
+                return False if database.check_exists(self.config["tbl_allowed_chats"],
+                                                      {"chat_id": chat_id}) == 0 else True
+            except mysql.connector.errors.DatabaseError as e:
+                log(error=str(e), error_code=20008)
+                return chat_id == passwords.telegram_chat_id
+
         else:
             return chat_id == passwords.telegram_chat_id
 

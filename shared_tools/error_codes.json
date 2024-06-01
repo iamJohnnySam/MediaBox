@@ -13,6 +13,7 @@
   "20005": "Unable to create Job frm callback",
   "20006": "No message to send",
   "20007": "Group does not exist",
+  "20008": "SQL Database Error",
   "20009": "Telepot account not matching with job ID to reply.",
   "20010": "Unable to reply for a group message. Reply reference will be removed.",
   "20011": "Keyboard generation error",
