@@ -106,11 +106,12 @@ def extract_job_from_callback(msg: dict):
     reply_to = q[1]
 
     msg_prefix = f"{q[0]};{q[1]};{q[2]}"
+    sub_key = f"{q[0]};{q[1]}"
 
     if len(q) == 4 and q[3] == 'X':
         cb_file = JSONEditor(configuration.Configuration().telegram["callback_overflow"])
         query_data = cb_file.read()[msg_prefix]
-        cb_file.delete(job_id=msg_id, key=msg_prefix)
+        cb_file.delete(job_id=msg_id, key=msg_prefix, sub_key=sub_key)
         log(job_id=msg_id, msg="Recovered Query: " + query_data)
 
         try:

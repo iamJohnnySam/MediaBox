@@ -65,16 +65,21 @@ class JSONEditor:
 
         log(job_id=job_id, msg="-------DATABASE CLEANUP ENDED-------")
 
-    def delete(self, key: str, job_id=0):
+    def delete(self, key: str, job_id=0, sub_key: str = None):
         self.lock.acquire()
 
         with open(self.file, 'r+') as file:
             data: dict = json.load(file)
 
-        for key in data.copy().keys():
-            if key in data.keys():
-                del data[key]
-                log(job_id=job_id, msg="Deleted Key - " + str(key))
+        if key in data.copy().keys():
+            del data[key]
+            log(job_id=job_id, msg="Deleted Key - " + str(key))
+
+        if sub_key is not None:
+            for key in data.copy().keys():
+                if sub_key in key:
+                    del data[key]
+                    log(job_id=job_id, msg="Deleted Key due to sub key - " + str(key))
 
         with open(self.file, 'w+') as file:
             json.dump(data, file, indent=4)
