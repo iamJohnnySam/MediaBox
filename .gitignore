@@ -1,5 +1,6 @@
 /passwords.py
 /log
+/backup
 
 *.json
 !database/telepot_commands.json

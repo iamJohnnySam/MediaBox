@@ -104,8 +104,8 @@ class CCTVChecker(Module):
         client.email_close()
 
     def get_last(self, amount: int = 10):
-        a01_files = sorted(os.listdir(os.path.join(self.cctv_save, "A01", "1")))[-amount:]
-        a02_files = sorted(os.listdir(os.path.join(self.cctv_save, "A02", "1")))[-amount:]
+        a01_files = sorted(os.listdir(os.path.join(self.cctv_save, "A01", "1")), key=os.path.getctime)[-amount:]
+        a02_files = sorted(os.listdir(os.path.join(self.cctv_save, "A02", "1")), key=os.path.getctime)[-amount:]
 
         self.send_message(Message(job=self.job, send_string=f"Last {amount} CCTV images for A01 channel."))
         for photo in a01_files:

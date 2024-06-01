@@ -23,6 +23,8 @@ class Message:
         self.get_input = get_input
         self.index = index
         self.no_message = False
+        self._job = job
+        self._compressed_job = {} if self.job is None else self.job.job_compress()
 
         if job is None:
             global message_id
@@ -51,6 +53,15 @@ class Message:
     @property
     def channel(self):
         return self._channel
+
+    @property
+    def job(self):
+        return self._job
+
+    @job.setter
+    def job(self, j: Job):
+        self._job = j
+        self._compressed_job = j.job_compress()
 
     @channel.setter
     def channel(self, val):
@@ -131,7 +142,8 @@ class Message:
             "photo": self.photo,
             "get_input": self.get_input,
             "no_message": self.no_message,
-            "index": self.index
+            "index": self.index,
+            "job": self._compressed_job
         }
 
     def message_decompress(self, message_details: dict):
@@ -146,4 +158,5 @@ class Message:
         self.get_input = message_details["get_input"]
         self.no_message = message_details["no_message"]
         self.index = message_details["index"]
+        self._compressed_job = message_details["job"]
         log(self.msg_id, f"Message ({self.send_string}) decompressed.")

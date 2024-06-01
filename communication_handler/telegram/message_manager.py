@@ -28,6 +28,9 @@ def run_telegram():
                 log(job_id=msg.msg_id, msg=f"Chats in Queue: {communication_queues.wait_queue[msg.channel]}")
                 continue
 
+            if msg.get_input:
+                communication_queues.wait_queue[msg.channel][msg.chat_id] = msg.message_compress()
+
             try:
                 telepot_channels[msg.channel].send_now(message=msg)
             except KeyError as e:

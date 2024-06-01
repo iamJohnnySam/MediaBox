@@ -16,6 +16,12 @@
     "definition": "Back Up Program Information",
     "function": "backup_all"
   },
+  "backup_database": {
+    "definition": "Back Up Databases"
+  },
+  "gdrive_upload": {
+    "skip_bots": true
+  },
 
   "Entertainment Controls": false,
   "check_shows": {

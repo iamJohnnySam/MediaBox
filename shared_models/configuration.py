@@ -76,6 +76,10 @@ class Configuration:
         return self._get_module_details("commands")
 
     @property
+    def google(self):
+        return self._get_module_details("google")
+
+    @property
     def admin(self):
         return self._get_module_details("admin")
 

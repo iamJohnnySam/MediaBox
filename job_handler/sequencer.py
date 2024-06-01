@@ -3,6 +3,7 @@ from job_handler.modules.admin import Admin
 from job_handler.modules.baby import Baby
 from job_handler.modules.backup import BackUp
 from job_handler.modules.cctv_checker import CCTVChecker
+from job_handler.modules.cloud import Cloud
 from job_handler.modules.finance import Finance
 from job_handler.modules.folder_refactor import RefactorFolder
 from job_handler.modules.movie_finder import MovieFinder
@@ -147,6 +148,9 @@ class Sequence:
         for database in self.config.admin["backup_databases"]:
             backup.databases.append(database)
         backup.cp_all_databases()
+
+    def gdrive_upload(self):
+        Cloud(self.job).upload()
 
     def check_shows(self):
         ShowDownloader(self.job).check_shows()

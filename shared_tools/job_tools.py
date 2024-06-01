@@ -11,6 +11,7 @@ def transform_job(job: Job, new_function: str,
                   new_collection: list | str | bool | int | float | datetime = None,
                   keep_collection: bool = False) -> Job:
     job.function = new_function
+    log(msg=f"Function updated to {job.function}")
     job.bypass_channel_check = True
 
     if not keep_collection:
@@ -28,12 +29,15 @@ def transform_job(job: Job, new_function: str,
         else:
             job.collection = []
 
+    log(msg=f"Collection is {job.collection}")
+
     return job
 
 
 def transform_and_queue_job(job: Job, new_function: str,
                             new_collection: list | str | bool | int | float | datetime = None,
                             keep_collection: bool = False):
+    log(msg=f"Transforming job {job.function} to {new_function} and collection {new_collection}")
     job = transform_job(job, new_function, new_collection, keep_collection)
     queues.job_q.put(job)
 

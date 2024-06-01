@@ -12,6 +12,10 @@
     "commands": {
       "enable": true,
       "commands": "database/telepot_commands.json"
+    },
+    "google": {
+      "enable": true,
+      "secret_location": "secrets/client_secret.json"
     }
   },
   "iamjohnnysam-dell": {
