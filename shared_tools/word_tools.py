@@ -30,8 +30,6 @@ def breakdown_torrent_file_name(job: Job, file_name):
     match_tv3 = re.search('S[0-9][0-9] E[0-9][0-9]', file_name, flags=re.IGNORECASE)
     match_quality = re.search('[0-9][0-9][0-9]p', file_name, flags=re.IGNORECASE)
 
-    # todo remove year 2021
-
     if (match_tv or match_tv2 or match_tv3) and match_video:
         if match_tv:
             match_start = match_tv.start()

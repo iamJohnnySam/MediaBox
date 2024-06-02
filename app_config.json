@@ -26,7 +26,7 @@
       "log_to_file": false,
       "log_to_console": true,
       "backup_location": "backup/",
-      "backup_databases": ["administration", "news", "transactions", "baby", "entertainment"],
+      "backup_databases": ["news", "transactions", "baby", "entertainment"],
       "error_codes": "shared_tools/error_codes.json",
       "main_telegram_channel": "test"
     },
@@ -37,9 +37,8 @@
       "accept_all_commands": ["test"],
       "callback_overflow": "database/callbacks.json",
       "db_telepot_accounts": "database/telepot_accounts.json",
-      "database": "administration",
-      "tbl_allowed_chats": "telepot_allowed_chats",
-      "tbl_groups": "telepot_groups",
+      "db_allowed_chats": "database/telepot_allowed_chats.json",
+      "db_groups": "database/telepot_groups.json",
       "telepot_image_dump": "communication/chat_images"
     },
     "media": {"enable": false},
@@ -48,7 +47,8 @@
       "enable": true,
       "sources": "database/news_sources.json",
       "database": "news",
-      "tbl_news": "news_articles"
+      "tbl_news": "news_articles",
+      "tbl_subscriptions": "subscriptions"
     },
     "finance": {
       "enable": true,
@@ -78,7 +78,7 @@
       "log_to_file": true,
       "log_to_console": true,
       "backup_location": "/home/pi/backup",
-      "backup_databases": ["administration", "news", "transactions", "baby", "entertainment"],
+      "backup_databases": ["news", "transactions", "baby", "entertainment"],
       "error_codes": "shared_tools/error_codes.json",
       "main_telegram_channel": "spark"
     },
@@ -89,9 +89,8 @@
       "accept_all_commands": ["spark", "baby"],
       "callback_overflow": "database/callbacks.json",
       "db_telepot_accounts": "database/telepot_accounts.json",
-      "database": "administration",
-      "tbl_allowed_chats": "telepot_allowed_chats",
-      "tbl_groups": "telepot_groups",
+      "db_allowed_chats": "database/telepot_allowed_chats.json",
+      "db_groups": "database/telepot_groups.json",
       "telepot_image_dump": "communication/chat_images"
     },
     "media": {"enable": false},
@@ -100,7 +99,8 @@
       "enable": true,
       "sources": "database/news_sources.json",
       "database": "news",
-      "tbl_news": "news_articles"
+      "tbl_news": "news_articles",
+      "tbl_subscriptions": "subscriptions"
     },
     "finance": {
       "enable": true,

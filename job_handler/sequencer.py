@@ -190,12 +190,10 @@ class Sequence:
         cctv.clean_up(self.config.cctv["sent"])
 
     def add_me_to_cctv(self):
-        # todo check if connected to the correct telegram
         Subscriptions(self.job).manage_chat_group("cctv")
 
     def remove_me_from_cctv(self):
-        # todo check if connected to the correct telegram
-        Subscriptions(self.job).manage_chat_group("cctv", add=False, remove=True)
+        Subscriptions(self.job).manage_chat_group("cctv", remove=True)
 
     def list_torrents(self):
         Transmission(self.job).send_list()
@@ -249,12 +247,10 @@ class Sequence:
         Baby(self.job).pump()
 
     def add_me_to_baby(self):
-        # todo check if connected to the correct telegram
         Subscriptions(self.job).manage_chat_group("baby")
 
     def remove_me_from_baby(self):
-        # todo check if connected to the correct telegram
-        Subscriptions(self.job).manage_chat_group("baby", add=False, remove=True)
+        Subscriptions(self.job).manage_chat_group("baby", remove=True)
 
     def start_over(self):
         Admin(self.job).start_over()

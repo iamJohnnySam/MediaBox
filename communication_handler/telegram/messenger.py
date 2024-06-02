@@ -1,6 +1,5 @@
 import os
 
-import mysql.connector
 import telepot
 from telepot.loop import MessageLoop
 from telepot.namedtuple import InlineKeyboardMarkup, InlineKeyboardButton
@@ -11,10 +10,11 @@ from shared_models import configuration
 from shared_models.message import Message
 from shared_models.job import Job
 from shared_tools.custom_exceptions import UnexpectedOperation
+from shared_tools.group_tools import get_group
 from shared_tools.image_tools import resize_image
+from shared_tools.json_editor import JSONEditor
 from shared_tools.logger import log
 from shared_tools.message_tools import create_keyboard_data
-from shared_tools.sql_connector import SQLConnector
 
 
 def create_keyboard(msg_id, function: str | list[str], reply_to, button_text: list, button_val: list,
@@ -57,6 +57,7 @@ class Messenger:
         self.master = telepot_master
 
         self.config = configuration.Configuration().telegram
+        self.authorized_chats = []
 
         # Listen
         self.bot = telepot.Bot(telepot_key)
@@ -89,18 +90,13 @@ class Messenger:
         Commander(msg, self.channel).process_command()
 
     def is_authorised(self, chat_id) -> bool:
-        if "database" in self.config.keys():
+        if not self.authorized_chats:
+            if "db_allowed_chats" in self.config.keys():
+                self.authorized_chats = [eval(i) for i in JSONEditor(self.config["db_allowed_chats"]).read().keys()]
+            else:
+                self.authorized_chats.append(passwords.telegram_chat_id)
 
-            try:
-                database = SQLConnector(job_id=0, database=self.config["database"])
-                return False if database.check_exists(self.config["tbl_allowed_chats"],
-                                                      {"chat_id": chat_id}) == 0 else True
-            except mysql.connector.errors.DatabaseError as e:
-                log(error=str(e), error_code=20008)
-                return chat_id == passwords.telegram_chat_id
-
-        else:
-            return chat_id == passwords.telegram_chat_id
+        return True if chat_id in self.authorized_chats else False
 
     def handle_photo(self, msg: dict):
         if not os.path.exists(self.config["telepot_image_dump"]):
@@ -139,21 +135,14 @@ class Messenger:
             log(job_id=message.msg_id, msg="Sending avoided due to background task")
             return
 
+        log(job_id=message.msg_id, msg=f"Preparing to send: {message.send_string}")
+
         chats = [message.chat_id]
-        if message.group is not None and "database" in self.config.keys():
-            # todo sql access for Groups
-            database = SQLConnector(self.config["database"])
-            group_exists = database.check_exists(self.config["tbl_groups"], {"group_name": message.group}) != 0
+        if message.group is not None:
+            chats = get_group(group=message.group)
 
-            if not group_exists:
+            if not chats:
                 log(job_id=message.msg_id, error_code=20007)
-                raise ValueError
-
-            result = database.select(table=self.config["tbl_groups"],
-                                     columns="chat_id",
-                                     where={"group_name": message.group},
-                                     fetch_all=True)
-            chats = [row[0] for row in result]
 
         if message.keyboard:
             keyboard = create_keyboard(msg_id=message.msg_id,

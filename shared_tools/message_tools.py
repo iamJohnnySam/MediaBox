@@ -74,9 +74,10 @@ def create_keyboard_data(msg_id, reply_to, function, button_text, button_value, 
         button_data = f"{button_data};{collection}"
 
     if len(button_data) >= 60:
+        log(job_id=msg_id, msg=f'Callback data too long: {button_data}')
         telepot_cb = {button_prefix: button_data}
         save_loc = configuration.Configuration().telegram["callback_overflow"]
-        JSONEditor(save_loc).add_level1(telepot_cb, job_id=msg_id)
+        JSONEditor(save_loc).add_level1(data=telepot_cb, job_id=msg_id)
         log(job_id=msg_id, msg=f'Keyboard button saved > {telepot_cb}')
         button_data = f"{button_prefix};X"
 

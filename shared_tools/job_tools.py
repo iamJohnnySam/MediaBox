@@ -42,9 +42,13 @@ def transform_and_queue_job(job: Job, new_function: str,
     queues.job_q.put(job)
 
 
-def duplicate_and_transform_job(job: Job, new_function: str,
+def duplicate_and_transform_job(job: Job, new_function: str = None,
                                 new_collection: list | str | bool | int | float | datetime = None,
                                 keep_collection: bool = False) -> Job:
     new_job = copy.deepcopy(job)
+    new_job.generate_new_id()
+    if new_function is None:
+        return new_job
+
     new_job = transform_job(new_job, new_function, new_collection, keep_collection)
     return new_job

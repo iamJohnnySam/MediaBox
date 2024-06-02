@@ -57,16 +57,6 @@
     "definition": "Show News Channels",
     "module": "news"
   },
-  "add_me_to_news": {
-    "function": "add_me_to_news",
-    "definition": "Add to CCTV group",
-    "module": "telegram"
-  },
-  "remove_me_from_news": {
-    "function": "remove_me_from_news",
-    "definition": "Remove from CCTV group",
-    "module": "telegram"
-  },
 
   "CCTV Controls": false,
   "check_cctv": {

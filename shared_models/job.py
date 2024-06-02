@@ -22,11 +22,7 @@ class Job:
         :param background_task: Block outgoing messages if true.
         """
 
-        global current_id
-        current_id = current_id + 1
-        if current_id >= 10_000:
-            log(msg="Job ID rolled over to 0")
-            current_id = 1
+        self.generate_new_id()
         self.job_id = current_id
 
         self.function: str = function
@@ -61,6 +57,14 @@ class Job:
         if type(self.collection) is not list:
             log(self.job_id, error_code=40002)
             raise InvalidParameterException("Error creating job")
+
+    def generate_new_id(self):
+        global current_id
+        current_id = current_id + 1
+        if current_id >= 10_000:
+            current_id = 1
+            log(job_id=current_id, msg="Job ID rolled over to 1")
+        self.job_id = current_id
 
     def job_compress(self):
         log(self.job_id, f"Job ({self.function}) compressed with collection: {self.collection}")
