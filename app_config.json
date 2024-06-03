@@ -181,7 +181,7 @@
       "backup_location": "/home/pi/backup",
       "backup_databases": [],
       "error_codes": "shared_tools/error_codes.json",
-      "main_telegram_channel": "entertainer"
+      "main_telegram_channel": "tv"
     },
     "telegram": {
       "enable": true,

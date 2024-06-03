@@ -30,6 +30,7 @@ pip install pyodbc
 pip install pandas
 pip install opencv-python
 pip install python-git-info
+pip install pydrive2
 
 deactivate
 cd || exit
