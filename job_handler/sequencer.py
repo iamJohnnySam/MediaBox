@@ -18,6 +18,7 @@ from shared_tools.configuration_tools import is_config_enabled
 from shared_tools.custom_exceptions import UnexpectedOperation
 from shared_tools.json_editor import JSONEditor
 from shared_tools.logger import log
+from shared_tools.packet_tools import packet_and_queue
 
 
 class Sequence:
@@ -31,7 +32,7 @@ class Sequence:
 
         if not self.check_module_availability():
             log(job_id=self.job.job_id, msg="Sending job to network.")
-            queues.packet_q.put(self.job.job_compress())
+            packet_and_queue(self.job)
             return
 
         log(job_id=self.job.job_id, msg=f"{self.job.chat_id} - Calling Function: {self.function}")

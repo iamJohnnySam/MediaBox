@@ -2,7 +2,7 @@ import threading
 import time
 
 from common_workspace import queues, global_var
-from communication_handler.packet_handler import Packer
+from communication_handler.socket.packet_handler import Packer
 from communication_handler.socket.link import Link
 from communication_handler.socket.network_client import Client
 from communication_handler.socket.network_server import Server
@@ -66,8 +66,15 @@ def run_sockets():
                 time.sleep(1)
 
             if not packet_sent:
-                log(msg=f"Packet for {module} was not sent to hosts: {hosts}. Packet {packet} added to back of queue.")
-                queues.packet_q.put(packet)
+                log(job_id=packet_id, msg=f"Packet for {module} was not sent to hosts: {hosts}")
+                if packet["attempts"] > 3:
+                    log(error_code=60007)
+                    log(job_id=packet_id, msg=f"Packet dropped: {packet}")
+
+                else:
+                    packet["attempts"] = packet["attempts"] + 1
+                    queues.packet_q.put(packet)
+                    log(job_id=packet_id, msg="Packet {packet} added to back of queue.")
 
             if queues.packet_q.empty():
                 for client in list(connected_clients.keys()):

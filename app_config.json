@@ -1,5 +1,9 @@
 {
   "COMMON": {
+    "program": {
+      "enable": true,
+      "sequence_threading": false
+    },
     "socket": {
       "enable": true,
       "port": 10000,
@@ -33,7 +37,6 @@
     "telegram": {
       "enable": true,
       "connect": ["test"],
-      "main_account": 0,
       "accept_all_commands": ["test"],
       "callback_overflow": "database/callbacks.json",
       "db_telepot_accounts": "database/telepot_accounts.json",
@@ -85,7 +88,6 @@
     "telegram": {
       "enable": true,
       "connect": ["spark"],
-      "main_account": 0,
       "accept_all_commands": ["spark", "baby"],
       "callback_overflow": "database/callbacks.json",
       "db_telepot_accounts": "database/telepot_accounts.json",
@@ -186,7 +188,6 @@
     "telegram": {
       "enable": true,
       "connect": ["tv"],
-      "main_account": 0,
       "accept_all_commands": ["tv"],
       "callback_overflow": "database/callbacks.json",
       "db_telepot_accounts": "database/telepot_accounts.json",

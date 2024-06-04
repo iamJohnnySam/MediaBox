@@ -72,6 +72,10 @@ class Configuration:
         return False if self._get_module_details(module) == {} else True
 
     @property
+    def program(self):
+        return self._get_module_details("program")
+
+    @property
     def commands(self):
         return self._get_module_details("commands")
 

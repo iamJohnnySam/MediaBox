@@ -2,7 +2,7 @@ import json
 import socket
 
 from common_workspace import global_var
-from communication_handler.packet_handler import Packer
+from communication_handler.socket.packet_handler import Packer
 from shared_tools.logger import log
 
 data_id = 0

@@ -4,6 +4,7 @@
   "10002": "SQL Error",
   "10003": "Accessing invalid telepot channel",
   "10004": "Mailbox login error",
+  "10005": "Packet conversion error",
 
   "20000": "Telepot Errors",
   "20001": "Unknown Chat Type",
@@ -53,5 +54,6 @@
   "60003": "Unknown packet data",
   "60004": "No destination host for packet",
   "60005": "Socket already taken",
+  "60007": "Packet could not be sent",
   "60017": "Socket config CONNECT key has no accounts to connect."
 }

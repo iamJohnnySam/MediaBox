@@ -8,6 +8,7 @@ from shared_models import configuration
 from shared_models.message import Message
 from shared_tools.custom_exceptions import InvalidParameterException
 from shared_tools.logger import log
+from shared_tools.packet_tools import packet_and_queue
 
 
 def run_telegram():
@@ -19,8 +20,7 @@ def run_telegram():
             msg: Message = queues.message_q.get()
 
             if msg.channel not in telepot_channels.keys():
-                packet = msg.message_compress()
-                queues.packet_q.put(packet)
+                packet_and_queue(msg)
                 continue
 
             if msg.get_input and msg.chat_id in communication_queues.wait_queue[msg.channel].keys():
