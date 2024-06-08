@@ -96,6 +96,6 @@ def log(job_id: int | str = 0, msg: str = "", log_type: str = "debug", error_cod
 
     if print_message:
         for segment in message.split("\n"):
-            print(f"{os.getpid():0>6},{threading.current_thread().ident:0>6},"
+            print(f"{os.getpid():0>6},{threading.current_thread().ident:0>10},"
                   f"{log_type},{datetime.now().strftime('%m-%d %H:%M:%S')},{caller:_<20},"
                   f"{job_id:_>6},>,{segment}")

@@ -4,7 +4,7 @@ from shared_models import configuration
 from shared_models.job import Job
 from shared_models.message import Message
 from shared_tools.custom_exceptions import UnexpectedOperation
-from shared_tools.message_tools import extract_job_from_message, extract_job_from_string, extract_job_from_callback
+from shared_tools.message_tools import get_job_from_message, get_job_from_string, extract_job_from_callback
 from shared_tools.logger import log
 
 
@@ -23,12 +23,12 @@ class Commander:
 
     def process_command(self):
         if type(self.msg) is dict:
-            function, chat_id, username, reply_to, collection, photo = extract_job_from_message(self.msg)
+            function, chat_id, username, reply_to, collection, photo = get_job_from_message(self.msg)
         elif type(self.msg) is str:
             username = "Console User"
             reply_to = 0
             chat_id = 0
-            function, collection = extract_job_from_string(self.msg)
+            function, collection = get_job_from_string(self.msg)
         else:
             log(error_code=20019)
             return

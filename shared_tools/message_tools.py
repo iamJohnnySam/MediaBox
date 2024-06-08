@@ -3,7 +3,7 @@ from shared_tools.json_editor import JSONEditor
 from shared_tools.logger import log
 
 
-def extract_job_from_string(msg: str) -> (str, list):
+def get_job_from_string(msg: str) -> (str, list):
     first_word: str = msg.split(" ")[0].lower()
     collection = []
 
@@ -31,7 +31,7 @@ def extract_job_from_string(msg: str) -> (str, list):
     return function, collection
 
 
-def extract_job_from_message(msg: dict) -> (str, int, str, int, list):
+def get_job_from_message(msg: dict) -> (str, int, str, int, list):
     chat_id = msg['chat']['id']
     reply_to = msg['message_id']
     username = msg['chat']['first_name']
@@ -49,7 +49,7 @@ def extract_job_from_message(msg: dict) -> (str, int, str, int, list):
 
     if 'text' in msg.keys():
         content = msg['text']
-        function, _collection = extract_job_from_string(content)
+        function, _collection = get_job_from_string(content)
 
         if _collection:
             collection = _collection
