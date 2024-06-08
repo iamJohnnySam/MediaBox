@@ -17,6 +17,7 @@ class Packer:
             log(job_id=self.data_id, msg=f"Job Packet Received [{self.packet['function']}].")
             job = Job(self.packet["function"])
             job.job_decompress(self.packet)
+            job.bypass_channel_check = True
             queues.job_q.put(job)
 
         elif self.packet["packet_type"] == "message":
