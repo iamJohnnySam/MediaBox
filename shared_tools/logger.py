@@ -2,6 +2,7 @@ import inspect
 import json
 import logging
 import os.path
+import threading
 from datetime import date, datetime
 
 today_date = str(date.today())
@@ -95,5 +96,6 @@ def log(job_id: int | str = 0, msg: str = "", log_type: str = "debug", error_cod
 
     if print_message:
         for segment in message.split("\n"):
-            print(f"{os.getpid():0>6},{log_type},{datetime.now().strftime('%m-%d %H:%M:%S')},{caller:_<20},"
+            print(f"{os.getpid():0>6},{threading.current_thread().ident:0>6},"
+                  f"{log_type},{datetime.now().strftime('%m-%d %H:%M:%S')},{caller:_<20},"
                   f"{job_id:_>6},>,{segment}")
