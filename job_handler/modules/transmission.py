@@ -34,7 +34,7 @@ class Transmission(Module):
         success, torrent_name = self._add_torrent_to_list(torrent)
         log(self.job.job_id, msg=f"Torrent Added: {torrent_name}")
         if success:
-            self.send_message(Message(f"Torrent {torrent_name} added to queue."))
+            self.send_message(Message(f"Torrent {torrent_name} added to queue.", job=self.job))
             if not self.is_master:
                 self.send_admin(Message(f"Torrent {torrent_name} added to queue."))
 
