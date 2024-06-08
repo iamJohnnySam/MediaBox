@@ -87,8 +87,8 @@
     },
     "telegram": {
       "enable": true,
-      "connect": ["spark"],
-      "accept_all_commands": ["spark", "baby"],
+      "connect": ["spark", "baby"],
+      "accept_all_commands": ["spark"],
       "callback_overflow": "database/callbacks.json",
       "db_telepot_accounts": "database/telepot_accounts.json",
       "db_allowed_chats": "database/telepot_allowed_chats.json",
