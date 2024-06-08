@@ -147,6 +147,7 @@ class Module:
             message_temp = copy.deepcopy(message)
             message_temp.group = None
             message.this_telepot_account = channel
+            message.channel = channel
             self.__send_message(message_temp)
             self.__send_message(message)
 
