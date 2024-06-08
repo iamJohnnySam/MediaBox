@@ -55,6 +55,8 @@ class JSONEditor:
 
         with open(self.file, 'r+') as file:
             file_data = json.load(file)
+            if file_data == "":
+                file_data = {}
             file_data.update(data)
             file.seek(0)
             json.dump(file_data, file, indent=4)
