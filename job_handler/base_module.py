@@ -1,3 +1,4 @@
+import copy
 from datetime import datetime, timedelta
 
 import passwords
@@ -143,7 +144,7 @@ class Module:
 
     def send_message(self, message: Message, channel=None):
         if channel is not None and channel != self.job.channel:
-            message_temp = message
+            message_temp = copy.deepcopy(message)
             message_temp.group = None
             message.this_telepot_account = channel
             self.__send_message(message_temp)

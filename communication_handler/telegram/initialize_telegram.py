@@ -34,8 +34,7 @@ def init_telegram(config: dict) -> dict:
             log(msg=f"Starting telepot channel: {account}.")
             channels[account] = Messenger(telepot_account=account,
                                           telepot_key=telepot_accounts[account]["account"],
-                                          telepot_master=telepot_accounts[account]["master"],
-                                          )
+                                          telepot_master=telepot_accounts[account]["master"])
         else:
             log(error_code=20012)
 
