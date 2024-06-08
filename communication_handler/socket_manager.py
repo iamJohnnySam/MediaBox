@@ -76,6 +76,8 @@ def run_sockets():
                     queues.packet_q.put(packet)
                     log(job_id=packet_id, msg="Packet {packet} added to back of queue.")
 
+            # todo keep client connection open for some time (10 minutes) and check if any other packets need to be sent
+
             if queues.packet_q.empty():
                 for client in list(connected_clients.keys()):
                     connected_clients[client].close_connection()

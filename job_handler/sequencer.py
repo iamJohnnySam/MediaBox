@@ -181,14 +181,14 @@ class Sequence:
     def check_cctv(self):
         cctv = CCTVChecker(self.job)
         cctv.download_cctv()
-        cctv.clean_up(self.config.cctv["sent"])
+        cctv.clean_up()
         queues.message_q.put(Message("CCTV Check Completed", job=self.job))
 
     def get_cctv(self):
         cctv = CCTVChecker(self.job)
         cctv.download_cctv()
         cctv.get_last(10)
-        cctv.clean_up(self.config.cctv["sent"])
+        cctv.clean_up()
 
     def add_me_to_cctv(self):
         Subscriptions(self.job).manage_chat_group("cctv")
