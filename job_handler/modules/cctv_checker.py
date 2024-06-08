@@ -120,6 +120,9 @@ class CCTVChecker(Module):
         else:
             log(self.job.job_id, f"Cannot get last {amount} CCTV images. Not in Operation Mode")
 
+    def get_date(self, date: datetime = datetime.today()):
+        date_str = date.strftime("%d%m$Y")
+
     def clean_up(self, mailbox=""):
         if mailbox == "":
             mailbox = self.cctv_sent
