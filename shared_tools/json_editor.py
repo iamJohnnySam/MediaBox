@@ -47,9 +47,9 @@ class JSONEditor:
         if not os.path.exists(self.file):
             os.makedirs(os.path.dirname(self.file), exist_ok=True)
 
-        with open(self.file, "w") as f:
-            f.seek(0)
-            json.dump({}, f)
+            with open(self.file, "w") as f:
+                f.seek(0)
+                json.dump({}, f)
 
         log(job_id=job_id, msg="Added Level 1 data: " + str(list(data.keys())[0]) + " at " + self.file)
 
