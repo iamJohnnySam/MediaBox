@@ -149,7 +149,7 @@ class RefactorFolder(Module):
         if not success:
             return
 
-        movies = asyncio.run(get_movie_info(movie_name))
+        movies = get_movie_info(movie_name)
 
         success, movie = self.check_value(index=1, description="actual movie title")
         if not success:

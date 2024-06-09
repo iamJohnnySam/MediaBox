@@ -3,10 +3,11 @@ from themoviedb import TMDb
 import passwords
 
 
-async def get_movie_info(movie: str):
+def get_movie_info(movie: str):
     tmdb = TMDb(key=passwords.tmdb_api)
 
-    movies = tmdb.search().movies(movie)
+    movies = tmdb.search().movies(query=movie)
+    print(movies)
     print(len(movies))
     for movie in movies:
         print(movie)
