@@ -130,7 +130,7 @@ class RefactorFolder(Module):
         self._update_movie_db()
 
     def _update_movie_db(self):
-        db = SQLConnector(self.config["database"])
+        db = SQLConnector(job_id=self.job.job_id, database=self.config["database"])
 
         files, directories = file_tools.get_file_and_directory(self.job, self.movies_path)
         if len(directories) == 0:
@@ -165,6 +165,7 @@ class RefactorFolder(Module):
         if not success:
             return
 
-        SQLConnector(self.config["database"]).insert(table=self.config["tbl_available_movies"],
-                                                     columns="folder_name, name",
-                                                     val=(movie_name, movie))
+        SQLConnector(job_id=self.job.job_id,
+                     database=self.config["database"]).insert(table=self.config["tbl_available_movies"],
+                                                              columns="folder_name, name",
+                                                              val=(movie_name, movie))
