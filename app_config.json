@@ -93,7 +93,8 @@
       "backup_location": "/home/pi/backup",
       "backup_databases": ["news", "transactions", "baby", "entertainment"],
       "error_codes": "shared_tools/error_codes.json",
-      "main_telegram_channel": "spark"
+      "main_telegram_channel": "spark",
+      "location": "/home/pi/MediaBox"
     },
     "telegram": {
       "enable": true,
@@ -144,7 +145,8 @@
       "backup_location": "/home/hp/backup",
       "backup_databases": ["administration", "entertainment"],
       "error_codes": "shared_tools/error_codes.json",
-      "main_telegram_channel": "media"
+      "main_telegram_channel": "media",
+      "location": "/home/hp/MediaBox"
     },
     "telegram": {
       "enable": true,
@@ -194,7 +196,8 @@
       "backup_location": "/home/pi/backup",
       "backup_databases": [],
       "error_codes": "shared_tools/error_codes.json",
-      "main_telegram_channel": "tv"
+      "main_telegram_channel": "tv",
+      "location": "/home/pi/MediaBox"
     },
     "telegram": {
       "enable": true,
