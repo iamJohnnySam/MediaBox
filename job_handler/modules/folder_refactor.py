@@ -160,7 +160,7 @@ class RefactorFolder(Module):
         else:
             default = ""
 
-        success, movie = self.check_value(index=1, description="actual movie title",
+        success, movie = self.check_value(index=1, description=f"actual movie title of {movie_name}",
                                           option_list=movie_titles, default=default)
         if not success:
             return
