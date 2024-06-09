@@ -131,8 +131,11 @@ class Module:
 
             if option_list:
                 msg = Message(send_string=send_val, job=self.job)
+
+                bpr = 1 if sum([len(string) for string in option_list])/len(option_list) > 20 else 3
+
                 msg.keyboard_extractor(function=self.job.function,
-                                       index=index, options=option_list,
+                                       index=index, options=option_list, bpr=bpr,
                                        add_cancel=True, add_other=get_manual, reply_to=self.job.reply_to)
                 self.send_message(message=msg)
             else:
