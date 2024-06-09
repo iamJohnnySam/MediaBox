@@ -1,4 +1,5 @@
 import re
+import urllib.request
 
 from themoviedb import TMDb
 
@@ -16,15 +17,10 @@ def get_movie_info(movie: str):
             return
         movies = tmdb.search().movies(query=movie[0:d.start()].strip())
 
-    print(movies)
-    print(len(movies))
+    if len(movies) == 0:
+        return
+
     for movie in movies:
-        print(movie)
-        movie_id = movie.id
-        movie = tmdb.movie(movie_id).details(append_to_response="credits,external_ids,images,videos")
-        print(movie.title, movie.year)
-        print(movie.tagline)
-        print(movie.poster_url)
-        print(movie.external_ids.imdb_url)
+        urllib.request.urlretrieve(movie.poster_path, f"{movie.title} ({movie.year}).jpg")
 
     return movies
