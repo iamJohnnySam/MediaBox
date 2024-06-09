@@ -9,7 +9,7 @@ from job_handler.base_module import Module
 from shared_tools import file_tools
 from shared_tools.job_tools import duplicate_and_transform_job
 from shared_tools.logger import log
-from shared_tools.movie_tools import get_movie_info
+from shared_tools.movie_tools import get_movie_info, get_show_info
 from shared_tools.sql_connector import SQLConnector
 from shared_tools.word_tools import breakdown_torrent_file_name
 
@@ -197,7 +197,7 @@ class RefactorFolder(Module):
         if not success:
             return
 
-        show_titles, show_posters = get_movie_info(job_id=self.job.job_id, show=show_name)
+        show_titles, show_posters = get_show_info(job_id=self.job.job_id, show=show_name)
 
         if len(show_titles) == 1:
             default = show_titles[0]
