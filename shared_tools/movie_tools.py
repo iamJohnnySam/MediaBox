@@ -4,9 +4,10 @@ import urllib.request
 from themoviedb import TMDb
 
 import passwords
+from shared_tools.logger import log
 
 
-def get_movie_info(movie: str):
+def get_movie_info(job_id: int, movie: str):
     tmdb = TMDb(key=passwords.tmdb_api)
 
     movies = tmdb.search().movies(query=movie)
@@ -21,6 +22,7 @@ def get_movie_info(movie: str):
         return
 
     for movie in movies:
+        log(job_id=job_id, msg=f"Found Movie: {movie.title} ({movie.year})")
         urllib.request.urlretrieve(movie.poster_path, f"{movie.title} ({movie.year}).jpg")
 
     return movies
