@@ -1,15 +1,20 @@
-from tmdb import route
+from themoviedb import TMDb
 
 import passwords
 
-base = route.Base()
-base.key = passwords.tmdb_api
-
 
 async def get_movie_info(movie: str):
+    tmdb = TMDb(key=passwords.tmdb_api)
 
-    movies = await route.Movie().search(movie)
+    movies = tmdb.search().movies(movie)
+    print(len(movies))
     for movie in movies:
-        print (movie)
+        print(movie)
+        movie_id = movie.id
+        movie = tmdb.movie(movie_id).details(append_to_response="credits,external_ids,images,videos")
+        print(movie.title, movie.year)
+        print(movie.tagline)
+        print(movie.poster_url)
+        print(movie.external_ids.imdb_url)
 
     return movies
