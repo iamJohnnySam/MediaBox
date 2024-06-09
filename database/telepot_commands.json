@@ -43,6 +43,10 @@
     "skip_bots": true,
     "module": "media"
   },
+  "add_show_to_db": {
+    "skip_bots": true,
+    "module": "media"
+  },
 
   "News Controls": false,
   "news": {

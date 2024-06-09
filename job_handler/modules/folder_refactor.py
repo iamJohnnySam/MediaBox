@@ -126,10 +126,7 @@ class RefactorFolder(Module):
                 base_loc = None
         return base_loc
 
-    def update_db(self):
-        self._update_movie_db()
-
-    def _update_movie_db(self):
+    def update_movie_db(self):
         db = SQLConnector(job_id=self.job.job_id, database=self.config["database"])
 
         files, directories = file_tools.get_file_and_directory(self.job, self.movies_path)
@@ -141,6 +138,31 @@ class RefactorFolder(Module):
             if not db.check_exists(table=self.config["tbl_available_movies"], where={"folder_name": movie}):
                 new_job = duplicate_and_transform_job(self.job, new_function="add_movie_to_db", new_collection=[movie])
                 queues.job_q.put(new_job)
+            else:
+                db.update(table=self.config["tbl_available_movies"],
+                          update={"available": 1},
+                          where={"folder_name": movie})
+
+    def update_show_db(self):
+        db = SQLConnector(job_id=self.job.job_id, database=self.config["database"])
+
+        files, directories = file_tools.get_file_and_directory(self.job, self.shows_path)
+        if len(directories) == 0:
+            log(self.job.job_id, "Nothing to update")
+            return
+
+        for show in directories:
+            files, directories = file_tools.get_file_and_directory(self.job, os.path.join(self.shows_path, show))
+            for episode in files:
+                if not db.check_exists(table=self.config["tbl_available_shows"],
+                                       where={"folder_name": show, "file_name": episode}):
+                    new_job = duplicate_and_transform_job(self.job, new_function="add_show_to_db",
+                                                          new_collection=[show, episode])
+                    queues.job_q.put(new_job)
+                else:
+                    db.update(table=self.config["tbl_available_shows"],
+                              update={"available": 1},
+                              where={"folder_name": show, "file_name": episode})
 
     def add_movie_to_db(self):
         # 0 - Original Title
@@ -169,3 +191,17 @@ class RefactorFolder(Module):
                      database=self.config["database"]).insert(table=self.config["tbl_available_movies"],
                                                               columns="folder_name, name",
                                                               val=(movie_name, movie))
+
+    def add_show_to_db(self):
+        # 0 - Folder Name
+        # 1 - File Name
+
+        success, show_name = self.check_value(index=0, description="show title")
+        if not success:
+            return
+
+        success, show_name = self.check_value(index=1, description="episode name")
+        if not success:
+            return
+
+        # todo

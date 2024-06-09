@@ -161,13 +161,18 @@ class Sequence:
         MovieFinder(self.job).find_movie()
 
     def organize_media(self):
-        RefactorFolder(self.job).update_db()
+        refac = RefactorFolder(self.job)
+        refac.update_movie_db()
+        refac.update_show_db()
 
     def download_torrent(self):
         Transmission(self.job).add_torrent()
 
     def add_movie_to_db(self):
         RefactorFolder(self.job).add_movie_to_db()
+
+    def add_show_to_db(self):
+        RefactorFolder(self.job).add_show_to_db()
 
     def check_news(self):
         NewsReader(self.job).get_news()

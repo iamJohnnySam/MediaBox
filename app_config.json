@@ -168,6 +168,7 @@
       "database": "entertainment",
       "tbl_tv_shows": "tv_show",
       "tbl_available_movies": "available_movies",
+      "tbl_available_shows": "available_shows",
       "telegram_group": "show"
     },
     "cctv": {
