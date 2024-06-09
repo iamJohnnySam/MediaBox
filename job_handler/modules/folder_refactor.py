@@ -16,23 +16,25 @@ class RefactorFolder(Module):
         super().__init__(job)
         self.config = configuration.Configuration().media
 
-        self.path = self.config['download']
+        self.downloads_path = self.config['download']
+        self.movies_path = self.config['movies']
+        self.shows_path = self.config['tv_shows']
         self.send_string = ""
 
     def clean_torrent_downloads(self):
         self.send_string = "New additions to MediaBox:"
-        files, directories = file_tools.get_file_and_directory(self.job, self.path)
+        files, directories = file_tools.get_file_and_directory(self.job, self.downloads_path)
         if len(files) == 0 and len(directories) == 0:
             log(self.job.job_id, "Nothing to refactor")
             return
 
         self.job.is_background_task = False
 
-        self._sort_torrent_files(files, self.path)
+        self._sort_torrent_files(files, self.downloads_path)
 
         for directory in directories:
             last_loc = None
-            directory_path, sub_directories, get_last_loc = self._torrent_step_1(self.path, directory)
+            directory_path, sub_directories, get_last_loc = self._torrent_step_1(self.downloads_path, directory)
             if get_last_loc is not None:
                 last_loc = get_last_loc
 
@@ -99,14 +101,14 @@ class RefactorFolder(Module):
             file_name, tv_show, movie, subtitle, base_name = breakdown_torrent_file_name(self.job, file)
             log(self.job.job_id, f'{file_name}, {tv_show}, {movie}, {subtitle}, {base_name}')
             if tv_show and not movie:
-                base_loc = os.path.join(self.config['tv_shows'], base_name)
+                base_loc = os.path.join(self.shows_path, base_name)
                 file_tools.move_file(self.job, os.path.join(directory, file),
                                      base_loc,
                                      file_name)
                 self.send_string = self.send_string + "\n" + file_name
 
             elif movie and not tv_show:
-                base_loc = os.path.join(self.config['movies'], base_name)
+                base_loc = os.path.join(self.movies_path, base_name)
                 file_tools.move_file(self.job, os.path.join(directory, file),
                                      base_loc,
                                      file_name)
@@ -121,4 +123,9 @@ class RefactorFolder(Module):
         return base_loc
 
     def update_db(self):
-        pass
+        files, directories = file_tools.get_file_and_directory(self.job, self.movies_path)
+        if len(directories) == 0:
+            log(self.job.job_id, "Nothing to update")
+            return
+
+        #todo

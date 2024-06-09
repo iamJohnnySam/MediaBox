@@ -32,6 +32,7 @@ pip install opencv-python
 pip install python-git-info
 pip install pydrive2
 pip install GitPython
+pip install tmdb-python
 
 deactivate
 cd || exit

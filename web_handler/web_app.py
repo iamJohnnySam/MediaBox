@@ -1,5 +1,3 @@
-import time
-
 from flask import Flask, render_template
 
 from shared_tools.logger import log
@@ -18,6 +16,5 @@ def movies():
 
 
 def run_webapp():
-    time.sleep(5)
     log(msg="Web App Starting")
     app.run(host="0.0.0.0", debug=True)
