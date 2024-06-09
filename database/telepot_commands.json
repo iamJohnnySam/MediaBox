@@ -200,6 +200,9 @@
   },
 
   "Bot Admin": false,
+  "git_update": {
+    "definition": "Update Git Repo"
+  },
   "start_over": {
     "definition": "Restart the program"
   },
