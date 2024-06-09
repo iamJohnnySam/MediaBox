@@ -6,6 +6,7 @@ from job_handler.modules.cctv_checker import CCTVChecker
 from job_handler.modules.cloud import Cloud
 from job_handler.modules.finance import Finance
 from job_handler.modules.folder_refactor import RefactorFolder
+from job_handler.modules.github import GitHub
 from job_handler.modules.movie_finder import MovieFinder
 from job_handler.modules.news_reader import NewsReader
 from job_handler.modules.show_downloader import ShowDownloader
@@ -259,6 +260,9 @@ class Sequence:
 
     def remove_me_from_baby(self):
         Subscriptions(self.job).manage_chat_group("baby", remove=True)
+
+    def git_update(self):
+        GitHub(self.job).pull_repo()
 
     def start_over(self):
         Admin(self.job).start_over()
