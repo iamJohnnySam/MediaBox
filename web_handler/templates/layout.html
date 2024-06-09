@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Spark-flix</title>
+  <title>SPARK-flix</title>
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
   <style>
     body {
@@ -39,7 +39,7 @@
 <body>
   <!-- Navbar -->
   <nav class="navbar navbar-expand-lg navbar-dark">
-    <a class="navbar-brand" href="#">SPARK-flix</a>
+    <a class="navbar-brand" href="#">SPARK-flix: {% block header %}{% endblock %}</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
@@ -49,16 +49,16 @@
           <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="shows.html">TV Shows</a>
+          <a class="nav-link" href="/shows">TV Shows</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="movies.html">Movies</a>
+          <a class="nav-link" href="/movies">Movies</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="network.html">Network</a>
+          <a class="nav-link" href="/network">Network</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="login.html">{% block user %}{% endblock %}</a>
+          <a class="nav-link" href="/login">{% block user %}{% endblock %}</a>
         </li>
       </ul>
     </div>

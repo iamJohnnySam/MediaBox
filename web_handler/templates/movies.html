@@ -1,10 +1,77 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Download Movies</title>
-</head>
-<body>
+{% extends "layout.html" %}
 
-</body>
-</html>
+{% block header %}Movies{% endblock %}
+
+{% block body %}
+<!-- Movies Page Content -->
+<div class="container">
+  <div class="category">
+    <h2 class="category-title">Popular Movies</h2>
+    <div class="row">
+      <div class="col-md-3">
+        <img src="https://via.placeholder.com/200x300" alt="Movie 1">
+      </div>
+      <div class="col-md-3">
+        <img src="https://via.placeholder.com/200x300" alt="Movie 2">
+      </div>
+      <div class="col-md-3">
+        <img src="https://via.placeholder.com/200x300" alt="Movie 3">
+      </div>
+      <div class="col-md-3">
+        <img src="https://via.placeholder.com/200x300" alt="Movie 4">
+      </div>
+    </div>
+  </div>
+  <div class="category">
+    <h2 class="category-title">New Releases</h2>
+    <div class="row">
+      <div class="col-md-3">
+        <img src="https://via.placeholder.com/200x300" alt="Movie 5">
+      </div>
+      <div class="col-md-3">
+        <img src="https://via.placeholder.com/200x300" alt="Movie 6">
+      </div>
+      <div class="col-md-3">
+        <img src="https://via.placeholder.com/200x300" alt="Movie 7">
+      </div>
+      <div class="col-md-3">
+        <img src="https://via.placeholder.com/200x300" alt="Movie 8">
+      </div>
+    </div>
+  </div>
+  <div class="category">
+    <h2 class="category-title">Action Movies</h2>
+    <div class="row">
+      <div class="col-md-3">
+        <img src="https://via.placeholder.com/200x300" alt="Movie 9">
+      </div>
+      <div class="col-md-3">
+        <img src="https://via.placeholder.com/200x300" alt="Movie 10">
+      </div>
+      <div class="col-md-3">
+        <img src="https://via.placeholder.com/200x300" alt="Movie 11">
+      </div>
+      <div class="col-md-3">
+        <img src="https://via.placeholder.com/200x300" alt="Movie 12">
+      </div>
+    </div>
+  </div>
+  <div class="category">
+    <h2 class="category-title">Comedy Movies</h2>
+    <div class="row">
+      <div class="col-md-3">
+        <img src="https://via.placeholder.com/200x300" alt="Movie 13">
+      </div>
+      <div class="col-md-3">
+        <img src="https://via.placeholder.com/200x300" alt="Movie 14">
+      </div>
+      <div class="col-md-3">
+        <img src="https://via.placeholder.com/200x300" alt="Movie 15">
+      </div>
+      <div class="col-md-3">
+        <img src="https://via.placeholder.com/200x300" alt="Movie 16">
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

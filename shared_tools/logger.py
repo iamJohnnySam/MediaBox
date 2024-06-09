@@ -13,12 +13,28 @@ error_codes = ""
 log_to_console = True
 log_to_file = False
 file_created = False
+permission_error = ""
 
 
 def log_file_name():
+    global today_date
+    global permission_error
+
+    today_date = str(date.today())
+
     if logs_location != "" and not os.path.exists(logs_location):
         os.makedirs(logs_location)
-    return os.path.join(logs_location, f"log-{today_date}.log")
+
+    if permission_error != "":
+        if permission_error == today_date:
+            suffix = "_1"
+        else:
+            suffix = ""
+            permission_error = ""
+    else:
+        suffix = ""
+
+    return os.path.join(logs_location, f"log-{today_date}{suffix}.log")
 
 
 def log(job_id: int | str = 0, msg: str = "", log_type: str = "debug", error_code: int = 0, error: str = ""):
@@ -99,3 +115,9 @@ def log(job_id: int | str = 0, msg: str = "", log_type: str = "debug", error_cod
             print(f"{os.getpid():0>6},{threading.current_thread().ident:0>10},"
                   f"{log_type},{datetime.now().strftime('%m-%d %H:%M:%S')},{caller:_<20},"
                   f"{job_id:_>6},>,{segment}")
+
+
+try:
+    log(msg="LOG START")
+except PermissionError:
+    permission_error = today_date

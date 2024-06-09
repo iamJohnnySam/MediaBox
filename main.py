@@ -9,7 +9,6 @@ from communication_handler import communication_main
 from job_handler import job_main
 from shared_models import configuration
 from shared_models.message import Message
-from web_handler import web_main
 from shared_tools.logger import log
 
 crashed = False
@@ -44,17 +43,17 @@ def main():
     p_tasker.start()
     log(msg="Process Started: Job Handler")
 
-    p_web = multiprocessing.Process(target=web_main.main,
-                                    daemon=True,
-                                    args=(queues.message_q,
-                                          queues.job_q,
-                                          queues.packet_q,
-                                          queues.info_q,
-                                          global_var.flag_stop,
-                                          global_var.flag_restart,
-                                          global_var.flag_reboot))
-    p_web.start()
-    log(msg="Process Started: Web Handler")
+    # p_web = multiprocessing.Process(target=web_main.main,
+    #                                 daemon=True,
+    #                                 args=(queues.message_q,
+    #                                       queues.job_q,
+    #                                       queues.packet_q,
+    #                                       queues.info_q,
+    #                                       global_var.flag_stop,
+    #                                       global_var.flag_restart,
+    #                                       global_var.flag_reboot))
+    # p_web.start()
+    # log(msg="Process Started: Web Handler")
 
     queues.message_q.put(Message(f"--- iamJohnnySam ---\n{global_var.version}\n\n"
                                  f"Program Started on {config.host}..."))
@@ -65,8 +64,8 @@ def main():
     crashed = True if not global_var.flag_stop.value else False
     global_var.flag_stop.value = True
 
-    p_web.join()
-    log(msg="Process Ended: Web Handler")
+    # p_web.join()
+    # log(msg="Process Ended: Web Handler")
 
 
 def exit_program():

@@ -1,5 +1,3 @@
-import threading
-
 from common_workspace import queues, global_var
 from shared_models import configuration
 from shared_tools.logger import log
@@ -21,3 +19,7 @@ def main(message_q, job_q, packet_q, info_q, flag_stop, flag_restart, flag_reboo
         log(msg="Web Process is Starting...")
 
         web_app.run_webapp()
+
+
+if __name__ == '__main__':
+    web_app.run_webapp()
