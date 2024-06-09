@@ -42,6 +42,9 @@ class EmailManager:
     def select_mailbox(self, mailbox=None):
         if mailbox is None:
             mailbox = self.mb
+
+        log(self.job.job_id, msg=f"Available Mailboxes: {self.myEmail.list()}")
+
         try:
             self.myEmail.select(mailbox=mailbox, readonly=False)
         except imaplib.IMAP4.error as err:
@@ -60,7 +63,7 @@ class EmailManager:
         try:
             (self.result, self.messages) = self.myEmail.search(None, scan_type)
             self.unread_emails = len(self.messages[0].split(b' '))
-            log(self.job.job_id, "Check Mail Success")
+            log(self.job.job_id, f"Check Mail Success. Unread: {self.unread_emails}")
             return True, self.unread_emails
         except imaplib.IMAP4.error as err:
             log(self.job.job_id, f"Mailbox search error - {str(err)}", log_type="error")
@@ -133,7 +136,7 @@ class EmailManager:
             exit_condition = True
 
         count = 0
-        while exit_condition and (not global_var.flag_stop):
+        while exit_condition and (not global_var.flag_stop.value):
             try:
                 ret, data = self.myEmail.fetch(message, '(RFC822)')
             except (imaplib.IMAP4.error, imaplib.IMAP4.abort) as error:

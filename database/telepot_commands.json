@@ -67,6 +67,10 @@
     "definition": "Check latest cctv",
     "module": "cctv"
   },
+  "clear_gmail_sent": {
+    "skip_bots": true,
+    "module": "cctv"
+  },
   "add_me_to_cctv": {
     "function": "add_me_to_cctv",
     "definition": "Add to CCTV group",

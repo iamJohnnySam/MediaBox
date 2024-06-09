@@ -3,7 +3,7 @@ import threading
 from common_workspace import queues, global_var
 from shared_models import configuration
 from shared_tools.logger import log
-from web_handler.web import web_app
+from web_handler import web_app
 
 
 def main(message_q, job_q, packet_q, info_q, flag_stop, flag_restart, flag_reboot):
@@ -20,7 +20,4 @@ def main(message_q, job_q, packet_q, info_q, flag_stop, flag_restart, flag_reboo
     if config["enable"]:
         log(msg="Web Process is Starting...")
 
-        t_webapp = threading.Thread(target=web_app.run_webapp, daemon=True)
-        t_webapp.start()
-
-        log(msg="Thread Started: Web app")
+        web_app.run_webapp()

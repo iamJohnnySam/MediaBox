@@ -190,6 +190,10 @@ class Sequence:
         cctv.get_last(10)
         cctv.clean_up()
 
+    def clear_gmail_sent(self):
+        cctv = CCTVChecker(self.job)
+        cctv.clean_up()
+
     def add_me_to_cctv(self):
         Subscriptions(self.job).manage_chat_group("cctv")
 

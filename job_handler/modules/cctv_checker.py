@@ -27,8 +27,10 @@ class CCTVChecker(Module):
         self.cctv_imap = self.config['imap']
         self.cctv_mailbox = self.config['mailbox']
         self.cctv_sent = self.config['sent']
-        self.cctv_model1 = self.config['model1']
-        self.cctv_model2 = self.config['model2']
+        if "model1" in self.config.keys():
+            self.cctv_model1 = self.config['model1']
+        if "model2" in self.config.keys():
+            self.cctv_model2 = self.config['model2']
         self.cctv_download = self.config['download_loc']
         self.cctv_save = self.config['save_loc']
 

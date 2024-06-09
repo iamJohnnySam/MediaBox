@@ -45,7 +45,15 @@
       "telepot_image_dump": "communication/chat_images"
     },
     "media": {"enable": false},
-    "cctv": {"enable": false},
+    "cctv": {
+      "enable": true,
+      "imap": "imap.gmail.com",
+      "mailbox": "CCTV",
+      "sent": "\"[Gmail]/Sent Mail\"",
+      "download_loc": "resources/CCTVImages",
+      "save_loc": "/home/hp/media/CCTVSaved",
+      "telegram_group": "cctv"
+    },
     "news": {
       "enable": true,
       "sources": "database/news_sources.json",
@@ -71,7 +79,9 @@
       "tbl_pump": "pump",
       "telegram_group": "baby"
     },
-    "web": {"enable": false}
+    "web": {
+      "enable": true
+    }
   },
   "spark": {
     "admin": {

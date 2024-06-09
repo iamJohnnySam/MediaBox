@@ -8,7 +8,7 @@ from PIL import Image
 
 from shared_tools.configuration_tools import is_config_enabled
 
-if is_config_enabled(configuration.Configuration().cctv):
+if is_config_enabled(configuration.Configuration().cctv) and "model1" in configuration.Configuration().cctv.keys():
     import tflite_runtime.interpreter as tflite
 
 
