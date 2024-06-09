@@ -101,12 +101,13 @@ class CCTVChecker(Module):
                     t = t+1
                 file_name = file_name.replace(":", "").replace(" ", "")
                 move_destination = shutil.move(att_path, os.path.join(sav_cctv, file_name))
-                log(self.job.job_id, f"Image Saved in {move_destination} with sus level at {val:.3f}")
+                log(self.job.job_id, f"({t:0>3}) {file_name} saved with sus at {val:.3f}")
 
         log(self.job.job_id, "-------ENDED CCTV MAIN SCRIPT-------")
         client.email_close()
 
     def get_last(self, amount: int = 10):
+        amount = amount +1
         a01 = glob.glob(os.path.join(self.cctv_save, "A01", "1"))
         a01.sort(key=os.path.getmtime)
         a01_files = a01[-amount:]
@@ -117,16 +118,17 @@ class CCTVChecker(Module):
 
         self.send_message(Message(job=self.job, send_string=f"Last {amount} CCTV images for A01 channel."))
         for photo in a01_files:
+            if os.path.isdir(photo):
+                continue
             self.send_message(Message(job=self.job, send_string=photo,
                                       photo=os.path.join(self.cctv_save, "A01", "1", photo)))
 
         self.send_message(Message(job=self.job, send_string=f"Last {amount} CCTV images for A02 channel."))
         for photo in a02_files:
+            if os.path.isdir(photo):
+                continue
             self.send_message(Message(job=self.job, send_string=photo,
                                       photo=os.path.join(self.cctv_save, "A02", "1", photo)))
-
-        else:
-            log(self.job.job_id, f"Cannot get last {amount} CCTV images. Not in Operation Mode")
 
     def get_date(self, date: datetime = datetime.today()):
         date_str = date.strftime("%d%m$Y")
