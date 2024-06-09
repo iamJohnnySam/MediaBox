@@ -20,4 +20,4 @@ def movies():
 def run_webapp():
     time.sleep(5)
     log(msg="Web App Starting")
-    app.run(debug=True)
+    app.run(host="0.0.0.0", debug=True)

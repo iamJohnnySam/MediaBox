@@ -159,6 +159,9 @@ class Sequence:
     def find_movie(self):
         MovieFinder(self.job).find_movie()
 
+    def organize_media(self):
+        RefactorFolder(self.job).update_db()
+
     def download_torrent(self):
         Transmission(self.job).add_torrent()
 

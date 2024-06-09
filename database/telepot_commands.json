@@ -31,6 +31,10 @@
   "find_movie": {
     "definition": "Find a movie to download"
   },
+  "organize_media": {
+    "definition": "Update database with movies",
+    "module": "media"
+  },
   "download_torrent": {
     "skip_bots": true,
     "module": "media"

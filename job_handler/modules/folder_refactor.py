@@ -11,7 +11,6 @@ from shared_tools.word_tools import breakdown_torrent_file_name
 
 
 class RefactorFolder(Module):
-    module = 'media'
 
     def __init__(self, job: Job):
         super().__init__(job)
@@ -120,3 +119,6 @@ class RefactorFolder(Module):
                                      base_name + file_name)
                 base_loc = None
         return base_loc
+
+    def update_db(self):
+        pass
