@@ -120,4 +120,5 @@ def log(job_id: int | str = 0, msg: str = "", log_type: str = "debug", error_cod
 try:
     log(msg="LOG START")
 except PermissionError:
+    print("PERMISSION ERROR")
     permission_error = today_date
