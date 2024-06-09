@@ -2,6 +2,7 @@ import asyncio
 import os
 import shutil
 
+from common_workspace import queues
 from shared_models import configuration
 from shared_models.job import Job
 from shared_models.message import Message
@@ -136,7 +137,8 @@ class RefactorFolder(Module):
             return
 
         for movie in directories:
-            duplicate_and_transform_job(self.job, new_function="add_movie_to_db", new_collection=movie)
+            new_job = duplicate_and_transform_job(self.job, new_function="add_movie_to_db", new_collection=movie)
+            queues.job_q.put(new_job)
             return
 
     def add_movie_to_db(self):
