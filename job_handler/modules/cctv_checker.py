@@ -123,7 +123,7 @@ class CCTVChecker(Module):
             if os.path.isdir(photo):
                 log(job_id=self.job.job_id, msg=f"{photo} is not a file")
                 continue
-            self.send_message(Message(job=self.job, send_string=photo,
+            self.send_message(Message(job=self.job, send_string=photo.split("/")[-1],
                                       photo=os.path.join(self.cctv_save, "A01", "1", photo)))
 
         self.send_message(Message(job=self.job, send_string=f"Last {amount} CCTV images for A02 channel."))
@@ -131,7 +131,7 @@ class CCTVChecker(Module):
             if os.path.isdir(photo):
                 log(job_id=self.job.job_id, msg=f"{photo} is not a file")
                 continue
-            self.send_message(Message(job=self.job, send_string=photo,
+            self.send_message(Message(job=self.job, send_string=photo.split("/")[-1],
                                       photo=os.path.join(self.cctv_save, "A02", "1", photo)))
 
     def get_date(self, date: datetime = datetime.today()):
