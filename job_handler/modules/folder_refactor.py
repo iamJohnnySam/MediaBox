@@ -1,12 +1,16 @@
 import os
 import shutil
 
+from tmdb import route
+
+import passwords
 from shared_models import configuration
 from shared_models.job import Job
 from shared_models.message import Message
 from job_handler.base_module import Module
 from shared_tools import file_tools
 from shared_tools.logger import log
+from shared_tools.sql_connector import SQLConnector
 from shared_tools.word_tools import breakdown_torrent_file_name
 
 
@@ -123,9 +127,21 @@ class RefactorFolder(Module):
         return base_loc
 
     def update_db(self):
+        db = SQLConnector(job_id=self.job.job_id, database=self.config["database"])
+
+        self._update_movie_db(db)
+
+    def _update_movie_db(self, db: SQLConnector):
+        base = route.Base()
+        base.key = passwords.tmdb_api
+
         files, directories = file_tools.get_file_and_directory(self.job, self.movies_path)
         if len(directories) == 0:
             log(self.job.job_id, "Nothing to update")
             return
 
-        #todo
+        for movie in directories:
+            movie_options = route.Movie().search(movie)
+            print(movie_options)
+
+        # todo

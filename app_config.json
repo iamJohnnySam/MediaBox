@@ -165,6 +165,7 @@
       "unknown_files": "/home/hp/media/Unknown",
       "database": "entertainment",
       "tbl_tv_shows": "tv_show",
+      "tbl_available_movies": "available_movies",
       "telegram_group": "show"
     },
     "cctv": {
