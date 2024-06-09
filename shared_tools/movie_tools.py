@@ -7,10 +7,15 @@ import passwords
 from shared_tools.logger import log
 
 
-def get_movie_info(job_id: int, movie: str) -> (list, list):
+def get_movie_info(job_id: int, movie: str = None, show: str = None) -> (list, list):
     tmdb = TMDb(key=passwords.tmdb_api)
 
-    movies = tmdb.search().movies(query=movie)
+    if movie is not None:
+        movies = tmdb.search().movies(query=movie)
+    elif show is not None:
+        movies = tmdb.search().tv(query=show)
+    else:
+        return [], []
 
     if len(movies) == 0:
         d = re.search(r'\d{4}', movie)

@@ -152,17 +152,14 @@ class RefactorFolder(Module):
             return
 
         for show in directories:
-            files, directories = file_tools.get_file_and_directory(self.job, os.path.join(self.shows_path, show))
-            for episode in files:
-                if not db.check_exists(table=self.config["tbl_available_shows"],
-                                       where={"folder_name": show, "file_name": episode}):
-                    new_job = duplicate_and_transform_job(self.job, new_function="add_show_to_db",
-                                                          new_collection=[show, episode])
-                    queues.job_q.put(new_job)
-                else:
-                    db.update(table=self.config["tbl_available_shows"],
-                              update={"available": 1},
-                              where={"folder_name": show, "file_name": episode})
+            if not db.check_exists(table=self.config["tbl_available_shows"], where={"folder_name": show}):
+                new_job = duplicate_and_transform_job(self.job, new_function="add_show_to_db",
+                                                      new_collection=[show])
+                queues.job_q.put(new_job)
+            else:
+                db.update(table=self.config["tbl_available_shows"],
+                          update={"available": 1},
+                          where={"folder_name": show})
 
     def add_movie_to_db(self):
         # 0 - Original Title
@@ -194,14 +191,26 @@ class RefactorFolder(Module):
 
     def add_show_to_db(self):
         # 0 - Folder Name
-        # 1 - File Name
+        # 1 - Show
 
         success, show_name = self.check_value(index=0, description="show title")
         if not success:
             return
 
-        success, show_name = self.check_value(index=1, description="episode name")
-        if not success:
-            return
+        show_titles, show_posters = get_movie_info(job_id=self.job.job_id, movie=show_name)
 
-        # todo
+        if len(show_titles) == 1:
+            default = show_titles[0]
+        elif len(show_titles) == 0:
+            log(job_id=self.job.job_id, msg=f"Movie {show_name} not found in database")
+            return
+        else:
+            default = ""
+
+        success, show = self.check_value(index=1, description=f"actual show title of {show_name}",
+                                         option_list=show_titles, default=default)
+
+        SQLConnector(job_id=self.job.job_id,
+                     database=self.config["database"]).insert(table=self.config["tbl_available_shows"],
+                                                              columns="folder_name, name",
+                                                              val=(show_name, show))
