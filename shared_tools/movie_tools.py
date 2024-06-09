@@ -23,7 +23,8 @@ def get_movie_info(job_id: int, movie: str):
 
     for movie in movies:
         log(job_id=job_id, msg=f"Found Movie: {movie.title} ({movie.year})")
-        print(movie.poster_url.poster_path)
-        urllib.request.urlretrieve(movie.poster_url.poster_path, f"{movie.title} ({movie.year}).jpg")
+        print(movie.poster_path)
+        urllib.request.urlretrieve(url="https://image.tmdb.org/t/p/w185"+movie.poster_path,
+                                   filename=f"{movie.title} ({movie.year}).jpg")
 
     return movies
