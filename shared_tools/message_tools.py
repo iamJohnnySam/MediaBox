@@ -109,10 +109,9 @@ def extract_job_from_callback(msg: dict):
     msg_prefix = f"{q[0]};{q[1]};{q[2]}"
     sub_key = f"{q[0]};{q[1]}"
 
+    cb_file = JSONEditor(configuration.Configuration().telegram["callback_overflow"])
     if len(q) == 4 and q[3] == 'X':
-        cb_file = JSONEditor(configuration.Configuration().telegram["callback_overflow"])
         query_data = cb_file.read()[msg_prefix]
-        cb_file.delete(job_id=msg_id, key=msg_prefix, sub_key=sub_key)
         log(job_id=msg_id, msg="Recovered Query: " + query_data)
 
         try:
@@ -121,6 +120,8 @@ def extract_job_from_callback(msg: dict):
             log(job_id=msg_id, error_code=20003, error=str(e))
             return
 
+    cb_file.delete(job_id=msg_id, key=msg_prefix, sub_key=sub_key)
+
     function = q[3]
     index = int(q[4])
     value = q[5]
@@ -128,5 +129,7 @@ def extract_job_from_callback(msg: dict):
         collection = q[6:]
     else:
         collection = []
+
+    log(job_id=msg_id, msg=f"Recovered Function: {function} with collection: {collection}")
 
     return function, chat_id, username, reply_to, collection, index, value
