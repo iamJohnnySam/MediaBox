@@ -1,4 +1,3 @@
-import asyncio
 import os
 import shutil
 
@@ -131,15 +130,17 @@ class RefactorFolder(Module):
         self._update_movie_db()
 
     def _update_movie_db(self):
+        db = SQLConnector(self.config["database"])
+
         files, directories = file_tools.get_file_and_directory(self.job, self.movies_path)
         if len(directories) == 0:
             log(self.job.job_id, "Nothing to update")
             return
 
         for movie in directories:
-            new_job = duplicate_and_transform_job(self.job, new_function="add_movie_to_db", new_collection=movie)
-            queues.job_q.put(new_job)
-            return
+            if not db.check_exists(table=self.config["tbl_available_movies"], where={"folder_name": movie}):
+                new_job = duplicate_and_transform_job(self.job, new_function="add_movie_to_db", new_collection=movie)
+                queues.job_q.put(new_job)
 
     def add_movie_to_db(self):
         # 0 - Original Title
@@ -149,11 +150,21 @@ class RefactorFolder(Module):
         if not success:
             return
 
-        movies = get_movie_info(job_id=self.job.job_id, movie=movie_name)
+        movie_titles, movie_posters = get_movie_info(job_id=self.job.job_id, movie=movie_name)
 
-        success, movie = self.check_value(index=1, description="actual movie title")
+        if len(movie_titles) == 1:
+            default = movie_titles[0]
+        elif len(movie_titles) == 0:
+            log(job_id=self.job.job_id, msg=f"Movie {movie_name} not found in database")
+            return
+        else:
+            default = ""
+
+        success, movie = self.check_value(index=1, description="actual movie title",
+                                          option_list=movie_titles, default=default)
         if not success:
             return
 
-
-        # todo
+        SQLConnector(self.config["database"]).insert(table=self.config["tbl_available_movies"],
+                                                     columns="folder_name, name",
+                                                     val=(movie_name, movie))

@@ -7,7 +7,7 @@ import passwords
 from shared_tools.logger import log
 
 
-def get_movie_info(job_id: int, movie: str):
+def get_movie_info(job_id: int, movie: str) -> (list, list):
     tmdb = TMDb(key=passwords.tmdb_api)
 
     movies = tmdb.search().movies(query=movie)
@@ -15,16 +15,20 @@ def get_movie_info(job_id: int, movie: str):
     if len(movies) == 0:
         d = re.search(r'\d{4}', movie)
         if d is None:
-            return
+            return [], []
         movies = tmdb.search().movies(query=movie[0:d.start()].strip())
 
-    if len(movies) == 0:
-        return
+    movie_titles = []
+    movie_posters = []
 
     for movie in movies:
-        log(job_id=job_id, msg=f"Found Movie: {movie.title} ({movie.year})")
-        print(movie.poster_path)
+        title = f"{movie.title} ({movie.year})"
+        log(job_id=job_id, msg=f"Found Movie: {title}")
+        poster_path = f"resources/movie_poster/{title}.jpg"
         urllib.request.urlretrieve(url="https://image.tmdb.org/t/p/w185"+movie.poster_path,
-                                   filename=f"{movie.title} ({movie.year}).jpg")
+                                   filename=poster_path)
 
-    return movies
+        movie_titles.append(title)
+        movie_posters.append(poster_path)
+
+    return movie_titles, movie_posters
