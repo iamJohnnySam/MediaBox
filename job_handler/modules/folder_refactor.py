@@ -1,3 +1,4 @@
+import asyncio
 import os
 import shutil
 
@@ -129,9 +130,9 @@ class RefactorFolder(Module):
     def update_db(self):
         db = SQLConnector(job_id=self.job.job_id, database=self.config["database"])
 
-        self._update_movie_db(db)
+        asyncio.run(self._update_movie_db(db))
 
-    def _update_movie_db(self, db: SQLConnector):
+    async def _update_movie_db(self, db: SQLConnector):
         base = route.Base()
         base.key = passwords.tmdb_api
 
@@ -141,7 +142,7 @@ class RefactorFolder(Module):
             return
 
         for movie in directories:
-            movie_options = route.Movie().search(movie)
+            movie_options = await route.Movie().search(movie)
             print(movie_options)
 
         # todo
