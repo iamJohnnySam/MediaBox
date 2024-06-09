@@ -73,6 +73,9 @@ def create_keyboard_data(msg_id, reply_to, function, button_text, button_value, 
     if collection != "":
         button_data = f"{button_data};{collection}"
 
+    if len(button_prefix) >= 60:
+        button_prefix = button_prefix[:40] + button_prefix[-19]
+
     if len(button_data) >= 60:
         log(job_id=msg_id, msg=f'Callback data too long: {button_data}')
         telepot_cb = {button_prefix: button_data}
