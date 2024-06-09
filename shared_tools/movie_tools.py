@@ -23,6 +23,6 @@ def get_movie_info(job_id: int, movie: str):
 
     for movie in movies:
         log(job_id=job_id, msg=f"Found Movie: {movie.title} ({movie.year})")
-        urllib.request.urlretrieve(movie.poster_path, f"{movie.title} ({movie.year}).jpg")
+        urllib.request.urlretrieve(movie.poster_url, f"{movie.title} ({movie.year}).jpg")
 
     return movies
