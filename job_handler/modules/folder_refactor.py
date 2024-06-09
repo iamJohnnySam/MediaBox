@@ -139,7 +139,7 @@ class RefactorFolder(Module):
 
         for movie in directories:
             if not db.check_exists(table=self.config["tbl_available_movies"], where={"folder_name": movie}):
-                new_job = duplicate_and_transform_job(self.job, new_function="add_movie_to_db", new_collection=movie)
+                new_job = duplicate_and_transform_job(self.job, new_function="add_movie_to_db", new_collection=[movie])
                 queues.job_q.put(new_job)
 
     def add_movie_to_db(self):
