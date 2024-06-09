@@ -150,7 +150,6 @@ class RefactorFolder(Module):
             return
 
         movies = asyncio.run(get_movie_info(movie_name))
-        print(len(movies))
 
         success, movie = self.check_value(index=1, description="actual movie title")
         if not success:

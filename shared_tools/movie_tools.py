@@ -9,5 +9,7 @@ base.key = passwords.tmdb_api
 async def get_movie_info(movie: str):
 
     movies = await route.Movie().search(movie)
+    for movie in movies:
+        print (movie)
 
     return movies
