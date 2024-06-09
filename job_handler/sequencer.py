@@ -166,6 +166,9 @@ class Sequence:
     def download_torrent(self):
         Transmission(self.job).add_torrent()
 
+    def add_movie_to_db(self):
+        RefactorFolder(self.job).add_movie_to_db()
+
     def check_news(self):
         NewsReader(self.job).get_news()
 
