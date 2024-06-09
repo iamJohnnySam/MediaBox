@@ -39,6 +39,7 @@ def log_file_name():
 
 def log(job_id: int | str = 0, msg: str = "", log_type: str = "debug", error_code: int = 0, error: str = ""):
     global file_created
+    global permission_error
     if error_code == 0 and msg == "":
         raise ValueError("Invalid Parameters for record")
 
@@ -78,7 +79,11 @@ def log(job_id: int | str = 0, msg: str = "", log_type: str = "debug", error_cod
             level = logging.DEBUG
         else:
             level = logging.INFO
-        logging.basicConfig(filename=log_file_name(), level=level)
+        try:
+            logging.basicConfig(filename=log_file_name(), level=level)
+        except PermissionError:
+            permission_error = today_date
+            logging.basicConfig(filename=log_file_name(), level=level)
         file_created = True
 
     print_message = False
@@ -116,9 +121,3 @@ def log(job_id: int | str = 0, msg: str = "", log_type: str = "debug", error_cod
                   f"{log_type},{datetime.now().strftime('%m-%d %H:%M:%S')},{caller:_<20},"
                   f"{job_id:_>6},>,{segment}")
 
-
-try:
-    log(msg="LOG START")
-except PermissionError:
-    print("PERMISSION ERROR")
-    permission_error = today_date
