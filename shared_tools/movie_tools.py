@@ -13,7 +13,11 @@ def get_movie_info(job_id: int, movie: str = None, show: str = None) -> (list, l
     if movie is not None:
         movies = tmdb.search().movies(query=movie)
     elif show is not None:
-        movies = tmdb.search().tv(query=show)
+        d = re.search(r'\d{4}', show)
+        if d is None:
+            movies = tmdb.search().tv(query=show)
+        else:
+            movies = tmdb.search().movies(query=show[0:d.start()].strip())
     else:
         return [], []
 

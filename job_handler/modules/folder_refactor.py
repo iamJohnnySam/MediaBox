@@ -209,6 +209,8 @@ class RefactorFolder(Module):
 
         success, show = self.check_value(index=1, description=f"actual show title of {show_name}",
                                          option_list=show_titles, default=default)
+        if not success:
+            return
 
         SQLConnector(job_id=self.job.job_id,
                      database=self.config["database"]).insert(table=self.config["tbl_available_shows"],
