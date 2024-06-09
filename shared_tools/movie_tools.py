@@ -22,11 +22,11 @@ def get_movie_info(job_id: int, movie: str) -> (list, list):
     movie_posters = []
 
     for movie in movies:
+        if movie.poster_path is None or movie.title is None or movie.year is None:
+            continue
         title = f"{movie.title} ({movie.year})"
         log(job_id=job_id, msg=f"Found Movie: {title}")
         poster_path = f"resources/movie_poster/{title}.jpg"
-        if movie.poster_path is None:
-            continue
         urllib.request.urlretrieve(url="https://image.tmdb.org/t/p/w185"+movie.poster_path,
                                    filename=poster_path)
 

@@ -96,8 +96,10 @@ class Message:
 
         if collection and type(collection) is list:
             collection_str = ";".join([str(ele) for ele in collection])
+            log(job_id=message_id, msg=f"Collection String: {collection_str}")
         else:
             collection_str = ""
+            log(job_id=message_id, msg=f"Collection not found")
 
         button_value = []
         for text in options:
@@ -143,7 +145,8 @@ class Message:
             "get_input": self.get_input,
             "no_message": self.no_message,
             "index": self.index,
-            "job": self._compressed_job
+            "job": self._compressed_job,
+            "collection": self.job.collection
         }
 
     def message_decompress(self, message_details: dict):

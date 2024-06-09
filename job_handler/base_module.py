@@ -136,7 +136,8 @@ class Module:
 
                 msg.keyboard_extractor(function=self.job.function,
                                        index=index, options=option_list, bpr=bpr,
-                                       add_cancel=True, add_other=get_manual, reply_to=self.job.reply_to)
+                                       add_cancel=True, add_other=get_manual, reply_to=self.job.reply_to,
+                                       collection=self.job.collection)
                 self.send_message(message=msg)
             else:
                 self.send_message(message=Message(send_string=send_val + "\nSend /cancel to stop waiting.",
