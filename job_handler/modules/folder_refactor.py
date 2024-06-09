@@ -197,7 +197,7 @@ class RefactorFolder(Module):
         if not success:
             return
 
-        show_titles, show_posters = get_movie_info(job_id=self.job.job_id, movie=show_name)
+        show_titles, show_posters = get_movie_info(job_id=self.job.job_id, show=show_name)
 
         if len(show_titles) == 1:
             default = show_titles[0]
