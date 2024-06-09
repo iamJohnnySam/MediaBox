@@ -2,15 +2,14 @@ import asyncio
 import os
 import shutil
 
-from tmdb import route
-
-import passwords
 from shared_models import configuration
 from shared_models.job import Job
 from shared_models.message import Message
 from job_handler.base_module import Module
 from shared_tools import file_tools
+from shared_tools.job_tools import duplicate_and_transform_job
 from shared_tools.logger import log
+from shared_tools.movie_tools import get_movie_info
 from shared_tools.sql_connector import SQLConnector
 from shared_tools.word_tools import breakdown_torrent_file_name
 
@@ -128,21 +127,32 @@ class RefactorFolder(Module):
         return base_loc
 
     def update_db(self):
-        db = SQLConnector(job_id=self.job.job_id, database=self.config["database"])
+        self._update_movie_db()
 
-        asyncio.run(self._update_movie_db(db))
-
-    async def _update_movie_db(self, db: SQLConnector):
-        base = route.Base()
-        base.key = passwords.tmdb_api
-
+    def _update_movie_db(self):
         files, directories = file_tools.get_file_and_directory(self.job, self.movies_path)
         if len(directories) == 0:
             log(self.job.job_id, "Nothing to update")
             return
 
         for movie in directories:
-            movie_options = await route.Movie().search(movie)
-            print(movie_options)
+            duplicate_and_transform_job(self.job, new_function="add_movie_to_db", new_collection=movie)
+            return
+
+    def add_movie_to_db(self):
+        # 0 - Original Title
+        # 1 - Actual Title
+
+        success, movie_name = self.check_value(index=0, description="movie title")
+        if not success:
+            return
+
+        movies = asyncio.run(get_movie_info(movie_name))
+        print(len(movies))
+
+        success, movie = self.check_value(index=1, description="actual movie title")
+        if not success:
+            return
+
 
         # todo

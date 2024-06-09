@@ -39,6 +39,10 @@
     "skip_bots": true,
     "module": "media"
   },
+  "add_movie_to_db": {
+    "skip_bots": true,
+    "module": "media"
+  },
 
   "News Controls": false,
   "news": {
