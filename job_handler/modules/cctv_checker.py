@@ -108,12 +108,12 @@ class CCTVChecker(Module):
 
     def get_last(self, amount: int = 10):
         amount = amount + 1
-        a01 = glob.glob(os.path.join(self.cctv_save, "A01", "1"))
+        a01 = glob.glob(os.path.join(self.cctv_save, "A01", "1", "*"))
         a01.sort(key=os.path.getmtime)
         a01_files = a01[-amount:]
         log(job_id=self.job.job_id, msg=f"Last {amount} A01 files are {a01_files}")
 
-        a02 = glob.glob(os.path.join(self.cctv_save, "A02", "1"))
+        a02 = glob.glob(os.path.join(self.cctv_save, "A02", "1", "*"))
         a02.sort(key=os.path.getmtime)
         a02_files = a02[-amount:]
         log(job_id=self.job.job_id, msg=f"Last {amount} A02 files are {a02_files}")
