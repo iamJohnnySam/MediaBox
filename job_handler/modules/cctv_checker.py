@@ -101,24 +101,27 @@ class CCTVChecker(Module):
                     t = t+1
                 file_name = file_name.replace(":", "").replace(" ", "")
                 move_destination = shutil.move(att_path, os.path.join(sav_cctv, file_name))
-                log(self.job.job_id, f"({t:0>3}) {file_name} saved with sus at {val:.3f}")
+                log(self.job.job_id, f"{count:0>3} {file_name} saved with sus at {val:.3f}")
 
         log(self.job.job_id, "-------ENDED CCTV MAIN SCRIPT-------")
         client.email_close()
 
     def get_last(self, amount: int = 10):
-        amount = amount +1
+        amount = amount + 1
         a01 = glob.glob(os.path.join(self.cctv_save, "A01", "1"))
         a01.sort(key=os.path.getmtime)
         a01_files = a01[-amount:]
+        log(job_id=self.job.job_id, msg=f"Last {amount} A01 files are {a01_files}")
 
         a02 = glob.glob(os.path.join(self.cctv_save, "A02", "1"))
         a02.sort(key=os.path.getmtime)
         a02_files = a02[-amount:]
+        log(job_id=self.job.job_id, msg=f"Last {amount} A02 files are {a02_files}")
 
         self.send_message(Message(job=self.job, send_string=f"Last {amount} CCTV images for A01 channel."))
         for photo in a01_files:
             if os.path.isdir(photo):
+                log(job_id=self.job.job_id, msg=f"{photo} is not a file")
                 continue
             self.send_message(Message(job=self.job, send_string=photo,
                                       photo=os.path.join(self.cctv_save, "A01", "1", photo)))
@@ -126,6 +129,7 @@ class CCTVChecker(Module):
         self.send_message(Message(job=self.job, send_string=f"Last {amount} CCTV images for A02 channel."))
         for photo in a02_files:
             if os.path.isdir(photo):
+                log(job_id=self.job.job_id, msg=f"{photo} is not a file")
                 continue
             self.send_message(Message(job=self.job, send_string=photo,
                                       photo=os.path.join(self.cctv_save, "A02", "1", photo)))
