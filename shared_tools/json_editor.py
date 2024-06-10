@@ -117,7 +117,7 @@ class JSONEditor:
                 content = file.read()
             if content.endswith('}}'):
                 modified_content = content[:-1]
-                with open('your_file.json', 'w') as file:
+                with open(self.file, 'w') as file:
                     file.write(modified_content)
             data: dict = json.load(file)
         return data
