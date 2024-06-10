@@ -106,7 +106,7 @@ class Message:
             button_value.append(f'{index};{text}')
 
         if add_other:
-            button_text.append("Other")
+            button_text.append("#Other")
             button_value.append(f'{index};/GET')
 
         arrangement = [bpr for _ in range(int(math.floor(len(button_text) / bpr)))]

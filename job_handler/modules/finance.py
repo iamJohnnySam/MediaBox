@@ -165,6 +165,7 @@ class Finance(Module):
         success, cat = self.check_value(index=index, description="category of transaction",
                                         check_list=pre_sel_cats, manual_option=show_man)
         if not success:
+
             return
 
         index = 8
