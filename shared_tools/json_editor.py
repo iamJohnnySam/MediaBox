@@ -119,8 +119,8 @@ class JSONEditor:
 
     def test_json(self):
         try:
-            with open(self.file, 'r+') as file:
-                data: dict = json.load(file)
+            with open(self.file, 'r') as file:
+                _: dict = json.load(file)
         except JSONDecodeError as e:
             with open(self.file, 'r') as file:
                 content = file.read()
