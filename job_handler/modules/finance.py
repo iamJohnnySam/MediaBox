@@ -210,7 +210,8 @@ class Finance(Module):
                       f"({vendor_id}).\nSummary for {t_date}"
 
         for row in result:
-            send_string = send_string + f"\n{row[0]}: {'-' if row[1] == 'expense' else '+'}{row[2]:.2f}"
+            val = 0 if row[2] is None else row[2]
+            send_string = send_string + f"\n{row[0]}: {'-' if row[1] == 'expense' else '+'}{val:.2f}"
 
         log(self.job.job_id, msg=send_string)
         self.send_message(Message(send_string=send_string))
