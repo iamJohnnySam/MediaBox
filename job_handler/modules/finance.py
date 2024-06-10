@@ -180,14 +180,13 @@ class Finance(Module):
 
         if currency != "LKR":
             c = CurrencyRates()
-            f_value = t_value
             f_rate = c.get_rate(currency, "LKR")
-            t_value = t_value / f_rate
+            log(job_id=self.job.job_id, msg=f"Currency: {currency}, Rate: {f_rate}")
             self.db_finance.insert(self._tbl_transactions,
                                    "transaction_by, date, type, category_id, amount, vendor_id, vendor, "
                                    "foreign_amount, currency, rate",
-                                   (self.job.chat_id, t_date, t_type, cat_id, t_value, vendor_id, vendor,
-                                    f_value, currency, f_rate))
+                                   (self.job.chat_id, t_date, t_type, cat_id, t_value / f_rate, vendor_id, vendor,
+                                    t_value, currency, f_rate))
 
         else:
             self.db_finance.insert(self._tbl_transactions,
