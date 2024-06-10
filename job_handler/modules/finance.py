@@ -1,4 +1,5 @@
 import re
+import urllib.error
 from datetime import datetime
 
 import PyCurrency_Converter
@@ -165,7 +166,6 @@ class Finance(Module):
         success, cat = self.check_value(index=index, description="category of transaction",
                                         check_list=pre_sel_cats, manual_option=show_man)
         if not success:
-
             return
 
         index = 8
@@ -180,14 +180,21 @@ class Finance(Module):
             return
 
         if currency != "LKR":
-            f_value = PyCurrency_Converter.convert(t_value, currency, 'LKR')
-            f_rate = f_value/t_value
-            log(job_id=self.job.job_id, msg=f"Currency: {currency}, Rate: {f_rate}")
-            self.db_finance.insert(self._tbl_transactions,
-                                   "transaction_by, date, type, category_id, amount, vendor_id, vendor, "
-                                   "foreign_amount, currency, rate",
-                                   (self.job.chat_id, t_date, t_type, cat_id, f_value, vendor_id, vendor,
-                                    t_value, currency, f_rate))
+            try:
+                f_value = PyCurrency_Converter.convert(t_value, currency, 'LKR')
+                f_rate = f_value / t_value
+                log(job_id=self.job.job_id, msg=f"Currency: {currency}, Rate: {f_rate}")
+                self.db_finance.insert(self._tbl_transactions,
+                                       "transaction_by, date, type, category_id, amount, vendor_id, vendor, "
+                                       "foreign_amount, currency, rate",
+                                       (self.job.chat_id, t_date, t_type, cat_id, f_value, vendor_id, vendor,
+                                        t_value, currency, f_rate))
+            except urllib.error.HTTPError:
+                self.db_finance.insert(self._tbl_transactions,
+                                       "transaction_by, date, type, category_id, vendor_id, vendor, "
+                                       "foreign_amount, currency",
+                                       (self.job.chat_id, t_date, t_type, cat_id, vendor_id, vendor,
+                                        t_value, currency))
 
         else:
             self.db_finance.insert(self._tbl_transactions,
