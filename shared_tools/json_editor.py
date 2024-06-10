@@ -54,39 +54,32 @@ class JSONEditor:
 
         log(job_id=job_id, msg="Added Level 1 data: " + str(list(data.keys())[0]) + " at " + self.file)
 
-        self.test_json()
+        file_data = self.read_json()
+        if file_data == "":
+            file_data = {}
+        file_data.update(data)
 
         with open(self.file, 'r+') as file:
-            file_data = json.load(file)
-            if file_data == "":
-                file_data = {}
-            file_data.update(data)
             file.seek(0)
             json.dump(file_data, file, indent=4)
 
     @thread_safe
     def add_level2(self, level, data, job_id=0):
-        self.test_json()
+        file_data = self.read_json()
+        file_data[level].append(data)
+
         log(job_id=job_id, msg="Added Level 2 data: " + str(list(data.keys())[0]) + " to " + level + " at " + self.file)
         with open(self.file, 'r+') as file:
-            file_data = json.load(file)
-            file_data[level].append(data)
             file.seek(0)
             json.dump(file_data, file, indent=4)
 
     @thread_safe
     def read(self, job_id=0):
-        self.test_json()
-        with open(self.file, 'r') as file:
-            log(job_id=job_id, msg="Loaded - " + str(self.file))
-            file = json.load(file)
-        return file
+        return self.read_json()
 
     @thread_safe
     def inv_delete(self, keep_keys, job_id=0):
-        self.test_json()
-        with open(self.file, 'r+') as file:
-            data = json.load(file)
+        data = self.read_json()
 
         for key in data.copy().keys():
             if key not in keep_keys:
@@ -98,9 +91,7 @@ class JSONEditor:
 
     @thread_safe
     def delete(self, key: str, job_id=0, sub_key: str = None):
-        self.test_json()
-        with open(self.file, 'r+') as file:
-            data: dict = json.load(file)
+        data: dict = self.read_json()
 
         if key in data.copy().keys():
             del data[key]
@@ -117,10 +108,10 @@ class JSONEditor:
 
         log(job_id=job_id, msg="Deleted Key - " + str(key))
 
-    def test_json(self):
+    def read_json(self):
         try:
             with open(self.file, 'r+') as file:
-                _: dict = json.load(file)
+                data: dict = json.load(file)
         except JSONDecodeError as e:
             with open(self.file, 'r') as file:
                 content = file.read()
@@ -128,3 +119,5 @@ class JSONEditor:
                 modified_content = content[:-1]
                 with open('your_file.json', 'w') as file:
                     file.write(modified_content)
+            data: dict = json.load(file)
+        return data
