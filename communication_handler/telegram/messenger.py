@@ -61,8 +61,7 @@ class Messenger:
 
         # Listen
         self.bot = telepot.Bot(telepot_key)
-        self.loop = MessageLoop(self.bot, {'chat': self.handle_message, 'callback_query': self.handle_callback})
-        self.loop.run_as_thread()
+        MessageLoop(self.bot, {'chat': self.handle_message, 'callback_query': self.handle_callback}).run_as_thread()
         log(msg=f'Telepot {telepot_account} listening')
 
     def handle_message(self, msg: dict):
