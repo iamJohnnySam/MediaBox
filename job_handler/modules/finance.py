@@ -1,6 +1,8 @@
 import re
 from datetime import datetime
 
+from forex_python.converter import CurrencyRates
+
 from common_workspace import global_var
 from shared_models import configuration
 from shared_models.job import Job
@@ -55,6 +57,8 @@ class Finance(Module):
         else:
             raise InvalidParameterException(f"Could not find transaction type in {sms}")
 
+        self.job.collect('LKR', 3)
+
         # Extract vendor
         try:
             vendor_match = str(re.findall(r'at ([^.0-9]+?)(?=\s\d+ [A-Z]{2}|$|[.]| on)', sms)[0])
@@ -62,7 +66,7 @@ class Finance(Module):
             log(job_id=self.job.job_id, msg=f"Vendor: {vendor_match}")
         except IndexError:
             vendor_match = ""
-        self.job.collect(vendor_match.strip(), 3)
+        self.job.collect(vendor_match.strip(), 4)
 
         self.job.function = "finance"
         self.finance()
@@ -71,11 +75,12 @@ class Finance(Module):
         # 0 - value
         # 1 - expense / income
         # 2 - date
-        # 3 - raw vendor
-        # 4 - vendor
-        # 5 - duplicate?
-        # 6 - category Type
-        # 7 - category
+        # 3 - currency
+        # 4 - raw vendor
+        # 5 - vendor
+        # 6 - duplicate?
+        # 7 - category Type
+        # 8 - category
         # todo user_id
 
         index = 0
@@ -97,11 +102,17 @@ class Finance(Module):
             return
 
         index = 3
-        success, raw_vendor = self.check_value(index=index, description="vendor name")
+        success, currency = self.check_value(index=index, description="transaction currency",
+                                             check_list=global_var.currencies, default="LKR")
         if not success:
             return
 
         index = 4
+        success, raw_vendor = self.check_value(index=index, description="vendor name")
+        if not success:
+            return
+
+        index = 5
         default_vendor, options = self._get_from_lookup(raw_vendor, index,
                                                         self._tbl_raw_vendors, "vendor_id", "raw_vendor",
                                                         self._tbl_vendors, "name", "vendor_id")
@@ -113,7 +124,7 @@ class Finance(Module):
                                    self._tbl_raw_vendors, "raw_vendor", "vendor_id",
                                    self._tbl_vendors, "name", "vendor_id")
 
-        index = 5
+        index = 6
         check_duplicate = self.db_finance.check_exists(self._tbl_transactions, where={"date": t_date,
                                                                                       "amount": t_value,
                                                                                       "vendor_id": vendor_id})
@@ -127,7 +138,7 @@ class Finance(Module):
         if not success:
             return
 
-        index = 6
+        index = 7
         pre_sel_cats_str = self.db_finance.select(self._tbl_vendors, "category_id", where={"vendor_id": vendor_id})
         if pre_sel_cats_str is not None and pre_sel_cats_str[0] is not None:
             pre_sel_cat_ids = pre_sel_cats_str[0].split(";")
@@ -156,7 +167,7 @@ class Finance(Module):
         if not success:
             return
 
-        index = 7
+        index = 8
         cat_id = self.db_finance.select(self._tbl_categories, "category_id", where={"category": cat})[0]
         if cat_id not in pre_sel_cat_ids:
             pre_sel_cat_ids.append(str(cat_id))
@@ -167,9 +178,21 @@ class Finance(Module):
         if not success:
             return
 
-        self.db_finance.insert(self._tbl_transactions,
-                               "transaction_by, date, type, category_id, amount, vendor_id, vendor",
-                               (self.job.chat_id, t_date, t_type, cat_id, t_value, vendor_id, vendor))
+        if currency != "LKR":
+            c = CurrencyRates()
+            f_value = t_value
+            f_rate = c.get_rate(currency, "LKR")
+            t_value = t_value / f_rate
+            self.db_finance.insert(self._tbl_transactions,
+                                   "transaction_by, date, type, category_id, amount, vendor_id, vendor, "
+                                   "foreign_amount, currency, rate",
+                                   (self.job.chat_id, t_date, t_type, cat_id, t_value, vendor_id, vendor,
+                                    f_value, currency, f_rate))
+
+        else:
+            self.db_finance.insert(self._tbl_transactions,
+                                   "transaction_by, date, type, category_id, amount, vendor_id, vendor",
+                                   (self.job.chat_id, t_date, t_type, cat_id, t_value, vendor_id, vendor))
 
         result = list(self.db_finance.select(table=self._tbl_transactions,
                                              columns="vendor, type, amount",
