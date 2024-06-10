@@ -13,8 +13,10 @@ from shared_tools.packet_tools import packet_and_queue
 
 def run_telegram():
     config = configuration.Configuration()
+    log(msg="Initiating Telepot accounts")
     telepot_channels: dict[str, Messenger] = init_telegram(config.telegram)
 
+    log(msg="Starting Telepot read loop")
     while not global_var.flag_stop.value:
         while not queues.message_q.empty():
             msg: Message = queues.message_q.get()

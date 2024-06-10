@@ -20,12 +20,14 @@ def init_telegram(config: dict) -> dict:
 
     try:
         telepot_accounts: dict = JSONEditor(config["db_telepot_accounts"]).read()
+        log(msg=f"Found login for channels: {telepot_accounts.keys()}.")
     except KeyError:
         log(error_code=20018)
         return channels
 
     try:
         global_var.main_telegram_channel = accounts[config["main_account"]]
+        log(msg=f'Main account set to {accounts[config["main_account"]]}')
     except (IndexError, KeyError):
         log(error_code=20016)
 
