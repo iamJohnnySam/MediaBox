@@ -2,6 +2,7 @@ import json
 import os
 import threading
 from functools import wraps
+from json import JSONDecodeError
 
 from shared_tools.logger import log
 
@@ -92,8 +93,14 @@ class JSONEditor:
 
     @thread_safe
     def delete(self, key: str, job_id=0, sub_key: str = None):
-        with open(self.file, 'r+') as file:
-            data: dict = json.load(file)
+        try:
+            with open(self.file, 'r+') as file:
+                data: dict = json.load(file)
+        except JSONDecodeError as e:
+            with open(self.file, "w") as f:
+                f.seek(0)
+                json.dump({}, f)
+            data = {}
 
         if key in data.copy().keys():
             del data[key]
