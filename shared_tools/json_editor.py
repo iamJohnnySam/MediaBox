@@ -124,7 +124,7 @@ class JSONEditor:
         except JSONDecodeError as e:
             with open(self.file, 'r') as file:
                 content = file.read()
-            if content:
+            if content.endswith('}}'):
                 modified_content = content[:-1]
                 with open('your_file.json', 'w') as file:
                     file.write(modified_content)
