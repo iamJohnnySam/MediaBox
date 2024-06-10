@@ -2,7 +2,7 @@
   "COMMON": {
     "program": {
       "enable": true,
-      "sequence_threading": false
+      "sequence_threading": true
     },
     "socket": {
       "enable": true,

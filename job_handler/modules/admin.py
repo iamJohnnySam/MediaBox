@@ -17,10 +17,10 @@ class Admin(Module):
 
     def alive(self):
         self.send_message(Message(f"Hello {self.job.username} (chat id: {str(self.job.chat_id)})!\n"
-                                  f"I'm Alive and kicking!"))
+                                  f"I'm Alive and kicking!", job=self.job))
 
     def time(self):
-        self.send_message(Message(str(datetime.now())))
+        self.send_message(Message(str(datetime.now()), job=self.job))
 
     def help(self):
         message = "--- AVAILABLE COMMANDS ---"
@@ -49,7 +49,7 @@ class Admin(Module):
 
             else:
                 add_command = "\n\n" + command
-        self.send_message(Message(message))
+        self.send_message(Message(message, job=self.job))
 
     def start_over(self):
         if self.is_master:
