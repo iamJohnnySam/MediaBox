@@ -34,7 +34,7 @@ pip install pydrive2
 pip install GitPython
 pip install dacite
 pip install themoviedb
-pip install forex-python
+pip install PyCurrency-Converter
 
 deactivate
 cd || exit

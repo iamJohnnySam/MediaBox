@@ -1,7 +1,7 @@
 import re
 from datetime import datetime
 
-from currency_converter import CurrencyConverter
+import PyCurrency_Converter
 
 from common_workspace import global_var
 from shared_models import configuration
@@ -180,8 +180,7 @@ class Finance(Module):
             return
 
         if currency != "LKR":
-            c = CurrencyConverter()
-            f_value = c.convert(t_value, currency, 'LKR')
+            f_value = PyCurrency_Converter.convert(t_value, currency, 'LKR')
             f_rate = f_value/t_value
             log(job_id=self.job.job_id, msg=f"Currency: {currency}, Rate: {f_rate}")
             self.db_finance.insert(self._tbl_transactions,
