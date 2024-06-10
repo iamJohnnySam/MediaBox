@@ -119,5 +119,6 @@ class JSONEditor:
                 modified_content = content[:-1]
                 with open(self.file, 'w') as file:
                     file.write(modified_content)
-            data: dict = json.load(file)
+            with open(self.file, 'r+') as file:
+                data: dict = json.load(file)
         return data
