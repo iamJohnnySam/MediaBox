@@ -96,14 +96,14 @@ class Finance(Module):
             return
 
         index = 2
-        success, t_type = self.check_value(index=index, description="transaction type",
-                                           check_list=["income", "expense"])
+        success, currency = self.check_value(index=index, description="transaction currency",
+                                             check_list=global_var.currencies, default="LKR")
         if not success:
             return
 
         index = 3
-        success, currency = self.check_value(index=index, description="transaction currency",
-                                             check_list=global_var.currencies, default="LKR")
+        success, t_type = self.check_value(index=index, description="transaction type",
+                                           check_list=["income", "expense"])
         if not success:
             return
 
