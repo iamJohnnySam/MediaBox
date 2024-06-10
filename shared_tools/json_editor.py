@@ -119,7 +119,7 @@ class JSONEditor:
 
     def test_json(self):
         try:
-            with open(self.file, 'r') as file:
+            with open(self.file, 'r+') as file:
                 _: dict = json.load(file)
         except JSONDecodeError as e:
             with open(self.file, 'r') as file:
