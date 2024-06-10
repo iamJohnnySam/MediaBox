@@ -1,7 +1,7 @@
 import re
 from datetime import datetime
 
-from forex_python.converter import CurrencyRates
+from currency_converter import CurrencyConverter
 
 from common_workspace import global_var
 from shared_models import configuration
@@ -180,13 +180,14 @@ class Finance(Module):
             return
 
         if currency != "LKR":
-            c = CurrencyRates()
-            f_rate = c.get_rate(currency, "LKR")
+            c = CurrencyConverter()
+            f_value = c.convert(t_value, currency, 'LKR')
+            f_rate = f_value/t_value
             log(job_id=self.job.job_id, msg=f"Currency: {currency}, Rate: {f_rate}")
             self.db_finance.insert(self._tbl_transactions,
                                    "transaction_by, date, type, category_id, amount, vendor_id, vendor, "
                                    "foreign_amount, currency, rate",
-                                   (self.job.chat_id, t_date, t_type, cat_id, t_value / f_rate, vendor_id, vendor,
+                                   (self.job.chat_id, t_date, t_type, cat_id, f_value, vendor_id, vendor,
                                     t_value, currency, f_rate))
 
         else:
