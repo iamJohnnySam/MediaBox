@@ -54,6 +54,8 @@ class JSONEditor:
 
         log(job_id=job_id, msg="Added Level 1 data: " + str(list(data.keys())[0]) + " at " + self.file)
 
+        self.test_json()
+
         with open(self.file, 'r+') as file:
             file_data = json.load(file)
             if file_data == "":
@@ -64,6 +66,7 @@ class JSONEditor:
 
     @thread_safe
     def add_level2(self, level, data, job_id=0):
+        self.test_json()
         log(job_id=job_id, msg="Added Level 2 data: " + str(list(data.keys())[0]) + " to " + level + " at " + self.file)
         with open(self.file, 'r+') as file:
             file_data = json.load(file)
@@ -73,6 +76,7 @@ class JSONEditor:
 
     @thread_safe
     def read(self, job_id=0):
+        self.test_json()
         with open(self.file, 'r') as file:
             log(job_id=job_id, msg="Loaded - " + str(self.file))
             file = json.load(file)
@@ -80,6 +84,7 @@ class JSONEditor:
 
     @thread_safe
     def inv_delete(self, keep_keys, job_id=0):
+        self.test_json()
         with open(self.file, 'r+') as file:
             data = json.load(file)
 
@@ -93,14 +98,9 @@ class JSONEditor:
 
     @thread_safe
     def delete(self, key: str, job_id=0, sub_key: str = None):
-        try:
-            with open(self.file, 'r+') as file:
-                data: dict = json.load(file)
-        except JSONDecodeError as e:
-            with open(self.file, "w") as f:
-                f.seek(0)
-                json.dump({}, f)
-            data = {}
+        self.test_json()
+        with open(self.file, 'r+') as file:
+            data: dict = json.load(file)
 
         if key in data.copy().keys():
             del data[key]
@@ -116,3 +116,15 @@ class JSONEditor:
             json.dump(data, file, indent=4)
 
         log(job_id=job_id, msg="Deleted Key - " + str(key))
+
+    def test_json(self):
+        try:
+            with open(self.file, 'r+') as file:
+                data: dict = json.load(file)
+        except JSONDecodeError as e:
+            with open(self.file, 'r') as file:
+                content = file.read()
+            if content:
+                modified_content = content[:-1]
+                with open('your_file.json', 'w') as file:
+                    file.write(modified_content)
