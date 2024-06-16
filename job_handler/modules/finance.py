@@ -1,13 +1,12 @@
 import re
-import urllib.error
 from datetime import datetime
 
-import PyCurrency_Converter
 
 from common_workspace import global_var
 from shared_models import configuration
 from shared_models.job import Job
 from shared_models.message import Message
+from shared_tools.money_tools import currency_exchange
 from shared_tools.sql_connector import SQLConnector
 from job_handler.base_module import Module
 from shared_tools.custom_exceptions import InvalidParameterException
@@ -181,7 +180,7 @@ class Finance(Module):
 
         if currency != "LKR":
             try:
-                f_value = PyCurrency_Converter.convert(t_value, currency, 'LKR')
+                f_value = currency_exchange(t_value, currency)
                 f_rate = f_value / t_value
                 log(job_id=self.job.job_id, msg=f"Currency: {currency}, Rate: {f_rate}")
                 self.db_finance.insert(self._tbl_transactions,
@@ -189,7 +188,8 @@ class Finance(Module):
                                        "foreign_amount, currency, rate",
                                        (self.job.chat_id, t_date, t_type, cat_id, f_value, vendor_id, vendor,
                                         t_value, currency, f_rate))
-            except urllib.error.HTTPError:
+            except Exception as e:
+                log(job_id=self.job.job_id, error=str(e))
                 self.db_finance.insert(self._tbl_transactions,
                                        "transaction_by, date, type, category_id, vendor_id, vendor, "
                                        "foreign_amount, currency",
