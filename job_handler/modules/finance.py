@@ -189,7 +189,7 @@ class Finance(Module):
                                        (self.job.chat_id, t_date, t_type, cat_id, f_value, vendor_id, vendor,
                                         t_value, currency, f_rate))
             except Exception as e:
-                log(job_id=self.job.job_id, error=str(e))
+                log(job_id=self.job.job_id, error=str(e), msg="Unable to get data")
                 self.db_finance.insert(self._tbl_transactions,
                                        "transaction_by, date, type, category_id, vendor_id, vendor, "
                                        "foreign_amount, currency",
