@@ -20,7 +20,7 @@ date_formats = ["%Y-%m-%d", "%d-%m-%Y", "%Y-%b-%d", "%d-%b-%Y", "%m-%d-%y", "%b-
 time_formats = ["%H:%M:%S", "%H:%M",
                 "%H-%M-%S", "%H-%M"]
 
-currencies = ["LKR", "USD", "SGD", "EUR"]
+currencies = ["LKR", "USD", "SGD", "EUR", "INR", "GPB", "CAD", "AUD", "JPY", "CNY", "PHP"]
 
 credit_words = ["Credit", "inward slip transfer", "Int.Pd", "ISLI"]
 debit_words = ["Debit", "trx", "transaction", "bill payment", "WTax.Pd"]

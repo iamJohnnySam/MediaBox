@@ -181,7 +181,7 @@ class Finance(Module):
         if currency != "LKR":
             try:
                 f_value = currency_exchange(t_value, currency)
-                f_rate = f_value / t_value
+                f_rate = float(f_value) / float(t_value)
                 log(job_id=self.job.job_id, msg=f"Currency: {currency}, Rate: {f_rate}")
                 self.db_finance.insert(self._tbl_transactions,
                                        "transaction_by, date, type, category_id, amount, vendor_id, vendor, "

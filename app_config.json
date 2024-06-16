@@ -46,7 +46,7 @@
     },
     "media": {"enable": false},
     "cctv": {
-      "enable": true,
+      "enable": false,
       "imap": "imap.gmail.com",
       "mailbox": "CCTV",
       "sent": "\"[Gmail]/Sent Mail\"",
