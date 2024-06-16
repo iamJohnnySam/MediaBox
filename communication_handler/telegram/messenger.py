@@ -14,7 +14,7 @@ from shared_tools.group_tools import get_group
 from shared_tools.image_tools import resize_image
 from shared_tools.json_editor import JSONEditor
 from shared_tools.logger import log
-from shared_tools.message_tools import create_keyboard_data
+from shared_tools.message_tools import get_keyboard
 
 
 def create_keyboard(msg_id, function: str | list[str], reply_to, button_text: list, button_val: list,
@@ -27,12 +27,12 @@ def create_keyboard(msg_id, function: str | list[str], reply_to, button_text: li
 
     buttons = []
     for i in range(len(button_text)):
-        button_data = create_keyboard_data(msg_id=msg_id,
-                                           reply_to=reply_to,
-                                           function=function[i] if type(function) is list else function,
-                                           button_text=button_text[i],
-                                           button_value=button_val[i],
-                                           collection=collection)
+        button_data = get_keyboard(msg_id=msg_id,
+                                   reply_to=reply_to,
+                                   function=function[i] if type(function) is list else function,
+                                   button_text=button_text[i],
+                                   button_value=button_val[i],
+                                   collection=collection)
 
         buttons.append(InlineKeyboardButton(text=str(button_text[i]), callback_data=button_data))
         log(job_id=msg_id, msg=f'Keyboard button created > {button_data}')

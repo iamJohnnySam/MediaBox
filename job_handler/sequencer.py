@@ -220,9 +220,14 @@ class Sequence:
         torrent = Transmission(self.job)
         torrent.delete_downloaded()
         torrent.list_torrents()
+
         log(self.job.job_id, "Starting Downloads Refactor")
-        RefactorFolder(self.job).clean_torrent_downloads()
+        refac = RefactorFolder(self.job)
+        refac.clean_torrent_downloads()
         log(self.job.job_id, "Cleanup sequence Complete")
+        refac.update_movie_db()
+        refac.update_show_db()
+        log(self.job.job_id, "Database update Complete")
 
     def finance(self):
         Finance(self.job).finance()

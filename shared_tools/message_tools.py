@@ -31,7 +31,7 @@ def get_job_from_string(msg: str) -> (str, list):
     return function, collection
 
 
-def get_job_from_message(msg: dict) -> (str, int, str, int, list):
+def get_job_from_msg(msg: dict) -> (str, int, str, int, list):
     chat_id = msg['chat']['id']
     reply_to = msg['message_id']
     username = msg['chat']['first_name']
@@ -62,7 +62,7 @@ def get_job_from_message(msg: dict) -> (str, int, str, int, list):
     return function, chat_id, username, reply_to, collection, photo_available
 
 
-def create_keyboard_data(msg_id, reply_to, function, button_text, button_value, collection) -> str:
+def get_keyboard(msg_id, reply_to, function, button_text, button_value, collection) -> str:
     if reply_to is None:
         reply_to = 0
 
@@ -87,7 +87,7 @@ def create_keyboard_data(msg_id, reply_to, function, button_text, button_value, 
     return button_data
 
 
-def extract_job_from_callback(msg: dict):
+def get_job_from_cb(msg: dict):
     try:
         q = str(msg['data']).split(";")
     except ValueError as e:

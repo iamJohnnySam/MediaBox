@@ -4,7 +4,7 @@ from shared_models import configuration
 from shared_models.job import Job
 from shared_models.message import Message
 from shared_tools.custom_exceptions import UnexpectedOperation
-from shared_tools.message_tools import get_job_from_message, get_job_from_string, extract_job_from_callback
+from shared_tools.message_tools import get_job_from_msg, get_job_from_string, get_job_from_cb
 from shared_tools.logger import log
 
 
@@ -23,7 +23,7 @@ class Commander:
 
     def process_command(self):
         if type(self.msg) is dict:
-            function, chat_id, username, reply_to, collection, photo = get_job_from_message(self.msg)
+            function, chat_id, username, reply_to, collection, photo = get_job_from_msg(self.msg)
         elif type(self.msg) is str:
             username = "Console User"
             reply_to = 0
@@ -59,7 +59,7 @@ class Commander:
 
     def process_callback(self) -> (Job, str, bool):
         if type(self.msg) is dict:
-            function, chat_id, username, reply_to, collection, index, value = extract_job_from_callback(self.msg)
+            function, chat_id, username, reply_to, collection, index, value = get_job_from_cb(self.msg)
         else:
             log(error_code=20019)
             raise UnexpectedOperation
