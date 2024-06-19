@@ -206,7 +206,7 @@ class Finance(Module):
                                              where={"date": t_date},
                                              order="timestamp", fetch_all=True))
 
-        send_string = f"{str(t_type).capitalize()} added to {cat} ({cat_id}) for LKR {t_value} with {vendor} " \
+        send_string = f"{str(t_type).capitalize()} added to {cat} ({cat_id}) for {currency} {t_value} with {vendor} " \
                       f"({vendor_id}).\nSummary for {t_date}"
 
         for row in result:
@@ -214,7 +214,7 @@ class Finance(Module):
             send_string = send_string + f"\n{row[0]}: {'-' if row[1] == 'expense' else '+'}{val:.2f}"
 
         log(self.job.job_id, msg=send_string)
-        self.send_message(Message(send_string=send_string))
+        self.send_message(Message(send_string=send_string, job=self.job))
 
         # todo add another option with the same params
 

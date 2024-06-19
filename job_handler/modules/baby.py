@@ -79,7 +79,7 @@ class Baby(Module):
         day_total = self._get_total(self._tbl_pump, "amount", date, user_id=True)
 
         self.send_message(Message(f'\U0001F37C\nYou pumped {amount}ml on {date} at {time} from {source} boob.'
-                                  f'for a total of {day_total} today!', job=self.job))
+                                  f'for a total of {day_total} today!', job=self.job), channel="baby")
 
     def diaper(self):
         source_types = ["pee", "poo", "poopee"]
@@ -158,7 +158,7 @@ class Baby(Module):
         pic = grapher_weight_trend(graph_list=result,
                                    chart_title="Baby Weight Trend WHO - " + datetime.now().strftime('%Y-%m-%d %H:%M'))
 
-        self.send_message(Message("WHO Chart", group=self._group, photo=pic))
+        self.send_message(Message("WHO Chart", group=self._group, photo=pic), channel="baby")
 
     def feed_history(self):
         result = list(self._db.select(table=self._tbl_feed,
@@ -189,7 +189,7 @@ class Baby(Module):
                 caption = caption + f'\n{i} milk = {calc[i]}ml'
             caption = caption + "\nUse /feed to submit a new entry."
 
-        self.send_message(Message(caption, job=self.job, photo=pic))
+        self.send_message(Message(caption, job=self.job, photo=pic), channel="baby")
 
     def diaper_history(self):
         result = list(self._db.select(table=self._tbl_diaper,
@@ -221,7 +221,7 @@ class Baby(Module):
                 caption = caption + f'\n{i} = {calc[i]} nappies/diapers'
             caption = caption + "\nUse /diaper to submit a new entry."
 
-        self.send_message(Message(caption, job=self.job, photo=pic))
+        self.send_message(Message(caption, job=self.job, photo=pic), channel="baby")
 
     def feed_trend(self):
         result = list(self._db.select(table=self._tbl_feed,
@@ -234,7 +234,7 @@ class Baby(Module):
                                 x_time=True)
 
         caption = "Use /feed to submit a new entry."
-        self.send_message(Message(caption, job=self.job, photo=pic))
+        self.send_message(Message(caption, job=self.job, photo=pic), channel="baby")
 
     def diaper_trend(self):
         result = list(self._db.select(table=self._tbl_diaper,
@@ -246,7 +246,7 @@ class Baby(Module):
                                 chart_title="Diaper Trend - " + datetime.now().strftime('%Y-%m-%d %H:%M'),
                                 x_time=True)
         caption = "Use /diaper to submit a new entry."
-        self.send_message(Message(caption, job=self.job, photo=pic))
+        self.send_message(Message(caption, job=self.job, photo=pic), channel="baby")
 
     def feed_trend_today(self):
         result = list(self._db.select(table=self._tbl_feed,
@@ -270,7 +270,7 @@ class Baby(Module):
             caption = caption + f"\n{row[0]} - {row[1]} - {row[2]}"
         caption = caption + "\nUse /feed to submit a new entry."
 
-        self.send_message(Message(caption, job=self.job, photo=pic))
+        self.send_message(Message(caption, job=self.job, photo=pic), channel="baby")
 
     def diaper_trend_today(self):
         result = list(self._db.select(table=self._tbl_diaper,
@@ -288,7 +288,7 @@ class Baby(Module):
             caption = caption + f"\n{row[0]} - {row[1]} - {row[3]}"
         caption = caption + "\nUse /diaper to submit a new entry."
 
-        self.send_message(Message(caption, job=self.job, photo=pic))
+        self.send_message(Message(caption, job=self.job, photo=pic), channel="baby")
 
     def _get_total(self, table, col, date, user_id: bool = False):
         where = {"date": date}
