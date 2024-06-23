@@ -7,10 +7,10 @@ import passwords
 from shared_tools.logger import log
 
 
-def get_movie_info(job_id: int, movie: str = None) -> (list, list):
+def get_movie_info(job_id: int, s_movie: str = None) -> (list, list):
     tmdb = TMDb(key=passwords.tmdb_api)
 
-    movies = tmdb.search().movies(query=movie)
+    movies = tmdb.search().movies(query=s_movie)
 
     movie_titles = []
     movie_posters = []
@@ -27,9 +27,9 @@ def get_movie_info(job_id: int, movie: str = None) -> (list, list):
         movie_titles.append(title)
         movie_posters.append(poster_path)
 
-    d = re.search(r'\d{4}', movie)
+    d = re.search(r'\d{4}', s_movie)
     if d is not None:
-        movies2 = tmdb.search().movies(query=movie[0:d.start()].strip())
+        movies2 = tmdb.search().movies(query=s_movie[0:d.start()].strip())
         for movie in movies2:
             if movie.poster_path is None or movie.title is None or movie.year is None:
                 continue
