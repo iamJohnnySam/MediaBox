@@ -104,8 +104,6 @@ def check_date_validity(job_id, value) -> (bool, str):
     for date_format in date_formats:
         try:
             date_obj = datetime.strptime(value, date_format)
-            if '%Y' not in value:
-                date_obj = date_obj.replace(year=datetime.now().year)
             value = date_obj.strftime('%Y-%m-%d')
             success = True
             log(job_id, f"Date format accepted {str(value)} for {date_format}")
