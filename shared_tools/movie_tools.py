@@ -10,15 +10,14 @@ from shared_tools.logger import log
 def get_movie_info(job_id: int, movie: str = None) -> (list, list):
     tmdb = TMDb(key=passwords.tmdb_api)
 
-    movies1 = set(tmdb.search().movies(query=movie))
+    movies1 = tmdb.search().movies(query=movie)
 
     d = re.search(r'\d{4}', movie)
     if d is not None:
-        movies2 = set(tmdb.search().movies(query=movie[0:d.start()].strip()))
-        movies = list(movies1.union(movies2))
-
+        movies2 = tmdb.search().movies(query=movie[0:d.start()].strip())
+        movies = list(set(movies1).union(set(movies2)))
     else:
-        movies = list(movies1)
+        movies = movies1
 
     if len(movies) == 0:
         return [], []
