@@ -113,6 +113,8 @@ class Finance(Module):
             return
 
         index = 5
+        if len(self.job.collection) == index:
+            self.job.collect(raw_vendor, index)
         default_vendor, options = self._get_from_lookup(raw_vendor, index,
                                                         self._tbl_raw_vendors, "vendor_id", "raw_vendor",
                                                         self._tbl_vendors, "name", "vendor_id")
