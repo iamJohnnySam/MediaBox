@@ -113,11 +113,13 @@ class Finance(Module):
             return
 
         index = 5
-        if len(self.job.collection) == index:
-            self.job.collect(raw_vendor, index)
         default_vendor, options = self._get_from_lookup(raw_vendor, index,
                                                         self._tbl_raw_vendors, "vendor_id", "raw_vendor",
                                                         self._tbl_vendors, "name", "vendor_id")
+
+        if raw_vendor in options:
+            self.job.collect(raw_vendor, index)
+
         success, vendor = self.check_value(index=index, description="proper vendor name", default=default_vendor,
                                            check_list=options, manual_option=True)
         if not success:
