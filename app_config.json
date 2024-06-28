@@ -155,6 +155,7 @@
       "main_account": 0,
       "accept_all_commands": ["media"],
       "callback_overflow": "database/callbacks.json",
+      "db_groups": "database/telepot_groups.json",
       "db_telepot_accounts": "database/telepot_accounts.json",
       "telepot_image_dump": "communication/chat_images"
     },
