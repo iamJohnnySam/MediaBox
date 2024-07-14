@@ -49,15 +49,15 @@ class Finance(Module):
             date_match = datetime.today().strftime('%Y-%m-%d')
         self.job.collect(date_match, 1)
 
+        self.job.collect('LKR', 2)
+
         # Check Transaction Type
         if any(x.lower() in sms for x in global_var.credit_words):
-            self.job.collect('income', 2)
+            self.job.collect('income', 3)
         elif any(x.lower() in sms for x in global_var.debit_words):
-            self.job.collect('expense', 2)
+            self.job.collect('expense', 3)
         else:
             raise InvalidParameterException(f"Could not find transaction type in {sms}")
-
-        self.job.collect('LKR', 3)
 
         # Extract vendor
         try:
@@ -73,8 +73,8 @@ class Finance(Module):
 
     def finance(self):
         # 0 - value
-        # 1 - expense / income
-        # 2 - date
+        # 1 - date
+        # 2 - expense / income
         # 3 - currency
         # 4 - raw vendor
         # 5 - vendor
